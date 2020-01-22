@@ -88,3 +88,7 @@ helm install --name my-release \
   --set executor=CeleryExecutor \
   --set enablePodLaunching=false .
 ```
+
+## Contributing
+
+Check out [our contributing guide!](CONTRIBUTING.md)

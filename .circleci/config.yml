@@ -1,0 +1,56 @@
+version: 2
+
+workflows:
+  version: 2
+  install-airflow-chart:
+    jobs:
+      - 'airflow-on-k8s-14'
+      - 'airflow-on-k8s-15'
+      # - 'airflow-on-k8s-16'
+      # - 'airflow-on-k8s-17'
+
+jobs:
+
+  airflow-on-k8s-1.14:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.14.10
+    steps:
+      - checkout
+      - run:
+          name: Install Airflow chart
+          command: bin/run-ci
+
+  airflow-on-k8s-1.15:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.15.7
+    steps:
+      - checkout
+      - run:
+          name: Install Airflow chart
+          command: bin/run-ci
+
+  airflow-on-k8s-1.16:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.16.4
+    steps:
+      - checkout
+      - run:
+          name: Install Airflow chart
+          command: bin/run-ci
+
+  airflow-on-k8s-1.17:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.17.0
+    steps:
+      - checkout
+      - run:
+          name: Install Airflow chart
+          command: bin/run-ci
