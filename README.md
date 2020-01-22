@@ -51,7 +51,9 @@ The command removes all the Kubernetes components associated with the chart and 
 The recommended way to update your DAGs with this chart is to build a new docker image with the latest code (`docker build -t my-company/airflow:8a0da78 .`), push it to an accessible registry (`docker push my-company/airflow:8a0da78`), then update the Airflow pods with that image:
 
 ```console
-helm upgrade my-release . --set images.airflow.repository=my-company/airflow --set images.airflow.tag=8a0da78
+helm upgrade my-release . \
+  --set images.airflow.repository=my-company/airflow \
+  --set images.airflow.tag=8a0da78
 ```
 
 ## Parameters
