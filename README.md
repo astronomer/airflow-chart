@@ -5,9 +5,7 @@
 ## TL;DR
 
 ```console
-$ cd charts/airflow
-$ helm dependency update
-$ helm install .
+helm install .
 ```
 
 ## Introduction
@@ -24,7 +22,7 @@ This chart will bootstrap an [Airfow](https://github.com/astronomer/astronomer/t
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install --name my-release .
+helm install --name my-release .
 ```
 
 The command deploys Airflow on the Kubernetes cluster in the default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.
@@ -35,7 +33,7 @@ The command deploys Airflow on the Kubernetes cluster in the default configurati
 To upgrade the chart with the release name `my-release`:
 
 ```console
-$ helm upgrade --name my-release .
+helm upgrade --name my-release .
 ```
 
 ## Uninstalling the Chart
@@ -43,7 +41,7 @@ $ helm upgrade --name my-release .
 To uninstall/delete the `my-release` deployment:
 
 ```console
-$ helm delete my-release
+helm delete my-release
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -52,7 +50,7 @@ The command removes all the Kubernetes components associated with the chart and 
 The recommended way to update your DAGs with this chart is to build a new docker image with the latest code and update the Airflow pods with that image. After your docker image is built and pushed to an accessible registry, you can update a release with:
 
 ```console
-$ helm upgrade my-release . --set images.airflow.repository=my-company/airflow --set images.airflow.tag=8a0da78
+helm upgrade my-release . --set images.airflow.repository=my-company/airflow --set images.airflow.tag=8a0da78
 ```
 
 ## Parameters
@@ -86,7 +84,7 @@ The following tables lists the configurable parameters of the Airflow chart and 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
 ```console
-$ helm install --name my-release \
-    --set executor=CeleryExecutor \
-    --set enablePodLaunching=false .
+helm install --name my-release \
+  --set executor=CeleryExecutor \
+  --set enablePodLaunching=false .
 ```
