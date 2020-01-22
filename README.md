@@ -54,11 +54,6 @@ The recommended way to update your DAGs with this chart is to build a new docker
 helm upgrade my-release . --set images.airflow.repository=my-company/airflow --set images.airflow.tag=8a0da78
 ```
 
-### Push your Airflow image 
-```
-
-```
-
 ## Parameters
 
 The following tables lists the configurable parameters of the Airflow chart and their default values.
