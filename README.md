@@ -1,100 +1,92 @@
-# Astronomer Platform Helm Charts
+# Apache Airflow
 
-This repository contains the helm charts for deploying the [Astronomer Platform](https://github.com/astronomer/astronomer) into a Kubernetes cluster.
+[Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule and monitor workflows.
 
-Astronomer is a commercial "Airflow as a Service" platform that runs on Kubernetes. Source code is made available for the benefit of our customers, if you'd like to use the platform [reach out for a license](https://www.astronomer.io/enterprise/) or try out [Astronomer Cloud](https://www.astronomer.io/cloud/).
+## TL;DR
 
-## Architecture
-
-![Astronomer Architecture](https://assets2.astronomer.io/main/enterpriseArchitecture.svg "Astronomer Architecture")
-
-## Docker images
-
-Docker images for deploying and running Astronomer are currently available on
-[DockerHub](https://hub.docker.com/u/astronomerinc/).
-
-## Documentation
-
-The Astronomer Platform documentation is located at https://www.astronomer.io/docs/
-
-## Contributing
-
-We welcome any contributions:
-
-* Report all enhancements, bugs, and tasks as [GitHub issues](https://github.com/astronomerio/helm.astronomer.io/issues)
-* Provide fixes or enhancements by opening pull requests in Github
-
-## Local Development
-
-Install the following tools:
-
-- docker (make sure your user has permissions - try 'docker ps')
-- kubectl
-- [kind](https://github.com/kubernetes-sigs/kind#installation-and-usage)
-- gcloud cli (make sure gsutil in PATH)
-- helm
-
-Make sure you have access to the GCP development account
-
-```
-# Check that you can download the development TLS cert:
-gsutil cat gs://astronomer-development-certificates/fullchain.pem
-```
-If this does not work, anyone with 'Owner' in the development project can grant you 'Owner' via IAM.
-
-Run this script from the root of this repository:
-
-```
-bin/reset-local-dev
+```console
+$ cd charts/airflow
+$ helm dependency update
+$ helm install .
 ```
 
-Each time you run the script, the platform will be fully reset to the current helm chart.
+## Introduction
 
-### Customizing the local deployment
+This chart will bootstrap an [Airfow](https://github.com/astronomer/astronomer/tree/master/docker/airflow) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
-#### Turn on or off parts of the platform
+## Prerequisites
 
-Modify the "tags:" in configs/local-dev.yaml
-- platform: core Astronomer components
-- logging (large impact on RAM use): ElasticSearch, Kibana, Fluentd (aka 'EFK' stack)
-- monitoring: Prometheus
-- kubed: leave on
+- Kubernetes 1.12+
+- Helm 2.11+ or Helm 3.0-beta3+
+- PV provisioner support in the underlying infrastructure
 
-#### Add a Docker image into KinD's nodes (so it's available for pods):
-```
-kind load docker-image <your local image tag>
-```
+## Installing the Chart
+To install the chart with the release name `my-release`:
 
-#### Make use of that image:
-
-Make note of your pod name
-```
-kubectl get pods -n astronomer
+```console
+$ helm install --name my-release .
 ```
 
-Find the corresponding deployment, daemonset, or statefulset
-```
-kubectl get deployment -n astronomer
-```
+The command deploys Airflow on the Kubernetes cluster in the default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.
 
-Replace the pod with the new image
-Look for "image" on the appropriate container and replace with the local tag,
-and set the pull policy to never.
-```
-kubectl edit deployment -n astronomer <your deployment>
-```
+> **Tip**: List all releases using `helm list`
 
-#### Change Kubernetes version:
-```
-export KUBE_VERSION='v1.16.3'
-bin/reset-local-dev
+## Upgrading the Chart
+To upgrade the chart with the release name `my-release`:
+
+```console
+$ helm upgrade --name my-release .
 ```
 
+## Uninstalling the Chart
 
-## Releasing
+To uninstall/delete the `my-release` deployment:
 
-[Releasing Guide](https://github.com/astronomerio/helm.astronomer.io/blob/master/RELEASING.md)
+```console
+$ helm delete my-release
+```
 
-## License
+The command removes all the Kubernetes components associated with the chart and deletes the release.
 
-Usage of Astronomer code requires an [Astronomer Platform Enterprise Edition license](https://github.com/astronomer/astronomer/blob/master/LICENSE).
+## Updating DAGs
+The recommended way to update your DAGs with this chart is to build a new docker image with the latest code and update the Airflow pods with that image. After your docker image is built and pushed to an accessible registry, you can update a release with:
+
+```console
+$ helm upgrade my-release . --set images.airflow.repository=my-company/airflow --set images.airflow.tag=8a0da78
+```
+
+## Parameters
+
+The following tables lists the configurable parameters of the Airflow chart and their default values.
+
+| Parameter                           | Description                                                                                                  | Default                                           |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| `uid`                               | UID to run airflow pods under                                                                                | `nil`                                             |
+| `gid`                               | GID to run airflow pods under                                                                                | `nil`                                             |
+| `nodeSelector`                      | Node labels for pod assignment                                                                               | `{}`                                              |
+| `affinity`                          | Affinity labels for pod assignment                                                                           | `{}`                                              |
+| `tolerations`                       | Toleration labels for pod assignment                                                                         | `[]`                                              |
+| `labels`                            | Common labels to add to all objects defined in this chart                                                    | `{}`                                              |
+| `privateRegistry.enabled`           | Enable usage of a private registry for Airflow base image                                                    | `false`                                           |
+| `privateRegistry.repository`        | Repository where base image lives (eg: quay.io)                                                              | `~`                                               |
+| `ingress.enabled`                   | Enable Kubernetes Ingress support                                                                            | `false`                                           |
+| `ingress.acme`                      | Add acme annotations to Ingress object                                                                       | `false`                                           |
+| `ingress.tlsSecretName`             | Name of secret that contains a TLS secret                                                                    | `~`                                               |
+| `ingress.baseDomain`                | Base domain for VHOSTs                                                                                       | `~`                                               |
+| `ingress.class`                     | Ingress class to associate with                                                                              | `nginx`                                           |
+| `ingress.auth.enabled`              | Enable auth with Astronomer Platform                                                                         | `true`                                            |
+| `networkPolicies.enabled`           | Enable Network Policies to restrict traffic                                                                  | `true`                                            |
+| `airflowHome`                       | Location of airflow home directory                                                                           | `/usr/local/airflow`                              |
+| `rbacEnabled`                       | Deploy pods with Kubernets RBAC enabled                                                                      | `true`                                            |
+| `airflowVersion`                    | Default Airflow image version                                                                                | `1.10.5`                                          |
+| `executor`                          | Airflow executor (eg SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor)                  | `KubernetesExecutor`                              |
+| `allowPodLaunching`                 | Allow airflow pods to talk to Kubernetes API to launch more pods                                             | `true`                                            |
+
+
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
+
+```console
+$ helm install --name my-release \
+    --set executor=CeleryExecutor \
+    --set enablePodLaunching=false .
+```

@@ -1,36 +1,23 @@
-Thank you for installing Astronomer!
+Thank you for installing Airflow!
 
 Your release is named {{ .Release.Name }}.
 
-{{- if .Values.global.baseDomain }}
+{{- if .Values.ingress.baseDomain }}
 
-The platform components may take a few minutes to spin up.
+You can access your dashboard(s) in your browser here:
 
-You can access the platform at:
-
-{{- $astronomerEnabled := hasKey .Values.global "astronomerEnabled" | ternary .Values.global.astronomerEnabled true }}
-{{- $platformEnabled := hasKey .Values.tags "platform" | ternary .Values.tags.platform true }}
-
-{{- $grafanaEnabled := hasKey .Values.global "grafanaEnabled" | ternary .Values.global.grafanaEnabled true }}
-{{- $monitoringEnabled := hasKey .Values.tags "monitoring" | ternary .Values.tags.monitoring true }}
-
-{{- $kibanaEnabled := hasKey .Values.global "kibanaEnabled" | ternary .Values.global.kibanaEnabled true }}
-{{- $loggingEnabled := hasKey .Values.tags "logging" | ternary .Values.tags.logging true }}
-
-- Astronomer dashboard:        {{ if and $astronomerEnabled $platformEnabled }}https://app.{{ .Values.global.baseDomain }}{{ else }}Disabled{{ end }}
-- Grafana dashboard:           {{ if and $grafanaEnabled $monitoringEnabled }}https://grafana.{{ .Values.global.baseDomain }}{{ else }}Disabled{{ end }}
-- Kibana dashboard:            {{ if and $kibanaEnabled $loggingEnabled }}https://kibana.{{ .Values.global.baseDomain }}{{ else }}Disabled{{ end }}
-
-Now that you've installed the platform, you are ready to get started and create your first airflow deployment.
-
-Download the CLI:
-
-	curl -sSL https://install.{{ .Values.global.baseDomain }} | sudo bash
-
-We have guides available at https://www.astronomer.io/guides/ and are always available to help.
+Airflow dashboard:        https://{{ .Release.Name }}-airflow.{{ .Values.ingress.baseDomain }}
+{{- if eq .Values.executor "CeleryExecutor"}}
+Flower dashboard:         https://{{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }}
+{{- end }}
 
 {{- else }}
 
-To see dashboard URLs here, provide baseDomain in your config.
+You can now access your dashboard(s) by executing the following command(s) and visiting the corresponding port at localhost in your browser:
+
+Airflow dashboard:        kubectl port-forward svc/{{ .Release.Name }}-webserver {{ .Values.ports.airflowUI }}:{{ .Values.ports.airflowUI }}
+{{- if eq .Values.executor "CeleryExecutor"}}
+Flower dashboard:         kubectl port-forward svc/{{ .Release.Name }}-flower {{ .Values.ports.flowerUI }}:{{ .Values.ports.flowerUI }}
+{{- end }}
 
 {{- end }}

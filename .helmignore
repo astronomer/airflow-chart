@@ -19,11 +19,6 @@
 .project
 .idea/
 *.tmproj
-
-# Astronomer helm repository directory
-repository
 bin
+# Astronomer helm repository directory
 configs
-certs
-secrets
-tiller-rbac

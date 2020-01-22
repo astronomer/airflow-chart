@@ -1,308 +1,357 @@
-#################################
-## Astronomer global configuration
-#################################
-global:
-  # Base domain for all subdomains exposed through ingress
-  baseDomain: ~
+# Default values for airflow.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
 
-  # Name of secret containing TLS certificate
-  tlsSecret: ~
+# User and group of airflow user
+uid: 100
+gid: 101
 
-  # Use kube-lego
+# Select certain nodes for airflow pods.
+nodeSelector: {}
+affinity: {}
+tolerations: []
+
+# Add common labels to all objects and pods defined in this chart.
+labels: {}
+
+# Ingress configuration
+ingress:
+  # Enable ingress resource
+  enabled: false
+
+  # Enable for cert-manager or kube-lego
   acme: false
 
-  # If RBAC on cluster is enabled
-  rbacEnabled: true
+  # Name of tls secret to use on ingress
+  tlsSecretName: ~
 
-  # URL to the Astronomer helm repo
-  helmRepo: "https://helm.astronomer.io"
+  # Base domain for ingress vhosts
+  baseDomain: ~
 
-  # Host and port of where tiller is running in Kubernetes
-  helmHost: "tiller-deploy.kube-system.svc.cluster.local:44134"
+  # NGINX ingress class to associate Airflow ingress with.
+  class: "nginx"
 
-  # Single namespace mode
-  singleNamespace: false
-
-  # Enable/Disable components.
-  # Full platform is enabled by default.
-  # Airflow chart is disabled and should be deployed via the platform using the API/CLI/UI.
-  airflowEnabled: false
-
-  # Enables necessary components for compatibility with Istio Service Mesh
-  istioEnabled: false
-
-  # Enables necessary components for Velero (Velero, Grafana Dashboard, Prometheus Alerts)
-  veleroEnabled: false
-
-  # Set nodeSelector, affinity, and tolerations values for platform and deployment related pods.
-  # This allows for separation of platform and airflow pods between kubernetes node pools.
-  # Pods in the platformNodePool include alertmanager, cli-install, commander, houston, kube-replicator, orbit, prisma,
-  # registry, es-client, es-data, es-exporter, es-master, nginx-es, grafana, kibana, kube-state, nginx, nginx-default, prometheus.
-  # nodeSelector, affinity, and tolerations values for airflow deployment pods are assigned via houston config.
-  # See more information on pod / node assignment here: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  platformNodePool:
-    nodeSelector: {}
-    affinity: {}
-    tolerations: []
-
-  privateRegistry:
-    enabled: false
-    repository: ~
-
-#################################
-## Default tagged groups enabled
-#################################
-tags:
-  # Enable platform components by default (nginx, astronomer)
-  platform: true
-
-  # Enable monitoring stack (prometheus, kube-state, grafana)
-  monitoring: true
-
-  # Enable logging stack (elasticsearch, fluentd, kibana)
-  logging: true
-
-  # Kubed
-  kubed: true
-
-
-#################################
-## Astronomer configuration
-#################################
-astronomer:
-  orbit:
-    resources:
-      requests:
-        cpu: "100m"
-        memory: "256Mi"
-      limits:
-        cpu: "500m"
-        memory: "1024Mi"
-
-  norbit:
-    resources:
-      requests:
-        cpu: "100m"
-        memory: "256Mi"
-      limits:
-        cpu: "500m"
-        memory: "1024Mi"
-
-  houston:
-    resources:
-      requests:
-        cpu: "500m"
-        memory: "1024Mi"
-      limits:
-        cpu: "1000m"
-        memory: "2048Mi"
-
-  prisma:
-    resources:
-      requests:
-        cpu: "250m"
-        memory: "512Mi"
-      limits:
-        cpu: "500m"
-        memory: "1024Mi"
-
-  commander:
-    resources:
-      requests:
-        cpu: "250m"
-        memory: "512Mi"
-      limits:
-        cpu: "500m"
-        memory: "1024Mi"
-
-  registry:
-    resources:
-      requests:
-        cpu: "250m"
-        memory: "512Mi"
-      limits:
-        cpu: "500m"
-        memory: "1024Mi"
-
-    persistence:
-      enabled: true
-      size: "100Gi"
-
-  install:
-    resources:
-      requests:
-        cpu: "100m"
-        memory: "256Mi"
-      limits:
-        cpu: "500m"
-        memory: "1024Mi"
-
-
-#################################
-## Nginx configuration
-#################################
-nginx:
-  # Configure resources
-  resources:
-    requests:
-      cpu: "500m"
-      memory: "1024Mi"
-    limits:
-      cpu: "1"
-      memory: "2048Mi"
-
-  # IP address the nginx ingress should bind to
-  loadBalancerIP:
-
-  # Used to restrict IPs which can reach the nginx ingress
-  loadBalancerSourceRanges:
-
-
-#################################
-## Grafana configuration
-#################################
-grafana:
-  # Configure resources
-  resources:
-    requests:
-      cpu: "250m"
-      memory: "512Mi"
-    limits:
-      cpu: "500m"
-      memory: "1024Mi"
-
-  dashboards: {}
-   # default:
-   #   velero:
-   #     file: dashboards/velero.json
-
-#################################
-## Prometheus configuration
-#################################
-prometheus:
-  # Data retention
-  retention: 15d
-
-  # Persistence configuration
-  persistence:
+  # Enable platform authentication
+  auth:
     enabled: true
-    size: "150Gi"
 
-  # Configure resources
-  resources:
-    requests:
-      cpu: "1000m"
-      memory: "4Gi"
-    limits:
-      cpu: "2000m"
-      memory: "8Gi"
+# Network policy configuration
+networkPolicies:
+  # Enabled network policies
+  enabled: false
 
+# Airflow home directory
+# Used for mount paths
+airflowHome: "/usr/local/airflow"
 
-#################################
-## Elasticsearch configuration
-#################################
+# Enable RBAC (default on most clusters these days)
+rbacEnabled: true
+
+# Airflow executor
+# Options: SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor
+executor: "KubernetesExecutor"
+
+# If this is true and using LocalExecutor/SequentialExecutor/KubernetesExecutor, the scheudler's
+# service account will have access to communicate with the api-server and launch pods.
+# If this is true and using the CeleryExecutor, the workers will be able to launch pods.
+allowPodLaunching: true
+
+# Default airflow repository
+defaultAirflowRepository: astronomerinc/ap-airflow
+
+# Default airflow tag to deploy
+defaultAirflowTag: 1.10.5-alpine3.10
+
+# Astronomer Airflow images
+images:
+  airflow:
+    repository: astronomerinc/ap-airflow
+    tag: ~
+    pullPolicy: IfNotPresent
+  flower:
+    repository: astronomerinc/ap-airflow
+    tag: ~
+    pullPolicy: IfNotPresent
+  statsd:
+    repository: astronomerinc/ap-statsd-exporter
+    tag: 0.11.0
+    pullPolicy: IfNotPresent
+  redis:
+    repository: astronomerinc/ap-redis
+    tag: 0.11.0
+    pullPolicy: IfNotPresent
+  pgbouncer:
+    repository: astronomerinc/ap-pgbouncer
+    tag: 0.11.0
+    pullPolicy: IfNotPresent
+  pgbouncerExporter:
+    repository: astronomerinc/ap-pgbouncer-exporter
+    tag: 0.11.0
+    pullPolicy: IfNotPresent
+
+# Environment variables for all airflow containers
+env: []
+# - name: ""
+#   value: ""
+
+# Secrets for all airflow containers
+secret: []
+# - envName: ""
+#   secretName: ""
+#   secretKey: ""
+
+# Astronomer Airflow database config
+data:
+  # If secret names are provided, use those secrets
+  metadataSecretName: ~
+  resultBackendSecretName: ~
+
+  # Otherwise pass connection values in
+  metadataConnection:
+    user: postgres
+    pass: postgres
+    host: ~
+    port: 5432
+    db: postgres
+  resultBackendConnection:
+    user: postgres
+    pass: postgres
+    host: ~
+    port: 5432
+    db: postgres
+
+# Fernet key settings
+fernetKey: ~
+fernetKeySecretName: ~
+
+# Airflow Worker Config
+workers:
+  # Number of airflow celery workers in StatefulSet
+  replicas: 1
+
+  persistence:
+    # Enable persistent volumes
+    enabled: true
+    # Volume size for worker StatefulSet
+    size: 100Gi
+    # If using a custom storageClass, pass name ref to all statefulSets here
+    storageClassName:
+
+  resources: {}
+  #  limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  # Grace period for tasks to finish after SIGTERM is sent from kubernetes
+  terminationGracePeriodSeconds: 600
+
+  # Apply a HorizontalPodAutoscaler
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilization: 80
+    targetMemoryUtilization: 80
+
+# Airflow scheduler settings
+scheduler:
+  # Ensure we have one replica always running
+  podDisruptionBudget:
+    maxUnavailable: 1
+
+  resources: {}
+  #  limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Airflow webserver settings
+webserver:
+  livenessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 30
+    failureThreshold: 20
+    periodSeconds: 5
+
+  readinessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 30
+    failureThreshold: 20
+    periodSeconds: 5
+
+  # Number of webservers
+  replicas: 1
+
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # Secret that contains the cert to verify JWTs
+  jwtSigningCertificateSecretName: ~
+
+  # Create initial user.
+  defaultUser:
+    enabled: true
+    role: Admin
+    username: admin
+    email: admin@example.com
+    firstName: admin
+    lastName: user
+    password: admin
+
+# Flower settings
+flower:
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+# Statsd settings
+statsd:
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+# Pgbouncer settings
+pgbouncer:
+  # Enable pgbouncer
+  enabled: false
+
+  # Pool sizes
+  metadataPoolSize: 3
+  resultBackendPoolSize: 2
+
+  # Maximum clients that can connect to pgbouncer (higher = more file descriptors)
+  maxClientConn: 100
+
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+redis:
+  terminationGracePeriodSeconds: 600
+
+  persistence:
+    # Enable persistent volumes
+    enabled: true
+    # Volume size for worker StatefulSet
+    size: 1Gi
+    # If using a custom storageClass, pass name ref to all statefulSets here
+    storageClassName:
+
+  resources: {}
+  #  limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  # If set use as redis secret
+  passwordSecretName: ~
+  brokerURLSecretName: ~
+
+  # Else, if password is set, create secret with it,
+  # else generate a new one on install
+  password: ~
+
+# Auth secret for a private registry
+# This is used if pulling airflow images from a private registry
+registry:
+  secretName: ~
+
+  connection: {}
+    # user: ~
+    # pass: ~
+    # host: ~
+    # email: ~
+
+# Elasticsearch logging configuration
 elasticsearch:
-  # Common configuration
-  common:
-    persistence:
-      enabled: true
+  # Enable elasticsearch task logging
+  enabled: false
+  # A secret containing the connection
+  secretName: ~
+  # Or an object representing the connection
+  connection: {}
+    # user: ~
+    # pass: ~
+    # host: ~
+    # port: ~
 
-  # Configure client nodes
-  client:
-    # Match resources.requests.memory
-    heapMemory: "2g"
+# All ports used by chart
+ports:
+  flowerUI: 5555
+  airflowUI: 8080
+  workerLogs: 8793
+  redisDB: 6379
+  statsdIngest: 9125
+  statsdScrape: 9102
+  pgbouncer: 6543
+  pgbouncerScrape: 9127
 
-    resources:
-      requests:
-        cpu: "1"
-        memory: "2Gi"
-      limits:
-        cpu: "2"
-        memory: "4Gi"
+# Define any ResourceQuotas for namespace
+quotas: {}
 
-  # Configure data nodes
-  data:
-    # Match resources.requests.memory
-    heapMemory: "2g"
+# Define default/max/min values for pods and containers in namespace
+limits: []
 
-    resources:
-      requests:
-        cpu: "1"
-        memory: "2Gi"
-      limits:
-        cpu: "2"
-        memory: "4Gi"
+# Config Settings for pod_mutation_hook
+podMutation:
+  # Tolerations provided here would be applied using pod_mutation_hook
+  # So any pods spun up using KubernetesExecutor or KubernetesPodOperator will contain these tolerations.
+  tolerations: []
+  #  - key: "dynamic-pods"
+  #    operator: "Equal"
+  #    value: "true"
+  #    effect: "NoSchedule"
 
-    persistence:
-      size: "100Gi"
+  # Pods spun up would land in the node that matches the affinity
+  affinity: {}
+#    nodeAffinity:
+#      requiredDuringSchedulingIgnoredDuringExecution:
+#        nodeSelectorTerms:
+#          - matchExpressions:
+#              - key: "astronomer.io/dynamic-pods"
+#                operator: In
+#                values:
+#                  - "true"
 
-  # Configure master nodes
-  master:
-    # Match resources.requests.memory
-    heapMemory: "2g"
+# This runs as a CronJob to cleanup old pods.
+cleanup:
+  enabled: false
+  # Run every 15 minutes
+  schedule: "*/15 * * * *"
 
-    resources:
-      requests:
-        cpu: "1"
-        memory: "2Gi"
-      limits:
-        cpu: "2"
-        memory: "4Gi"
+# This block contains settings strictly used to integrate into the Astronomer platform.
+# This is what allows for integration into platform ingress, network policies, metrics collection, etc.
+# This chart is completely deployable without specifying these values.
+platform:
+  release: ~
+  workspace: ""
 
-    persistence:
-      size: "20Gi"
-
-
-#################################
-## Kibana configuration
-#################################
-kibana:
-  # Configure resources
-  resources:
-    requests:
-      cpu: "250m"
-      memory: "512Mi"
-    limits:
-      cpu: "500m"
-      memory: "1024Mi"
-
-
-#################################
-## Fluentd configuration
-#################################
-# fluentd:
-#   # Configure resources
-#   resources:
-#     requests:
-#       cpu: "250m"
-#       memory: "512Mi"
-#     limits:
-#       cpu: "500m"
-#       memory: "1024Mi"
-
-
-#################################
-## Kube State configuration
-#################################
-kubeState:
-  # Configure resources
-  resources:
-    requests:
-      cpu: "250m"
-      memory: "512Mi"
-    limits:
-      cpu: "500m"
-      memory: "1024Mi"
-
-#################################
-## KubeD configuration
-#################################
-kubed:
-  # Configure resources
-  resources:
-    requests:
-      cpu: "250m"
-      memory: "512Mi"
-    limits:
-      cpu: "2"
-      memory: "1024Mi"
+# Configuration for postgresql subchart
+postgresql:
+  enabled: true
+  postgresqlPassword: postgres
+  postgresqlUsername: postgres
