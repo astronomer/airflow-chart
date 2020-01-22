@@ -47,10 +47,16 @@ helm delete my-release
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
 ## Updating DAGs
-The recommended way to update your DAGs with this chart is to build a new docker image with the latest code and update the Airflow pods with that image. After your docker image is built and pushed to an accessible registry, you can update a release with:
+
+The recommended way to update your DAGs with this chart is to build a new docker image with the latest code (`docker build -t my-company/airflow:8a0da78 .`), push it to an accessible registry (`docker push my-company/airflow:8a0da78`), then update the Airflow pods with that image:
 
 ```console
 helm upgrade my-release . --set images.airflow.repository=my-company/airflow --set images.airflow.tag=8a0da78
+```
+
+### Push your Airflow image 
+```
+
 ```
 
 ## Parameters
