@@ -3,8 +3,11 @@ set -e
 
 # Common bash line that sets DIR to the directory of this script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-# The path to the working directory - the root of the repo
 REPO_DIR=$DIR/../
+
+if [[ -z "${HELM_CHART_PATH}" ]]; then
+  export HELM_CHART_PATH=$REPO_DIR
+fi
 
 source $DIR/clean-slate
 
@@ -15,12 +18,14 @@ WATCH_PID=$!
 
 START=$(date +%s)
 
+set -x
 helm install \
   -n airflow \
   --wait \
-  $REPO_DIR
+  $HELM_CHART_PATH
 
 HELM_CODE=$?
+set +x
 kill $WATCH_PID
 
 # Wait for all pods to become ready

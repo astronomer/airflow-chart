@@ -1,22 +1,25 @@
-version: 2
+version: 2.1
 
 workflows:
-  version: 2
+  version: 2.1
   install-airflow-chart:
     jobs:
       - lint
-      - 'airflow-on-k8s-1.14':
+      - build-artifact:
           requires:
           - lint
-      - 'airflow-on-k8s-1.15':
+      - 'airflow-on-k8s-1-14':
           requires:
-          - lint
-      - 'airflow-on-k8s-1.16':
+          - build-artifact
+      - 'airflow-on-k8s-1-15':
           requires:
-          - lint
-      - 'airflow-on-k8s-1.17':
+          - build-artifact
+      - 'airflow-on-k8s-1-16':
           requires:
-          - lint
+          - build-artifact
+      - 'airflow-on-k8s-1-17':
+          requires:
+          - build-artifact
 
 jobs:
 
@@ -27,50 +30,61 @@ jobs:
       - checkout
       - run:
           name: Lint the Airflow chart
-          command: |
-            ls
-            bin/lint
+          command: bin/lint
 
-  airflow-on-k8s-1.14:
+  build-artifact:
+    docker:
+      - image: alpine/helm:2.16.1
+    steps:
+      - checkout
+      - run:
+          name: Package the Airflow chart
+          command: bin/package
+      - persist_to_workspace:
+          root: /tmp/airflow-chart-package
+          paths:
+            - './*.tgz'
+
+  airflow-on-k8s-1-14:
     machine:
       image: ubuntu-1604:201903-01
     environment:
       KUBE_VERSION: 1.14.10
     steps:
-      - checkout
-      - run:
-          name: Install Airflow chart
-          command: bin/run-ci
+      - helm-install
 
-  airflow-on-k8s-1.15:
+  airflow-on-k8s-1-15:
     machine:
       image: ubuntu-1604:201903-01
     environment:
       KUBE_VERSION: 1.15.7
     steps:
-      - checkout
-      - run:
-          name: Install Airflow chart
-          command: bin/run-ci
+      - helm-install
 
-  airflow-on-k8s-1.16:
+  airflow-on-k8s-1-16:
     machine:
       image: ubuntu-1604:201903-01
     environment:
       KUBE_VERSION: 1.16.4
     steps:
-      - checkout
-      - run:
-          name: Install Airflow chart
-          command: bin/run-ci
+      - helm-install
 
-  airflow-on-k8s-1.17:
+  airflow-on-k8s-1-17:
     machine:
       image: ubuntu-1604:201903-01
     environment:
       KUBE_VERSION: 1.17.0
     steps:
+      - helm-install
+
+commands:
+  helm-install:
+    description: "Install Helm chart from artifact"
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
       - checkout
       - run:
           name: Install Airflow chart
-          command: bin/run-ci
+          command: |
+            HELM_CHART_PATH='/tmp/workspace/airflow-*.tgz' bin/run-ci
