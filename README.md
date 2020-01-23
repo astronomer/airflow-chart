@@ -1,6 +1,6 @@
-# Apache Airflow
+# Astronomer's Helm Chart for Apache Airflow 
 
-[Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule and monitor workflows.
+[Apache Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule and monitor workflows. [Astronomer](https://www.astronomer.io/) is a software company built around Airflow. We have extracted this Helm Chart from our platform Helm chart and made it accessible under Apache 2 license.
 
 ## TL;DR
 
@@ -47,10 +47,13 @@ helm delete my-release
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
 ## Updating DAGs
-The recommended way to update your DAGs with this chart is to build a new docker image with the latest code and update the Airflow pods with that image. After your docker image is built and pushed to an accessible registry, you can update a release with:
+
+The recommended way to update your DAGs with this chart is to build a new docker image with the latest code (`docker build -t my-company/airflow:8a0da78 .`), push it to an accessible registry (`docker push my-company/airflow:8a0da78`), then update the Airflow pods with that image:
 
 ```console
-helm upgrade my-release . --set images.airflow.repository=my-company/airflow --set images.airflow.tag=8a0da78
+helm upgrade my-release . \
+  --set images.airflow.repository=my-company/airflow \
+  --set images.airflow.tag=8a0da78
 ```
 
 ## Parameters
@@ -92,3 +95,35 @@ helm install --name my-release \
 ## Contributing
 
 Check out [our contributing guide!](CONTRIBUTING.md)
+
+##  Autoscaling with KEDA
+
+KEDA stands for Kubernetes Event Driven Autoscaling. KEDA is a custom controller that allows users to create custom bindings
+to the Kubernetes [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
+We've built an experimental scaler that allows users to create scalers based on postgreSQL queries. For the moment this exists
+on a seperate branch, but will be merged upstream soon. To install our custom version of KEDA on your cluster, please run
+
+```console
+helm repo add kedacore https://kedacore.github.io/charts
+
+helm repo update
+
+helm install \
+    --set image.keda=dimberman/keda:master \
+    --set image.metricsAdapter=dimberman/keda-metrics-adapter:master \
+    --namespace keda --name keda kedacore/keda
+```
+
+Once KEDA is installed (which should be pretty quick since there is only one pod). You can try out KEDA autoscaling 
+on this chart by setting `workers.keda.enabled=true` your helm command or in the `values.yaml`. 
+(Note: KEDA does not support StatefulSets so you need to set `worker.persistence.enabled` to `false`)
+
+```console
+helm install \
+    --name airflow \
+    --set executor=CeleryExecutor \
+    --set workers.keda.enabled=true \
+    --set workers.persistence.enabled=false \
+    --namespace airflow \
+    -f values.yaml .
+```
