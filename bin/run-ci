@@ -23,6 +23,30 @@ helm install \
 HELM_CODE=$?
 kill $WATCH_PID
 
+# Wait for all pods to become ready
+RC=0
+while [ $RC -eq 0 ]; do
+  NOW=$(date +%s)
+  DURATION="$(($NOW-$START))"
+  echo "Waiting for all pods to become ready. ${DURATION} seconds have elapsed, timeout at 800 seconds"
+  if [ $DURATION -gt 800 ];then
+    HELM_CODE=1
+    RC=1
+    echo "Error (timeout): giving up after 800 seconds"
+  else
+    sleep 10
+    kubectl get pods > /tmp/pods
+    if [ ! $? -eq 0 ];then
+      echo "kubectl get pods timed out. retrying."
+      continue
+    fi
+    set +e
+    cat /tmp/pods | grep -v 1/1 | grep -v 2/2 | grep -v NAME >/dev/null 2>&1
+    RC=$?
+    set -e
+  fi
+done
+
 # Output debugging information if the Helm install failed
 if [ $HELM_CODE -eq 0 ]; then
   echo "Airflow deployed!"
