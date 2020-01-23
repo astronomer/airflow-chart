@@ -366,6 +366,7 @@ platform:
   workspace: ""
 
 # Configuration for postgresql subchart
+# Not recommended for production
 postgresql:
   enabled: true
   postgresqlPassword: postgres
