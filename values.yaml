@@ -120,6 +120,7 @@ data:
     host: ~
     port: 5432
     db: postgres
+    sslmode: disable
 
 # Fernet key settings
 fernetKey: ~
