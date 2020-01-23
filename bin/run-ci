@@ -17,6 +17,7 @@ START=$(date +%s)
 
 helm install \
   -n airflow \
+  --wait \
   $REPO_DIR
 
 HELM_CODE=$?
