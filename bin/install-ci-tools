@@ -19,20 +19,31 @@ PATH=/tmp/bin:$PATH
 CURRENT_DIR=$(pwd)
 cd /tmp
 
-cd /tmp
 echo "Installing Kubernetes in Docker (kind) version ${KIND_VERSION}..."
-curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-${OS}-amd64 > /dev/null 2>&1
-chmod +x ./kind
-mv ./kind /tmp/bin/
+if [[ -f /tmp/bin/kind ]]; then
+  echo "Already installed in /tmp/bin. Skipping!"
+else
+  curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-${OS}-amd64 > /dev/null 2>&1
+  chmod +x ./kind
+  mv ./kind /tmp/bin/
+fi
 
 echo "Installing Helm version ${HELM_VERSION}..."
-wget https://get.helm.sh/helm-v${HELM_VERSION}-${OS}-amd64.tar.gz > /dev/null 2>&1
-tar -zxvf ./helm-v${HELM_VERSION}-${OS}-amd64.tar.gz
-mv ${OS}-amd64/helm /tmp/bin/
+if [[ -f /tmp/bin/helm ]]; then
+  echo "Already installed in /tmp/bin. Skipping!"
+else
+  wget https://get.helm.sh/helm-v${HELM_VERSION}-${OS}-amd64.tar.gz > /dev/null 2>&1
+  tar -zxvf ./helm-v${HELM_VERSION}-${OS}-amd64.tar.gz
+  mv ${OS}-amd64/helm /tmp/bin/
+fi
 
-cd /tmp/bin
 echo "Installing the latest, stable kubectl..."
-curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/${OS}/amd64/kubectl > /dev/null 2>&1
-chmod +x ./kubectl
+if [[ -f /tmp/bin/kubectl ]]; then
+  echo "Already installed in /tmp/bin. Skipping!"
+else
+  cd /tmp/bin
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/${OS}/amd64/kubectl > /dev/null 2>&1
+  chmod +x ./kubectl
+fi
 
 cd $CURRENT_DIR

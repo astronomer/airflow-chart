@@ -6,8 +6,8 @@ workflows:
     jobs:
       - 'airflow-on-k8s-1.14'
       - 'airflow-on-k8s-1.15'
-      # - 'airflow-on-k8s-1.16'
-      # - 'airflow-on-k8s-1.17'
+      - 'airflow-on-k8s-1.16'
+      - 'airflow-on-k8s-1.17'
 
 jobs:
 
