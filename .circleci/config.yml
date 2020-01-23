@@ -20,7 +20,24 @@ workflows:
       - 'airflow-on-k8s-1-17':
           requires:
           - build-artifact
-
+      - approve-release:
+          type: approval
+          requires:
+            - 'airflow-on-k8s-1-14'
+            - 'airflow-on-k8s-1-15'
+            - 'airflow-on-k8s-1-16'
+            - 'airflow-on-k8s-1-17'
+          filters:
+            branches:
+              only:
+                - '/release-.*/'
+      - release:
+          requires:
+            - approve-release
+          filters:
+            branches:
+              only:
+                - '/release-.*/'
 jobs:
 
   lint:
@@ -77,6 +94,17 @@ jobs:
     steps:
       - helm-install
 
+  release:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - checkout
+      - run:
+          name: Release the Airflow chart
+          command: |
+            HELM_CHART_PATH='/tmp/workspace/airflow-*.tgz' bin/release
 commands:
   helm-install:
     description: "Install Helm chart from artifact"
