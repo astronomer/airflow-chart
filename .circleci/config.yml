@@ -38,6 +38,7 @@ workflows:
             branches:
               only:
                 - '/release-.*/'
+
 jobs:
 
   lint:
@@ -105,6 +106,7 @@ jobs:
           name: Release the Airflow chart
           command: |
             HELM_CHART_PATH='/tmp/workspace/airflow-*.tgz' bin/release
+
 commands:
   helm-install:
     description: "Install Helm chart from artifact"

@@ -14,7 +14,3 @@ helm init --client-only
 helm dep update
 cd ..
 helm package /tmp/airflow-chart-package/airflow
-
-# Set up the index.html file
-wget https://helm.astronomer.io/index.yaml -O /tmp/index.yaml.current
-
