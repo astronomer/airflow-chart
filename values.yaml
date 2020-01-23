@@ -129,13 +129,18 @@ workers:
   # Number of airflow celery workers in StatefulSet
   replicas: 1
 
-  # Allow KEDA autoscaling. NOTE: Persistence.enabled must be set to false to use KEDA.
+  # Allow KEDA autoscaling.
+  # Persistence.enabled must be set to false to use KEDA.
   keda:
     enabled: false
+
     # How often KEDA polls the airflow DB to report new scale requests to the HPA
     pollingInterval: 5
-    # How many seconds KEDA will wait before scaling to zero. Note that HPA has a seperate cooldwon period for scale-downs
+
+    # How many seconds KEDA will wait before scaling to zero.
+    # Note that HPA has a seperate cooldwon period for scale-downs
     cooldownPeriod: 30
+
     # Maximum number of workers created by keda
     maxReplicaCount: 10
 
