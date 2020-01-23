@@ -2,7 +2,7 @@
 set -e
 
 if [[ -z "${KIND_VERSION}" ]]; then
-  export KIND_VERSION="0.5.1"
+  export KIND_VERSION="0.7.0"
 fi
 
 if [[ -z "${HELM_VERSION}" ]]; then

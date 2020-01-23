@@ -8,9 +8,6 @@ fi
 # Create a kind cluster
 kind create cluster --image kindest/node:v${KUBE_VERSION}
 
-# Point kubectl at the kind cluster.
-export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
-
 echo "Installing Tiller in the cluster..."
 # Install tiller into the fresh cluster.
 helm init --upgrade
