@@ -113,6 +113,7 @@ data:
     host: ~
     port: 5432
     db: postgres
+    sslmode: disable
   resultBackendConnection:
     user: postgres
     pass: postgres
