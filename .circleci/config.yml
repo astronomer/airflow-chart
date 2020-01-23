@@ -4,10 +4,10 @@ workflows:
   version: 2
   install-airflow-chart:
     jobs:
-      - 'airflow-on-k8s-14'
-      - 'airflow-on-k8s-15'
-      # - 'airflow-on-k8s-16'
-      # - 'airflow-on-k8s-17'
+      - 'airflow-on-k8s-1.14'
+      - 'airflow-on-k8s-1.15'
+      # - 'airflow-on-k8s-1.16'
+      # - 'airflow-on-k8s-1.17'
 
 jobs:
 
