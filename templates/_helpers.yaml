@@ -78,12 +78,16 @@
   {{ end }}
 {{- end }}
 
+{{ define "airflow_host" -}}
+  {{ printf "deployments.%s" .Values.ingress.baseDomain }}
+{{- end }}
+
 {{ define "airflow_url" -}}
-{{ .Release.Name }}-airflow.{{ .Values.ingress.baseDomain }}
+  {{ .Release.Name }}-airflow.{{ .Values.ingress.baseDomain }}
 {{- end }}
 
 {{ define "flower_url" -}}
-{{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }}
+  {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }}
 {{- end }}
 
 # This helper will change when customers deploy a new image.
