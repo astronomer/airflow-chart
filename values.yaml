@@ -60,7 +60,7 @@ allowPodLaunching: true
 defaultAirflowRepository: astronomerinc/ap-airflow
 
 # Default airflow tag to deploy
-defaultAirflowTag: 1.10.5-alpine3.10
+defaultAirflowTag: 1.10.7-alpine3.10
 
 # Astronomer Airflow images
 images:
@@ -113,12 +113,14 @@ data:
     host: ~
     port: 5432
     db: postgres
+    sslmode: disable
   resultBackendConnection:
     user: postgres
     pass: postgres
     host: ~
     port: 5432
     db: postgres
+    sslmode: disable
 
 # Fernet key settings
 fernetKey: ~
