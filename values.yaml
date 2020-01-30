@@ -227,23 +227,23 @@ webserver:
 
 # Flower settings
 flower:
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 512Mi
 
 # Statsd settings
 statsd:
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 1000m
+      memory: 256Mi
 
 # Pgbouncer settings
 pgbouncer:
@@ -257,13 +257,13 @@ pgbouncer:
   # Maximum clients that can connect to pgbouncer (higher = more file descriptors)
   maxClientConn: 100
 
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
 
 redis:
   terminationGracePeriodSeconds: 600
@@ -276,13 +276,13 @@ redis:
     # If using a custom storageClass, pass name ref to all statefulSets here
     storageClassName:
 
-  resources: {}
-  #  limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  #  requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
 
   # If set use as redis secret
   passwordSecretName: ~
