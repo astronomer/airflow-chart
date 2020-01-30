@@ -187,6 +187,12 @@ scheduler:
   #   cpu: 100m
   #   memory: 128Mi
 
+  # This setting can overwrite
+  # podMutation settings - be sure
+  # to reference the default if you
+  # are making use of those settings.
+  airflowLocalSettingsOverride: ~
+
 # Airflow webserver settings
 webserver:
   livenessProbe:
