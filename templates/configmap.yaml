@@ -119,9 +119,9 @@ data:
     SECURITY_MANAGER_CLASS = AirflowAstroSecurityManager
 {{- end }}
 
-{{- if .Values.scheduler.airflowLocalSettingsOverride }}
+{{- if .Values.scheduler.airflowLocalSettings }}
   airflow_local_settings.py: |
-    {{ .Values.scheduler.airflowLocalSettingsOverride | nindent 4 }}
+    {{ .Values.scheduler.airflowLocalSettings | nindent 4 }}
 {{- else }}
   airflow_local_settings.py: |
     from airflow.contrib.kubernetes.pod import Pod

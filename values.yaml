@@ -191,7 +191,7 @@ scheduler:
   # podMutation settings - be sure
   # to reference the default if you
   # are making use of those settings.
-  airflowLocalSettingsOverride: ~
+  airflowLocalSettings: ~
 
 # Airflow webserver settings
 webserver:
