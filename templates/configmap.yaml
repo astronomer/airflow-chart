@@ -26,7 +26,9 @@ data:
 {{- end }}
 
     [webserver]
+{{- if .Values.ingress.enabled }}
     base_url = {{ printf "https://%s/%s/airflow" (include "airflow_host" .) .Release.Name }}
+{{- end }}
     enable_proxy_fix = True
     expose_config = True
     rbac = True
