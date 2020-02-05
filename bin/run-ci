@@ -1,6 +1,26 @@
 #!/bin/bash
 set -e
 
+function get_debugging_info {
+  echo "Failed to deploy Airflow!"
+  echo "Printing description and logs where containers in pod are not ready..."
+  for pod in $(kubectl get pods -n airflow | grep -v NAME | grep -v 1/1 | grep -v 2/2 | grep -v Completed | awk '{ print $1 }'); do
+    echo "======================="
+    set -x
+    kubectl describe pod -n airflow $pod
+    kubectl logs -n airflow $pod | tail -n 30
+    set +x
+    echo "======================="
+  done
+  kubectl get pods --all-namespaces
+  echo "======================="
+  kubectl get ds --all-namespaces
+  echo "======================="
+  kubectl get sts --all-namespaces
+  echo "======================="
+  kubectl get deployments --all-namespaces
+}
+
 # Common bash line that sets DIR to the directory of this script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 REPO_DIR=$DIR/../
@@ -18,15 +38,22 @@ WATCH_PID=$!
 
 START=$(date +%s)
 
+set +e
 set -x
+
 helm install \
   -n airflow \
   --wait \
   $HELM_CHART_PATH
 
-HELM_CODE=$?
+if [ ! $? -eq 0 ]; then
+  echo "Helm chart failed to install"
+  get_debugging_info
+  exit 1
+fi
+
+HELM_CODE=0
 set +x
-kill $WATCH_PID
 
 # Wait for all pods to become ready
 RC=0
@@ -52,24 +79,13 @@ while [ $RC -eq 0 ]; do
   fi
 done
 
+kill $WATCH_PID
+
 # Output debugging information if the Helm install failed
 if [ $HELM_CODE -eq 0 ]; then
   echo "Airflow deployed!"
 else
   echo "Failed to deploy Airflow!"
-  echo "Printing description and logs where containers in pod are not ready..."
-  for pod in $(kubectl get pods | grep -v NAME | grep -v 1/1 | grep -v 2/2 | awk '{ print $1 }'); do
-    echo "======================="
-    set -x
-    kubectl describe pod $pod
-    kubectl logs $pod | tail -n 30
-    set +x
-    echo "======================="
-  done
+  get_debugging_info
+  exit 1
 fi
-
-set -x
-kubectl get pods --all-namespaces
-helm list
-
-exit $HELM_CODE
