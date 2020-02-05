@@ -31,7 +31,6 @@ cd $CURRENT_DIR
 sudo apt-get update > /dev/null
 sudo apt-get install -y tree > /dev/null
 
-
 # Ensure we have a new directory
 rm -rf /tmp/airflow-chart-release || true
 mkdir -p /tmp/airflow-chart-release
@@ -56,7 +55,14 @@ echo "========================="
 echo ""
 
 echo "Releasing chart..."
+
+set +x
+
+printf "%s" $${GCP_TOKEN} > /tmp/gcs_token.json
+gcloud auth activate-service-account --key-file=/tmp/gcs_token.json
+
 set -xe
+
 # Set up the index.html file
 wget https://helm.astronomer.io/index.yaml -O /tmp/index.yaml.current
 helm repo index ./airflow --url https://helm.astronomer.io --merge /tmp/index.yaml.current

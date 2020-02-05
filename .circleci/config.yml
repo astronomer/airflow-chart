@@ -107,8 +107,7 @@ jobs:
           name: Release the Airflow chart
           command: |
             set -e
-            printf "%s" $${GCP_TOKEN} > /tmp/gcs_token.json
-            gcloud auth activate-service-account --key-file=/tmp/gcs_token.json
+            pyenv global 2.7.12
             HELM_CHART_PATH='/tmp/workspace/airflow-*.tgz' bin/release
 
 commands:
