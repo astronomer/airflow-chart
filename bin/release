@@ -58,7 +58,7 @@ echo "Releasing chart..."
 
 set +x
 
-printf "%s" $${GCP_TOKEN} > /tmp/gcs_token.json
+printf "%s" ${GCP_TOKEN} > /tmp/gcs_token.json
 gcloud auth activate-service-account --key-file=/tmp/gcs_token.json
 
 set -xe
