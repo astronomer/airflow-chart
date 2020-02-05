@@ -134,6 +134,6 @@ commands:
           command: |
             set -xe
             pyenv global 3.7.0
-            pip install --user astronomer_e2e_test
+            pip install astronomer_e2e_test
             # We can remove --debug after we are happy with it
             astronomer-ci --debug publish-github-release --github-repository $CIRCLE_PROJECT_REPONAME --github-organization $CIRCLE_PROJECT_USERNAME --commitish $CIRCLE_SHA1
