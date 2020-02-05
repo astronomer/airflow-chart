@@ -175,9 +175,13 @@ workers:
 
 # Airflow scheduler settings
 scheduler:
-  # Ensure we have one replica always running
   podDisruptionBudget:
-    maxUnavailable: 1
+    enabled: false
+
+    # PDB configuration
+    config:
+      # Ensure we have one replica always running
+      maxUnavailable: 1
 
   resources: {}
   #  limits:
