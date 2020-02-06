@@ -90,7 +90,11 @@ spec:
               containerPort: {{ .Values.ports.airflowUI }}
           livenessProbe:
             httpGet:
+{{- if .Values.ingress.enabled }}
               path: {{ printf "/%s/airflow/health" .Release.Name }}
+{{- else }}
+              path: /health
+{{- end }}
               port: {{ .Values.ports.airflowUI }}
             initialDelaySeconds: {{ .Values.webserver.livenessProbe.initialDelaySeconds | default 15 }}
             timeoutSeconds: {{ .Values.webserver.livenessProbe.timeoutSeconds | default 30 }}
@@ -98,7 +102,11 @@ spec:
             periodSeconds: {{ .Values.webserver.livenessProbe.periodSeconds | default 5 }}
           readinessProbe:
             httpGet:
+{{- if .Values.ingress.enabled }}
               path: {{ printf "/%s/airflow/health" .Release.Name }}
+{{- else }}
+              path: /health
+{{- end }}
               port: {{ .Values.ports.airflowUI }}
             initialDelaySeconds: {{ .Values.webserver.readinessProbe.initialDelaySeconds | default 15 }}
             timeoutSeconds: {{ .Values.webserver.readinessProbe.timeoutSeconds | default 30 }}
