@@ -23,6 +23,14 @@ metadata:
     nginx.ingress.kubernetes.io/auth-url: https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization
     nginx.ingress.kubernetes.io/auth-signin: https://app.{{ .Values.ingress.baseDomain }}/login
     nginx.ingress.kubernetes.io/auth-response-headers: authorization, username, email
+    nginx.ingress.kubernetes.io/proxy-cookie-path: / /{{ .Release.Name }}/
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      if ($host = '{{- include "airflow_subdomain" . }}' ) {
+        rewrite ^ {{ printf "https://%s/%s/airflow"  ( include "deployments_subdomain" .) .Release.Name }} permanent;
+      }
+      if ($host = '{{- include "flower_subdomain" . }}' ) {
+        rewrite ^ {{ printf "https://%s/%s/flower"  ( include "deployments_subdomain" .) .Release.Name }} permanent;
+      }
   {{- end }}
 spec:
   tls:
@@ -34,17 +42,29 @@ spec:
     - secretName: ~
   {{- end }}
       hosts:
-        - {{- include "airflow_url" . | indent 1 }}
-        - {{- include "flower_url" . | indent 1 }}
+        - {{- include "deployments_subdomain" . | indent 1 }}
+        - {{- include "airflow_subdomain" . | indent 1 }}
+        - {{- include "flower_subdomain" . | indent 1 }}
   rules:
-    - host: {{- include "airflow_url" . | indent 1 }}
+    - host: {{- include "deployments_subdomain" . | indent 1 }}
+      http:
+        paths:
+          - path: /{{ .Release.Name }}/airflow
+            backend:
+              serviceName: {{ .Release.Name }}-webserver
+              servicePort: airflow-ui
+          - path: /{{ .Release.Name }}/flower
+            backend:
+              serviceName: {{ .Release.Name }}-flower
+              servicePort: flower-ui
+    - host: {{- include "airflow_subdomain" . | indent 1 }}
       http:
         paths:
           - path: /
             backend:
               serviceName: {{ .Release.Name }}-webserver
               servicePort: airflow-ui
-    - host: {{- include "flower_url" . | indent 1 }}
+    - host: {{- include "flower_subdomain" . | indent 1 }}
       http:
         paths:
           - path: /

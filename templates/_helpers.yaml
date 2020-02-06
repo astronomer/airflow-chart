@@ -78,11 +78,15 @@
   {{ end }}
 {{- end }}
 
-{{ define "airflow_url" -}}
+{{ define "deployments_subdomain" -}}
+{{ printf "deployments.%s" .Values.ingress.baseDomain }}
+{{- end }}
+
+{{ define "airflow_subdomain" -}}
 {{ .Release.Name }}-airflow.{{ .Values.ingress.baseDomain }}
 {{- end }}
 
-{{ define "flower_url" -}}
+{{ define "flower_subdomain" -}}
 {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }}
 {{- end }}
 
