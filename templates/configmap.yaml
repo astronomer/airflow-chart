@@ -27,7 +27,7 @@ data:
 
     [webserver]
 {{- if .Values.ingress.enabled }}
-    base_url = {{ printf "https://%s/%s/airflow" (include "airflow_host" .) .Release.Name }}
+    base_url = {{ printf "https://%s/%s/airflow" (include "deployments_subdomain" .) .Release.Name }}
 {{- end }}
     enable_proxy_fix = True
     expose_config = True
@@ -97,7 +97,7 @@ data:
     [astronomer]
 {{- if .Values.webserver.jwtSigningCertificateSecretName }}
     jwt_signing_cert = {{ template "airflow_webserver_jwt_cert_path" . }}
-    jwt_audience = {{ printf "%s/%s" ( include "airflow_host" . ) .Release.Name }}
+    jwt_audience = {{ printf "%s/%s" ( include "deployments_subdomain" . ) .Release.Name }}
 {{- end }}
 
   webserver_config.py: |
