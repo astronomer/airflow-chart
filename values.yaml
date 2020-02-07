@@ -179,9 +179,13 @@ workers:
 
 # Airflow scheduler settings
 scheduler:
-  # Ensure we have one replica always running
+  # Scheduler pod disruption budget
   podDisruptionBudget:
-    maxUnavailable: 1
+    enabled: false
+
+    # PDB configuration
+    config:
+      maxUnavailable: 1
 
   resources: {}
   #  limits:
@@ -270,6 +274,14 @@ pgbouncer:
 
   # Maximum clients that can connect to pgbouncer (higher = more file descriptors)
   maxClientConn: 100
+
+  # Pgbouner pod disruption budget
+  podDisruptionBudget:
+    enabled: false
+
+    # PDB configuration
+    config:
+      maxUnavailable: 1
 
   resources: {}
     # limits:
