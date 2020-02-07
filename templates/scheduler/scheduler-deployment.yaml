@@ -51,6 +51,7 @@ spec:
         checksum/result-backend-secret: {{ include (print $.Template.BasePath "/secrets/result-backend-connection-secret.yaml") . | sha256sum }}
         checksum/pgbouncer-config-secret: {{ include (print $.Template.BasePath "/secrets/pgbouncer-config-secret.yaml") . | sha256sum }}
         checksum/airflow-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        cluster-autoscaler.kubernetes.io/safe-to-evict: {{ .Values.scheduler.safeToEvict | default true }}
     spec:
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
