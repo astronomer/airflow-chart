@@ -32,7 +32,9 @@ spec:
 {{ toYaml . | indent 8 }}
 {{- end }}
       annotations:
-        cluster-autoscaler.kubernetes.io/safe-to-evict: {{ .Values.redis.safeToEvict | default true }}
+        {{- if .Values.redis.safeToEvict }}
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        {{- end }}
     spec:
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
