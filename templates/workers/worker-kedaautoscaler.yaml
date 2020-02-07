@@ -12,6 +12,7 @@ metadata:
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
+    deploymentName: {{ .Release.Name }}-worker
 {{- with .Values.labels }}
 {{ toYaml . | indent 8 }}
 {{- end }}
@@ -22,7 +23,7 @@ spec:
   cooldownPeriod: {{  .Values.workers.keda.cooldownPeriod }}    # Optional. Default: 300 seconds
   maxReplicaCount: {{  .Values.workers.keda.maxReplicaCount }}   # Optional. Default: 100
   triggers:
-    - type: postgres
+    - type: postgresql
       metadata:
         connection: AIRFLOW_CONN_AIRFLOW_DB
         query: "SELECT ceil(COUNT(*)::decimal / 16) FROM task_instance WHERE state='running' OR state='queued'"
