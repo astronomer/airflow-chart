@@ -173,6 +173,10 @@ workers:
     targetCPUUtilization: 80
     targetMemoryUtilization: 80
 
+  # This setting tells kubernetes that its ok to evict
+  # when it wants to scale a node down.
+  safeToEvict: true
+
 # Airflow scheduler settings
 scheduler:
   # Scheduler pod disruption budget
@@ -196,6 +200,10 @@ scheduler:
   # to reference the default if you
   # are making use of those settings.
   airflowLocalSettings: ~
+
+  # This setting tells kubernetes that its ok to evict
+  # when it wants to scale a node down.
+  safeToEvict: true
 
 # Airflow webserver settings
 webserver:
@@ -309,6 +317,10 @@ redis:
   # Else, if password is set, create secret with it,
   # else generate a new one on install
   password: ~
+
+  # This setting tells kubernetes that its ok to evict
+  # when it wants to scale a node down.
+  safeToEvict: true
 
 # Auth secret for a private registry
 # This is used if pulling airflow images from a private registry
