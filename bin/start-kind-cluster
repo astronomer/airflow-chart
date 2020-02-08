@@ -8,12 +8,10 @@ fi
 # Create a kind cluster
 kind create cluster --image kindest/node:v${KUBE_VERSION}
 
-echo "Installing Tiller in the cluster..."
-# Install tiller into the fresh cluster.
-helm init --upgrade
-
+echo "Installing service account..."
 # Update the service account for tiller to work.
 kubectl create serviceaccount --namespace kube-system tiller
 kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+echo "Installing Tiller in the cluster..."
 helm init --service-account tiller --upgrade --wait
+echo "Tiller installed."
