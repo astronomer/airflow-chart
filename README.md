@@ -109,8 +109,8 @@ helm repo add kedacore https://kedacore.github.io/charts
 helm repo update
 
 helm install \
-    --set image.keda=dimberman/keda:master \
-    --set image.metricsAdapter=dimberman/keda-metrics-adapter:master \
+    --set image.keda=docker.io/kedacore/keda:1.2.0 \
+    --set image.metricsAdapter=docker.io/kedacore/keda-metrics-adapter:1.2.0 \
     --namespace keda --name keda kedacore/keda
 ```
 
