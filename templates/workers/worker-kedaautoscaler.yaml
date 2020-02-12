@@ -14,7 +14,7 @@ metadata:
     heritage: {{ .Release.Service }}
     deploymentName: {{ .Release.Name }}-worker
 {{- with .Values.labels }}
-{{ toYaml . | indent 8 }}
+{{ toYaml . | indent 4 }}
 {{- end }}
 spec:
   scaleTargetRef:
