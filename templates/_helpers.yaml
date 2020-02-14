@@ -154,8 +154,8 @@
 
 {{ define "pgbouncer_config" }}
 [databases]
-{{ .Release.Name }}-metadata = host={{ .Values.data.metadataConnection.host }} dbname={{ .Values.data.metadataConnection.db }} port={{ .Values.data.metadataConnection.port }} pool_size={{ .Values.pgbouncer.metadataPoolSize }}
-{{ .Release.Name }}-result-backend = host={{ .Values.data.resultBackendConnection.host }} dbname={{ .Values.data.resultBackendConnection.db }} port={{ .Values.data.resultBackendConnection.port }} pool_size={{ .Values.pgbouncer.resultBackendPoolSize }}
+{{ .Release.Name }}-metadata = host={{ .Values.data.metadataConnection.host }} dbname={{ .Values.data.metadataConnection.db }} port={{ .Values.data.metadataConnection.port }} pool_size={{ .Values.pgbouncer.metadataPoolSize }} {{ if .Values.data.metadataConnection.azureDbServer }}user={{ .Values.data.metadataConnection.user }}{{ .Values.data.metadataConnection.azureDbServer }} password={{ .Values.data.metadataConnection.pass }}{{ end }}
+{{ .Release.Name }}-result-backend = host={{ .Values.data.resultBackendConnection.host }} dbname={{ .Values.data.resultBackendConnection.db }} port={{ .Values.data.resultBackendConnection.port }} pool_size={{ .Values.pgbouncer.resultBackendPoolSize }} {{ if .Values.data.resultBackendConnection.azureDbServer }}user={{ .Values.data.resultBackendConnection.user }}{{ .Values.data.resultBackendConnection.azureDbServer }} password={{ .Values.data.resultBackendConnection.pass }}{{ end }}
 
 [pgbouncer]
 pool_mode = transaction
