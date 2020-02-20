@@ -255,6 +255,7 @@ flower:
 
 # Statsd settings
 statsd:
+  enabled: true
   resources: {}
     # limits:
     #   cpu: 100m
