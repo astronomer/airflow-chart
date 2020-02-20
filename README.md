@@ -92,10 +92,6 @@ helm install --name my-release \
   --set enablePodLaunching=false .
 ```
 
-## Contributing
-
-Check out [our contributing guide!](CONTRIBUTING.md)
-
 ##  Autoscaling with KEDA
 
 KEDA stands for Kubernetes Event Driven Autoscaling. [KEDA](https://github.com/kedacore/keda) is a custom controller that allows users to create custom bindings
@@ -127,3 +123,7 @@ helm install \
     --namespace airflow \
     -f values.yaml .
 ```
+
+## Contributing
+
+Check out [our contributing guide!](CONTRIBUTING.md)
