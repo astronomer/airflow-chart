@@ -1,6 +1,7 @@
 ################################
 ## Airflow StatsD Deployment
 #################################
+{{- if .Values.statsd.enabled }}
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -66,3 +67,4 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
+{{- end }}
