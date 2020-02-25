@@ -1,0 +1,319 @@
+# Default values for airflow.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# User and group of airflow user
+uid: 100
+gid: 101
+
+nodeSelector: {}
+affinity: {}
+tolerations: []
+
+privateRegistry:
+  enabled: false
+  repository: ~
+
+# Ingress configuration
+ingress:
+  # Enable ingress resource
+  enabled: false
+
+  # Enable for cert-manager or kube-lego
+  acme: false
+
+  # Name of tls secret to use on ingress
+  tlsSecretName: ~
+
+  # Base domain for ingress vhosts
+  baseDomain: ~
+
+  # If deployed from the Astronomer platform, this will be overridden
+  # to a class that matches the platform release name. This lets us run
+  # multiple platforms in one cluster and have deployments from one platform
+  # use the corresponding platform ingress controller.
+  class: "nginx"
+
+  # Enable platform authentication
+  auth:
+    enabled: true
+
+# Network policy configuration
+networkPolicies:
+  # Enabled network policies
+  enabled: false
+
+# Airflow home directory
+# Used for mount paths
+airflowHome: "/usr/local/airflow"
+
+# Enable RBAC (default on most clusters these days)
+rbacEnabled: true
+
+# Airflow version
+# Options: 1.9.0, 1.10.2, etc
+airflowVersion: "1.10.5"
+
+# Airflow executor
+# Options: SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor
+executor: "CeleryExecutor"
+
+# If this is true and using LocalExecutor/SequentialExecutor/KubernetesExecutor, the scheudler's
+# service account will have access to communicate with the api-server and launch pods.
+# If this is true and using the CeleryExecutor, the workers will be able to launch pods.
+allowPodLaunching: false
+
+# Astronomer Airflow images
+images:
+  airflow:
+    # If tag is specified here or overridden, that value is used, otherwise
+    # it is build using {{ .Chart.Version }}-{{ .Values.airflowVersion }}
+    repository: astronomerinc/ap-airflow
+    tag: ~
+    pullPolicy: IfNotPresent
+  flower:
+    repository: astronomerinc/ap-airflow
+    tag: ~
+    pullPolicy: IfNotPresent
+  statsd:
+    repository: astronomerinc/ap-statsd-exporter
+    tag: 0.10.3
+    pullPolicy: IfNotPresent
+  redis:
+    repository: astronomerinc/ap-redis
+    tag: 0.10.3
+    pullPolicy: IfNotPresent
+  pgbouncer:
+    repository: astronomerinc/ap-pgbouncer
+    tag: 0.10.3
+    pullPolicy: IfNotPresent
+  pgbouncerExporter:
+    repository: astronomerinc/ap-pgbouncer-exporter
+    tag: 0.10.3
+    pullPolicy: IfNotPresent
+
+# Environment variables for all airflow containers
+env: []
+# - name: ""
+#   value: ""
+
+# Secrets for all airflow containers
+secret: []
+# - envName: ""
+#   secretName: ""
+#   secretKey: ""
+
+# Astronomer Airflow database config
+data:
+  # If secret names are provided, use those secrets
+  metadataSecretName: ~
+  resultBackendSecretName: ~
+
+  # Otherwise pass connection values in
+  metadataConnection: {}
+    # user: ~
+    # pass: ~
+    # host: ~
+    # port: ~
+    # db: ~
+  resultBackendConnection: {}
+    # user: ~
+    # pass: ~
+    # host: ~
+    # port: ~
+    # db: ~
+
+# Fernet key settings
+fernetKey: ~
+fernetKeySecretName: ~
+
+# Airflow Worker Config
+workers:
+  # Number of airflow celery workers in StatefulSet
+  replicas: 1
+
+  persistence:
+    # Enable persistent volumes
+    enabled: true
+    # Volume size for worker StatefulSet
+    size: 100Gi
+    # If using a custom storageClass, pass name ref to all statefulSets here
+    storageClassName:
+
+  resources: {}
+  #  limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  # Grace period for tasks to finish after SIGTERM is sent from kubernetes
+  terminationGracePeriodSeconds: 600
+
+  # Apply a HorizontalPodAutoscaler
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilization: 80
+    targetMemoryUtilization: 80
+
+# Airflow scheduler settings
+scheduler:
+  # Ensure we have one replica always running
+  podDisruptionBudget:
+    maxUnavailable: 1
+
+  resources: {}
+  #  limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Airflow webserver settings
+webserver:
+  livenessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 30
+    failureThreshold: 20
+    periodSeconds: 5
+
+  readinessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 30
+    failureThreshold: 20
+    periodSeconds: 5
+
+  # Number of webservers
+  replicas: 1
+
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # Secret that contains the cert to verify JWTs
+  jwtSigningCertificateSecretName: ~
+
+# Flower settings
+flower:
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+# Statsd settings
+statsd:
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+# Pgbouncer settings
+pgbouncer:
+  # Enable pgbouncer
+  enabled: false
+
+  # Pool sizes
+  metadataPoolSize: 3
+  resultBackendPoolSize: 2
+
+  # Maximum clients that can connect to pgbouncer (higher = more file descriptors)
+  maxClientConn: 100
+
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+redis:
+  terminationGracePeriodSeconds: 600
+
+  persistence:
+    # Enable persistent volumes
+    enabled: true
+    # Volume size for worker StatefulSet
+    size: 1Gi
+    # If using a custom storageClass, pass name ref to all statefulSets here
+    storageClassName:
+
+  resources: {}
+  #  limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  # If set use as redis secret
+  passwordSecretName: ~
+  brokerURLSecretName: ~
+
+  # Else, if password is set, create secret with it,
+  # else generate a new one on install
+  password: ~
+
+# Auth secret for a private registry
+# This is used if pulling airflow images from a private registry
+registry:
+  secretName: ~
+
+  connection: {}
+    # user: ~
+    # pass: ~
+    # host: ~
+    # email: ~
+
+# Elasticsearch logging configuration
+elasticsearch:
+  # Enable elasticsearch task logging
+  enabled: false
+  # A secret containing the connection
+  secretName: ~
+  # Or an object representing the connection
+  connection: {}
+    # user: ~
+    # pass: ~
+    # host: ~
+    # port: ~
+
+# All ports used by chart
+ports:
+  flowerUI: 5555
+  airflowUI: 8080
+  workerLogs: 8793
+  redisDB: 6379
+  statsdIngest: 9125
+  statsdScrape: 9102
+  pgbouncer: 6543
+  pgbouncerScrape: 9127
+
+# Define any ResourceQuotas for namespace
+quotas: {}
+
+# Define default/max/min values for pods and containers in namespace
+limits: []
+
+# This block contains settings strictly used to integrate into the Astronomer platform.
+# This is what allows for integration into platform ingress, network policies, metrics collection, etc.
+# This chart is completely deployable without specifying these values.
+platform:
+  namespace: ~
+  release: ~
+  workspace: ""
+  singleNamespace: true

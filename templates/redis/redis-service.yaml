@@ -1,0 +1,28 @@
+################################
+## Airflow Redis Service
+#################################
+{{- if eq .Values.executor "CeleryExecutor" }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-redis
+  labels:
+    tier: airflow
+    component: redis
+    release: {{ .Release.Name }}
+    workspace: {{ .Values.platform.workspace | quote }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  type: ClusterIP
+  selector:
+    tier: airflow
+    component: redis
+    release: {{ .Release.Name }}
+    workspace: {{ .Values.platform.workspace | quote }}
+  ports:
+    - name: redis-db
+      protocol: TCP
+      port: {{ .Values.ports.redisDB }}
+      targetPort: {{ .Values.ports.redisDB }}
+{{- end }}
