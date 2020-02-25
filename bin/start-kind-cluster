@@ -17,15 +17,24 @@ helm init --service-account tiller --upgrade --wait
 echo "Tiller installed."
 
 echo "Deploying postgresql..."
-helm install -n postgresql --namespace astronomer --wait \
+helm install -n postgresql --namespace default --wait \
   --set image.tag=9.6.15-centos-7-r34 \
   --set postgresqlPassword=notactuallysecret \
   stable/postgresql > /dev/null 2>&1
 
-export POSTGRES_PASSWORD=$(kubectl get secret --namespace astronomer postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
-export DB_CONNECTION_STRING="postgres://postgres:${POSTGRES_PASSWORD}@postgresql.astronomer:5432"
+export POSTGRES_PASSWORD=$(kubectl get secret --namespace default postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+export DB_CONNECTION_STRING="postgres://postgres:${POSTGRES_PASSWORD}@postgresql.default:5432"
 kubectl create secret generic astronomer-bootstrap \
   --from-literal connection=$DB_CONNECTION_STRING \
-  --namespace astronomer
-
+  --namespace default
 echo "Postgresql deployed."
+
+echo "Making certs"
+mkcert -install
+mkcert -cert-file /tmp/fullchain.pem -key-file /tmp/privkey.pem app.local.astronomer-development.com local.astronomer-development.com "*.local.astronomer-development.com"
+cat "$(mkcert -CAROOT)/rootCA.pem" >> /tmp/fullchain.pem
+
+echo "Installing TLS cert and private key"
+kubectl create secret tls astronomer-tls \
+  --key /tmp/privkey.pem \
+  --cert /tmp/fullchain.pem

@@ -8,17 +8,10 @@ workflows:
       - build-artifact:
           requires:
           - lint
-      - 'airflow-on-k8s-1-14':
-          requires:
-          - build-artifact
-      - 'airflow-on-k8s-1-15':
-          requires:
-          - build-artifact
       - approve-release:
           type: approval
           requires:
-            - 'airflow-on-k8s-1-14'
-            - 'airflow-on-k8s-1-15'
+            - build-artifact
           filters:
             branches:
               only:

@@ -12,4 +12,8 @@ echo "Deploying Airflow..."
 
 helm install \
   -n airflow \
+  --set webserver.jwtSigningCertificateSecretName=astronomer-tls \
+  --set ingress.tlsSecretName=astronomer-tls \
+  --set data.metadataSecretName=astronomer-bootstrap \
+  --set data.resultBackendSecretName=astronomer-bootstrap \
   $REPO_DIR

@@ -46,4 +46,15 @@ else
   chmod +x ./kubectl
 fi
 
+set -e
+
+# Install mkcert
+if [[ -f /tmp/bin/mkcert ]]; then
+  echo "mkcert is already installed."
+else
+  cd /tmp/
+  curl -Lo /tmp/bin/mkcert https://github.com/FiloSottile/mkcert/releases/download/v1.4.1/mkcert-v1.4.1-${OS}-amd64
+  chmod +x /tmp/bin/mkcert
+fi
+
 cd $CURRENT_DIR

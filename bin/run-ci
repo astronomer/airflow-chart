@@ -43,6 +43,10 @@ set -x
 
 helm install \
   -n airflow \
+  --set webserver.jwtSigningCertificateSecretName=astronomer-tls \
+  --set ingress.tlsSecretName=astronomer-tls \
+  --set data.metadataSecretName=astronomer-bootstrap \
+  --set data.resultBackendSecretName=astronomer-bootstrap \
   --wait \
   $HELM_CHART_PATH
 
