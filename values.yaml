@@ -69,11 +69,11 @@ images:
     # If tag is specified here or overridden, that value is used, otherwise
     # it is build using {{ .Chart.Version }}-{{ .Values.airflowVersion }}
     repository: astronomerinc/ap-airflow
-    tag: ~
+    tag: 0.10.3-1.10.5
     pullPolicy: IfNotPresent
   flower:
     repository: astronomerinc/ap-airflow
-    tag: ~
+    tag: 0.10.3-1.10.5
     pullPolicy: IfNotPresent
   statsd:
     repository: astronomerinc/ap-statsd-exporter

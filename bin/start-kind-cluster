@@ -15,3 +15,17 @@ kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admi
 echo "Installing Tiller in the cluster..."
 helm init --service-account tiller --upgrade --wait
 echo "Tiller installed."
+
+echo "Deploying postgresql..."
+helm install -n postgresql --namespace astronomer --wait \
+  --set image.tag=9.6.15-centos-7-r34 \
+  --set postgresqlPassword=notactuallysecret \
+  stable/postgresql > /dev/null 2>&1
+
+export POSTGRES_PASSWORD=$(kubectl get secret --namespace astronomer postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+export DB_CONNECTION_STRING="postgres://postgres:${POSTGRES_PASSWORD}@postgresql.astronomer:5432"
+kubectl create secret generic astronomer-bootstrap \
+  --from-literal connection=$DB_CONNECTION_STRING \
+  --namespace astronomer
+
+echo "Postgresql deployed."
