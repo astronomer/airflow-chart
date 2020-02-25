@@ -25,6 +25,14 @@ ingress:
   # Name of tls secret to use on ingress
   tlsSecretName: ~
 
+  # Annotations always injected when configuring Ingress ojbect
+  annotations: |-
+      # kubernetes.io/ingress.class: {{ .Values.ingress.class }}
+
+  # These Annotations will only be injected into the Ingress object if ingress.auth.enabled=true
+  authAnnotations: |-
+      # nginx.ingress.kubernetes.io/auth-url: https://{{ .Values.ingress.baseDomain }}/v1/authorization
+
   # Base domain for ingress vhosts
   baseDomain: ~
 
