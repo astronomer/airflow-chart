@@ -65,7 +65,7 @@ metadata:
   name: {{ .Release.Name }}-flower-ingress
   labels:
     tier: airflow
-    component: airflow-ingress
+    component: flower-ingress
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
