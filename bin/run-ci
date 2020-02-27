@@ -43,6 +43,7 @@ set -x
 
 helm install \
   -n airflow \
+  --set pgbouncer.enabled=true \
   --wait \
   $HELM_CHART_PATH
 

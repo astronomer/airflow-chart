@@ -12,4 +12,5 @@ echo "Deploying Airflow..."
 
 helm install \
   -n airflow \
+  --set pgbouncer.enabled=true \
   $REPO_DIR
