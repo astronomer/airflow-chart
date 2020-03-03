@@ -85,7 +85,7 @@ metadata:
       if ($host = '{{- include "flower_subdomain" . }}' ) {
         rewrite ^ {{ printf "https://%s/%s/flower"  ( include "deployments_subdomain" .) .Release.Name }} permanent;
       }
-      rewrite ^/{{ .Release.Name }}/flower/?(.*)/$ /$1 break;
+      rewrite ^/{{ .Release.Name }}/flower/?(.*)$ /$1 break;
       sub_filter '="/' '="/{{ .Release.Name }}/flower/';
       sub_filter_last_modified on;
       sub_filter_once off;
