@@ -2,6 +2,7 @@
 ## Airflow Ingress
 #################################
 {{- if .Values.ingress.enabled }}
+  {{ $ctx := . }}
 kind: Ingress
 apiVersion: networking.k8s.io/v1beta1
 metadata:
@@ -16,9 +17,13 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
   annotations:
-{{ tpl .Values.ingress.annotations . | indent 4}}
+  {{- range $k, $v := .Values.ingress.annotations }}
+    {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
+  {{- end }}
 {{- if .Values.ingress.auth.enabled }}
-{{ tpl .Values.ingress.authAnnotations . | indent 4}}
+  {{- range $k, $v := .Values.ingress.authAnnotations }}
+    {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
+  {{- end }}
 {{- end }}
 spec:
   tls:
@@ -64,9 +69,6 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
-    kubernetes.io/tls-acme: {{ eq .Values.ingress.acme true | quote }}
-    nginx.ingress.kubernetes.io/custom-http-errors: "403,404,502,503"
   {{- if .Values.ingress.auth.enabled }}
     nginx.ingress.kubernetes.io/auth-url: https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization
     nginx.ingress.kubernetes.io/auth-signin: https://app.{{ .Values.ingress.baseDomain }}/login
@@ -81,6 +83,9 @@ metadata:
       sub_filter '="/' '="/{{ .Release.Name }}/flower/';
       sub_filter_last_modified on;
       sub_filter_once off;
+  {{- end }}
+  {{- range $k, $v := .Values.ingress.annotations }}
+      {{ $k | quote }}: {{ $v | toYaml }}
   {{- end }}
 spec:
   tls:
