@@ -3,7 +3,7 @@
 #################################
 {{- if .Values.ingress.enabled }}
 kind: Ingress
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: {{ .Release.Name }}-airflow-ingress
   labels:
@@ -60,7 +60,7 @@ spec:
 {{- if and .Values.ingress.enabled (eq .Values.executor "CeleryExecutor") }}
 ---
 kind: Ingress
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: {{ .Release.Name }}-flower-ingress
   labels:
@@ -79,13 +79,14 @@ metadata:
   {{- if .Values.ingress.auth.enabled }}
     nginx.ingress.kubernetes.io/auth-url: https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization
     nginx.ingress.kubernetes.io/auth-signin: https://app.{{ .Values.ingress.baseDomain }}/login
+    nginx.ingress.kubernetes.io/rewrite-target: /$2;
     nginx.ingress.kubernetes.io/auth-response-headers: authorization, username, email
     nginx.ingress.kubernetes.io/proxy-cookie-path: / /{{ .Release.Name }}/
     nginx.ingress.kubernetes.io/configuration-snippet: |
       if ($host = '{{- include "flower_subdomain" . }}' ) {
         rewrite ^ {{ printf "https://%s/%s/flower"  ( include "deployments_subdomain" .) .Release.Name }} permanent;
       }
-      rewrite ^/{{ .Release.Name }}/flower/?(.*)$ /$1 break;
+      subs_filter_types text/css text/xml text/css;
       sub_filter '="/' '="/{{ .Release.Name }}/flower/';
       sub_filter_last_modified on;
       sub_filter_once off;
@@ -106,7 +107,7 @@ spec:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
         paths:
-          - path: /
+          - path: /{{ .Release.Name }}/flower(/|$)(.*)
             backend:
               serviceName: {{ .Release.Name }}-flower
               servicePort: flower-ui
