@@ -44,6 +44,10 @@ networkPolicies:
 # Used for mount paths
 airflowHome: "/usr/local/airflow"
 
+# Extra annotations to apply to all
+# Airflow pods
+airflowPodAnnotations: {}
+
 # Enable RBAC (default on most clusters these days)
 rbacEnabled: true
 
