@@ -19,6 +19,9 @@ ingress:
   # Enable ingress resource
   enabled: false
 
+  # Enable for cert-manager or kube-lego
+  acme: false
+
   # Name of tls secret to use on ingress
   tlsSecretName: ~
 
