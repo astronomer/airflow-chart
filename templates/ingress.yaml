@@ -71,9 +71,9 @@ metadata:
   {{ $ctx := . }}
   annotations:
   {{- if .Values.ingress.auth.enabled }}
-    {{- range $k, $v := .Values.ingress.flowerAuthAnnotations }}
-      {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
-    {{- end }}
+  {{- range $k, $v := .Values.ingress.flowerAuthAnnotations }}
+    {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
+  {{- end }}
   {{- end }}
   {{- range $k, $v := .Values.ingress.flowerAnnotations }}
     {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
