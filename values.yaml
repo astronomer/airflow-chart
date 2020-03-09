@@ -31,6 +31,9 @@ ingress:
   # These Annotations will only be injected into the Ingress object if ingress.auth.enabled=true
   authAnnotations: {}
 
+  # These Annotations will only be injected into the Ingress object if ingress.auth.enabled=true
+  flowerAuthAnnotations: {}
+
   # Base domain for ingress vhosts
   baseDomain: ~
 
