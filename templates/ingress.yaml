@@ -68,7 +68,6 @@ metadata:
 {{- with .Values.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
-{{- if .Values.ingress.enabled }}
   {{ $ctx := . }}
   annotations:
   {{- if .Values.ingress.auth.enabled }}
@@ -76,10 +75,6 @@ metadata:
       {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
     {{- end }}
   {{- end }}
-  {{- range $k, $v := .Values.ingress.annotations }}
-      {{ $k | quote }}: {{ $v | toYaml }}
-  {{- end }}
-{{- end }}
 spec:
   tls:
           {{- if .Values.ingress.acme }}
