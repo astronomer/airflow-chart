@@ -4,6 +4,36 @@
 
 ## TL;DR
 
+To install this helm chart remotely
+
+```console
+helm repo add astronomer https://helm.astronomer.io
+helm install --version 0.12.0 astronomer/airflow
+```
+
+To install airflow with the KEDA autoscaler
+
+```console
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo add astronomer https://helm.astronomer.io
+
+helm repo update
+
+helm install \
+    --set image.keda=docker.io/kedacore/keda:1.2.0 \
+    --set image.metricsAdapter=docker.io/kedacore/keda-metrics-adapter:1.2.0 \
+    --namespace keda --name keda kedacore/keda
+
+helm install \
+    --name airflow \
+    --set executor=CeleryExecutor \
+    --set workers.keda.enabled=true \
+    --set workers.persistence.enabled=false \
+    --namespace airflow \
+    --version 0.12.0 astronomer/airflow
+
+```
+To install this repository from source
 ```console
 helm install .
 ```
@@ -191,7 +221,7 @@ helm install \
     --set workers.keda.enabled=true \
     --set workers.persistence.enabled=false \
     --namespace airflow \
-    -f values.yaml .
+    --version 0.12.0 astronomer/airflow
 ```
 
 ## Contributing
