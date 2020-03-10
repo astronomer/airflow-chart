@@ -25,17 +25,13 @@ ingress:
   # Name of tls secret to use on ingress
   tlsSecretName: ~
 
-  # Annotations always injected when configuring Ingress ojbect
-  annotations: {}
+  # Annotations always injected when configuring webserver Ingress ojbect
+  webserverAnnotations: {}
 
-  # These Annotations will only be injected into the Ingress object if ingress.auth.enabled=true
-  authAnnotations: {}
 
   # Annotations always injected when configuring Flower Ingress object
   flowerAnnotations: {}
 
-  # These Annotations will only be injected into the Flower Ingress object if ingress.auth.enabled=true
-  flowerAuthAnnotations: {}
 
   # Base domain for ingress vhosts
   baseDomain: ~

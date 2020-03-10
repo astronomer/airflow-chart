@@ -17,14 +17,9 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
   annotations:
-  {{- range $k, $v := .Values.ingress.annotations }}
+  {{- range $k, $v := .Values.ingress.webserverAnnotations }}
     {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
   {{- end }}
-{{- if .Values.ingress.auth.enabled }}
-  {{- range $k, $v := .Values.ingress.authAnnotations }}
-    {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
-  {{- end }}
-{{- end }}
 spec:
   tls:
   {{- if .Values.ingress.acme }}
@@ -70,11 +65,6 @@ metadata:
 {{- end }}
   {{ $ctx := . }}
   annotations:
-  {{- if .Values.ingress.auth.enabled }}
-  {{- range $k, $v := .Values.ingress.flowerAuthAnnotations }}
-    {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
-  {{- end }}
-  {{- end }}
   {{- range $k, $v := .Values.ingress.flowerAnnotations }}
     {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
   {{- end }}
