@@ -31,7 +31,6 @@ ingress:
   # Annotations always injected when configuring Flower Ingress object
   flowerAnnotations: {}
 
-
   # Base domain for ingress vhosts
   baseDomain: ~
 
