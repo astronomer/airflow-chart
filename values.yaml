@@ -28,7 +28,6 @@ ingress:
   # Annotations always injected when configuring webserver Ingress ojbect
   webserverAnnotations: {}
 
-
   # Annotations always injected when configuring Flower Ingress object
   flowerAnnotations: {}
 
