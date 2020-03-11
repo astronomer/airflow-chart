@@ -10,7 +10,7 @@ To install this helm chart remotely (using helm 3)
 kubectl create namespace airflow
 
 helm repo add astronomer https://helm.astronomer.io
-helm install airflow --version 0.12.0 --namespace airflow astronomer/airflow
+helm install airflow --namespace airflow astronomer/airflow
 ```
 
 To install airflow with the KEDA autoscaler
@@ -32,7 +32,6 @@ helm install airflow \
     --set workers.keda.enabled=true \
     --set workers.persistence.enabled=false \
     --namespace airflow \
-    --version 0.12.0 \
     astronomer/airflow
 
 ```
@@ -229,7 +228,6 @@ helm install airflow \
     --set workers.keda.enabled=true \
     --set workers.persistence.enabled=false \
     --namespace airflow \
-    --version 0.12.0 \
     astronomer/airflow
 ```
 
