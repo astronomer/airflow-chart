@@ -4,8 +4,41 @@
 
 ## TL;DR
 
+To install this helm chart remotely (using helm 3)
+
 ```console
-helm install .
+kubectl create namespace airflow
+
+helm repo add astronomer https://helm.astronomer.io
+helm install airflow --namespace airflow astronomer/airflow
+```
+
+To install airflow with the KEDA autoscaler
+
+```console
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo add astronomer https://helm.astronomer.io
+
+helm repo update
+
+kubectl create namespace keda
+helm install keda \
+    --namespace keda kedacore/keda
+
+kubectl create namespace airflow
+
+helm install airflow \
+    --set executor=CeleryExecutor \
+    --set workers.keda.enabled=true \
+    --set workers.persistence.enabled=false \
+    --namespace airflow \
+    astronomer/airflow
+
+```
+To install this repository from source
+```console
+kubectl create namespace airflow
+helm install --namespace airflow .
 ```
 
 ## Introduction
@@ -185,13 +218,17 @@ on this chart by setting `workers.keda.enabled=true` your helm command or in the
 (Note: KEDA does not support StatefulSets so you need to set `worker.persistence.enabled` to `false`)
 
 ```console
-helm install \
-    --name airflow \
+helm repo add astronomer https://helm.astronomer.io
+helm repo update
+
+kubectl create namespace airflow
+
+helm install airflow \
     --set executor=CeleryExecutor \
     --set workers.keda.enabled=true \
     --set workers.persistence.enabled=false \
     --namespace airflow \
-    -f values.yaml .
+    astronomer/airflow
 ```
 
 ## Contributing
