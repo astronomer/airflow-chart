@@ -231,6 +231,54 @@ helm install airflow \
     astronomer/airflow
 ```
 
+## Walkthrough using kind
+
+**Install kind, and create a cluster:**
+
+We recommend testing with Kubernetes 1.15, as this image doesn't support Kubernetes 1.16+ for CeleryExecutor presently.
+
+```
+kind create cluster \
+  --image kindest/node:v1.15.7@sha256:e2df133f80ef633c53c0200114fce2ed5e1f6947477dbc83261a6a921169488d
+```
+
+Confirm it's up:
+
+```
+kubectl cluster-info --context kind-kind
+```
+
+**Add Astronomer's Helm repo:**
+
+```
+helm repo add astronomer https://helm.astronomer.io
+helm repo update
+```
+
+**Create namespace + install the chart:**
+
+```
+kubectl create namespace airflow
+helm install airflow --n airflow astronomer/airflow
+```
+
+It may take a few minutes. Confirm the pods are up:
+
+```
+kubectl get pods --all-namespaces
+helm list -n airflow
+```
+
+Run `kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow` 
+to port-forward the Airflow UI to http://localhost:8080/ to cofirm Airflow is working.
+
+**Build a Docker image from your DAGs:**
+
+1. Start a project using [astro-cli](https://github.com/astronomer/astro-cli), which will generate a Dockerfile.
+2. Switch to that directory, run `docker build -t my-dags:0.0.1 .`
+3. Load the image into kind `kind load docker-image my-dags:0.0.1`
+4. Upgrade Helm deployment `helm upgrade airflow -n airflow --set images.airflow.repository=my-dags --set images.airflow.tag=0.0.1 astronomer/airflow`
+
 ## Contributing
 
 Check out [our contributing guide!](CONTRIBUTING.md)
