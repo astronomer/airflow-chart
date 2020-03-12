@@ -26,7 +26,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-cookie-path: / /{{ .Release.Name }}/
     nginx.ingress.kubernetes.io/configuration-snippet: |
       if ($host = '{{- include "airflow_subdomain" . }}' ) {
-        rewrite ^ {{ printf "https://%s/%s/airflow"  ( include "deployments_subdomain" .) .Release.Name }} permanent;
+        return 308 {{ printf "https://%s/%s/airflow/$request_uri" ( include "deployments_subdomain" .) .Release.Name }};
       }
   {{- end }}
 spec:
