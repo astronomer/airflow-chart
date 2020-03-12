@@ -275,7 +275,11 @@ to port-forward the Airflow UI to http://localhost:8080/ to cofirm Airflow is wo
 **Build a Docker image from your DAGs:**
 
 1. Start a project using [astro-cli](https://github.com/astronomer/astro-cli), which will generate a Dockerfile, and load your DAGs in. You can test locally before pushing to kind with `astro airflow start`.
-2. Switch to that directory, and run: 
+
+        mkdir my-airflow-project && cd my-airflow-project
+        astro dev init
+
+2. Then build the image: 
 
         docker build -t my-dags:0.0.1 .
 
