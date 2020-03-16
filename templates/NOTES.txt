@@ -6,10 +6,18 @@ Your release is named {{ .Release.Name }}.
 
 You can access your dashboard(s) in your browser here:
 
+{{- if .Values.ingress.pathBased.enabled}}
 Airflow dashboard:        https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/airflow
+{{- else }}
+Airflow dashboard:        https://{{ .Release.Name }}-airflow.{{ .Values.ingress.baseDomain }}
+{{- end }}
 
 {{- if eq .Values.executor "CeleryExecutor"}}
+{{- if .Values.ingress.pathBased.enabled}}
 Flower dashboard:         https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/flower
+{{- else }}
+Flower dashboard:         https://{{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }}
+{{- end }}
 {{- end }}
 
 {{- else }}

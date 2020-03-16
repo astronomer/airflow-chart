@@ -94,7 +94,11 @@ spec:
           livenessProbe:
             httpGet:
 {{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.pathBased.enabled }}
               path: {{ printf "/%s/airflow/health" .Release.Name }}
+{{- else }}
+              path: /health
+{{- end }}
 {{- else }}
               path: /health
 {{- end }}
@@ -106,7 +110,11 @@ spec:
           readinessProbe:
             httpGet:
 {{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.pathBased.enabled }}
               path: {{ printf "/%s/airflow/health" .Release.Name }}
+{{- else }}
+              path: /health
+{{- end }}
 {{- else }}
               path: /health
 {{- end }}

@@ -35,6 +35,11 @@ ingress:
   auth:
     enabled: true
 
+  # Disable path based airflow to use old style releaseName-airflow.baseDomain style
+  # only exists for backward computability
+  pathBased:
+    enabled: true
+
 # Network policy configuration
 networkPolicies:
   # Enabled network policies
