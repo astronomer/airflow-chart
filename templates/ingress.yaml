@@ -24,6 +24,9 @@ metadata:
     nginx.ingress.kubernetes.io/auth-signin: https://app.{{ .Values.ingress.baseDomain }}/login
     nginx.ingress.kubernetes.io/auth-response-headers: authorization, username, email
     nginx.ingress.kubernetes.io/proxy-cookie-path: / /{{ .Release.Name }}/
+    # To support people who are using Airflow's experimental API on the old URL, but don't
+    # have their client set up to follow redirects correctly: We proxy it to the right location
+    # for them.
     nginx.ingress.kubernetes.io/server-snippet: |
       location ^~ /api/ {
         proxy_pass {{ printf "https://%s/%s/airflow/$request_uri" ( include "deployments_subdomain" .) .Release.Name }};
