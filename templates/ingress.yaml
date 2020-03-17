@@ -68,9 +68,9 @@ metadata:
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
-        {{- with .Values.labels }}
-        {{ toYaml . | indent 4 }}
-        {{- end }}
+{{- with .Values.labels }}
+{{ toYaml . | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: {{ .Values.ingress.class }}
     kubernetes.io/tls-acme: {{ eq .Values.ingress.acme true | quote }}
