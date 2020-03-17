@@ -29,6 +29,9 @@ metadata:
     # for them.
     nginx.ingress.kubernetes.io/server-snippet: |
       location ^~ /api/ {
+        if ($host = '{{- include "deployments_subdomain" . }}' ) {
+          return 404;
+        }
         proxy_pass {{ printf "https://%s/%s/airflow/$request_uri" ( include "deployments_subdomain" .) .Release.Name }};
       }
     nginx.ingress.kubernetes.io/configuration-snippet: |
