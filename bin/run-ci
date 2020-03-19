@@ -43,6 +43,7 @@ set -x
 
 helm install \
   -n airflow \
+  --set executor=$EXECUTOR \
   --wait \
   $HELM_CHART_PATH
 
