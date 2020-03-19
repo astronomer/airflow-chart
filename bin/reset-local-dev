@@ -10,6 +10,11 @@ source $DIR/clean-slate
 
 echo "Deploying Airflow..."
 
+if [[ -z "${EXECUTOR}" ]]; then
+  export EXECUTOR=CeleryExecutor
+fi
+
 helm install \
   -n airflow \
+  --set executor=$EXECUTOR \
   $REPO_DIR
