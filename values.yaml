@@ -139,6 +139,7 @@ workers:
   # Persistence.enabled must be set to false to use KEDA.
   keda:
     enabled: false
+    namespaceLabels: {}
 
     # How often KEDA polls the airflow DB to report new scale requests to the HPA
     pollingInterval: 5
@@ -272,6 +273,8 @@ statsd:
 pgbouncer:
   # Enable pgbouncer
   enabled: false
+  # additional network policies as needed
+  extraNetworkPolicies: []
 
   # Pool sizes
   metadataPoolSize: 3
