@@ -3,7 +3,7 @@
 #################################
 {{- if eq .Values.executor "CeleryExecutor" }}
 kind: StatefulSet
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 metadata:
   name: {{ .Release.Name }}-redis
   labels:
