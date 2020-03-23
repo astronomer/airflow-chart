@@ -8,25 +8,58 @@ workflows:
       - build-artifact:
           requires:
           - lint
-      - 'airflow-on-k8s-1-14':
+      - 'airflow-celery-on-k8s-1-14':
           requires:
           - build-artifact
-      - 'airflow-on-k8s-1-15':
+      - 'airflow-celery-on-k8s-1-15':
           requires:
           - build-artifact
-      - 'airflow-on-k8s-1-16':
+      - 'airflow-celery-on-k8s-1-16':
           requires:
           - build-artifact
-      - 'airflow-on-k8s-1-17':
+      - 'airflow-celery-on-k8s-1-17':
           requires:
           - build-artifact
+      - 'airflow-kubernetes-on-k8s-1-14':
+          requires:
+          - build-artifact
+      - 'airflow-kubernetes-on-k8s-1-15':
+          requires:
+          - build-artifact
+      - 'airflow-kubernetes-on-k8s-1-16':
+          requires:
+          - build-artifact
+      - 'airflow-kubernetes-on-k8s-1-17':
+          requires:
+          - build-artifact
+      - 'airflow-local-on-k8s-1-14':
+          requires:
+          - build-artifact
+      - 'airflow-local-on-k8s-1-15':
+          requires:
+          - build-artifact
+      - 'airflow-local-on-k8s-1-16':
+          requires:
+          - build-artifact
+      - 'airflow-local-on-k8s-1-17':
+          requires:
+          - build-artifact
+
       - approve-release:
           type: approval
           requires:
-            - 'airflow-on-k8s-1-14'
-            - 'airflow-on-k8s-1-15'
-            - 'airflow-on-k8s-1-16'
-            - 'airflow-on-k8s-1-17'
+            - 'airflow-celery-on-k8s-1-14'
+            - 'airflow-celery-on-k8s-1-15'
+            - 'airflow-celery-on-k8s-1-16'
+            - 'airflow-celery-on-k8s-1-17'
+            - 'airflow-kubernetes-on-k8s-1-14'
+            - 'airflow-kubernetes-on-k8s-1-15'
+            - 'airflow-kubernetes-on-k8s-1-16'
+            - 'airflow-kubernetes-on-k8s-1-17'
+            - 'airflow-local-on-k8s-1-14'
+            - 'airflow-local-on-k8s-1-15'
+            - 'airflow-local-on-k8s-1-16'
+            - 'airflow-local-on-k8s-1-17'
           filters:
             branches:
               only:
@@ -38,9 +71,7 @@ workflows:
             branches:
               only:
                 - '/release-.*/'
-
 jobs:
-
   lint:
     docker:
       - image: alpine/helm:2.16.1
@@ -63,35 +94,111 @@ jobs:
           paths:
             - './*.tgz'
 
-  airflow-on-k8s-1-14:
+  airflow-local-on-k8s-1-14:
     machine:
       image: ubuntu-1604:201903-01
     environment:
       KUBE_VERSION: 1.14.10
+      EXECUTOR: "LocalExecutor"
     steps:
       - helm-install
 
-  airflow-on-k8s-1-15:
+  airflow-local-on-k8s-1-15:
     machine:
       image: ubuntu-1604:201903-01
     environment:
       KUBE_VERSION: 1.15.7
+      EXECUTOR: "LocalExecutor"
     steps:
       - helm-install
 
-  airflow-on-k8s-1-16:
+  airflow-local-on-k8s-1-16:
     machine:
       image: ubuntu-1604:201903-01
     environment:
       KUBE_VERSION: 1.16.4
+      EXECUTOR: "LocalExecutor"
     steps:
       - helm-install
 
-  airflow-on-k8s-1-17:
+  airflow-local-on-k8s-1-17:
     machine:
       image: ubuntu-1604:201903-01
     environment:
       KUBE_VERSION: 1.17.0
+      EXECUTOR: "LocalExecutor"
+    steps:
+      - helm-install
+
+  airflow-kubernetes-on-k8s-1-14:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.14.10
+      EXECUTOR: "KubernetesExecutor"
+    steps:
+      - helm-install
+
+  airflow-kubernetes-on-k8s-1-15:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.15.7
+      EXECUTOR: "KubernetesExecutor"
+    steps:
+      - helm-install
+
+  airflow-kubernetes-on-k8s-1-16:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.16.4
+      EXECUTOR: "KubernetesExecutor"
+    steps:
+      - helm-install
+
+  airflow-kubernetes-on-k8s-1-17:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.17.0
+      EXECUTOR: "KubernetesExecutor"
+    steps:
+      - helm-install
+
+  airflow-celery-on-k8s-1-14:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.14.10
+      EXECUTOR: "CeleryExecutor"
+    steps:
+      - helm-install
+
+  airflow-celery-on-k8s-1-15:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.15.7
+      EXECUTOR: "CeleryExecutor"
+    steps:
+      - helm-install
+
+  airflow-celery-on-k8s-1-16:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.16.4
+      EXECUTOR: "CeleryExecutor"
+    steps:
+      - helm-install
+
+  airflow-celery-on-k8s-1-17:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      KUBE_VERSION: 1.17.0
+      EXECUTOR: "CeleryExecutor"
     steps:
       - helm-install
 
