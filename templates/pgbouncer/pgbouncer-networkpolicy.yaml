@@ -29,6 +29,21 @@ spec:
         matchLabels:
           tier: airflow
           release: {{ .Release.Name }}
+{{- if .Values.workers.keda.enabled }}
+{{- if .Values.workers.keda.namespaceLabels }}
+    - namespaceSelector:
+       matchLabels:
+{{ toYaml .Values.workers.keda.namespaceLabels | indent 10}}
+      podSelector:
+{{- else }}
+    - podSelector:
+{{- end }}
+        matchLabels:
+          app: keda-operator
+{{- end}}
+{{- if .Values.pgbouncer.extraNetworkPolicies}}
+{{ toYaml .Values.pgbouncer.extraNetworkPolicies | indent 4}}
+{{- end}}
     {{- if .Values.platform.release }}
     - namespaceSelector: {}
       podSelector:

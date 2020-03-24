@@ -4,7 +4,7 @@ set -e
 function get_debugging_info {
   echo "Failed to deploy Airflow!"
   echo "Printing description and logs where containers in pod are not ready..."
-  for pod in $(kubectl get pods -n airflow | grep -v NAME | grep -v 1/1 | grep -v 2/2 | grep -v Completed | awk '{ print $1 }'); do
+  for pod in $(kubectl get pods -n airflow | grep -v NAME | grep -v 1/1 | grep -v 2/2 | grep -v 3/3 | grep -v Completed | awk '{ print $1 }'); do
     echo "======================="
     set -x
     kubectl describe pod -n airflow $pod
@@ -43,6 +43,7 @@ set -x
 
 helm install \
   -n airflow \
+  --set executor=$EXECUTOR \
   --wait \
   $HELM_CHART_PATH
 
@@ -73,7 +74,7 @@ while [ $RC -eq 0 ]; do
       continue
     fi
     set +e
-    cat /tmp/pods | grep -v 1/1 | grep -v 2/2 | grep -v NAME >/dev/null 2>&1
+    cat /tmp/pods | grep -v 1/1 | grep -v 2/2 | grep -v 3/3 | grep -v NAME >/dev/null 2>&1
     RC=$?
     set -e
   fi

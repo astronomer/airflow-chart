@@ -3,7 +3,7 @@
 #################################
 {{- if .Values.ingress.enabled }}
 kind: Ingress
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: {{ .Release.Name }}-airflow-ingress
   labels:
@@ -24,12 +24,19 @@ metadata:
     nginx.ingress.kubernetes.io/auth-signin: https://app.{{ .Values.ingress.baseDomain }}/login
     nginx.ingress.kubernetes.io/auth-response-headers: authorization, username, email
     nginx.ingress.kubernetes.io/proxy-cookie-path: / /{{ .Release.Name }}/
+    # To support people who are using Airflow's experimental API on the old URL, but don't
+    # have their client set up to follow redirects correctly: We proxy it to the right location
+    # for them.
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location ^~ /api/ {
+        if ($host = '{{- include "deployments_subdomain" . }}' ) {
+          return 404;
+        }
+        proxy_pass {{ printf "https://%s/%s/airflow/$request_uri" ( include "deployments_subdomain" .) .Release.Name }};
+      }
     nginx.ingress.kubernetes.io/configuration-snippet: |
       if ($host = '{{- include "airflow_subdomain" . }}' ) {
-        rewrite ^ {{ printf "https://%s/%s/airflow"  ( include "deployments_subdomain" .) .Release.Name }} permanent;
-      }
-      if ($host = '{{- include "flower_subdomain" . }}' ) {
-        rewrite ^ {{ printf "https://%s/%s/flower"  ( include "deployments_subdomain" .) .Release.Name }} permanent;
+        return 308 {{ printf "https://%s/%s/airflow/$request_uri" ( include "deployments_subdomain" .) .Release.Name }};
       }
   {{- end }}
 spec:
@@ -44,7 +51,6 @@ spec:
       hosts:
         - {{- include "deployments_subdomain" . | indent 1 }}
         - {{- include "airflow_subdomain" . | indent 1 }}
-        - {{- include "flower_subdomain" . | indent 1 }}
   rules:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
@@ -53,10 +59,6 @@ spec:
             backend:
               serviceName: {{ .Release.Name }}-webserver
               servicePort: airflow-ui
-          - path: /{{ .Release.Name }}/flower
-            backend:
-              serviceName: {{ .Release.Name }}-flower
-              servicePort: flower-ui
     - host: {{- include "airflow_subdomain" . | indent 1 }}
       http:
         paths:
@@ -64,6 +66,61 @@ spec:
             backend:
               serviceName: {{ .Release.Name }}-webserver
               servicePort: airflow-ui
+{{- end }}
+{{- if and .Values.ingress.enabled (eq .Values.executor "CeleryExecutor") }}
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1beta1
+metadata:
+  name: {{ .Release.Name }}-flower-ingress
+  labels:
+    tier: airflow
+    component: flower-ingress
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+{{- with .Values.labels }}
+{{ toYaml . | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
+    kubernetes.io/tls-acme: {{ eq .Values.ingress.acme true | quote }}
+    nginx.ingress.kubernetes.io/custom-http-errors: "403,404,502,503"
+  {{- if .Values.ingress.auth.enabled }}
+    nginx.ingress.kubernetes.io/auth-url: https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization
+    nginx.ingress.kubernetes.io/auth-signin: https://app.{{ .Values.ingress.baseDomain }}/login
+    nginx.ingress.kubernetes.io/rewrite-target: /$2;
+    nginx.ingress.kubernetes.io/auth-response-headers: authorization, username, email
+    nginx.ingress.kubernetes.io/proxy-cookie-path: / /{{ .Release.Name }}/
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      if ($host = '{{- include "flower_subdomain" . }}' ) {
+        rewrite ^ {{ printf "https://%s/%s/flower"  ( include "deployments_subdomain" .) .Release.Name }} permanent;
+      }
+      subs_filter_types text/css text/xml text/css;
+      sub_filter '="/' '="/{{ .Release.Name }}/flower/';
+      sub_filter_last_modified on;
+      sub_filter_once off;
+  {{- end }}
+spec:
+  tls:
+          {{- if .Values.ingress.acme }}
+    - secretName: {{ .Release.Name }}-airflow-tls
+          {{- else if .Values.ingress.tlsSecretName }}
+    - secretName: {{ .Values.ingress.tlsSecretName }}
+          {{ else }}
+    - secretName: ~
+            {{- end }}
+      hosts:
+        - {{- include "deployments_subdomain" . | indent 1 }}
+        - {{- include "flower_subdomain" . | indent 1 }}
+  rules:
+    - host: {{- include "deployments_subdomain" . | indent 1 }}
+      http:
+        paths:
+          - path: /{{ .Release.Name }}/flower(/|$)(.*)
+            backend:
+              serviceName: {{ .Release.Name }}-flower
+              servicePort: flower-ui
     - host: {{- include "flower_subdomain" . | indent 1 }}
       http:
         paths:

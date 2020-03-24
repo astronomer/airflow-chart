@@ -4,8 +4,41 @@
 
 ## TL;DR
 
-```console
-helm install .
+To install this helm chart remotely (using helm 3)
+
+```bash
+kubectl create namespace airflow
+
+helm repo add astronomer https://helm.astronomer.io
+helm install airflow --namespace airflow astronomer/airflow
+```
+
+To install airflow with the KEDA autoscaler
+
+```bash
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo add astronomer https://helm.astronomer.io
+
+helm repo update
+
+kubectl create namespace keda
+helm install keda \
+    --namespace keda kedacore/keda
+
+kubectl create namespace airflow
+
+helm install airflow \
+    --set executor=CeleryExecutor \
+    --set workers.keda.enabled=true \
+    --set workers.persistence.enabled=false \
+    --namespace airflow \
+    astronomer/airflow
+
+```
+To install this repository from source
+```bash
+kubectl create namespace airflow
+helm install --namespace airflow .
 ```
 
 ## Introduction
@@ -15,13 +48,13 @@ This chart will bootstrap an [Airfow](https://github.com/astronomer/astronomer/t
 ## Prerequisites
 
 - Kubernetes 1.12+
-- Helm 2.11+ or Helm 3.0-beta3+
+- Helm 2.11+ or Helm 3.0+
 - PV provisioner support in the underlying infrastructure
 
 ## Installing the Chart
 To install the chart with the release name `my-release`:
 
-```console
+```bash
 helm install --name my-release .
 ```
 
@@ -32,7 +65,7 @@ The command deploys Airflow on the Kubernetes cluster in the default configurati
 ## Upgrading the Chart
 To upgrade the chart with the release name `my-release`:
 
-```console
+```bash
 helm upgrade --name my-release .
 ```
 
@@ -40,7 +73,7 @@ helm upgrade --name my-release .
 
 To uninstall/delete the `my-release` deployment:
 
-```console
+```bash
 helm delete my-release
 ```
 
@@ -50,11 +83,16 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The recommended way to update your DAGs with this chart is to build a new docker image with the latest code (`docker build -t my-company/airflow:8a0da78 .`), push it to an accessible registry (`docker push my-company/airflow:8a0da78`), then update the Airflow pods with that image:
 
-```console
+```bash
 helm upgrade my-release . \
   --set images.airflow.repository=my-company/airflow \
   --set images.airflow.tag=8a0da78
 ```
+
+## Docker Images
+
+* The Airflow image that are referenced as the default values in this chart are generated from this repository: https://github.com/astronomer/ap-airflow.
+* Other non-airflow images used in this chart are generted from this repository: https://github.com/astronomer/ap-vendor.
 
 ## Parameters
 
@@ -111,7 +149,7 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `fernetKey`                                           | String representing an Airflow fernet key                                                                    | `~`                                               |
 | `fernetKeySecretName`                                 | Secret name for Airlow fernet key                                                                            | `~`                                               |
 | `workers.replicas`                                    | Replica count for Celery workers (if applicable)                                                             | `1`                                               |
-| `workers.keda.enabed`                                 | Enable KEDA autoscaling features                                                                             | `false`                                           |
+| `workers.keda.enabled`                                 | Enable KEDA autoscaling features                                                                             | `false`                                           |
 | `workers.keda.pollingInverval`                        | How often KEDA should poll the backend database for metrics in seconds                                       | `5`                                               |
 | `workers.keda.cooldownPeriod`                         | How often KEDA should wait before scaling down in seconds                                                    | `30`                                              |
 | `workers.keda.maxReplicaCount`                        | Maximum number of Celery workers KEDA can scale to                                                           | `10`                                              |
@@ -156,7 +194,7 @@ The following tables lists the configurable parameters of the Airflow chart and 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
-```console
+```bash
 helm install --name my-release \
   --set executor=CeleryExecutor \
   --set enablePodLaunching=false .
@@ -169,7 +207,7 @@ to the Kubernetes [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/r
 We've built an experimental scaler that allows users to create scalers based on postgreSQL queries. For the moment this exists
 on a seperate branch, but will be merged upstream soon. To install our custom version of KEDA on your cluster, please run
 
-```console
+```bash
 helm repo add kedacore https://kedacore.github.io/charts
 
 helm repo update
@@ -184,15 +222,82 @@ Once KEDA is installed (which should be pretty quick since there is only one pod
 on this chart by setting `workers.keda.enabled=true` your helm command or in the `values.yaml`. 
 (Note: KEDA does not support StatefulSets so you need to set `worker.persistence.enabled` to `false`)
 
-```console
-helm install \
-    --name airflow \
+```bash
+helm repo add astronomer https://helm.astronomer.io
+helm repo update
+
+kubectl create namespace airflow
+
+helm install airflow \
     --set executor=CeleryExecutor \
     --set workers.keda.enabled=true \
     --set workers.persistence.enabled=false \
     --namespace airflow \
-    -f values.yaml .
+    astronomer/airflow
 ```
+
+## Walkthrough using kind
+
+**Install kind, and create a cluster:**
+
+We recommend testing with Kubernetes 1.15, as this image doesn't support Kubernetes 1.16+ for CeleryExecutor presently.
+
+```
+kind create cluster \
+  --image kindest/node:v1.15.7@sha256:e2df133f80ef633c53c0200114fce2ed5e1f6947477dbc83261a6a921169488d
+```
+
+Confirm it's up:
+
+```
+kubectl cluster-info --context kind-kind
+```
+
+**Add Astronomer's Helm repo:**
+
+```
+helm repo add astronomer https://helm.astronomer.io
+helm repo update
+```
+
+**Create namespace + install the chart:**
+
+```
+kubectl create namespace airflow
+helm install airflow --n airflow astronomer/airflow
+```
+
+It may take a few minutes. Confirm the pods are up:
+
+```
+kubectl get pods --all-namespaces
+helm list -n airflow
+```
+
+Run `kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow` 
+to port-forward the Airflow UI to http://localhost:8080/ to cofirm Airflow is working.
+
+**Build a Docker image from your DAGs:**
+
+1. Start a project using [astro-cli](https://github.com/astronomer/astro-cli), which will generate a Dockerfile, and load your DAGs in. You can test locally before pushing to kind with `astro airflow start`.
+
+        mkdir my-airflow-project && cd my-airflow-project
+        astro dev init
+
+2. Then build the image: 
+
+        docker build -t my-dags:0.0.1 .
+
+3. Load the image into kind:
+
+        kind load docker-image my-dags:0.0.1
+
+4. Upgrade Helm deployment:
+
+        helm upgrade airflow -n airflow \
+            --set images.airflow.repository=my-dags \
+            --set images.airflow.tag=0.0.1 \
+            astronomer/airflow
 
 ## Contributing
 
