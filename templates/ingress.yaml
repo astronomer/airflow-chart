@@ -16,9 +16,11 @@ metadata:
 {{- with .Values.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
+  {{- if .Values.ingress.webserverAnnotations }}
   annotations:
   {{- range $k, $v := .Values.ingress.webserverAnnotations }}
     {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
+  {{- end }}
   {{- end }}
 spec:
   tls:
@@ -63,10 +65,12 @@ metadata:
 {{- with .Values.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
+  {{- if .Values.ingress.flowerAnnotations }}
   {{ $ctx := . }}
   annotations:
   {{- range $k, $v := .Values.ingress.flowerAnnotations }}
     {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
+  {{- end }}
   {{- end }}
 spec:
   tls:
