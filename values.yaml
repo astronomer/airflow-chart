@@ -25,11 +25,14 @@ ingress:
   # Name of tls secret to use on ingress
   tlsSecretName: ~
 
+  # Annotations always injected when configuring webserver Ingress ojbect
+  webserverAnnotations: {}
+
+  # Annotations always injected when configuring Flower Ingress object
+  flowerAnnotations: {}
+
   # Base domain for ingress vhosts
   baseDomain: ~
-
-  # NGINX ingress class to associate Airflow ingress with.
-  class: "nginx"
 
   # Enable platform authentication
   auth:

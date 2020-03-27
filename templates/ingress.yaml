@@ -2,6 +2,7 @@
 ## Airflow Ingress
 #################################
 {{- if .Values.ingress.enabled }}
+  {{ $ctx := . }}
 kind: Ingress
 apiVersion: networking.k8s.io/v1beta1
 metadata:
@@ -15,29 +16,11 @@ metadata:
 {{- with .Values.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
+  {{- if .Values.ingress.webserverAnnotations }}
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
-    kubernetes.io/tls-acme: {{ eq .Values.ingress.acme true | quote }}
-    nginx.ingress.kubernetes.io/custom-http-errors: "403,404,502,503"
-  {{- if .Values.ingress.auth.enabled }}
-    nginx.ingress.kubernetes.io/auth-url: https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization
-    nginx.ingress.kubernetes.io/auth-signin: https://app.{{ .Values.ingress.baseDomain }}/login
-    nginx.ingress.kubernetes.io/auth-response-headers: authorization, username, email
-    nginx.ingress.kubernetes.io/proxy-cookie-path: / /{{ .Release.Name }}/
-    # To support people who are using Airflow's experimental API on the old URL, but don't
-    # have their client set up to follow redirects correctly: We proxy it to the right location
-    # for them.
-    nginx.ingress.kubernetes.io/server-snippet: |
-      location ^~ /api/ {
-        if ($host = '{{- include "deployments_subdomain" . }}' ) {
-          return 404;
-        }
-        proxy_pass {{ printf "https://%s/%s/airflow/$request_uri" ( include "deployments_subdomain" .) .Release.Name }};
-      }
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      if ($host = '{{- include "airflow_subdomain" . }}' ) {
-        return 308 {{ printf "https://%s/%s/airflow/$request_uri" ( include "deployments_subdomain" .) .Release.Name }};
-      }
+  {{- range $k, $v := .Values.ingress.webserverAnnotations }}
+    {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
+  {{- end }}
   {{- end }}
 spec:
   tls:
@@ -82,24 +65,12 @@ metadata:
 {{- with .Values.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
+  {{- if .Values.ingress.flowerAnnotations }}
+  {{ $ctx := . }}
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
-    kubernetes.io/tls-acme: {{ eq .Values.ingress.acme true | quote }}
-    nginx.ingress.kubernetes.io/custom-http-errors: "403,404,502,503"
-  {{- if .Values.ingress.auth.enabled }}
-    nginx.ingress.kubernetes.io/auth-url: https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization
-    nginx.ingress.kubernetes.io/auth-signin: https://app.{{ .Values.ingress.baseDomain }}/login
-    nginx.ingress.kubernetes.io/rewrite-target: /$2;
-    nginx.ingress.kubernetes.io/auth-response-headers: authorization, username, email
-    nginx.ingress.kubernetes.io/proxy-cookie-path: / /{{ .Release.Name }}/
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      if ($host = '{{- include "flower_subdomain" . }}' ) {
-        rewrite ^ {{ printf "https://%s/%s/flower"  ( include "deployments_subdomain" .) .Release.Name }} permanent;
-      }
-      subs_filter_types text/css text/xml text/css;
-      sub_filter '="/' '="/{{ .Release.Name }}/flower/';
-      sub_filter_last_modified on;
-      sub_filter_once off;
+  {{- range $k, $v := .Values.ingress.flowerAnnotations }}
+    {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
+  {{- end }}
   {{- end }}
 spec:
   tls:

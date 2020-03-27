@@ -89,6 +89,11 @@ helm upgrade my-release . \
   --set images.airflow.tag=8a0da78
 ```
 
+## Docker Images
+
+* The Airflow image that are referenced as the default values in this chart are generated from this repository: https://github.com/astronomer/ap-airflow.
+* Other non-airflow images used in this chart are generted from this repository: https://github.com/astronomer/ap-vendor.
+
 ## Parameters
 
 The following tables lists the configurable parameters of the Airflow chart and their default values.
