@@ -46,6 +46,5 @@ spec:
               # Don't use entry point here, we don't need to wait on pg-bouncer etc being available.
               command: ["airflow-cleanup-pods", "--namespace={{ .Release.Namespace }}"]
               env:
-              {{- include "custom_airflow_environment" . | indent 12 }}
               {{- include "standard_airflow_environment" . | indent 12 }}
 {{- end }}
