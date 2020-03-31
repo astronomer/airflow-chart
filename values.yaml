@@ -302,6 +302,11 @@ pgbouncer:
     #   cpu: 100m
     #   memory: 128Mi
 
+  # https://www.pgbouncer.org/config.html
+  verbose: 0
+  logDisconnections: 0
+  logConnections: 0
+
 redis:
   terminationGracePeriodSeconds: 600
 
