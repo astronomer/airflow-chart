@@ -21,7 +21,6 @@ spec:
     tier: airflow
     component: flower
     release: {{ .Release.Name }}
-    workspace: {{ .Values.platform.workspace | quote }}
   ports:
     - name: flower-ui
       protocol: TCP

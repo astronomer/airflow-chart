@@ -411,7 +411,6 @@ cleanup:
 # This chart is completely deployable without specifying these values.
 platform:
   release: ~
-  workspace: ""
 
 # Configuration for postgresql subchart
 # Not recommended for production
