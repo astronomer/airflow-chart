@@ -64,6 +64,21 @@ spec:
         - name: {{ template "registry_secret" . }}
       {{- end }}
       initContainers:
+      {{- if and $persistence .Values.workers.persistence.fixPermissions }}
+        - name: volume-permissions
+          image: {{ template "airflow_image" . }}
+          imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
+          command:
+            - chown
+            - -R
+            - "{{ .Values.uid }}:{{ .Values.gid }}"
+            - {{ template "airflow_logs" . }}
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: logs
+              mountPath: {{ template "airflow_logs" . }}
+      {{- end }}
         - name: wait-for-airflow-migrations
           image: {{ template "default_airflow_image" . }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}

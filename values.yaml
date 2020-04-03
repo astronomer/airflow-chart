@@ -161,6 +161,10 @@ workers:
     size: 100Gi
     # If using a custom storageClass, pass name ref to all statefulSets here
     storageClassName:
+    # Execute init container to chown log directory
+    # This is currently only needed in KinD, due to usage
+    # of local-path provisioner.
+    fixPermissions: false
 
   resources: {}
   #  limits:
