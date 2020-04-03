@@ -34,10 +34,6 @@ ingress:
   # Base domain for ingress vhosts
   baseDomain: ~
 
-  # Enable platform authentication
-  auth:
-    enabled: true
-
 # Network policy configuration
 networkPolicies:
   # Enabled network policies
