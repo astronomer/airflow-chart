@@ -92,8 +92,9 @@ data:
     tier = airflow
     component = worker
     release = {{ .Release.Name }}
-    platform = {{ .Values.platform.release }}
-    workspace = {{ .Values.platform.workspace }}
+    {{- range $key, $value := .Values.labels }}
+    {{ printf "%s = %s" $key $value }}
+    {{- end }}
 {{- end }}
 
     [astronomer]
