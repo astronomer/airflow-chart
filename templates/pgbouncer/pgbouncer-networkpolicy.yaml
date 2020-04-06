@@ -55,8 +55,6 @@ spec:
     ports:
     - protocol: TCP
       port: {{ .Values.ports.pgbouncer }}
-  {{- if .Values.platform.release }}
     - protocol: TCP
       port: {{ .Values.ports.pgbouncerScrape }}
-  {{- end }}
 {{- end }}
