@@ -29,6 +29,9 @@ spec:
         matchLabels:
           tier: airflow
           release: {{ .Release.Name }}
+{{- if .Values.statsd.extraNetworkPolicies}}
+{{ toYaml .Values.statsd.extraNetworkPolicies | indent 4}}
+{{- end}}
     {{- if .Values.platform.release }}
     - namespaceSelector: {}
       podSelector:
@@ -40,8 +43,6 @@ spec:
     ports:
     - protocol: UDP
       port: {{ .Values.ports.statsdIngest }}
-  {{- if .Values.platform.release }}
     - protocol: TCP
       port: {{ .Values.ports.statsdScrape }}
-  {{- end }}
 {{- end }}

@@ -264,6 +264,8 @@ flower:
 # Statsd settings
 statsd:
   enabled: true
+  # Additional network policies as needed
+  extraNetworkPolicies: []
   resources: {}
     # limits:
     #   cpu: 100m
@@ -276,7 +278,7 @@ statsd:
 pgbouncer:
   # Enable pgbouncer
   enabled: false
-  # additional network policies as needed
+  # Additional network policies as needed
   extraNetworkPolicies: []
 
   # Pool sizes
