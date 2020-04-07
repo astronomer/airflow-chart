@@ -29,9 +29,9 @@ spec:
         matchLabels:
           tier: airflow
           release: {{ .Release.Name }}
-{{- if .Values.statsd.extraNetworkPolicies}}
-{{ toYaml .Values.statsd.extraNetworkPolicies | indent 4}}
-{{- end}}
+{{- if .Values.statsd.extraNetworkPolicies }}
+{{ toYaml .Values.statsd.extraNetworkPolicies | indent 4 }}
+{{- end }}
     {{- if .Values.platform.release }}
     - namespaceSelector: {}
       podSelector:
