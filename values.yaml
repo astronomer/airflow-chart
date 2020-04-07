@@ -230,6 +230,9 @@ webserver:
   # Number of webservers
   replicas: 1
 
+  # Additional network policies as needed
+  extraNetworkPolicies: []
+
   resources: {}
     # limits:
     #   cpu: 100m
@@ -253,6 +256,8 @@ webserver:
 
 # Flower settings
 flower:
+  # Additional network policies as needed
+  extraNetworkPolicies: []
   resources: {}
     # limits:
     #   cpu: 100m
