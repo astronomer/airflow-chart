@@ -419,12 +419,6 @@ cleanup:
   # Run every 15 minutes
   schedule: "*/15 * * * *"
 
-# This block contains settings strictly used to integrate into the Astronomer platform.
-# This is what allows for integration into platform ingress, network policies, metrics collection, etc.
-# This chart is completely deployable without specifying these values.
-platform:
-  release: ~
-
 # Configuration for postgresql subchart
 # Not recommended for production
 postgresql:
