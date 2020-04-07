@@ -1,6 +1,6 @@
-# Astronomer's Helm Chart for Apache Airflow 
+# Helm Chart for Apache Airflow 
 
-[Apache Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule and monitor workflows. [Astronomer](https://www.astronomer.io/) is a software company built around Airflow. We have extracted this Helm Chart from our platform Helm chart and made it accessible under Apache 2 license.
+[Apache Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule and monitor workflows.
 
 ## TL;DR
 
