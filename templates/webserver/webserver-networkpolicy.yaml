@@ -23,17 +23,12 @@ spec:
       release: {{ .Release.Name }}
   policyTypes:
   - Ingress
-{{- if .Values.platform.release }}
   ingress:
   - from:
-    - namespaceSelector: {}
-      podSelector:
-        matchLabels:
-          tier: nginx
-          component: ingress-controller
-          release: {{ .Values.platform.release }}
+{{- if .Values.webserver.extraNetworkPolicies }}
+{{ toYaml .Values.webserver.extraNetworkPolicies | indent 4 }}
+{{- end }}
     ports:
     - protocol: TCP
       port: {{ .Values.ports.airflowUI }}
-{{- end }}
 {{- end }}
