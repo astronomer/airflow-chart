@@ -59,7 +59,7 @@ spec:
         - name: wait-for-airflow-migrations
           image: {{ template "airflow_image" . }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
-          args: ["airflow-migration-spinner", "--timeout=60"]
+          args: ["db", "check-migrations", "--migration-wait-timeout", "60"]
           env:
           {{- include "custom_airflow_environment" . | indent 10 }}
           {{- include "standard_airflow_environment" . | indent 10 }}
@@ -67,7 +67,7 @@ spec:
         - name: webserver
           image: {{ template "airflow_image" . }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
-          args: ["airflow", "webserver"]
+          args: ["webserver"]
           resources:
 {{ toYaml .Values.webserver.resources | indent 12 }}
           volumeMounts:

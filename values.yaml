@@ -3,8 +3,8 @@
 # Declare variables to be passed into your templates.
 
 # User and group of airflow user
-uid: 100
-gid: 101
+uid: 50000
+gid: 50000
 
 # Select certain nodes for airflow pods.
 nodeSelector: {}
@@ -45,7 +45,7 @@ networkPolicies:
 
 # Airflow home directory
 # Used for mount paths
-airflowHome: "/usr/local/airflow"
+airflowHome: "/opt/airflow/"
 
 # Extra annotations to apply to all
 # Airflow pods
@@ -64,17 +64,17 @@ executor: "KubernetesExecutor"
 allowPodLaunching: true
 
 # Default airflow repository
-defaultAirflowRepository: astronomerinc/ap-airflow
+defaultAirflowRepository: apache/airflow
 
 # Default airflow tag to deploy
-defaultAirflowTag: 1.10.7-alpine3.10
+defaultAirflowTag: master-python3.7
 
 # Astronomer Airflow images
 images:
   airflow:
-    repository: astronomerinc/ap-airflow
-    tag: ~
-    pullPolicy: IfNotPresent
+    repository: apache/airflow
+    tag: master-python3.7
+    pullPolicy: Always
   flower:
     repository: astronomerinc/ap-airflow
     tag: ~
@@ -156,7 +156,7 @@ workers:
 
   persistence:
     # Enable persistent volumes
-    enabled: true
+    enabled: false
     # Volume size for worker StatefulSet
     size: 100Gi
     # If using a custom storageClass, pass name ref to all statefulSets here

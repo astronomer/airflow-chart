@@ -38,19 +38,19 @@ spec:
           image: {{ template "airflow_image" . }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
           args:
-            - "airflow"
-            - "create_user"
-            - "-r"
+            - "users"
+            - "create"
+            - "--role"
             - {{ .Values.webserver.defaultUser.role }}
-            - "-u"
+            - "--username"
             - {{ .Values.webserver.defaultUser.username }}
-            - "-e"
+            - "--email"
             - {{ .Values.webserver.defaultUser.email }}
-            - "-f"
+            - "--firstname"
             - {{ .Values.webserver.defaultUser.firstName }}
-            - "-l"
+            - "--lastname"
             - {{ .Values.webserver.defaultUser.lastName }}
-            - "-p"
+            - "--password"
             - {{ .Values.webserver.defaultUser.password }}
           env:
           {{- include "custom_airflow_environment" . | indent 10 }}
