@@ -403,15 +403,15 @@ podMutation:
   #    effect: "NoSchedule"
 
   # Pods spun up would land in the node that matches the affinity
-  affinity: {}
-#    nodeAffinity:
-#      requiredDuringSchedulingIgnoredDuringExecution:
-#        nodeSelectorTerms:
-#          - matchExpressions:
-#              - key: "astronomer.io/dynamic-pods"
-#                operator: In
-#                values:
-#                  - "true"
+  # affinity: {}
+  #   nodeAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       nodeSelectorTerms:
+  #       - matchExpressions:
+  #         - key: "company.io/dynamic-pods"
+  #           operator: In
+  #           values:
+  #           - "true"
 
 # This runs as a CronJob to cleanup old pods.
 cleanup:
