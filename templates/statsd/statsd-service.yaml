@@ -16,11 +16,11 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
   annotations:
-    {{- if .Values.platform.release }}
-    astronomer.io/platform-release: {{ .Values.platform.release }}
-    {{- end }}
     prometheus.io/scrape: "true"
     prometheus.io/port: {{ .Values.ports.statsdScrape | quote }}
+{{- if .Values.statsd.service.extraAnnotations }}
+{{- toYaml .Values.statsd.service.extraAnnotations | nindent 4 }}
+{{- end }}
 spec:
   type: ClusterIP
   selector:

@@ -279,6 +279,9 @@ statsd:
     #   cpu: 100m
     #   memory: 128Mi
 
+  service:
+    extraAnnotations: {}
+
 # Pgbouncer settings
 pgbouncer:
   # Enable pgbouncer
@@ -308,6 +311,9 @@ pgbouncer:
     # requests:
     #   cpu: 100m
     #   memory: 128Mi
+
+  service:
+    extraAnnotations: {}
 
   # https://www.pgbouncer.org/config.html
   verbose: 0
