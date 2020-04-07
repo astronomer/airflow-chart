@@ -44,14 +44,6 @@ spec:
 {{- if .Values.pgbouncer.extraNetworkPolicies}}
 {{ toYaml .Values.pgbouncer.extraNetworkPolicies | indent 4}}
 {{- end}}
-    {{- if .Values.platform.release }}
-    - namespaceSelector: {}
-      podSelector:
-        matchLabels:
-          tier: monitoring
-          component: prometheus
-          release: {{ .Values.platform.release }}
-    {{- end }}
     ports:
     - protocol: TCP
       port: {{ .Values.ports.pgbouncer }}
