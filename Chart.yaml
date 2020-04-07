@@ -5,4 +5,4 @@ version: 0.12.0-alpha.5
 description: Helm chart to deploy Apache Airflow
 icon: https://www.astronomer.io/static/airflowNewA.png
 keywords:
-  - astronomer
+  - airflow
