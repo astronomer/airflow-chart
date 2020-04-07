@@ -32,14 +32,6 @@ spec:
 {{- if .Values.statsd.extraNetworkPolicies }}
 {{ toYaml .Values.statsd.extraNetworkPolicies | indent 4 }}
 {{- end }}
-    {{- if .Values.platform.release }}
-    - namespaceSelector: {}
-      podSelector:
-        matchLabels:
-          tier: monitoring
-          component: prometheus
-          release: {{ .Values.platform.release }}
-    {{- end }}
     ports:
     - protocol: UDP
       port: {{ .Values.ports.statsdIngest }}
