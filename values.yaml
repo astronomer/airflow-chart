@@ -416,7 +416,7 @@ podMutation:
   #    effect: "NoSchedule"
 
   # Pods spun up would land in the node that matches the affinity
-  # affinity: {}
+  affinity: {}
   #   nodeAffinity:
   #     requiredDuringSchedulingIgnoredDuringExecution:
   #       nodeSelectorTerms:
