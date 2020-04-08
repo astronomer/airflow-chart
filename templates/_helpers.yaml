@@ -185,12 +185,6 @@ log_connections = {{ .Values.pgbouncer.logConnections }}
 {{ define "airflow_webserver_config_path" -}}
 {{ (printf "%s/webserver_config.py" .Values.airflowHome) | quote }}
 {{- end }}
-{{ define "airflow_webserver_jwt_cert_dir" -}}
-/etc/airflow/tls
-{{- end }}
-{{ define "airflow_webserver_jwt_cert_path" -}}
-{{ printf "%s/tls.crt" (include "airflow_webserver_jwt_cert_dir" . ) }}
-{{- end }}
 
 {{ define "airflow_local_setting_path" -}}
 {{ (printf "%s/config/airflow_local_settings.py" .Values.airflowHome) | quote }}

@@ -83,10 +83,8 @@ spec:
               mountPath: {{ template "airflow_local_setting_path" . }}
               subPath: airflow_local_settings.py
               readOnly: true
-{{- if .Values.webserver.jwtSigningCertificateSecretName }}
-            - name: signing-certificate
-              mountPath: {{ template "airflow_webserver_jwt_cert_dir" . }}
-              readOnly: true
+{{- if .Values.webserver.extraVolumeMounts }}
+{{ toYaml .Values.webserver.extraVolumeMounts | indent 12 }}
 {{- end }}
           ports:
             - name: webserver-ui
@@ -122,8 +120,6 @@ spec:
         - name: config
           configMap:
             name: {{ template "airflow_config" . }}
-{{- if .Values.webserver.jwtSigningCertificateSecretName }}
-        - name: signing-certificate
-          secret:
-            secretName: {{ .Values.webserver.jwtSigningCertificateSecretName }}
+{{- if .Values.webserver.extraVolumes }}
+{{ toYaml .Values.webserver.extraVolumes | indent 8 }}
 {{- end }}

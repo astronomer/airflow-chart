@@ -241,9 +241,6 @@ webserver:
     #   cpu: 100m
     #   memory: 128Mi
 
-  # Secret that contains the cert to verify JWTs
-  jwtSigningCertificateSecretName: ~
-
   # Create initial user.
   defaultUser:
     enabled: true
@@ -253,6 +250,22 @@ webserver:
     firstName: admin
     lastName: user
     password: admin
+
+  # Mount additional volumes into webserver.
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  # This will be mounted into the Airflow Webserver as
+  # a custom webserver_config.py
+  webserverConfig: ~
+  # webserverConfig: |
+  #   from airflow import configuration as conf
+
+  #   # The SQLAlchemy connection string.
+  #   SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
+
+  #   # Flask-WTF flag for CSRF
+  #   CSRF_ENABLED = True
 
 # Flower settings
 flower:
