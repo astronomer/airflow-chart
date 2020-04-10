@@ -57,7 +57,7 @@ spec:
       {{- end }}
       initContainers:
         - name: wait-for-airflow-migrations
-          image: {{ template "default_airflow_image" . }}
+          image: {{ template "airflow_image" . }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
           args: ["airflow-migration-spinner", "--timeout=60"]
           env:
