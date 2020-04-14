@@ -36,6 +36,7 @@ spec:
       containers:
         - name: create-user
           image: {{ template "airflow_image" . }}
+          imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
           args:
             - "airflow"
             - "create_user"

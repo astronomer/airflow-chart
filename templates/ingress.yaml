@@ -19,7 +19,7 @@ metadata:
   {{- if .Values.ingress.webserverAnnotations }}
   annotations:
   {{- range $k, $v := .Values.ingress.webserverAnnotations }}
-    {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
+    {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
   {{- end }}
   {{- end }}
 spec:
@@ -69,7 +69,7 @@ metadata:
   {{ $ctx := . }}
   annotations:
   {{- range $k, $v := .Values.ingress.flowerAnnotations }}
-    {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
+    {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
   {{- end }}
   {{- end }}
 spec:
