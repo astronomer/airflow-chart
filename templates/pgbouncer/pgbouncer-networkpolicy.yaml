@@ -40,6 +40,16 @@ spec:
 {{- end }}
         matchLabels:
           app: keda-operator
+{{- if .Values.workers.keda.namespaceLabels }}
+    - namespaceSelector:
+       matchLabels:
+{{ toYaml .Values.workers.keda.namespaceLabels | indent 10}}
+      podSelector:
+{{- else }}
+    - podSelector:
+{{- end }}
+        matchLabels:
+          app: keda-operator-metrics-apiserver
 {{- end}}
 {{- if .Values.pgbouncer.extraNetworkPolicies}}
 {{ toYaml .Values.pgbouncer.extraNetworkPolicies | indent 4}}

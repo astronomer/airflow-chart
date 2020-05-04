@@ -128,6 +128,7 @@ spec:
         # Always start the garbage collector sidecar.
         - name: scheduler-gc
           image: {{ template "airflow_image" . }}
+          imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
           args: ["/usr/local/bin/clean-airflow-logs"]
           volumeMounts:
             - name: logs
