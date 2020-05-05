@@ -151,9 +151,6 @@ workers:
     # Note that HPA has a seperate cooldwon period for scale-downs
     cooldownPeriod: 30
 
-    # Maximum number of workers created by keda
-    maxReplicaCount: 10
-
   persistence:
     # Enable persistent volumes
     enabled: true
