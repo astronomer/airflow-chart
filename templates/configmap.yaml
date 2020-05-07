@@ -147,6 +147,8 @@ data:
             extra_labels["kubernetes-pod-operator"] = "True"
 
         pod.labels.update(extra_labels)
+        pod.labels.update({{ toJson .Values.podMutation.labels }})
+        pod.annotations.update({{ toJson .Values.podMutation.annotations }})
         pod.tolerations += {{ toJson .Values.podMutation.tolerations }}
         pod.affinity.update({{ toJson .Values.podMutation.affinity }})
 {{- end }}

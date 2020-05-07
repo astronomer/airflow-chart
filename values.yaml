@@ -404,6 +404,12 @@ podMutation:
 #                values:
 #                  - "true"
 
+  # Extra labels to apply to all pods spun up using KubernetesExecutor or KubernetesPodOperator
+  labels: {}
+
+  # Extra annotations to apply to all pods spun up using KubernetesExecutor or KubernetesPodOperator
+  annotations: {}
+
 # This runs as a CronJob to cleanup old pods.
 cleanup:
   enabled: false
