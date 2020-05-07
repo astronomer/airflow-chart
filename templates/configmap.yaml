@@ -79,7 +79,7 @@ data:
     worker_service_account_name = {{ .Release.Name }}-worker-serviceaccount
     image_pull_secrets = {{ template "registry_secret" . }}
     dags_in_image = True
-    delete_worker_pods = True
+    delete_worker_pods = {{ .Values.workers.deleteKubernetesPods }}
 
     [kubernetes_secrets]
     AIRFLOW__CORE__SQL_ALCHEMY_CONN = {{ printf "%s=connection" (include "airflow_metadata_secret" .) }}
