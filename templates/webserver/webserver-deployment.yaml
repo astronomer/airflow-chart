@@ -49,6 +49,7 @@ spec:
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
       restartPolicy: Always
+      serviceAccountName: {{ .Release.Name }}-webserver-serviceaccount
       securityContext:
         runAsUser: {{ .Values.uid }}
       {{- if or .Values.registry.secretName .Values.registry.connection }}
