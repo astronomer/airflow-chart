@@ -32,6 +32,10 @@ spec:
   serviceName: {{ .Release.Name }}-scheduler
 {{- end }}
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
   selector:
     matchLabels:
       tier: airflow
