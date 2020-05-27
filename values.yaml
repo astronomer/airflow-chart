@@ -191,13 +191,6 @@ workers:
 
 # Airflow scheduler settings
 scheduler:
-  # Scheduler pod disruption budget
-  podDisruptionBudget:
-    enabled: false
-
-    # PDB configuration
-    config:
-      maxUnavailable: 1
 
   resources: {}
   #  limits:

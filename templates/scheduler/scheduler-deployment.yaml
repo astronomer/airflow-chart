@@ -32,6 +32,8 @@ spec:
   serviceName: {{ .Release.Name }}-scheduler
 {{- end }}
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       tier: airflow
