@@ -136,15 +136,15 @@ data:
     def pod_mutation_hook(pod: Pod):
 
         extra_labels = {
-            "kubernetes-executor": "False",
-            "kubernetes-pod-operator": "False"
+            "kubernetes_executor": "False",
+            "kubernetes_pod_operator": "False"
         }
 
         if 'airflow-worker' in pod.labels.keys() or \
                 conf.get('core', 'EXECUTOR') == "KubernetesExecutor":
-            extra_labels["kubernetes-executor"] = "True"
+            extra_labels["kubernetes_executor"] = "True"
         else:
-            extra_labels["kubernetes-pod-operator"] = "True"
+            extra_labels["kubernetes_pod_operator"] = "True"
 
         pod.labels.update(extra_labels)
         pod.tolerations += {{ toJson .Values.podMutation.tolerations }}
