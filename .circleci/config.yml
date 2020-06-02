@@ -64,9 +64,6 @@ jobs:
       kube_version:
         type: string
         default: "1.18.2"
-    environment:
-      KUBE_VERSION: 1.14.10
-      EXECUTOR: "LocalExecutor"
     steps:
       - attach_workspace:
           at: /tmp/workspace
