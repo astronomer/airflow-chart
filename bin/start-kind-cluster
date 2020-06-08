@@ -17,3 +17,5 @@ if ! [[ $? -eq 0 ]]; then
   kind create cluster --image kindest/node:${KUBE_VERSION}
 fi
 set -e
+
+kubectl create namespace airflow
