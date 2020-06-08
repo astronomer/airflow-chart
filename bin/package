@@ -10,7 +10,6 @@ rm -rf /tmp/airflow-chart-package/ || true
 mkdir -p /tmp/airflow-chart-package
 cp -R . /tmp/airflow-chart-package/airflow
 cd /tmp/airflow-chart-package/airflow
-helm init --client-only
 helm dep update
 cd ..
 helm package /tmp/airflow-chart-package/airflow
