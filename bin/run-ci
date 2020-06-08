@@ -45,6 +45,7 @@ helm install \
   -n airflow \
   --set executor=$EXECUTOR \
   --wait \
+  airflow \
   $HELM_CHART_PATH
 
 if [ ! $? -eq 0 ]; then

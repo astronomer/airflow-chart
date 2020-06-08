@@ -34,7 +34,7 @@ workflows:
 jobs:
   lint:
     docker:
-      - image: alpine/helm:2.16.1
+      - image: alpine/helm:3.2.1
     steps:
       - checkout
       - run:
@@ -43,7 +43,7 @@ jobs:
 
   build-artifact:
     docker:
-      - image: alpine/helm:2.16.1
+      - image: alpine/helm:3.2.1
     steps:
       - checkout
       - run:

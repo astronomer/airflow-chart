@@ -6,7 +6,7 @@ if [[ -z "${KIND_VERSION}" ]]; then
 fi
 
 if [[ -z "${HELM_VERSION}" ]]; then
-  export HELM_VERSION="2.16.1"
+  export HELM_VERSION="3.2.1"
 fi
 
 # Determine the platform we are running on
@@ -36,6 +36,9 @@ else
   tar -zxvf ./helm-v${HELM_VERSION}-${OS}-amd64.tar.gz
   mv ${OS}-amd64/helm /tmp/bin/
 fi
+
+# Add stable helm repo
+helm repo add stable https://kubernetes-charts.storage.googleapis.com
 
 echo "Installing the latest, stable kubectl..."
 if [[ -f /tmp/bin/kubectl ]]; then
