@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 if [[ -z "${KUBE_VERSION}" ]]; then
-  export KUBE_VERSION='1.15.6'
+  export KUBE_VERSION='1.18.2'
 fi
 
 # Create a kind cluster
@@ -18,10 +18,4 @@ if ! [[ $? -eq 0 ]]; then
 fi
 set -e
 
-echo "Installing service account..."
-# Update the service account for tiller to work.
-kubectl create serviceaccount --namespace kube-system tiller
-kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-echo "Installing Tiller in the cluster..."
-helm init --service-account tiller --upgrade --wait
-echo "Tiller installed."
+kubectl create namespace airflow

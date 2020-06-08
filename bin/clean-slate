@@ -4,7 +4,6 @@ source $REPO_DIR/bin/install-ci-tools
 
 # Install the postgresql subchart
 echo "Installing Helm subchart(s)..."
-helm init --client-only > /dev/null 2>&1
 helm dep update > /dev/null 2>&1
 
 # Fail fast for helm syntax errors

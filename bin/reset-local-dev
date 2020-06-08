@@ -18,4 +18,5 @@ helm install \
   -n airflow \
   --set executor=$EXECUTOR \
   --set workers.persistence.fixPermissions=true \
+  airflow \
   $REPO_DIR
