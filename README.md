@@ -1,4 +1,4 @@
-# Astronomer's Helm Chart for Apache Airflow 
+# Astronomer's Helm Chart for Apache Airflow
 
 [Apache Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule and monitor workflows. [Astronomer](https://www.astronomer.io/) is a software company built around Airflow. We have extracted this Helm Chart from our platform Helm chart and made it accessible under Apache 2 license.
 
@@ -145,11 +145,11 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `data.metadataSecretName`                             | Secret name to mount Airflow connection string from                                                          | `~`                                               |
 | `data.resultBackendSecretName`                        | Secret name to mount Celery result backend connection string from                                            | `~`                                               |
 | `data.metadataConection`                              | Field separated connection data (alternative to secret name)                                                 | `{}`                                              |
-| `data.resultBakcnedConnection`                        | Field separated connection data (alternative to secret name)                                                 | `{}`                                              |
+| `data.resultBackendConnection`                        | Field separated connection data (alternative to secret name)                                                 | `{}`                                              |
 | `fernetKey`                                           | String representing an Airflow fernet key                                                                    | `~`                                               |
 | `fernetKeySecretName`                                 | Secret name for Airlow fernet key                                                                            | `~`                                               |
 | `workers.replicas`                                    | Replica count for Celery workers (if applicable)                                                             | `1`                                               |
-| `workers.keda.enabled`                                 | Enable KEDA autoscaling features                                                                             | `false`                                           |
+| `workers.keda.enabled`                                | Enable KEDA autoscaling features                                                                             | `false`                                           |
 | `workers.keda.pollingInverval`                        | How often KEDA should poll the backend database for metrics in seconds                                       | `5`                                               |
 | `workers.keda.cooldownPeriod`                         | How often KEDA should wait before scaling down in seconds                                                    | `30`                                              |
 | `workers.keda.maxReplicaCount`                        | Maximum number of Celery workers KEDA can scale to                                                           | `10`                                              |
@@ -218,8 +218,8 @@ helm install \
     --namespace keda --name keda kedacore/keda
 ```
 
-Once KEDA is installed (which should be pretty quick since there is only one pod). You can try out KEDA autoscaling 
-on this chart by setting `workers.keda.enabled=true` your helm command or in the `values.yaml`. 
+Once KEDA is installed (which should be pretty quick since there is only one pod). You can try out KEDA autoscaling
+on this chart by setting `workers.keda.enabled=true` your helm command or in the `values.yaml`.
 (Note: KEDA does not support StatefulSets so you need to set `worker.persistence.enabled` to `false`)
 
 ```bash
@@ -274,7 +274,7 @@ kubectl get pods --all-namespaces
 helm list -n airflow
 ```
 
-Run `kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow` 
+Run `kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow`
 to port-forward the Airflow UI to http://localhost:8080/ to cofirm Airflow is working.
 
 **Build a Docker image from your DAGs:**
@@ -284,7 +284,7 @@ to port-forward the Airflow UI to http://localhost:8080/ to cofirm Airflow is wo
         mkdir my-airflow-project && cd my-airflow-project
         astro dev init
 
-2. Then build the image: 
+2. Then build the image:
 
         docker build -t my-dags:0.0.1 .
 
