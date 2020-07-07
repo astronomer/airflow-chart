@@ -102,6 +102,8 @@ spec:
             timeoutSeconds: {{ .Values.scheduler.livenessProbe.timeoutSeconds | default 5 }}
             failureThreshold: {{ .Values.scheduler.livenessProbe.failureThreshold | default 10 }}
             periodSeconds: {{ .Values.scheduler.livenessProbe.periodSeconds | default 30 }}
+            exec:
+              command:
               - /usr/bin/env
               - AIRFLOW__CORE__LOGGING_LEVEL=ERROR
               - python3
