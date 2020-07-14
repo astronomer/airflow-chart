@@ -51,6 +51,9 @@ airflowHome: "/usr/local/airflow"
 # Airflow pods
 airflowPodAnnotations: {}
 
+# Extra annotations to apply to Create user job
+createUserJobAnnotations: {}
+
 # Extra annotations to apply to service accounts
 serviceAccountAnnotations: {}
 

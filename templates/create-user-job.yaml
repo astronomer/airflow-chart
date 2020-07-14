@@ -1,6 +1,7 @@
 ################################
 ## Airflow Create User Job
 #################################
+{{ $ctx := . }}
 {{- if .Values.webserver.defaultUser.enabled }}
 apiVersion: batch/v1
 kind: Job
@@ -25,6 +26,10 @@ spec:
         tier: airflow
         component: create-user-job
         release: {{ .Release.Name }}
+      annotations:
+      {{- range $k, $v := .Values.createUserJobAnnotations }}
+        {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
+      {{- end }}
     spec:
       restartPolicy: OnFailure
       nodeSelector:
