@@ -308,7 +308,9 @@ pgbouncer:
   verbose: 0
   logDisconnections: 0
   logConnections: 0
-
+  # TLS connection is always requested first from PostgreSQL, when refused connection will be established
+  # over plain TCP. Server certificate is not validated.
+  serverTlsSslmode: prefer
 redis:
   terminationGracePeriodSeconds: 600
 
