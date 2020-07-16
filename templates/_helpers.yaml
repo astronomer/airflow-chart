@@ -160,6 +160,7 @@
 [pgbouncer]
 pool_mode = transaction
 listen_port = {{ .Values.ports.pgbouncer }}
+server_tls_sslmode = {{ .Values.pgbouncer.serverTlsSslmode | default "prefer" }}
 listen_addr = *
 auth_type = md5
 auth_file = /etc/pgbouncer/users.txt
