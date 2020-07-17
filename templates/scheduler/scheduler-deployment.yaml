@@ -97,6 +97,27 @@ spec:
           {{- include "standard_airflow_environment" . | indent 10 }}
           # If the scheduler stops heartbeating for 5 minutes (10*30s) kill the
           # scheduler and let Kubernetes restart it
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.scheduler.livenessProbe.initialDelaySeconds | default 0 }}
+            timeoutSeconds: {{ .Values.scheduler.livenessProbe.timeoutSeconds | default 5 }}
+            failureThreshold: {{ .Values.scheduler.livenessProbe.failureThreshold | default 10 }}
+            periodSeconds: {{ .Values.scheduler.livenessProbe.periodSeconds | default 30 }}
+            exec:
+              command:
+              - /usr/bin/env
+              - AIRFLOW__CORE__LOGGING_LEVEL=ERROR
+              - python3
+              - -Wignore
+              - -c
+              - |
+                from airflow.jobs.scheduler_job import SchedulerJob
+                from airflow.db import create_session
+                from airflow.utils.net import get_hostname
+                import sys
+
+                with create_session() as session:
+                  job = session.query(SchedulerJob).filter_by(hostname=get_hostname()).order_by(SchedulerJob.latest_heartbeat.desc()).limit(1).first()
+                sys.exit(0 if job.is_alive() else 1)
           livenessProbe:
             initialDelaySeconds: {{ .Values.scheduler.livenessProbe.initialDelaySeconds | default 0 }}
             timeoutSeconds: {{ .Values.scheduler.livenessProbe.timeoutSeconds | default 5 }}
