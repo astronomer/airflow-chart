@@ -111,7 +111,7 @@ spec:
               - -c
               - |
                 from airflow.jobs.scheduler_job import SchedulerJob
-                from airflow.db import create_session
+                from airflow.utils.db import create_session
                 from airflow.utils.net import get_hostname
                 import sys
 
@@ -132,7 +132,7 @@ spec:
               - -c
               - |
                 from airflow.jobs.scheduler_job import SchedulerJob
-                from airflow.db import create_session
+                from airflow.utils.db import create_session
                 from airflow.utils.net import get_hostname
                 import sys
 
