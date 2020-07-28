@@ -103,11 +103,13 @@ images:
     pullPolicy: IfNotPresent
 
 # Environment variables for all airflow containers
+# other than init containers.
 env: []
 # - name: ""
 #   value: ""
 
 # Secrets for all airflow containers
+# other than init containers.
 secret: []
 # - envName: ""
 #   secretName: ""
