@@ -1,0 +1,9 @@
+---
+suite: Test templates/rbac/pod-launcher-rolebinding.yaml
+templates:
+  - templates/rbac/pod-launcher-rolebinding.yaml
+tests:
+  - it: should work
+    asserts:
+      - isKind:
+          of: RoleBinding

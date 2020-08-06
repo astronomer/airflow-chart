@@ -5,9 +5,11 @@ workflows:
   install-airflow-chart:
     jobs:
       - lint
+      - unittest-charts
       - build-artifact:
           requires:
           - lint
+          - unittest-charts
       - airflow-test:
           matrix:
             parameters:
@@ -24,6 +26,7 @@ workflows:
             branches:
               only:
                 - '/release-.*/'
+
       - release:
           requires:
             - approve-release
@@ -34,16 +37,31 @@ workflows:
 jobs:
   lint:
     docker:
-      - image: alpine/helm:3.2.1
+      - image: alpine/helm:3.2.4
     steps:
       - checkout
       - run:
           name: Lint the Airflow chart
           command: bin/lint
 
+  unittest-charts:
+    docker:
+      - image: alpine/helm:3.2.4
+        entrypoint: /bin/sh
+    steps:
+      - checkout
+      - run:
+          name: unittest the Airflow chart
+          command: |
+            apk add git bash
+            helm repo add stable https://kubernetes-charts.storage.googleapis.com
+            helm dep update
+            helm plugin install https://github.com/astronomer/helm-unittest/
+            helm unittest .
+
   build-artifact:
     docker:
-      - image: alpine/helm:3.2.1
+      - image: alpine/helm:3.2.4
     steps:
       - checkout
       - run:

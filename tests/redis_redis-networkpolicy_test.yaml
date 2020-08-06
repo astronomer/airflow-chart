@@ -1,0 +1,12 @@
+---
+suite: Test templates/redis/redis-networkpolicy.yaml
+templates:
+  - templates/redis/redis-networkpolicy.yaml
+tests:
+  - it: should work
+    set:
+      executor: CeleryExecutor
+      networkPolicies.enabled: true
+    asserts:
+      - isKind:
+          of: NetworkPolicy

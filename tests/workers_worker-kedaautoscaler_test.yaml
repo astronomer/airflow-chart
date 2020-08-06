@@ -1,0 +1,12 @@
+---
+suite: Test templates/workers/worker-kedaautoscaler.yaml
+templates:
+  - templates/workers/worker-kedaautoscaler.yaml
+tests:
+  - it: should work
+    set:
+      executor: CeleryExecutor
+      workers.keda.enabled: CeleryExecutor
+    asserts:
+      - isKind:
+          of: ScaledObject

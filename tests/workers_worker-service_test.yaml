@@ -1,0 +1,12 @@
+---
+suite: Test templates/workers/worker-service.yaml
+templates:
+  - templates/workers/worker-service.yaml
+tests:
+  - it: should work
+    set:
+      executor: CeleryExecutor
+      workers.autoscaling.enabled: true
+    asserts:
+      - isKind:
+          of: Service

@@ -1,0 +1,11 @@
+---
+suite: Test templates/workers/worker-deployment.yaml
+templates:
+  - templates/workers/worker-deployment.yaml
+tests:
+  - it: should work
+    set:
+      executor: CeleryExecutor
+    asserts:
+      - isKind:
+          of: StatefulSet

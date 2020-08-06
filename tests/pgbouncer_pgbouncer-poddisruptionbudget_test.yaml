@@ -1,0 +1,12 @@
+---
+suite: Test templates/pgbouncer/pgbouncer-poddisruptionbudget.yaml
+templates:
+  - templates/pgbouncer/pgbouncer-poddisruptionbudget.yaml
+tests:
+  - it: should work
+    set:
+      pgbouncer.enabled: true
+      pgbouncer.podDisruptionBudget.enabled: true
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget

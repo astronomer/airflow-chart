@@ -1,0 +1,9 @@
+---
+suite: Test templates/webserver/webserver-deployment.yaml
+templates:
+  - templates/webserver/webserver-deployment.yaml
+tests:
+  - it: should work
+    asserts:
+      - isKind:
+          of: Deployment

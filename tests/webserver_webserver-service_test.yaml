@@ -1,0 +1,9 @@
+---
+suite: Test templates/webserver/webserver-service.yaml
+templates:
+  - templates/webserver/webserver-service.yaml
+tests:
+  - it: should work
+    asserts:
+      - isKind:
+          of: Service

@@ -1,0 +1,9 @@
+---
+suite: Test templates/scheduler/scheduler-deployment.yaml
+templates:
+  - templates/scheduler/scheduler-deployment.yaml
+tests:
+  - it: should work
+    asserts:
+      - isKind:
+          of: Deployment

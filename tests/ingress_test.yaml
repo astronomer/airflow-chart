@@ -1,0 +1,11 @@
+---
+suite: Test templates/ingress.yaml
+templates:
+  - templates/ingress.yaml
+tests:
+  - it: should work
+    set:
+      ingress.enabled: true
+    asserts:
+      - isKind:
+          of: Ingress
