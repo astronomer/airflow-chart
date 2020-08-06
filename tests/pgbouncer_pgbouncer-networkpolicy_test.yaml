@@ -1,0 +1,11 @@
+---
+suite: Test templates/pgbouncer/pgbouncer-networkpolicy.yaml
+templates:
+  - templates/pgbouncer/pgbouncer-networkpolicy.yaml
+tests:
+  - it: should work
+    set:
+      networkPolicies.enabled: true
+    asserts:
+      - isKind:
+          of: NetworkPolicy

@@ -1,0 +1,11 @@
+---
+suite: Test templates/flower/flower-service.yaml
+templates:
+  - templates/flower/flower-service.yaml
+tests:
+  - it: should work
+    set:
+      executor: CeleryExecutor
+    asserts:
+      - isKind:
+          of: Service

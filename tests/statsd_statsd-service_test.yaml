@@ -1,0 +1,9 @@
+---
+suite: Test templates/statsd/statsd-service.yaml
+templates:
+  - templates/statsd/statsd-service.yaml
+tests:
+  - it: should work
+    asserts:
+      - isKind:
+          of: Service

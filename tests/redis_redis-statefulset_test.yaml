@@ -1,0 +1,11 @@
+---
+suite: Test templates/redis/redis-statefulset.yaml
+templates:
+  - templates/redis/redis-statefulset.yaml
+tests:
+  - it: should work
+    set:
+      executor: CeleryExecutor
+    asserts:
+      - isKind:
+          of: StatefulSet

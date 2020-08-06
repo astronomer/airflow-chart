@@ -1,0 +1,11 @@
+---
+suite: Test templates/flower/flower-deployment.yaml
+templates:
+  - templates/flower/flower-deployment.yaml
+tests:
+  - it: with CeleryExecutor
+    set:
+      executor: CeleryExecutor
+    asserts:
+      - isKind:
+          of: Deployment

@@ -1,0 +1,9 @@
+---
+suite: Test templates/create-user-job.yaml
+templates:
+  - templates/create-user-job.yaml
+tests:
+  - it: should work
+    asserts:
+      - isKind:
+          of: Job
