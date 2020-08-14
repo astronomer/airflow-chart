@@ -31,6 +31,8 @@ spec:
         {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
       {{- end }}
     spec:
+      securityContext:
+        runAsUser: {{ .Values.uid }}
       restartPolicy: OnFailure
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
