@@ -53,15 +53,21 @@
 
 {{/* User defined Airflow environment variables */}}
 {{- define "custom_airflow_environment" }}
-  # Dynamically created environment variables
-  {{- range $i, $config := .Values.env }}
-  - name: {{ $config.name }}
-    value: {{ $config.value | quote }}
-    {{- if eq $.Values.executor "KubernetesExecutor" }}
-  - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__{{ $config.name }}
-    value: {{ $config.value | quote }}
-    {{- end }}
+  {{- if .Values.mountAllFromSecretName }}
+    envFrom:
+    {{- include "custom_airflow_environment_mount_all" . | indent 2 }}
+    env:
+    {{- include "custom_airflow_environment_config" . }}
+    {{- include "standard_airflow_environment" . | indent 2 }}
+  {{ else }}
+    env:
+    {{- include "custom_airflow_environment_mount_single" . | indent 2 }}
+    {{- include "custom_airflow_environment_config" . }}
+    {{- include "standard_airflow_environment" . | indent 2 }}
   {{- end }}
+{{- end }}
+
+{{- define "custom_airflow_environment_mount_single" }}
   # Dynamically created secret envs
   {{- range $i, $config := .Values.secret }}
   - name: {{ $config.envName }}
@@ -70,12 +76,30 @@
         name: {{ $config.secretName }}
         key: {{ default "value" $config.secretKey }}
   {{- end }}
+{{- end }}
+
+{{- define "custom_airflow_environment_config" }}
+  # Dynamically created environment variables
+  {{- range $i, $config := .Values.env }}
+  - name: {{ $config.name }}
+    value: {{ $config.value | quote }}
+    {{- if eq $.Values.executor "KubernetesExecutor" }}
+    - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__{{ $config.name }}
+      value: {{ $config.value | quote }}
+    {{- end }}
+  {{- end }}
   {{- if eq .Values.executor "KubernetesExecutor" }}
     {{- range $i, $config := .Values.secret }}
-  - name: AIRFLOW__KUBERNETES_SECRETS__{{ $config.envName }}
-    value: {{ printf "%s=%s" $config.secretName $config.secretKey }}
+    - name: AIRFLOW__KUBERNETES_SECRETS__{{ $config.envName }}
+      value: {{ printf "%s=%s" $config.secretName $config.secretKey }}
     {{- end }}
-  {{ end }}
+  {{- end }}
+{{- end }}
+
+{{- define "custom_airflow_environment_mount_all" }}
+  # Dynamically created secret envs
+  - secretRef:
+      name: {{ .Release.Name }}-env
 {{- end }}
 
 {{ define "deployments_subdomain" -}}
