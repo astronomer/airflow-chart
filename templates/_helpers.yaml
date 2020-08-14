@@ -60,7 +60,7 @@
     {{- include "custom_airflow_environment_config" . }}
     {{- include "standard_airflow_environment" . | indent 2 }}
   {{ else }}
-    env:
+  - env:
     {{- include "custom_airflow_environment_mount_single" . | indent 2 }}
     {{- include "custom_airflow_environment_config" . }}
     {{- include "standard_airflow_environment" . | indent 2 }}
@@ -84,8 +84,8 @@
   - name: {{ $config.name }}
     value: {{ $config.value | quote }}
     {{- if eq $.Values.executor "KubernetesExecutor" }}
-    - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__{{ $config.name }}
-      value: {{ $config.value | quote }}
+  - name: AIRFLOW__KUBERNETES_ENVIRONMENT_VARIABLES__{{ $config.name }}
+    value: {{ $config.value | quote }}
     {{- end }}
   {{- end }}
   {{- if eq .Values.executor "KubernetesExecutor" }}
