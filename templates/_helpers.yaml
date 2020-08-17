@@ -88,12 +88,6 @@ env:
     value: {{ $config.value | quote }}
     {{- end }}
   {{- end }}
-  {{- if eq .Values.executor "KubernetesExecutor" }}
-    {{- range $i, $config := .Values.secret }}
-    - name: AIRFLOW__KUBERNETES_SECRETS__{{ $config.envName }}
-      value: {{ printf "%s=%s" $config.secretName $config.secretKey }}
-    {{- end }}
-  {{- end }}
 {{- end }}
 
 {{- define "custom_airflow_environment_mount_all" }}
