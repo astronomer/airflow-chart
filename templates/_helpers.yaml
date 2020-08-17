@@ -53,19 +53,19 @@
 
 {{/* User defined Airflow environment variables */}}
 {{- define "custom_airflow_environment" }}
-  {{- if .Values.mountAllFromSecretName }}
-    envFrom:
-    {{- include "custom_airflow_environment_mount_all" . | indent 2 }}
-    env:
-    {{- include "custom_airflow_environment_config" . }}
-    {{- include "standard_airflow_environment" . | indent 2 }}
-  {{ else }}
-  - env:
-    {{- include "custom_airflow_environment_mount_single" . | indent 2 }}
-    {{- include "custom_airflow_environment_config" . }}
-    {{- include "standard_airflow_environment" . | indent 2 }}
-  {{- end }}
-{{- end }}
+{{- if .Values.mountAllFromSecretName }}
+envFrom:
+{{- include "custom_airflow_environment_mount_all" . }}
+env:
+{{- include "custom_airflow_environment_config" . }}
+{{- include "standard_airflow_environment" . }}
+{{- else }}
+env:
+{{- include "custom_airflow_environment_mount_single" . }}
+{{- include "custom_airflow_environment_config" . }}
+{{- include "standard_airflow_environment" . }}
+{{- end -}}
+{{- end -}}
 
 {{- define "custom_airflow_environment_mount_single" }}
   # Dynamically created secret envs
@@ -97,9 +97,9 @@
 {{- end }}
 
 {{- define "custom_airflow_environment_mount_all" }}
-  # Dynamically created secret envs
-  - secretRef:
-      name: {{ .Release.Name }}-env
+# Dynamically created secret envs
+- secretRef:
+    name: {{ .Release.Name }}-env
 {{- end }}
 
 {{ define "deployments_subdomain" -}}

@@ -91,7 +91,7 @@ spec:
           image: {{ template "airflow_image" . }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
           args: ["airflow", "scheduler"]
-          {{- include "custom_airflow_environment" . | indent 6 }}
+          {{- include "custom_airflow_environment" . | indent 10 }}
           # If the scheduler stops heartbeating for 5 minutes (10*30s) kill the
           # scheduler and let Kubernetes restart it.
           # Use the same for readiness and liveness.
