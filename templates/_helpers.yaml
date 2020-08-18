@@ -66,14 +66,6 @@ env:
 {{- end -}}
 
 {{- define "custom_airflow_environment_mount_individual" }}
-  # Dynamically created secret envs
-  {{- range $i, $config := .Values.secret }}
-  - name: {{ $config.envName }}
-    valueFrom:
-      secretKeyRef:
-        name: {{ $config.secretName }}
-        key: {{ default "value" $config.secretKey }}
-  {{- end }}
   # Dynamically created environment variables
   {{- range $i, $config := .Values.env }}
   - name: {{ $config.name }}
@@ -83,12 +75,20 @@ env:
     value: {{ $config.value | quote }}
     {{- end }}
   {{- end }}
+  # Dynamically created secret envs
+  {{- range $i, $config := .Values.secret }}
+  - name: {{ $config.envName }}
+    valueFrom:
+      secretKeyRef:
+        name: {{ $config.secretName }}
+        key: {{ default "value" $config.secretKey }}
+  {{- end }}
   {{- if eq .Values.executor "KubernetesExecutor" }}
     {{- range $i, $config := .Values.secret }}
-    - name: AIRFLOW__KUBERNETES_SECRETS__{{ $config.envName }}
-      value: {{ printf "%s=%s" $config.secretName $config.secretKey }}
+  - name: AIRFLOW__KUBERNETES_SECRETS__{{ $config.envName }}
+    value: {{ printf "%s=%s" $config.secretName $config.secretKey }}
     {{- end }}
-  {{- end }}
+  {{ end }}
 {{- end }}
 
 {{- define "custom_airflow_environment_mount_all" }}
