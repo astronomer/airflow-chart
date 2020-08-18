@@ -52,7 +52,20 @@
 {{- end }}
 
 {{/* User defined Airflow environment variables */}}
-{{- define "custom_airflow_environment" }}
+{{- define "airflow_environment_variables" }}
+{{- if .Values.mountAllFromSecretName }}
+envFrom:
+{{- include "custom_airflow_environment_mount_all" . }}
+env:
+{{- include "standard_airflow_environment" . }}
+{{- else }}
+env:
+{{- include "custom_airflow_environment_mount_individual" . }}
+{{- include "standard_airflow_environment" . }}
+{{- end -}}
+{{- end -}}
+
+{{- define "custom_airflow_environment_mount_individual" }}
   # Dynamically created environment variables
   {{- range $i, $config := .Values.env }}
   - name: {{ $config.name }}
@@ -76,6 +89,12 @@
     value: {{ printf "%s=%s" $config.secretName $config.secretKey }}
     {{- end }}
   {{ end }}
+{{- end }}
+
+{{- define "custom_airflow_environment_mount_all" }}
+# Dynamically created secret envs
+- secretRef:
+    name: {{ .Release.Name }}-env
 {{- end }}
 
 {{ define "deployments_subdomain" -}}
