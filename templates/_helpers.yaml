@@ -60,12 +60,12 @@ env:
 {{- include "standard_airflow_environment" . }}
 {{- else }}
 env:
-{{- include "custom_airflow_environment_mount_single" . }}
+{{- include "custom_airflow_environment_mount_individual" . }}
 {{- include "standard_airflow_environment" . }}
 {{- end -}}
 {{- end -}}
 
-{{- define "custom_airflow_environment_mount_single" }}
+{{- define "custom_airflow_environment_mount_individual" }}
   # Dynamically created secret envs
   {{- range $i, $config := .Values.secret }}
   - name: {{ $config.envName }}
