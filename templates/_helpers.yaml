@@ -74,10 +74,6 @@ env:
         name: {{ $config.secretName }}
         key: {{ default "value" $config.secretKey }}
   {{- end }}
-  {{- include "custom_airflow_environment_config" . }}
-{{- end }}
-
-{{- define "custom_airflow_environment_config" }}
   # Dynamically created environment variables
   {{- range $i, $config := .Values.env }}
   - name: {{ $config.name }}
