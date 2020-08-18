@@ -115,7 +115,7 @@ spec:
             timeoutSeconds: {{ .Values.webserver.readinessProbe.timeoutSeconds | default 30 }}
             failureThreshold: {{ .Values.webserver.readinessProbe.failureThreshold | default 20 }}
             periodSeconds: {{ .Values.webserver.readinessProbe.periodSeconds | default 5 }}
-          {{- include "custom_airflow_environment" . | indent 10 }}
+          {{- include "airflow_environment_variables" . | indent 10 }}
       volumes:
         - name: config
           configMap:

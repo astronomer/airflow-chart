@@ -106,7 +106,7 @@ spec:
               mountPath: {{ template "airflow_local_setting_path" . }}
               subPath: airflow_local_settings.py
               readOnly: true
-          {{- include "custom_airflow_environment" . | indent 10 }}
+          {{- include "airflow_environment_variables" . | indent 10 }}
 {{- if $persistence }}
         - name: worker-gc
           image: {{ template "airflow_image" . }}
