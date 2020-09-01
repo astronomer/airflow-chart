@@ -37,7 +37,7 @@ def create_kube_client(in_cluster=False):
 
 
 def test_pgbouncer_fqdn_trailing_dot(webserver):
-    """ Ensure Airflow is in PATH
+    """ Ensure the FQDN for pgbouncer has a dot at the end
     """
     db_conn_string = webserver.check_output('env | grep AIRFLOW_CONN_AIRFLOW_DB')
     assert 'airflow-pgbouncer.airflow.svc.cluster.local.' in db_conn_string, \
