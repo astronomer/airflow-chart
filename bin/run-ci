@@ -41,9 +41,16 @@ START=$(date +%s)
 set +e
 set -x
 
+export EXECUTOR="${EXECUTOR:-CeleryExecutor}"
+
 helm install \
   -n airflow \
   --set executor=$EXECUTOR \
+  --set pgbouncer.enabled=true \
+  --set pgbouncer.metadataPoolSize=25 \
+  --set pgbouncer.resultBackendPoolSize=25 \
+  --set data.metadataConnection.host="airflow-postgresql.airflow.svc.cluster.local" \
+  --set data.resultBackendConnection.host="airflow-postgresql.airflow.svc.cluster.local" \
   --wait \
   airflow \
   $HELM_CHART_PATH
