@@ -90,6 +90,7 @@ jobs:
       - run:
           name: Install Airflow chart
           command: |
+            pyenv global 3.7.0
             export KUBE_VERSION=<< parameters.kube_version >>
             export EXECUTOR=<< parameters.executor >>
             HELM_CHART_PATH='/tmp/workspace/airflow-*.tgz' bin/run-ci

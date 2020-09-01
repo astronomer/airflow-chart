@@ -91,3 +91,12 @@ else
   get_debugging_info
   exit 1
 fi
+
+pip3 install virtualenv
+virtualenv --python=python3 /tmp/venv
+source /tmp/venv/bin/activate
+pip install -r $REPO_DIR/tests/functional-tests/requirements.txt
+export NAMESPACE=airflow
+export RELEASE_NAME=airflow
+pytest $REPO_DIR/tests/functional-tests/
+deactivate
