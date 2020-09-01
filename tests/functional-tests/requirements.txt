@@ -1,0 +1,5 @@
+pre-commit==2.4.0
+pytest==6.0.1
+kubernetes==11.0.0
+testinfra==3.2.1
+docker==4.1.0
