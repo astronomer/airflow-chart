@@ -70,8 +70,8 @@ set -xe
 # Set up the index.html file
 wget https://helm.astronomer.io/index.yaml -O /tmp/index.yaml.current
 helm repo index . --url https://helm.astronomer.io --merge /tmp/index.yaml.current
-gsutil cp -a public-read $HELM_CHART_PATH gs://helm.astronomer.io
-gsutil cp -a public-read ./index.yaml gs://helm.astronomer.io
+gsutil cp $HELM_CHART_PATH gs://helm.astronomer.io
+gsutil cp ./index.yaml gs://helm.astronomer.io
 
 set +x
 echo ""
