@@ -8,4 +8,21 @@ tests:
       executor: CeleryExecutor
     asserts:
       - isKind:
-          of: StatefulSet
+          of: Deployment
+
+  - it: should work
+    set:
+      workers.updateStrategy:
+        strategy:
+          rollingUpdate:
+            maxSurge: "100%"
+            maxUnavailable: "50%"
+      asserts:
+        - isKind:
+            of: Deployment
+        - equal:
+            path: deployment.spec.strategy.rollingUpdate.maxSurge
+            value: "100%"
+        - equal:
+            path: deployment.spec.strategy.rollingUpdate.maxUnavailable
+            value: "50%"
