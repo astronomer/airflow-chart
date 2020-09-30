@@ -74,7 +74,7 @@ jobs:
 
   airflow-test:
     machine:
-      image: ubuntu-1604:201903-01
+      image: ubuntu-2004:202008-01
       resource_class: large
     parameters:
       executor:
@@ -97,7 +97,7 @@ jobs:
 
   release:
     machine:
-      image: ubuntu-1604:201903-01
+      image: ubuntu-2004:202008-01
     steps:
       - attach_workspace:
           at: /tmp/workspace
