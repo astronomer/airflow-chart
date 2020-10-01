@@ -69,11 +69,14 @@ executor: "KubernetesExecutor"
 # If this is true and using the CeleryExecutor, the workers will be able to launch pods.
 allowPodLaunching: true
 
+# Airflow version
+airflowVersion: 1.10.10
+
 # Default airflow repository
 defaultAirflowRepository: astronomerinc/ap-airflow
 
 # Default airflow tag to deploy
-defaultAirflowTag: 1.10.10-alpine3.10
+defaultAirflowTag: 1.10.10-buster
 
 # Astronomer Airflow images
 images:
@@ -226,6 +229,9 @@ scheduler:
   # This setting tells kubernetes that its ok to evict
   # when it wants to scale a node down.
   safeToEvict: true
+
+  # Number of schedulers to run
+  replicas: 1
 
 # Airflow webserver settings
 webserver:
