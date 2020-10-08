@@ -135,6 +135,10 @@ env:
 {{ printf "%s:%s" .Values.images.pgbouncer.repository .Values.images.pgbouncer.tag }}
 {{- end }}
 
+{{ define "airflow_pod_template_file" -}}
+{{ (printf "%s/pod_templates" .Values.airflowHome) }}
+{{- end }}
+
 {{ define "pgbouncer_exporter_image" -}}
 {{ printf "%s:%s" .Values.images.pgbouncerExporter.repository .Values.images.pgbouncerExporter.tag }}
 {{- end }}

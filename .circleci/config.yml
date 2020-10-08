@@ -57,6 +57,7 @@ jobs:
             helm repo add stable https://kubernetes-charts.storage.googleapis.com
             helm dep update
             helm plugin install https://github.com/astronomer/helm-unittest/
+            cp files/pod-template-file.yaml templates
             helm unittest .
 
   build-artifact:

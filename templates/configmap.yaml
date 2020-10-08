@@ -73,24 +73,27 @@ data:
     worker_container_repository = {{ .Values.images.airflow.repository }}
     worker_container_tag = {{ .Values.images.airflow.tag }}
     worker_container_image_pull_policy = {{ .Values.images.airflow.pullPolicy }}
-    worker_service_account_name = {{ .Release.Name }}-worker-serviceaccount
-    image_pull_secrets = {{ template "registry_secret" . }}
     dags_in_image = True
     delete_worker_pods = True
-
-    [kubernetes_secrets]
-    AIRFLOW__CORE__SQL_ALCHEMY_CONN = {{ printf "%s=connection" (include "airflow_metadata_secret" .) }}
-    AIRFLOW__CORE__FERNET_KEY = {{ printf "%s=fernet-key" (include "fernet_key_secret" .) }}
-{{- if .Values.elasticsearch.enabled }}
-    AIRFLOW__ELASTICSEARCH__ELASTICSEARCH_HOST = {{ printf "%s=connection" (include "elasticsearch_secret" .) }}
-{{- end }}
-
+    {{- if semverCompare ">=1.10.12" .Values.airflowVersion }}
+    pod_template_file = {{ include "airflow_pod_template_file" . }}/pod_template_file.yaml
+    {{- else }}
+    worker_service_account_name = {{ .Release.Name }}-worker-serviceaccount
+    image_pull_secrets = {{ template "registry_secret" . }}
     [kubernetes_labels]
     tier = airflow
     component = worker
     release = {{ .Release.Name }}
     platform = {{ .Values.platform.release }}
     workspace = {{ .Values.platform.workspace }}
+
+    [kubernetes_secrets]
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN = {{ printf "%s=connection" (include "airflow_metadata_secret" .) }}
+    AIRFLOW__CORE__FERNET_KEY = {{ printf "%s=fernet-key" (include "fernet_key_secret" .) }}
+    {{- if .Values.elasticsearch.enabled }}
+    AIRFLOW__ELASTICSEARCH__ELASTICSEARCH_HOST = {{ printf "%s=connection" (include "elasticsearch_secret" .) }}
+    {{- end }}
+    {{- end }}
 
     [astronomer]
 {{- if .Values.webserver.jwtSigningCertificateSecretName }}
@@ -125,6 +128,8 @@ data:
     {{ .Values.scheduler.airflowLocalSettings | nindent 4 }}
 {{- else }}
   airflow_local_settings.py: |
+    {{- if semverCompare ">=1.10.12" .Values.airflowVersion }}
+
     from airflow.contrib.kubernetes.pod import Pod
     from airflow.configuration import conf
 
@@ -145,4 +150,37 @@ data:
         pod.labels.update(extra_labels)
         pod.tolerations += {{ toJson .Values.podMutation.tolerations }}
         pod.affinity.update({{ toJson .Values.podMutation.affinity }})
+    {{- else }}
+    from kubernetes.client import models as k8s
+    from airflow.configuration import conf
+
+
+    def pod_mutation_hook(pod: k8s.V1Pod):
+
+        extra_labels = {
+            "kubernetes_executor": "False",
+            "kubernetes_pod_operator": "False"
+        }
+
+
+        if 'airflow-worker' in pod.metadata.labels.keys() or \
+                conf.get('core', 'EXECUTOR') == "KubernetesExecutor":
+            extra_labels["kubernetes_executor"] = "True"
+        else:
+            extra_labels["kubernetes_pod_operator"] = "True"
+
+        pod.metadata.labels.update(extra_labels)
+        pod.metadata.tolerations += {{ toJson .Values.podMutation.tolerations }}
+        pod.metadata.affinity.update({{ toJson .Values.podMutation.affinity }})
+    {{- end }}
+{{- end }}
+{{- if eq .Values.executor "KubernetesExecutor" }}
+{{- if semverCompare ">=1.10.12" .Values.airflowVersion }}
+  pod_template_file.yaml: |-
+    {{- if .Values.podTemplate }}
+    {{ .Values.podTemplate | nindent 4 }}
+    {{- else }}
+    {{ tpl (.Files.Get "files/pod-template-file.yaml") . | nindent 4 }}
+    {{- end }}
+{{- end }}
 {{- end }}

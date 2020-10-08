@@ -1,0 +1,24 @@
+---
+suite: Test templates/pod-template-file.yaml
+templates:
+  - pod-template-file.yaml
+tests:
+  - it: should work
+    asserts:
+      - isKind:
+          of: Pod
+      - equal:
+          path: spec.containers[0].image
+          value: dummy_image
+      - equal:
+          path: spec.containers[0].name
+          value: base
+  - it: should add registry secrets
+    set:
+      registry.secretName: foo
+    asserts:
+      - isKind:
+          of: Pod
+      - equal:
+          path: spec.imagePullSecrets[0].name
+          value: foo

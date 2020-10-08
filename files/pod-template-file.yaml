@@ -1,0 +1,50 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dummy-name
+  labels:
+    tier: airflow
+    component: worker
+    release: '{{ .Release.Name }}'
+    platform: "{{ .Values.platform.release }}"
+    workspace: "{{ .Values.platform.workspace }}"
+spec:
+  containers:
+    - args: []
+      name: "base"
+      command: []
+      env:
+      - name: AIRFLOW__CORE__EXECUTOR
+        value: LocalExecutor
+{{- include "standard_airflow_environment" . | indent 4 }}
+      envFrom: []
+      image: dummy_image
+      imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
+      name: base
+      ports: []
+      volumeMounts:
+        - mountPath: {{ template "airflow_logs" . }}
+          name: airflow-logs
+  hostNetwork: false
+  {{- if or .Values.registry.secretName .Values.registry.connection }}
+  imagePullSecrets:
+    - name: {{ template "registry_secret" . }}
+  {{- end }}
+  restartPolicy: Never
+  securityContext:
+    runAsUser: {{ .Values.uid }}
+  nodeSelector:
+    {{ toYaml .Values.nodeSelector | indent 8 }}
+  affinity:
+    {{ toYaml .Values.affinity | indent 8 }}
+  tolerations:
+    {{ toYaml .Values.tolerations | indent 8 }}
+  serviceAccountName: '{{ .Release.Name }}-worker-serviceaccount'
+  volumes:
+  - configMap:
+      name: {{ include "airflow_config" . }}
+    name: airflow-config
+  - configMap:
+      name: {{ include "airflow_config" . }}
+    name: airflow-local-settings
