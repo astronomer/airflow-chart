@@ -3,7 +3,31 @@ suite: Test templates/scheduler/scheduler-deployment.yaml
 templates:
   - templates/scheduler/scheduler-deployment.yaml
 tests:
-  - it: should work
+  - it: "should work"
     asserts:
       - isKind:
           of: Deployment
+  - it: "should create multiple schedulers"
+    set:
+      scheduler:
+        replicas: 2
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 2
+  - it: "should run the correct migration command for airflow 1.x"
+    set:
+      executor: CeleryExecutor
+      airflowVersion: "1.10.12"
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].args
+          value: ["airflow", "upgradedb"]
+  - it: "should run the correct migration command for airflow 2.x"
+    set:
+      executor: CeleryExecutor
+      airflowVersion: "2.0.0"
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].args
+          value: ["airflow", "db", "upgrade"]
