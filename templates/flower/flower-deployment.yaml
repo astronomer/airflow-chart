@@ -51,7 +51,11 @@ spec:
         - name: flower
           image: {{ template "flower_image" . }}
           imagePullPolicy: {{ .Values.images.flower.pullPolicy }}
+          {{- if semverCompare ">=2.0.0" .Values.airflowVersion }}
+          args: ["airflow", "celery", "flower"]
+          {{- else }}
           args: ["airflow", "flower"]
+          {{- end }}
           resources:
 {{ toYaml .Values.flower.resources | indent 12 }}
           volumeMounts:

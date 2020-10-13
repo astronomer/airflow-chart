@@ -26,3 +26,19 @@ tests:
         - equal:
             path: deployment.spec.strategy.rollingUpdate.maxUnavailable
             value: "50%"
+  - it: "should run the correct worker command for airflow 1.x"
+    set:
+      executor: CeleryExecutor
+      airflowVersion: "1.10.12"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value: ["airflow", "worker"]
+  - it: "should run the correct worker command for airflow 2.x"
+    set:
+      executor: CeleryExecutor
+      airflowVersion: "2.0.0"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value: ["airflow", "celery", "worker"]
