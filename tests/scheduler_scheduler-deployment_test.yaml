@@ -15,6 +15,13 @@ tests:
       - equal:
           path: spec.replicas
           value: 2
+  - it: "should create one scheduler if replicas is not specified"
+    set:
+        replicas: ~
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
   - it: "should run the correct migration command for airflow 1.x"
     set:
       executor: CeleryExecutor
