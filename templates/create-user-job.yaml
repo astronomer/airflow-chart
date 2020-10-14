@@ -50,7 +50,12 @@ spec:
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
           args:
             - "airflow"
+            {{- if semverCompare ">=2.0.0" .Values.airflowVersion }}
+            - "users"
+            - "create"
+            {{- else }}
             - "create_user"
+            {{- end }}
             - "-r"
             - {{ .Values.webserver.defaultUser.role }}
             - "-u"

@@ -135,6 +135,10 @@ spec:
               mountPath: {{ template "airflow_local_setting_path" . }}
               subPath: airflow_local_settings.py
               readOnly: true
+            - name: config
+              subPath: pod_template_file.yaml
+              mountPath: {{ include "airflow_pod_template_file" . }}/pod_template_file.yaml
+              readOnly: true
         # Always start the garbage collector sidecar.
         - name: scheduler-gc
           image: {{ template "airflow_image" . }}
