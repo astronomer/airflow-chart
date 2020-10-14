@@ -70,19 +70,19 @@ executor: "KubernetesExecutor"
 allowPodLaunching: true
 
 # Airflow version
-airflowVersion: 2.0.0
+airflowVersion: 1.10.10
 
 # Default airflow repository
-defaultAirflowRepository: astronomerio/ap-airflow
+defaultAirflowRepository: astronomerinc/ap-airflow
 
 # Default airflow tag to deploy
-defaultAirflowTag: 2.0.0-1.dev-buster-onbuild
+defaultAirflowTag: 1.10.10-buster
 
 # Astronomer Airflow images
 images:
   airflow:
-    repository: astronomerio/ap-airflow
-    tag: 2.0.0-1.dev-buster-onbuild
+    repository: astronomerinc/ap-airflow
+    tag: ~
     pullPolicy: IfNotPresent
   flower:
     repository: astronomerinc/ap-airflow
