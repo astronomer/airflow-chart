@@ -1,0 +1,9 @@
+---
+suite: Test templates/run-airflow-migrations.yaml
+templates:
+  - templates/run-airflow-migrations.yaml
+tests:
+  - it: should work
+    asserts:
+      - isKind:
+          of: Job

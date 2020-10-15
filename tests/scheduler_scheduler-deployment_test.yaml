@@ -29,7 +29,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.initContainers[0].args
-          value: ["airflow", "upgradedb"]
+          value: ["airflow-migration-spinner", "--timeout=60"]
   - it: "should run the correct migration command for airflow 2.x"
     set:
       executor: CeleryExecutor
