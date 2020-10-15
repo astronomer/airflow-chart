@@ -22,19 +22,10 @@ tests:
       - equal:
           path: spec.replicas
           value: 1
-  - it: "should run the correct migration command for airflow 1.x"
+  - it: "should wait for migrations"
     set:
       executor: CeleryExecutor
-      airflowVersion: "1.10.12"
     asserts:
       - equal:
           path: spec.template.spec.initContainers[0].args
           value: ["airflow-migration-spinner", "--timeout=60"]
-  - it: "should run the correct migration command for airflow 2.x"
-    set:
-      executor: CeleryExecutor
-      airflowVersion: "2.0.0"
-    asserts:
-      - equal:
-          path: spec.template.spec.initContainers[0].args
-          value: ["airflow", "db", "upgrade"]
