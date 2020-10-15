@@ -51,7 +51,6 @@ helm install \
   --set pgbouncer.resultBackendPoolSize=25 \
   --set data.metadataConnection.host="airflow-postgresql.airflow.svc.cluster.local" \
   --set data.resultBackendConnection.host="airflow-postgresql.airflow.svc.cluster.local" \
-  --wait \
   airflow \
   $HELM_CHART_PATH
 
