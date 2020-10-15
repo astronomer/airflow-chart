@@ -54,6 +54,9 @@ airflowPodAnnotations: {}
 # Extra annotations to apply to Create user job
 createUserJobAnnotations: {}
 
+# Extra annotations to apply to run migrations job
+runMigrationsJobAnnotations: {}
+
 # Extra annotations to apply to service accounts
 serviceAccountAnnotations: {}
 
