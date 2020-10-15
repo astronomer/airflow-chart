@@ -183,8 +183,10 @@ workers:
     # This is currently only needed in KinD, due to usage
     # of local-path provisioner.
     fixPermissions: false
-    additionalVolumeMounts: []
-    additionalVolumes: []
+  
+  # Attach additional volumes to celery workers
+  additionalVolumeMounts: []
+  additionalVolumes: []
 
   resources: {}
   #  limits:

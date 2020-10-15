@@ -103,8 +103,8 @@ spec:
             - name: worker-logs
               containerPort: {{ .Values.ports.workerLogs }}
           volumeMounts:
-          {{- if .Values.workers.persistence.additionalVolumeMounts }}
-          {{- toYaml .Values.workers.persistence.additionalVolumeMounts | nindent 12 }}
+          {{- if .Values.workers.additionalVolumeMounts }}
+          {{- toYaml .Values.workers.additionalVolumeMounts | nindent 12 }}
           {{- end }}
             - name: logs
               mountPath: {{ template "airflow_logs" . }}
@@ -126,8 +126,8 @@ spec:
               mountPath: {{ template "airflow_logs" . }}
 {{- end }}
       volumes:
-      {{- if .Values.workers.persistence.additionalVolumes }}
-      {{- toYaml .Values.workers.persistence.additionalVolumes | nindent 8 }}
+      {{- if .Values.workers.additionalVolumes }}
+      {{- toYaml .Values.workers.additionalVolumes | nindent 8 }}
       {{- end }}
         - name: config
           configMap:
