@@ -169,7 +169,7 @@ workers:
     pollingInterval: 5
 
     # How many seconds KEDA will wait before scaling to zero.
-    # Note that HPA has a separate cooldwon period for scale-downs
+    # Note that HPA has a separate cooldown period for scale-downs
     cooldownPeriod: 30
 
   persistence:
