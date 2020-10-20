@@ -25,7 +25,7 @@ ingress:
   # Name of tls secret to use on ingress
   tlsSecretName: ~
 
-  # Annotations always injected when configuring webserver Ingress ojbect
+  # Annotations always injected when configuring webserver Ingress object
   webserverAnnotations: {}
 
   # Annotations always injected when configuring Flower Ingress object
@@ -67,7 +67,7 @@ rbacEnabled: true
 # Options: SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor
 executor: "KubernetesExecutor"
 
-# If this is true and using LocalExecutor/SequentialExecutor/KubernetesExecutor, the scheudler's
+# If this is true and using LocalExecutor/SequentialExecutor/KubernetesExecutor, the scheduler's
 # service account will have access to communicate with the api-server and launch pods.
 # If this is true and using the CeleryExecutor, the workers will be able to launch pods.
 allowPodLaunching: true
@@ -76,7 +76,7 @@ allowPodLaunching: true
 airflowVersion: 1.10.10
 
 # Default airflow repository
-defaultAirflowRepository: astronomerinc/ap-airflow
+defaultAirflowRepository: quay.io/astronomer/ap-airflow
 
 # Default airflow tag to deploy
 defaultAirflowTag: 1.10.10-buster
@@ -84,27 +84,27 @@ defaultAirflowTag: 1.10.10-buster
 # Astronomer Airflow images
 images:
   airflow:
-    repository: astronomerinc/ap-airflow
+    repository: quay.io/astronomer/ap-airflow
     tag: ~
     pullPolicy: IfNotPresent
   flower:
-    repository: astronomerinc/ap-airflow
+    repository: quay.io/astronomer/ap-airflow
     tag: ~
     pullPolicy: IfNotPresent
   statsd:
-    repository: astronomerinc/ap-statsd-exporter
+    repository: quay.io/astronomer/ap-statsd-exporter
     tag: 0.18.0
     pullPolicy: IfNotPresent
   redis:
-    repository: astronomerinc/ap-redis
+    repository: quay.io/astronomer/ap-redis
     tag: 0.11.0
     pullPolicy: IfNotPresent
   pgbouncer:
-    repository: astronomerinc/ap-pgbouncer
+    repository: quay.io/astronomer/ap-pgbouncer
     tag: 0.11.0
     pullPolicy: IfNotPresent
   pgbouncerExporter:
-    repository: astronomerinc/ap-pgbouncer-exporter
+    repository: quay.io/astronomer/ap-pgbouncer-exporter
     tag: 0.11.0
     pullPolicy: IfNotPresent
 
@@ -169,7 +169,7 @@ workers:
     pollingInterval: 5
 
     # How many seconds KEDA will wait before scaling to zero.
-    # Note that HPA has a seperate cooldwon period for scale-downs
+    # Note that HPA has a separate cooldwon period for scale-downs
     cooldownPeriod: 30
 
   persistence:
@@ -309,7 +309,7 @@ pgbouncer:
   # Maximum clients that can connect to pgbouncer (higher = more file descriptors)
   maxClientConn: 100
 
-  # Pgbouner pod disruption budget
+  # Pgbouncer pod disruption budget
   podDisruptionBudget:
     enabled: false
 

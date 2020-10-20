@@ -92,7 +92,7 @@ helm upgrade my-release . \
 ## Docker Images
 
 * The Airflow image that are referenced as the default values in this chart are generated from this repository: https://github.com/astronomer/ap-airflow.
-* Other non-airflow images used in this chart are generted from this repository: https://github.com/astronomer/ap-vendor.
+* Other non-airflow images used in this chart are generated from this repository: https://github.com/astronomer/ap-vendor.
 
 ## Parameters
 
@@ -120,24 +120,24 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `airflowVersion`                                      | Default Airflow image version                                                                                | `1.10.5`                                          |
 | `executor`                                            | Airflow executor (eg SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor)                  | `KubernetesExecutor`                              |
 | `allowPodLaunching`                                   | Allow airflow pods to talk to Kubernetes API to launch more pods                                             | `true`                                            |
-| `defaultAirflowRepository`                            | Fallback docker repository to pull airflow image from                                                        | `astronomerinc/ap-airflow`                        |
+| `defaultAirflowRepository`                            | Fallback docker repository to pull airflow image from                                                        | `quay.io/astronomer/ap-airflow`                   |
 | `defaultAirflowTag`                                   | Fallback docker image tag to deploy                                                                          | `1.10.7-alpine3.10`                               |
-| `images.airflow.repository`                           | Docker repository to pull image from. Update this to deploy a custom image                                   | `astronomerinc/ap-airflow`                        |
+| `images.airflow.repository`                           | Docker repository to pull image from. Update this to deploy a custom image                                   | `quay.io/astronomer/ap-airflow`                   |
 | `images.airflow.tag`                                  | Docker image tag to pull image from. Update this to deploy a new custom image tag                            | `~`                                               |
 | `images.airflow.pullPolicy`                           | PullPolicy for airflow image                                                                                 | `IfNotPresent`                                    |
-| `images.flower.repository`                            | Docker repository to pull image from. Update this to deploy a custom image                                   | `astronomerinc/ap-airflow`                        |
+| `images.flower.repository`                            | Docker repository to pull image from. Update this to deploy a custom image                                   | `quay.io/astronomer/ap-airflow`                   |
 | `images.flower.tag`                                   | Docker image tag to pull image from. Update this to deploy a new custom image tag                            | `~`                                               |
 | `images.flower.pullPolicy`                            | PullPolicy for flower image                                                                                  | `IfNotPresent`                                    |
-| `images.statsd.repository`                            | Docker repository to pull image from. Update this to deploy a custom image                                   | `astronomerinc/ap-statsd-exporter`                |
+| `images.statsd.repository`                            | Docker repository to pull image from. Update this to deploy a custom image                                   | `quay.io/astronomer/ap-statsd-exporter`           |
 | `images.statsd.tag`                                   | Docker image tag to pull image from. Update this to deploy a new custom image tag                            | `~`                                               |
 | `images.statsd.pullPolicy`                            | PullPolicy for statsd-exporter image                                                                         | `IfNotPresent`                                    |
-| `images.redis.repository`                             | Docker repository to pull image from. Update this to deploy a custom image                                   | `astronomerinc/ap-redis`                          |
+| `images.redis.repository`                             | Docker repository to pull image from. Update this to deploy a custom image                                   | `quay.io/astronomer/ap-redis`                     |
 | `images.redis.tag`                                    | Docker image tag to pull image from. Update this to deploy a new custom image tag                            | `~`                                               |
 | `images.redis.pullPolicy`                             | PullPolicy for redis image                                                                                   | `IfNotPresent`                                    |
-| `images.pgbouncer.repository`                         | Docker repository to pull image from. Update this to deploy a custom image                                   | `astronomerinc/ap-pgbouncer`                      |
+| `images.pgbouncer.repository`                         | Docker repository to pull image from. Update this to deploy a custom image                                   | `quay.io/astronomer/ap-pgbouncer`                 |
 | `images.pgbouncer.tag`                                | Docker image tag to pull image from. Update this to deploy a new custom image tag                            | `~`                                               |
 | `images.pgbouncer.pullPolicy`                         | PullPolicy for pgbouncer image                                                                               | `IfNotPresent`                                    |
-| `images.pgbouncerExporter.repository`                 | Docker repository to pull image from. Update this to deploy a custom image                                   | `astronomerinc/ap-pgbouncer-exporter`             |
+| `images.pgbouncerExporter.repository`                 | Docker repository to pull image from. Update this to deploy a custom image                                   | `quay.io/astronomer/ap-pgbouncer-exporter`        |
 | `images.pgbouncerExporter.tag`                        | Docker image tag to pull image from. Update this to deploy a new custom image tag                            | `~`                                               |
 | `images.pgbouncerExporter.pullPolicy`                 | PullPolicy for pgbouncer-exporter image                                                                      | `IfNotPresent`                                    |
 | `env`                                                 | Environment variables key/values to mount into Airflow pods                                                  | `[]`                                              |
@@ -147,7 +147,7 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `data.metadataConection`                              | Field separated connection data (alternative to secret name)                                                 | `{}`                                              |
 | `data.resultBackendConnection`                        | Field separated connection data (alternative to secret name)                                                 | `{}`                                              |
 | `fernetKey`                                           | String representing an Airflow fernet key                                                                    | `~`                                               |
-| `fernetKeySecretName`                                 | Secret name for Airlow fernet key                                                                            | `~`                                               |
+| `fernetKeySecretName`                                 | Secret name for Airflow fernet key                                                                           | `~`                                               |
 | `workers.replicas`                                    | Replica count for Celery workers (if applicable)                                                             | `1`                                               |
 | `workers.keda.enabled`                                | Enable KEDA autoscaling features                                                                             | `false`                                           |
 | `workers.keda.pollingInverval`                        | How often KEDA should poll the backend database for metrics in seconds                                       | `5`                                               |
@@ -205,7 +205,7 @@ helm install --name my-release \
 KEDA stands for Kubernetes Event Driven Autoscaling. [KEDA](https://github.com/kedacore/keda) is a custom controller that allows users to create custom bindings
 to the Kubernetes [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
 We've built an experimental scaler that allows users to create scalers based on postgreSQL queries. For the moment this exists
-on a seperate branch, but will be merged upstream soon. To install our custom version of KEDA on your cluster, please run
+on a separate branch, but will be merged upstream soon. To install our custom version of KEDA on your cluster, please run
 
 ```bash
 helm repo add kedacore https://kedacore.github.io/charts
@@ -275,7 +275,7 @@ helm list -n airflow
 ```
 
 Run `kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow`
-to port-forward the Airflow UI to http://localhost:8080/ to cofirm Airflow is working.
+to port-forward the Airflow UI to http://localhost:8080/ to confirm Airflow is working.
 
 **Build a Docker image from your DAGs:**
 
