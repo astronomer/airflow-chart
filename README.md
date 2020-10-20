@@ -264,7 +264,7 @@ helm repo update
 
 ```
 kubectl create namespace airflow
-helm install airflow --n airflow astronomer/airflow
+helm install airflow -n airflow astronomer/airflow
 ```
 
 It may take a few minutes. Confirm the pods are up:
