@@ -2,8 +2,9 @@
 ## Airflow Worker Deployment
 #################################
 {{- $persistence := .Values.workers.persistence.enabled }}
+{{- $additionalVolume := .Values.workers.additionalVolume }}
 {{- if eq .Values.executor "CeleryExecutor" }}
-kind: {{ if $persistence }}StatefulSet{{ else }}Deployment{{ end }}
+kind: {{ if or $persistence $additionalVolume.enabled }}StatefulSet{{ else }}Deployment{{ end }}
 apiVersion: apps/v1
 metadata:
   name: {{ .Release.Name }}-worker
@@ -17,7 +18,7 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
-{{- if $persistence }}
+{{- if or $persistence $additionalVolume.enabled }}
   serviceName: {{ .Release.Name }}-worker
 {{- end }}
   replicas: {{ .Values.workers.replicas }}
@@ -103,9 +104,10 @@ spec:
             - name: worker-logs
               containerPort: {{ .Values.ports.workerLogs }}
           volumeMounts:
-          {{- if .Values.workers.additionalVolumeMounts }}
-          {{- toYaml .Values.workers.additionalVolumeMounts | nindent 12 }}
-          {{- end }}
+{{- if $additionalVolume.enabled }}
+            - name: worker-volume
+              mountPath: {{ $additionalVolume.mountPath }}
+{{- end }}
             - name: logs
               mountPath: {{ template "airflow_logs" . }}
             - name: config
@@ -126,9 +128,11 @@ spec:
               mountPath: {{ template "airflow_logs" . }}
 {{- end }}
       volumes:
-      {{- if .Values.workers.additionalVolumes }}
-      {{- toYaml .Values.workers.additionalVolumes | nindent 8 }}
-      {{- end }}
+{{- if $additionalVolume.enabled }}
+        - name: worker-volume
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-worker-claim
+{{- end }}
         - name: config
           configMap:
             name: {{ template "airflow_config" . }}
