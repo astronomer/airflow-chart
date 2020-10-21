@@ -1,5 +1,5 @@
 {{- $additionalVolume := .Values.workers.additionalVolume }}
-{{- if $additionalVolume.enabled }}
+{{- if and $additionalVolume.enabled (eq .Values.executor "CeleryExecutor")}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
