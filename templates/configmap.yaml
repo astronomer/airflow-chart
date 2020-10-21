@@ -128,7 +128,7 @@ data:
     {{ .Values.scheduler.airflowLocalSettings | nindent 4 }}
 {{- else }}
   airflow_local_settings.py: |
-    {{- if semverCompare ">=1.10.12" .Values.airflowVersion }}
+    {{- if semverCompare "<=1.10.12" .Values.airflowVersion }}
 
     from airflow.contrib.kubernetes.pod import Pod
     from airflow.configuration import conf
