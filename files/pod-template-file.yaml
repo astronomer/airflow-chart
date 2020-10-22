@@ -45,10 +45,10 @@ spec:
   {{- end }}
   restartPolicy: Never
   securityContext:
-  {{- if contains "buster"  .Values.defaultAirflowTag }}
-    runAsUser: 50000
-  {{- else }}
+  {{- if contains "alpine"  .Values.defaultAirflowTag }}
     runAsUser: 100
+  {{- else }}
+    runAsUser: 50000
   {{- end }}
   nodeSelector:
     {{ toYaml .Values.nodeSelector | indent 8 }}
