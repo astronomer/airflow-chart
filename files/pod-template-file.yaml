@@ -1,5 +1,5 @@
 ---
-# Are we using a local/sequenial executor?
+# Are we using a local/sequential executor?
 {{- $local := or (eq .Values.executor "LocalExecutor") (eq .Values.executor "SequentialExecutor") }}
 # Are we using the kubernetes executor?
 {{- $kube := eq .Values.executor "KubernetesExecutor" }}
