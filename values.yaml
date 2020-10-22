@@ -261,6 +261,12 @@ webserver:
     #   cpu: 100m
     #   memory: 128Mi
 
+  # This setting can overwrite
+  # webserver_config.py - be sure
+  # to reference the default if you
+  # are making use of those settings.
+  webserverConfig: ~
+
   # Secret that contains the cert to verify JWTs
   jwtSigningCertificateSecretName: ~
 
