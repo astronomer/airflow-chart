@@ -1,4 +1,7 @@
 ---
+# If we're using a StatefulSet
+{{- $stateful := and $local $persistence }}
+
 apiVersion: v1
 kind: Pod
 metadata:
@@ -48,3 +51,19 @@ spec:
   - configMap:
       name: {{ include "airflow_config" . }}
     name: airflow-local-settings
+{{- if not $stateful }}
+- name: logs
+  emptyDir: {}
+{{- else }}
+volumeClaimTemplates:
+  - metadata:
+      name: logs
+    spec:
+    {{- if .Values.workers.persistence.storageClassName }}
+    storageClassName: {{ .Values.workers.persistence.storageClassName }}
+    {{- end }}
+    accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: {{ .Values.workers.persistence.size }}
+  {{- end }}
