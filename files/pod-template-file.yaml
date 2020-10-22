@@ -1,6 +1,15 @@
 ---
+# Are we using a local/sequenial executor?
+{{- $local := or (eq .Values.executor "LocalExecutor") (eq .Values.executor "SequentialExecutor") }}
+# Are we using the kubernetes executor?
+{{- $kube := eq .Values.executor "KubernetesExecutor" }}
+# Is persistence enabled on the _workers_?
+# This is important because in $local mode, the scheduler assumes the role of the worker
+{{- $persistence := .Values.workers.persistence.enabled }}
 # If we're using a StatefulSet
 {{- $stateful := and $local $persistence }}
+# If we're using elasticsearch logging
+{{- $elasticsearch := .Values.elasticsearch.enabled }}
 
 apiVersion: v1
 kind: Pod
@@ -52,11 +61,11 @@ spec:
       name: {{ include "airflow_config" . }}
     name: airflow-local-settings
 {{- if not $stateful }}
-- name: logs
-  emptyDir: {}
+  - name: logs
+    emptyDir: {}
 {{- else }}
-volumeClaimTemplates:
-  - metadata:
+  volumeClaimTemplates:
+    - metadata:
       name: logs
     spec:
     {{- if .Values.workers.persistence.storageClassName }}
@@ -66,4 +75,4 @@ volumeClaimTemplates:
     resources:
       requests:
         storage: {{ .Values.workers.persistence.size }}
-  {{- end }}
+{{- end }}
