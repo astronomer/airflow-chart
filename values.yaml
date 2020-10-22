@@ -192,7 +192,7 @@ workers:
     capacity: ~
     storageClassName:
     mountPath: ~
-    volumePlugin: []
+    volumePlugin: {}
 
   resources: {}
   #  limits:
