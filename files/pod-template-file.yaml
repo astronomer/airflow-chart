@@ -45,7 +45,7 @@ spec:
   {{- end }}
   restartPolicy: Never
   securityContext:
-  {{- if contains "buster"  .Values.images.airflow.tag }}
+  {{- if contains "buster"  .Values.defaultAirflowTag }}
     runAsUser: 50000
   {{- else }}
     runAsUser: 100
