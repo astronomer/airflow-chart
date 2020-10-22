@@ -128,7 +128,7 @@ data:
     {{ .Values.scheduler.airflowLocalSettings | nindent 4 }}
 {{- else }}
   airflow_local_settings.py: |
-    {{- if semverCompare "<=1.10.12" .Values.airflowVersion }}
+    {{- if semverCompare "<1.10.12" .Values.airflowVersion }}
 
     from airflow.contrib.kubernetes.pod import Pod
     from airflow.configuration import conf
@@ -170,8 +170,8 @@ data:
             extra_labels["kubernetes_pod_operator"] = "True"
 
         pod.metadata.labels.update(extra_labels)
-        pod.metadata.tolerations += {{ toJson .Values.podMutation.tolerations }}
-        pod.metadata.affinity.update({{ toJson .Values.podMutation.affinity }})
+        pod.spec.tolerations += {{ toJson .Values.podMutation.tolerations }}
+        pod.spec.affinity.update({{ toJson .Values.podMutation.affinity }})
     {{- end }}
 {{- end }}
 {{- if eq .Values.executor "KubernetesExecutor" }}
