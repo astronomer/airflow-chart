@@ -45,7 +45,11 @@ spec:
   {{- end }}
   restartPolicy: Never
   securityContext:
-    runAsUser: {{ .Values.uid }}
+  {{- if contains "buster"  .Values.images.airflow.tag }}
+    runAsUser: 50000
+  {{- else }}
+    runAsUser: 100
+  {{- end }}
   nodeSelector:
     {{ toYaml .Values.nodeSelector | indent 8 }}
   affinity:
@@ -61,12 +65,12 @@ spec:
       name: {{ include "airflow_config" . }}
     name: airflow-local-settings
 {{- if not $stateful }}
-  - name: logs
+  - name: airflow-logs
     emptyDir: {}
 {{- else }}
   volumeClaimTemplates:
     - metadata:
-      name: logs
+      name: airflow-logs
     spec:
     {{- if .Values.workers.persistence.storageClassName }}
     storageClassName: {{ .Values.workers.persistence.storageClassName }}

@@ -75,6 +75,7 @@ data:
     worker_container_image_pull_policy = {{ .Values.images.airflow.pullPolicy }}
     dags_in_image = True
     delete_worker_pods = True
+    delete_on_success = False
     {{- if semverCompare ">=1.10.12" .Values.airflowVersion }}
     pod_template_file = {{ include "airflow_pod_template_file" . }}/pod_template_file.yaml
     {{- else }}
@@ -170,8 +171,16 @@ data:
             extra_labels["kubernetes_pod_operator"] = "True"
 
         pod.metadata.labels.update(extra_labels)
-        pod.spec.tolerations += {{ toJson .Values.podMutation.tolerations }}
-        pod.spec.affinity.update({{ toJson .Values.podMutation.affinity }})
+        if pod.spec.tolerations:
+            pod.spec.tolerations += {{ toJson .Values.podMutation.tolerations }}
+        else:
+            pod.spec.tolerations = {{ toJson .Values.podMutation.tolerations }}
+
+        if pod.spec.affinity:
+            pod.spec.affinity = pod.spec.affinity.to_dict().update({{ toJson .Values.podMutation.affinity }})
+        else:
+            pod.spec.affinity = {{ toJson .Values.podMutation.affinity }}
+
     {{- end }}
 {{- end }}
 {{- if eq .Values.executor "KubernetesExecutor" }}
