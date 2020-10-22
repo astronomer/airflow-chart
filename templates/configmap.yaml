@@ -75,7 +75,6 @@ data:
     worker_container_image_pull_policy = {{ .Values.images.airflow.pullPolicy }}
     dags_in_image = True
     delete_worker_pods = True
-    delete_on_success = False
     {{- if semverCompare ">=1.10.12" .Values.airflowVersion }}
     pod_template_file = {{ include "airflow_pod_template_file" . }}/pod_template_file.yaml
     {{- else }}
