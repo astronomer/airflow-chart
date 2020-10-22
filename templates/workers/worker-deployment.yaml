@@ -4,7 +4,7 @@
 {{- $persistence := .Values.workers.persistence.enabled }}
 {{- $additionalVolume := .Values.workers.additionalVolume }}
 {{- if eq .Values.executor "CeleryExecutor" }}
-kind: {{ if or $persistence $additionalVolume.enabled }}StatefulSet{{ else }}Deployment{{ end }}
+kind: {{ if $persistence }}StatefulSet{{ else }}Deployment{{ end }}
 apiVersion: apps/v1
 metadata:
   name: {{ .Release.Name }}-worker
@@ -18,7 +18,7 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
-{{- if or $persistence $additionalVolume.enabled }}
+{{- if $persistence }}
   serviceName: {{ .Release.Name }}-worker
 {{- end }}
   replicas: {{ .Values.workers.replicas }}
