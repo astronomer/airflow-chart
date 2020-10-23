@@ -23,4 +23,3 @@ subjects:
     name: {{ .Release.Name }}-cleanup-serviceaccount
     namespace: {{ .Release.Namespace }}
 {{- end }}
-
