@@ -2,6 +2,8 @@
 # shellcheck disable=SC1091,SC2181
 set -e
 
+PATH="/tmp/bin:$PATH"
+
 function get_debugging_info {
   echo "Failed to deploy Airflow!"
   echo "Printing description and logs where containers in pod are not ready..."
