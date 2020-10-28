@@ -1,12 +1,9 @@
 #!/bin/bash
 set -e
 
-# Common bash line that sets DIR to the directory of this script
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-# The path to the working directory - the root of the repo
-REPO_DIR=$DIR/../
+REPO_DIR="$(git rev-parse --show-toplevel)"
 
-source $DIR/clean-slate
+"$REPO_DIR/bin/clean-slate"
 
 echo "Deploying Airflow..."
 
@@ -16,7 +13,7 @@ fi
 
 helm install \
   -n airflow \
-  --set executor=$EXECUTOR \
+  --set executor="$EXECUTOR" \
   --set workers.persistence.fixPermissions=true \
   airflow \
-  $REPO_DIR
+  "$REPO_DIR"
