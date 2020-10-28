@@ -62,7 +62,7 @@ jobs:
 
   build-artifact:
     docker:
-      - image: alpine/helm:3.2.4
+      - image: quay.io/astronomer/ci-helm-release:2020-10-27
     steps:
       - checkout
       - run:
@@ -97,8 +97,8 @@ jobs:
             HELM_CHART_PATH='/tmp/workspace/airflow-*.tgz' bin/run-ci
 
   release:
-    machine:
-      image: ubuntu-2004:202008-01
+    docker:
+      - image: quay.io/astronomer/ci-helm-release:2020-10-27
     steps:
       - attach_workspace:
           at: /tmp/workspace
@@ -106,14 +106,7 @@ jobs:
       - publish-github-release
       - run:
           name: Release the Airflow chart
-          command: |
-            set -e
-            sudo apt-get update && sudo apt-get install -y ca-certificates curl
-            pyenv global 3.8.5
-            # Make sure gcloud doesn't try to use python2 - pyenv installs a
-            # "stub" version that won't work unless we install it
-            export CLOUDSDK_PYTHON="$(pyenv which python)"
-            HELM_CHART_PATH='/tmp/workspace/airflow-*.tgz' bin/release
+          command: bin/release /tmp/workspace/airflow-*.tgz
 
 commands:
   publish-github-release:
