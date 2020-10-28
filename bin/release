@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -8,14 +8,16 @@ if [[ -z "$1" ]] || [[ "${#@}" -ne 1 ]]  ; then
   exit 1
 fi
 
+helm_chart="$1"
+
 helm repo add stable https://kubernetes-charts.storage.googleapis.com
 
 rm -rf /tmp/airflow-chart-release || true
 mkdir -p /tmp/airflow-chart-release
 cd /tmp/airflow-chart-release
 
-cp "$HELM_CHART_PATH" .
-tar -xvzf "$HELM_CHART_PATH" --directory .
+cp "$helm_chart" .
+tar -xvzf "$helm_chart" --directory .
 
 echo ""
 echo "========================="
@@ -43,7 +45,7 @@ set -xe
 # Set up the index.html file
 wget https://helm.astronomer.io/index.yaml -O /tmp/index.yaml.current
 helm repo index . --url https://helm.astronomer.io --merge /tmp/index.yaml.current
-gsutil cp "$HELM_CHART_PATH" gs://helm.astronomer.io
+gsutil cp "$helm_chart" gs://helm.astronomer.io
 gsutil cp -h "Cache-Control: public, max-age=300" ./index.yaml gs://helm.astronomer.io
 
 set +x
