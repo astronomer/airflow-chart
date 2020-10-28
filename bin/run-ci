@@ -44,6 +44,7 @@ set -x
 
 export EXECUTOR="${EXECUTOR:-CeleryExecutor}"
 
+# shellcheck disable=SC2086
 helm install \
   -n airflow \
   --set executor="$EXECUTOR" \
@@ -53,7 +54,7 @@ helm install \
   --set data.metadataConnection.host="airflow-postgresql.airflow.svc.cluster.local" \
   --set data.resultBackendConnection.host="airflow-postgresql.airflow.svc.cluster.local" \
   airflow \
-  "$HELM_CHART_PATH"
+  $HELM_CHART_PATH
 
 if [[ $? -ne 0 ]] ; then
   echo "Helm chart failed to install"
