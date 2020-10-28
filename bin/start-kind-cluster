@@ -9,7 +9,7 @@ kind create cluster --image "kindest/node:v${KUBE_VERSION}"
 # fails rarely, but since we are running
 # many in parallel, that it happens
 # enough to justify a retry
-if ! [[ $? -eq 0 ]]; then
+if [[ $? -ne 0 ]] ; then
   set -e
   echo "Failed to create Kind cluster, trying one more time"
   kind delete cluster || true
