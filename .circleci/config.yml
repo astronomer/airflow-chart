@@ -94,6 +94,7 @@ jobs:
             pyenv global 3.8.5
             export KUBE_VERSION=<< parameters.kube_version >>
             export EXECUTOR=<< parameters.executor >>
+            bin/install-ci-tools
             HELM_CHART_PATH='/tmp/workspace/airflow-*.tgz' bin/run-ci
 
   release:
