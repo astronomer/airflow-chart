@@ -26,9 +26,11 @@ spec:
         tier: airflow
         component: run-airflow-migrations
         release: {{ .Release.Name }}
+      {{- if .Values.runMigrationsJobAnnotations }}
       annotations:
         {{- range $k, $v := .Values.runMigrationsJobAnnotations }}
         {{ $k | quote }}: {{ tpl $v $ctx | toYaml }}
+    {{- end }}
     {{- end }}
     spec:
       securityContext:
