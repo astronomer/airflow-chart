@@ -102,6 +102,7 @@ jobs:
             export EXECUTOR=<< parameters.executor >>
             HELM_CHART_PATH=$(find /tmp/workspace/ -name 'airflow-*.tgz')
             export HELM_CHART_PATH
+            bin/install-ci-tools
             bin/run-ci
 
   release-internal:
