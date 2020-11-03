@@ -5,11 +5,18 @@ set -uex
 
 app_version=$(awk '$1 == "airflowVersion:" {print $2}' values.yaml)
 
+rm -rf /tmp/airflow-chart-package || true
+mkdir /tmp/airflow-chart-package
+cd /tmp/airflow-chart-package
+
+helm repo add stable https://charts.helm.sh/stable
+cp -R "${OLDPWD}" airflow
+
 if [[ "${CIRCLE_JOB}" == "build-and-release-prod" ]] ; then
   : "Doing public release for CIRCLE_BUILD_NUM $CIRCLE_BUILD_NUM"
   helm_repo="helm.astronomer.io"
   extra_args=()
-  version=$(awk '$1 ~ /^version/ {printf $2}' Chart.yaml)
+  version=$(awk '$1 ~ /^version/ {printf $2}' airflow/Chart.yaml)
   filename="airflow-${version}.tgz"
   max_age=300
 
@@ -20,18 +27,13 @@ if [[ "${CIRCLE_JOB}" == "build-and-release-prod" ]] ; then
 else
   : "Doing internal release for CIRCLE_BUILD_NUM $CIRCLE_BUILD_NUM"
   helm_repo="internal-helm.astronomer.io"
-  version=$(awk '$1 ~ /^version/ {printf "%s-build%s\n", $2, ENVIRON["CIRCLE_BUILD_NUM"]}' Chart.yaml)
+  version=$(awk '$1 ~ /^version/ {printf "%s-build%s\n", $2, ENVIRON["CIRCLE_BUILD_NUM"]}' airflow/Chart.yaml)
   filename="airflow-${version}.tgz"
   extra_args=( '--version' "${version}" )
   max_age=60
+  sed -i "s#^description: .*#description: ${CIRCLE_BRANCH} ${CIRCLE_BUILD_URL}" airflow/Chart.yaml
 fi
 
-rm -rf /tmp/airflow-chart-package || true
-mkdir /tmp/airflow-chart-package
-cd /tmp/airflow-chart-package
-
-helm repo add stable https://charts.helm.sh/stable
-cp -R "${OLDPWD}" airflow
 helm3 package airflow --dependency-update --app-version "${app_version}" "${extra_args[@]}"
 
 curl -sSLo "index-orig.yaml" https://${helm_repo}/index.yaml
