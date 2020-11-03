@@ -6,34 +6,38 @@ workflows:
     jobs:
       - lint
       - unittest-charts
-      - build-artifact:
+
+      - build-and-release-internal:
           requires:
           - lint
           - unittest-charts
+
       - airflow-test:
           matrix:
             parameters:
-              kube_version: ["1.14.10", "1.15.7", "1.16.4", "1.17.2", "1.18.2"]
+              # https://hub.docker.com/r/kindest/node/tags
+              kube_version: ["1.14.10", "1.15.12", "1.16.15", "1.17.11", "1.18.8"]
               executor: ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
           requires:
-          - build-artifact
+          - build-and-release-internal
 
-      - approve-release:
+      - approve-release-prod:
           type: approval
           requires:
             - 'airflow-test'
           filters:
             branches:
               only:
-                - '/release-.*/'
+                - '/release-[0-9]+\.[0-9]+/'
 
-      - release:
+      - build-and-release-prod:
           requires:
-            - approve-release
+            - approve-release-prod
           filters:
             branches:
               only:
-                - '/release-.*/'
+                - '/release-[0-9]+\.[0-9]+/'
+
 jobs:
   lint:
     docker:
@@ -60,14 +64,14 @@ jobs:
             cp files/pod-template-file.yaml templates
             helm unittest .
 
-  build-artifact:
+  build-and-release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2020-10-27
+      - image: quay.io/astronomer/ci-helm-release:2020-11-02
     steps:
       - checkout
       - run:
-          name: Package the Airflow chart
-          command: bin/package
+          name: Package and release to internal
+          command: bin/package-and-release
       - persist_to_workspace:
           root: /tmp/airflow-chart-package
           paths:
@@ -83,7 +87,7 @@ jobs:
         default: "LocalExecutor"
       kube_version:
         type: string
-        default: "1.18.2"
+        default: "1.18.8"
     steps:
       - attach_workspace:
           at: /tmp/workspace
@@ -94,20 +98,28 @@ jobs:
             pyenv global 3.8.5
             export KUBE_VERSION=<< parameters.kube_version >>
             export EXECUTOR=<< parameters.executor >>
-            bin/install-ci-tools
-            HELM_CHART_PATH='/tmp/workspace/airflow-*.tgz' bin/run-ci
+            HELM_CHART_PATH=$(find /tmp/workspace/ -name 'airflow-*.tgz')
+            export HELM_CHART_PATH
+            bin/run-ci
 
-  release:
+  release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2020-10-27
+      - image: quay.io/astronomer/ci-helm-release:2020-11-02
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
+      - checkout
+      - run:
+          name: Release the Airflow chart to internal
+          command: bin/package-and-release
+
+  build-and-release-prod:
+    docker:
+      - image: quay.io/astronomer/ci-helm-release:2020-11-02
+    steps:
       - checkout
       - publish-github-release
       - run:
-          name: Release the Airflow chart
-          command: bin/release /tmp/workspace/airflow-*.tgz
+          name: Package and release to internal
+          command: bin/package-and-release
 
 commands:
   publish-github-release:

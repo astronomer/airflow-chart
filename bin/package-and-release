@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1090
+# https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
+set -uex
+
+if [[ "${CIRCLE_JOB}" == "build-and-publish-public" ]] ; then
+  : "Doing public release for CIRCLE_BUILD_NUM $CIRCLE_BUILD_NUM"
+  helm_repo="helm.astronomer.io"
+  extra_args=()
+  version=$(awk '$1 ~ /^version/ {printf $2}' Chart.yaml)
+  filename="airflow-${version}.tgz"
+  max_age=300
+
+  if gsutil -q stat "gs://${helm_repo}/${filename}" ; then
+    echo "ABORT: destination file ${filename} already exists. Did you forget to bump the chart version number in Chart.yaml?"
+    exit 1
+  fi
+else
+  : "Doing internal release for CIRCLE_BUILD_NUM $CIRCLE_BUILD_NUM"
+  helm_repo="internal-helm.astronomer.io"
+  version=$(awk '$1 ~ /^version/ {printf "%s-build%s\n", $2, ENVIRON["CIRCLE_BUILD_NUM"]}' Chart.yaml)
+  filename="airflow-${version}.tgz"
+  extra_args=( '--version' "${version}" )
+  max_age=60
+fi
+
+rm -rf /tmp/airflow-chart-package || true
+mkdir /tmp/airflow-chart-package
+cd /tmp/airflow-chart-package
+
+helm repo add stable https://charts.helm.sh/stable
+cp -R "${OLDPWD}" airflow
+helm3 package airflow --dependency-update "${extra_args[@]}"
+
+curl -sSLo "index-orig.yaml" https://${helm_repo}/index.yaml
+helm3 repo index . --url "https://${helm_repo}" --merge "index-orig.yaml"
+
+echo "${GCP_TOKEN}" > /tmp/gcs_token.json
+gcloud auth activate-service-account --key-file=/tmp/gcs_token.json
+
+gsutil cp "${filename}" "gs://${helm_repo}/"
+gsutil -h "Cache-Control: public, max-age=${max_age}" cp index.yaml "gs://${helm_repo}/"
