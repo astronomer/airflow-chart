@@ -31,7 +31,7 @@ else
   filename="airflow-${version}.tgz"
   extra_args=( '--version' "${version}" )
   max_age=60
-  sed -i "s#^description: .*#description: ${CIRCLE_BRANCH} ${CIRCLE_BUILD_URL}" airflow/Chart.yaml
+  sed -i "s#^description: .*#description: ${CIRCLE_BRANCH} ${CIRCLE_BUILD_URL}#" airflow/Chart.yaml
 fi
 
 helm3 package airflow --dependency-update --app-version "${app_version}" "${extra_args[@]}"
