@@ -29,7 +29,6 @@ workflows:
             branches:
               only:
                 - '/release-[0-9]+\.[0-9]+/'
-                - 1997-push-to-internal-helm
 
       - build-and-release-prod:
           requires:
@@ -38,7 +37,6 @@ workflows:
             branches:
               only:
                 - '/release-[0-9]+\.[0-9]+/'
-                - 1997-push-to-internal-helm
 
 jobs:
   lint:
