@@ -5,7 +5,7 @@ set -uex
 
 app_version=$(awk '$1 == "airflowVersion:" {print $2}' values.yaml)
 
-if [[ "${CIRCLE_JOB}" == "build-and-publish-public" ]] ; then
+if [[ "${CIRCLE_JOB}" == "build-and-release-prod" ]] ; then
   : "Doing public release for CIRCLE_BUILD_NUM $CIRCLE_BUILD_NUM"
   helm_repo="helm.astronomer.io"
   extra_args=()
