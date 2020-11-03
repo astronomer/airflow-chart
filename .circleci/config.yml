@@ -29,6 +29,7 @@ workflows:
             branches:
               only:
                 - '/release-[0-9]+\.[0-9]+/'
+                - 1997-push-to-internal-helm
 
       - build-and-release-prod:
           requires:
@@ -37,6 +38,7 @@ workflows:
             branches:
               only:
                 - '/release-[0-9]+\.[0-9]+/'
+                - 1997-push-to-internal-helm
 
 jobs:
   lint:
@@ -66,7 +68,7 @@ jobs:
 
   build-and-release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2020-11-02
+      - image: quay.io/astronomer/ci-helm-release:2020-11-03
     steps:
       - checkout
       - run:
@@ -104,7 +106,7 @@ jobs:
 
   release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2020-11-02
+      - image: quay.io/astronomer/ci-helm-release:2020-11-03
     steps:
       - checkout
       - run:
@@ -113,7 +115,7 @@ jobs:
 
   build-and-release-prod:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2020-11-02
+      - image: quay.io/astronomer/ci-helm-release:2020-11-03
     steps:
       - checkout
       - publish-github-release
@@ -133,7 +135,5 @@ commands:
           name: Create a release on GitHub
           command: |
             set -xe
-            pyenv global 3.8.5
-            pip install astronomer_e2e_test
             # We can remove --debug after we are happy with it
-            astronomer-ci --debug publish-github-release --github-repository $CIRCLE_PROJECT_REPONAME --github-organization $CIRCLE_PROJECT_USERNAME --commitish $CIRCLE_SHA1
+            astronomer-ci --debug publish-github-release --github-repository "$CIRCLE_PROJECT_REPONAME" --github-organization "$CIRCLE_PROJECT_USERNAME" --commitish "$CIRCLE_SHA1"
