@@ -3,6 +3,8 @@
 # https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
 set -uex
 
+app_version=$(awk '$1 == "airflowVersion:" {print $2}' values.yaml)
+
 if [[ "${CIRCLE_JOB}" == "build-and-publish-public" ]] ; then
   : "Doing public release for CIRCLE_BUILD_NUM $CIRCLE_BUILD_NUM"
   helm_repo="helm.astronomer.io"
@@ -30,7 +32,7 @@ cd /tmp/airflow-chart-package
 
 helm repo add stable https://charts.helm.sh/stable
 cp -R "${OLDPWD}" airflow
-helm3 package airflow --dependency-update "${extra_args[@]}"
+helm3 package airflow --dependency-update --app-version "${app_version}" "${extra_args[@]}"
 
 curl -sSLo "index-orig.yaml" https://${helm_repo}/index.yaml
 helm3 repo index . --url "https://${helm_repo}" --merge "index-orig.yaml"
