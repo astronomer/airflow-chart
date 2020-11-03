@@ -150,6 +150,9 @@ data:
 fernetKey: ~
 fernetKeySecretName: ~
 
+#
+sccEnabled: false
+
 # Airflow Worker Config
 workers:
   # Number of airflow celery workers in StatefulSet
