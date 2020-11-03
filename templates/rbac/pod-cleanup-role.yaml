@@ -23,4 +23,3 @@ rules:
       - "list"
       - "delete"
 {{- end }}
-
