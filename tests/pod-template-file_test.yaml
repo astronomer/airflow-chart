@@ -8,9 +8,6 @@ tests:
       - isKind:
           of: Pod
       - equal:
-          path: spec.containers[0].image
-          value: dummy_image
-      - equal:
           path: spec.containers[0].name
           value: base
   - it: should add registry secrets
