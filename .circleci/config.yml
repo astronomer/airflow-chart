@@ -58,7 +58,7 @@ jobs:
           name: unittest the Airflow chart
           command: |
             apk add git bash
-            helm repo add stable https://kubernetes-charts.storage.googleapis.com
+            helm repo add stable https://charts.helm.sh/stable
             helm dep update
             helm plugin install https://github.com/astronomer/helm-unittest/
             cp files/pod-template-file.yaml templates
