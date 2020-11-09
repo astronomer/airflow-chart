@@ -38,6 +38,7 @@ allowHostIPC: false
 allowHostNetwork: false
 allowHostPID: false
 allowHostPorts: false
+allowPrivilegeEscalation: false
 allowPrivilegedContainer: false
 allowedCapabilities: null
 {{- end }}
