@@ -42,3 +42,11 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].args
           value: ["airflow", "celery", "worker"]
+  - it: "test"
+    set:
+      workers.additionalVolume:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers.volumeMount.name
+          value: "worker-volumedf"
