@@ -1,0 +1,20 @@
+---
+suite: Test templates/workers/worker-persistentvolume.yaml
+templates:
+  - templates/workers/worker-persistentvolume.yaml
+tests:
+  - it: should exist
+    set:
+      workers.additionalVolume.enabled: false
+    asserts:
+      - isKind:
+          of: PersistentVolume
+  - it: should not exist
+    set:
+      workers:
+        additionalVolume:
+          enabled: false
+    asserts:
+      - not: true
+        isKind:
+          of: PersistentVolume
