@@ -183,7 +183,7 @@ workers:
     # This is currently only needed in KinD, due to usage
     # of local-path provisioner.
     fixPermissions: false
-  
+
   # Attach additional volume to celery workers (such as a shared file system)
   additionalVolume:
     enabled: false
