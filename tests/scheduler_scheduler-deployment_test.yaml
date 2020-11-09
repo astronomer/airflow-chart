@@ -17,16 +17,16 @@ tests:
           value: 2
   - it: "should create one scheduler if replicas is not specified"
     set:
-      replicas: ~
+        replicas: ~
     asserts:
       - equal:
           path: spec.replicas
           value: 1
-  - it: "should have pod antiAffinity"
-    assert:
-      - equal:
-          path: deployment.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.topologyKey
-          value: "kubernetes.io/hostname"
+  # - it: "should have pod antiAffinity"
+  #   assert:
+  #     - equal:
+  #         path: deployment.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.topologyKey
+  #         value: "kubernetes.io/hostname"
 
   - it: "should wait for migrations"
     set:
