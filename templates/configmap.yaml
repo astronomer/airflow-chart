@@ -59,7 +59,7 @@ data:
     elasticsearch_write_stdout = True
     elasticsearch_json_format = True
     elasticsearch_log_id_template = {dag_id}_{task_id}_{execution_date}_{try_number}
-    
+
     [elasticsearch_configs]
     max_retries = 3
     timeout = 30
@@ -128,7 +128,7 @@ data:
     {{ .Values.scheduler.airflowLocalSettings | nindent 4 }}
 {{- else }}
   airflow_local_settings.py: |
-    {{- if semverCompare ">=1.10.12" .Values.airflowVersion }}
+    {{- if semverCompare "<1.10.12" .Values.airflowVersion }}
 
     from airflow.contrib.kubernetes.pod import Pod
     from airflow.configuration import conf
@@ -170,8 +170,16 @@ data:
             extra_labels["kubernetes_pod_operator"] = "True"
 
         pod.metadata.labels.update(extra_labels)
-        pod.metadata.tolerations += {{ toJson .Values.podMutation.tolerations }}
-        pod.metadata.affinity.update({{ toJson .Values.podMutation.affinity }})
+        if pod.spec.tolerations:
+            pod.spec.tolerations += {{ toJson .Values.podMutation.tolerations }}
+        else:
+            pod.spec.tolerations = {{ toJson .Values.podMutation.tolerations }}
+
+        if pod.spec.affinity:
+            pod.spec.affinity = pod.spec.affinity.to_dict().update({{ toJson .Values.podMutation.affinity }})
+        else:
+            pod.spec.affinity = {{ toJson .Values.podMutation.affinity }}
+
     {{- end }}
 {{- end }}
 {{- if eq .Values.executor "KubernetesExecutor" }}

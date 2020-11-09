@@ -6,34 +6,38 @@ workflows:
     jobs:
       - lint
       - unittest-charts
-      - build-artifact:
+
+      - build-and-release-internal:
           requires:
           - lint
           - unittest-charts
+
       - airflow-test:
           matrix:
             parameters:
-              kube_version: ["1.14.10", "1.15.7", "1.16.4", "1.17.2", "1.18.2"]
+              # https://hub.docker.com/r/kindest/node/tags
+              kube_version: ["1.14.10", "1.15.12", "1.16.15", "1.17.11", "1.18.8"]
               executor: ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
           requires:
-          - build-artifact
+          - build-and-release-internal
 
-      - approve-release:
+      - approve-release-prod:
           type: approval
           requires:
             - 'airflow-test'
           filters:
             branches:
               only:
-                - '/release-.*/'
+                - '/release-[0-9]+\.[0-9]+/'
 
-      - release:
+      - build-and-release-prod:
           requires:
-            - approve-release
+            - approve-release-prod
           filters:
             branches:
               only:
-                - '/release-.*/'
+                - '/release-[0-9]+\.[0-9]+/'
+
 jobs:
   lint:
     docker:
@@ -54,20 +58,20 @@ jobs:
           name: unittest the Airflow chart
           command: |
             apk add git bash
-            helm repo add stable https://kubernetes-charts.storage.googleapis.com
+            helm repo add stable https://charts.helm.sh/stable
             helm dep update
             helm plugin install https://github.com/astronomer/helm-unittest/
             cp files/pod-template-file.yaml templates
             helm unittest .
 
-  build-artifact:
+  build-and-release-internal:
     docker:
-      - image: alpine/helm:3.2.4
+      - image: quay.io/astronomer/ci-helm-release:2020-11-03
     steps:
       - checkout
       - run:
-          name: Package the Airflow chart
-          command: bin/package
+          name: Package and release to internal
+          command: bin/package-and-release
       - persist_to_workspace:
           root: /tmp/airflow-chart-package
           paths:
@@ -75,7 +79,7 @@ jobs:
 
   airflow-test:
     machine:
-      image: ubuntu-1604:201903-01
+      image: ubuntu-2004:202008-01
       resource_class: large
     parameters:
       executor:
@@ -83,7 +87,7 @@ jobs:
         default: "LocalExecutor"
       kube_version:
         type: string
-        default: "1.18.2"
+        default: "1.18.8"
     steps:
       - attach_workspace:
           at: /tmp/workspace
@@ -91,26 +95,32 @@ jobs:
       - run:
           name: Install Airflow chart
           command: |
-            pyenv global 3.7.0
+            pyenv global 3.8.5
             export KUBE_VERSION=<< parameters.kube_version >>
             export EXECUTOR=<< parameters.executor >>
-            HELM_CHART_PATH='/tmp/workspace/airflow-*.tgz' bin/run-ci
+            HELM_CHART_PATH=$(find /tmp/workspace/ -name 'airflow-*.tgz')
+            export HELM_CHART_PATH
+            bin/install-ci-tools
+            bin/run-ci
 
-  release:
-    machine:
-      image: ubuntu-1604:201903-01
+  release-internal:
+    docker:
+      - image: quay.io/astronomer/ci-helm-release:2020-11-03
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
+      - checkout
+      - run:
+          name: Release the Airflow chart to internal
+          command: bin/package-and-release
+
+  build-and-release-prod:
+    docker:
+      - image: quay.io/astronomer/ci-helm-release:2020-11-03
+    steps:
       - checkout
       - publish-github-release
       - run:
-          name: Release the Airflow chart
-          command: |
-            set -e
-            sudo apt-get update && sudo apt-get install -y ca-certificates curl
-            pyenv global 2.7.12
-            HELM_CHART_PATH='/tmp/workspace/airflow-*.tgz' bin/release
+          name: Package and release to internal
+          command: bin/package-and-release
 
 commands:
   publish-github-release:
@@ -124,7 +134,5 @@ commands:
           name: Create a release on GitHub
           command: |
             set -xe
-            pyenv global 3.7.0
-            pip install astronomer_e2e_test
             # We can remove --debug after we are happy with it
-            astronomer-ci --debug publish-github-release --github-repository $CIRCLE_PROJECT_REPONAME --github-organization $CIRCLE_PROJECT_USERNAME --commitish $CIRCLE_SHA1
+            astronomer-ci --debug publish-github-release --github-repository "$CIRCLE_PROJECT_REPONAME" --github-organization "$CIRCLE_PROJECT_USERNAME" --commitish "$CIRCLE_SHA1"

@@ -38,7 +38,7 @@ else
 fi
 
 # Add stable helm repo
-helm repo add stable https://kubernetes-charts.storage.googleapis.com
+helm repo add stable https://charts.helm.sh/stable
 
 echo "Installing the latest, stable kubectl..."
 if [[ -f /tmp/bin/kubectl ]]; then
