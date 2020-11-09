@@ -42,4 +42,3 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].args
           value: ["airflow", "celery", "worker"]
-
