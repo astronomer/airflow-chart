@@ -8,7 +8,17 @@ gid: 101
 
 # Select certain nodes for airflow pods.
 nodeSelector: {}
-affinity: {}
+affinity: 
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: component
+          operator: In
+          values:
+          - scheduler
+      topologyKey: "kubernetes.io/hostname"
+
 tolerations: []
 
 # Add common labels to all objects and pods defined in this chart.
