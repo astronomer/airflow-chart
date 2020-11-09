@@ -22,6 +22,12 @@ tests:
       - equal:
           path: spec.replicas
           value: 1
+  # - it: "should have pod antiAffinity"
+  #   assert:
+  #     - equal:
+  #         path: deployment.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.topologyKey
+  #         value: "kubernetes.io/hostname"
+
   - it: "should wait for migrations"
     set:
       executor: CeleryExecutor

@@ -9,6 +9,7 @@ gid: 101
 # Select certain nodes for airflow pods.
 nodeSelector: {}
 affinity: {}
+
 tolerations: []
 
 # Add common labels to all objects and pods defined in this chart.
@@ -233,6 +234,19 @@ scheduler:
   #   cpu: 100m
   #   memory: 128Mi
 
+  affinity: 
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: component
+              operator: In
+              values:
+              - scheduler
+          topologyKey: "kubernetes.io/hostname"
+          
   # This setting can overwrite
   # podMutation settings - be sure
   # to reference the default if you
