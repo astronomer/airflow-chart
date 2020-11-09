@@ -2,6 +2,7 @@
 ## Airflow Worker Deployment
 #################################
 {{- $persistence := .Values.workers.persistence.enabled }}
+{{- $additionalVolume := .Values.workers.additionalVolume }}
 {{- if eq .Values.executor "CeleryExecutor" }}
 kind: {{ if $persistence }}StatefulSet{{ else }}Deployment{{ end }}
 apiVersion: apps/v1
@@ -103,6 +104,10 @@ spec:
             - name: worker-logs
               containerPort: {{ .Values.ports.workerLogs }}
           volumeMounts:
+{{- if $additionalVolume.enabled }}
+            - name: worker-volume
+              mountPath: {{ $additionalVolume.mountPath }}
+{{- end }}
             - name: logs
               mountPath: {{ template "airflow_logs" . }}
             - name: config
@@ -123,6 +128,11 @@ spec:
               mountPath: {{ template "airflow_logs" . }}
 {{- end }}
       volumes:
+{{- if $additionalVolume.enabled }}
+        - name: worker-volume
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-worker-claim
+{{- end }}
         - name: config
           configMap:
             name: {{ template "airflow_config" . }}
