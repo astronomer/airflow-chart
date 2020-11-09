@@ -184,6 +184,16 @@ workers:
     # of local-path provisioner.
     fixPermissions: false
 
+  # Attach additional volume to celery workers (such as a shared file system)
+  additionalVolume:
+    enabled: false
+    volumeMode: ~
+    accessMode: ~
+    capacity: ~
+    storageClassName:
+    mountPath: ~
+    volumePlugin: {}
+
   resources: {}
   #  limits:
   #   cpu: 100m
@@ -341,7 +351,7 @@ redis:
     # Volume size for worker StatefulSet
     size: 1Gi
     # If using a custom storageClass, pass name ref to all statefulSets here
-    storageClassName:
+    storageClassName: ~
 
   resources: {}
   #  limits:
