@@ -1,0 +1,42 @@
+{{- if .Values.sccEnabled }}
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  annotations:
+    release.openshift.io/create-only: "true"
+    "helm.sh/hook": "pre-install,pre-upgrade"
+  name: {{ .Release.Name }}-anyuid
+priority: 10
+readOnlyRootFilesystem: false
+requiredDropCapabilities:
+- MKNOD
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: MustRunAs
+supplementalGroups:
+  type: RunAsAny
+users:
+- system:serviceaccount:{{ .Release.Namespace }}:default
+- system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-scheduler-serviceaccount
+- system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-webserver-serviceaccount
+- system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-worker-serviceaccount
+volumes:
+- configMap
+- downwardAPI
+- emptyDir
+- persistentVolumeClaim
+- projected
+- secret
+defaultAddCapabilities: null
+fsGroup:
+  type: RunAsAny
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegeEscalation: true
+allowPrivilegedContainer: false
+allowedCapabilities: null
+{{- end }}

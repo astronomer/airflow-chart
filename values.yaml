@@ -150,6 +150,9 @@ data:
 fernetKey: ~
 fernetKeySecretName: ~
 
+# Enable security context constraints required for OpenShift
+sccEnabled: false
+
 # Airflow Worker Config
 workers:
   # Number of airflow celery workers in StatefulSet
