@@ -31,14 +31,12 @@ volumes:
 defaultAddCapabilities: null
 fsGroup:
   type: RunAsAny
-groups:
-- system:cluster-admins
 allowHostDirVolumePlugin: false
 allowHostIPC: false
 allowHostNetwork: false
 allowHostPID: false
 allowHostPorts: false
-allowPrivilegeEscalation: false
+allowPrivilegeEscalation: true
 allowPrivilegedContainer: false
 allowedCapabilities: null
 {{- end }}
