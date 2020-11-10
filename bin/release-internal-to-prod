@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Description: Copy a release from dev to prod
+set -eu
+
+if [[ ! "${OSTYPE}" =~ ^linux ]] ; then
+  echo "ABORT: This only works for Linux. You are running ${HOSTOS}."
+  exit 1
+fi
+
+if [[ ! "${CIRCLE_BRANCH}" =~ release-[0-9]+\.[0-9]+ ]] ; then
+  echo "This must only be run from a release branch in CircleCI"
+  exit 1
+fi
+
+dev_repo=internal-helm.astronomer.io
+prod_repo=helm.astronomer.io
+git_root="$(git rev-parse --show-toplevel)"
+version=$(awk '$1 ~ /^version/ {printf $2}' "${git_root}/Chart.yaml")
+filename="airflow-${version}.tgz"
+max_age=300
+
+echo "${GCP_TOKEN}" > /tmp/gcs_token.json
+gcloud auth activate-service-account --key-file=/tmp/gcs_token.json
+
+if gsutil -q stat "gs://${prod_repo}/${filename}" ; then
+  echo "ABORT: destination file ${filename} already exists. Did you forget to bump the chart version number in Chart.yaml?"
+  exit 1
+fi
+
+curl -sSLO "https://${dev_repo}/${filename}"
+
+curl -sSLo "index-orig.yaml" "https://${prod_repo}/index.yaml"
+helm repo index . --url "https://${prod_repo}" --merge index-orig.yaml
+
+echo "Copying version ${version} from ${dev_repo} to ${prod_repo} and updating index"
+
+gsutil cp "${filename}" "gs://${prod_repo}/"
+gsutil -h "Cache-Control: public, max-age=${max_age}" cp ./index.yaml "gs://${prod_repo}/"
+
+echo "Success! All indexes should be updated by:"
+for TZ in Asia/Kolkata Europe/Kiev Europe/London US/Eastern US/Central US/Pacific ; do
+  gdate -d "${max_age} seconds" "+    %F %T%z $TZ"
+done
