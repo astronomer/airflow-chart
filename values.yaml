@@ -150,7 +150,7 @@ data:
 fernetKey: ~
 fernetKeySecretName: ~
 
-#
+# Enable security context constraints required for OpenShift
 sccEnabled: false
 
 # Airflow Worker Config
