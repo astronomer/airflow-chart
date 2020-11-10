@@ -30,7 +30,7 @@ workflows:
               only:
                 - '/release-[0-9]+\.[0-9]+/'
 
-      - build-and-release-prod:
+      - copy-release-from-internal-to-prod:
           requires:
             - approve-release-prod
           filters:
@@ -71,7 +71,7 @@ jobs:
       - checkout
       - run:
           name: Package and release to internal
-          command: bin/package-and-release
+          command: bin/package-and-release-internal
       - persist_to_workspace:
           root: /tmp/airflow-chart-package
           paths:
@@ -110,17 +110,17 @@ jobs:
       - checkout
       - run:
           name: Release the Airflow chart to internal
-          command: bin/package-and-release
+          command: bin/package-and-release-internal
 
-  build-and-release-prod:
+  copy-release-from-internal-to-prod:
     docker:
       - image: quay.io/astronomer/ci-helm-release:2020-11-03
     steps:
       - checkout
       - publish-github-release
       - run:
-          name: Package and release to internal
-          command: bin/package-and-release
+          name: "Copy internal chart to prod repo"
+          command: bin/release-internal-to-prod
 
 commands:
   publish-github-release:

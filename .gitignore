@@ -1,21 +1,16 @@
-.DS_Store
-config.yaml
-config.yml
-!.circleci/config.yml
-certs
-/secrets
-
-# IDEs
-.idea/
-.vscode/
-
-repository
-letsencrypt*
-backup
-dev-account.json
-*.swp
-# Chart dependencies
-**/charts/*.tgz
-**pycache**
-kubeconfig
 **kubeconfig**
+**pycache**
+*.swp
+*.tgz
+.DS_Store
+/.idea/
+/.vscode/
+/config.yaml
+/config.yml
+/secrets
+backup
+certs
+dev-account.json
+kubeconfig
+letsencrypt*
+repository
