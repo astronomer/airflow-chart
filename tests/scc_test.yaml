@@ -1,0 +1,17 @@
+---
+suite: Test Security Context Constraints
+templates:
+  - templates/airflow-scc-anyuid.yaml
+tests:
+  - it: Should not be created by default
+    asserts:
+      - not: yes
+        isKind:
+          of: SecurityContextConstraint
+  - it: Should be created with configuration enabled
+    set:
+      global:
+        sccEnabled: true
+    asserts:
+      - isKind:
+          of: SecurityContextConstraint
