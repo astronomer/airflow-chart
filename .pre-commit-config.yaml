@@ -17,13 +17,15 @@ repos:
       - id: check-yaml
         args: ['--allow-multiple-documents']
         exclude: '(charts|templates|files)'
-      - id: debug-statements
       - id: detect-private-key
       - id: end-of-file-fixer
-      - id: fix-byte-order-marker
+      - id: file-contents-sorter
+        args: ['--ignore-case']
+        files: .gitignore
+      - id: no-commit-to-branch
+        args: ['-b', 'master']
       - id: mixed-line-ending
         args: ['--fix=lf']
-      - id: requirements-txt-fixer
       - id: sort-simple-yaml
       - id: trailing-whitespace
   - repo: https://gitlab.com/pycqa/flake8
