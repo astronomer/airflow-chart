@@ -47,15 +47,12 @@ spec:
   securityContext:
   {{- if contains "alpine"  .Values.defaultAirflowTag }}
     runAsUser: 100
-  {{- else }}g
+  {{- else }}
     runAsUser: 50000
   {{- end }}
-  nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 4 }}
-  affinity:
-{{ toYaml .Values.affinity | indent 4 }}
-  tolerations:
-{{ toYaml .Values.tolerations | indent 4 }}
+  nodeSelector: {{ toYaml .Values.nodeSelector | indent 4 }}
+  affinity: {{ toYaml .Values.affinity | indent 4 }}
+  tolerations: {{ toYaml .Values.tolerations | indent 4 }}
   serviceAccountName: '{{ .Release.Name }}-worker-serviceaccount'
   volumes:
   - configMap:
