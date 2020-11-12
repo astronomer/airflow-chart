@@ -370,7 +370,8 @@ elasticsearch:
   # A secret containing the connection
   secretName: ~
   # Or an object representing the connection
-  connection: {}
+  connection:
+    scheme: http
     # user: ~
     # pass: ~
     # host: ~
