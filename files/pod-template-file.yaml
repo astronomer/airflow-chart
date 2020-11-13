@@ -38,6 +38,14 @@ spec:
       volumeMounts:
         - mountPath: {{ template "airflow_logs" . }}
           name: airflow-logs
+        - name: airflow-config
+          mountPath: {{ template "airflow_config_path" . }}
+          subPath: airflow.cfg
+          readOnly: true
+        - name: airflow-config
+          mountPath: {{ template "airflow_local_setting_path" . }}
+          subPath: airflow_local_settings.py
+          readOnly: true
   hostNetwork: false
   {{- if or .Values.registry.secretName .Values.registry.connection }}
   imagePullSecrets:
@@ -58,9 +66,6 @@ spec:
   - configMap:
       name: {{ include "airflow_config" . }}
     name: airflow-config
-  - configMap:
-      name: {{ include "airflow_config" . }}
-    name: airflow-local-settings
 {{- if not $stateful }}
   - name: airflow-logs
     emptyDir: {}
