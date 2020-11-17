@@ -7,3 +7,21 @@ tests:
     asserts:
       - isKind:
           of: Deployment
+  - it: should get correct airflow container image for 1.10.11
+    set:
+      airflowVersion: 1.10.11
+      images:
+        airflow:
+          tag: 1.10.11-custom
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.io/astronomer/ap-airflow:1.10.11-custom
+  - it: should get correct airflow container image for 1.10.12
+    set:
+      airflowVersion: 1.10.12
+      defaultAirflowTag: 1.10.12-buster
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.io/astronomer/ap-airflow:1.10.12-buster
