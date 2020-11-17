@@ -19,9 +19,9 @@ tests:
           value: quay.io/astronomer/ap-airflow:1.10.11-custom
   - it: should get correct airflow container image for 1.10.12
     set:
-      airflowVersion: 1.10.12
-      defaultAirflowTag: 1.10.12-buster
+      airflowVersion: 2.0.0
+      defaultAirflowTag: 2.0.0-buster
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: quay.io/astronomer/ap-airflow:1.10.12-buster
+          value: quay.io/astronomer/ap-airflow:2.0.0-buster
