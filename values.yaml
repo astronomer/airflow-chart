@@ -3,8 +3,8 @@
 # Declare variables to be passed into your templates.
 
 # User and group of airflow user
-uid: 100
-gid: 101
+uid: 50000
+gid: 50000
 
 # Select certain nodes for airflow pods.
 nodeSelector: {}
