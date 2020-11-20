@@ -39,5 +39,5 @@ gsutil -h "Cache-Control: public, max-age=${max_age}" cp ./index.yaml "gs://${pr
 
 echo "Success! All indexes should be updated by:"
 for TZ in Asia/Kolkata Europe/Kiev Europe/London US/Eastern US/Central US/Pacific ; do
-  gdate -d "${max_age} seconds" "+    %F %T%z $TZ"
+  date -d "${max_age} seconds" "+    %F %T%z $TZ"
 done
