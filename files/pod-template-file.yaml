@@ -26,11 +26,19 @@ spec:
     - args: []
       name: "base"
       command: []
+      {{/* Environment section duplicated from _helpers.yaml file */}}
+      {{- if .Values.mountAllFromSecretName }}
+      envFrom:
+      {{- include "custom_airflow_environment_mount_all" . | indent 8 }}
       env:
-      - name: AIRFLOW__CORE__EXECUTOR
-        value: LocalExecutor
-{{- include "standard_airflow_environment" . | indent 4 }}
-      envFrom: []
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: LocalExecutor
+      {{- include "standard_airflow_environment" . | indent 6 }}
+      {{- else }}
+      env:
+      {{- include "custom_airflow_environment_mount_individual" . | indent 6 }}
+      {{- include "standard_airflow_environment" . | indent 6 }}
+      {{- end }}
       image: {{ template "airflow_image" . }}
       imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
       name: base
