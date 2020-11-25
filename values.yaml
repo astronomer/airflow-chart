@@ -122,6 +122,8 @@ secret: []
 #   secretName: ""
 #   secretKey: ""
 
+# Pass a secret name here to mount all keys as environment variables in
+# the Airflow pods.
 mountAllFromSecretName: ~
 
 # Astronomer Airflow database config
