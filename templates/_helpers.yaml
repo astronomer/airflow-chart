@@ -94,7 +94,7 @@ env:
 {{- define "custom_airflow_environment_mount_all" }}
 # Dynamically created secret envs
 - secretRef:
-    name: {{ .Release.Name }}-env
+    name: {{ .Values.mountAllFromSecretName }}
 {{- end }}
 
 {{ define "deployments_subdomain" -}}
