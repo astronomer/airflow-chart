@@ -29,7 +29,7 @@ spec:
       env:
       - name: AIRFLOW__CORE__EXECUTOR
         value: LocalExecutor
-{{- include "airflow_environment_variables" . | indent 4 }}
+{{- include "standard_airflow_environment" . | indent 4 }}
       envFrom: []
       image: {{ template "airflow_image" . }}
       imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
