@@ -61,11 +61,7 @@ spec:
   {{- end }}
   restartPolicy: Never
   securityContext:
-  {{- if contains "alpine"  .Values.defaultAirflowTag }}
-    runAsUser: 100
-  {{- else }}
-    runAsUser: 50000
-  {{- end }}
+    runAsUser: {{ .Values.uid }}
   nodeSelector: {{ toYaml .Values.nodeSelector | nindent 4 }}
   affinity: {{ toYaml .Values.affinity | nindent 4 }}
   tolerations: {{ toYaml .Values.tolerations | nindent 4 }}
