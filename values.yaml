@@ -267,6 +267,7 @@ scheduler:
 
 # Airflow webserver settings
 webserver:
+  allowPodLogReading: false
   livenessProbe:
     initialDelaySeconds: 15
     timeoutSeconds: 30
