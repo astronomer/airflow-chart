@@ -1,8 +1,8 @@
 # Astronomer's Helm Chart for Apache Airflow
 
-[Apache Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule and monitor workflows. [Astronomer](https://www.astronomer.io/) is a software company built around Airflow. We have extracted this Helm Chart from our platform Helm chart and made it accessible under Apache 2 license.
+This chart will bootstrap an [Airflow](https://github.com/astronomer/astronomer/tree/master/docker/airflow) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
-## TL;DR
+## Quickstart
 
 To install this helm chart remotely (using helm 3)
 
@@ -40,10 +40,6 @@ To install this repository from source
 kubectl create namespace airflow
 helm install --namespace airflow .
 ```
-
-## Introduction
-
-This chart will bootstrap an [Airflow](https://github.com/astronomer/astronomer/tree/master/docker/airflow) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 ## Prerequisites
 
@@ -302,3 +298,7 @@ to port-forward the Airflow UI to http://localhost:8080/ to confirm Airflow is w
 ## Contributing
 
 Check out [our contributing guide!](CONTRIBUTING.md)
+
+## License
+
+Apache 2.0 with Commons Clause
