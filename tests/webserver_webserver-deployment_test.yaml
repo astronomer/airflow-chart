@@ -19,7 +19,7 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].image
           value: quay.io/astronomer/ap-airflow:1.10.11-custom
-  - it: should get correct airflow container image for 1.10.12
+  - it: should get correct airflow container image for 2.0.0
     set:
       webserver:
         useDefaultAirflowImage: true
