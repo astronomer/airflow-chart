@@ -280,6 +280,9 @@ webserver:
   # Number of webservers
   replicas: 1
 
+  # reboot webserver
+  reboot: true
+
   resources: {}
     # limits:
     #   cpu: 100m
