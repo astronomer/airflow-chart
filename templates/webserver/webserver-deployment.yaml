@@ -66,9 +66,9 @@ spec:
       containers:
         - name: webserver
           {{- if .Values.webserver.useDefaultAirflowImage }}
-          image: {{ template "airflow_image" . }}
-          {{- else }}
           image: {{ template "default_airflow_image" . }}
+          {{- else }}
+          image: {{ template "airflow_image" . }}
           {{- end }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
           args: ["airflow", "webserver"]
