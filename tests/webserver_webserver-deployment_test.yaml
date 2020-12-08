@@ -10,7 +10,7 @@ tests:
   - it: should get correct airflow container image for 1.10.11
     set:
       webserver:
-        useDefaultAirflowImage: true
+        useDefaultAirflowImage: false
       airflowVersion: 1.10.11
       images:
         airflow:
