@@ -263,9 +263,6 @@ scheduler:
   # Number of schedulers to run
   replicas: 1
 
-# Prevent airflow webserver reboot only for Airflow 2.0.0
-webserverReboot: true
-
 # Airflow webserver settings
 webserver:
   livenessProbe:
@@ -282,7 +279,10 @@ webserver:
 
   # Number of webservers
   replicas: 1
-  
+
+  # Prevent airflow webserver reboot only for Airflow 2.0.0
+  useDefaultAirflowImage: true
+
   resources: {}
     # limits:
     #   cpu: 100m

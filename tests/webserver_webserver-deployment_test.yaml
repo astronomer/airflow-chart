@@ -9,7 +9,8 @@ tests:
           of: Deployment
   - it: should get correct airflow container image for 1.10.11
     set:
-      webserverReboot: true
+      webserver:
+        useDefaultAirflowImage: true
       airflowVersion: 1.10.11
       images:
         airflow:
@@ -20,7 +21,8 @@ tests:
           value: quay.io/astronomer/ap-airflow:1.10.11-custom
   - it: should get correct airflow container image for 1.10.12
     set:
-      webserverReboot: true
+      webserver:
+        useDefaultAirflowImage: true
       airflowVersion: 2.0.0
       defaultAirflowTag: 2.0.0-buster
     asserts:

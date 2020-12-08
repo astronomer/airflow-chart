@@ -65,7 +65,7 @@ spec:
           {{- include "standard_airflow_environment" . | indent 10 }}
       containers:
         - name: webserver
-          {{- if .Values.webserverReboot }}
+          {{- if .Values.webserver.useDefaultAirflowImage }}
           image: {{ template "airflow_image" . }}
           {{- else }}
           image: {{ template "default_airflow_image" . }}
