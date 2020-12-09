@@ -284,7 +284,7 @@ webserver:
   # AC image with matching Airflow version will be used
   # to run the Webserver. Since Airflow >= 2.0 uses DAG Serialization
   # User image containing DAGs is not required to run Webserver.
-  useDefaultAirflowImage: true
+  useDefaultAirflowImage: false
 
   resources: {}
     # limits:
