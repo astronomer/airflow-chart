@@ -280,7 +280,10 @@ webserver:
   # Number of webservers
   replicas: 1
 
-  # Prevent airflow webserver reboot only for Airflow 2.0.0
+  # Prevent Airflow webserver reboot only for Airflow 2.0.0
+  # AC image with matching Airflow version will be used
+  # to run the Webserver. Since Airflow >= 2.0 uses DAG Serialization
+  # User image containing DAGs is not required to run Webserver.
   useDefaultAirflowImage: true
 
   resources: {}
