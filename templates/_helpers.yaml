@@ -119,10 +119,6 @@ env:
 {{ printf "%s:%s" .Values.defaultAirflowRepository .Values.defaultAirflowTag }}
 {{- end }}
 
-{{ define "flower_image" -}}
-{{ printf "%s:%s" .Values.images.flower.repository (default .Values.defaultAirflowTag .Values.images.flower.tag) }}
-{{- end }}
-
 {{ define "statsd_image" -}}
 {{ printf "%s:%s" .Values.images.statsd.repository .Values.images.statsd.tag }}
 {{- end }}
