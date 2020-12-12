@@ -50,7 +50,7 @@ spec:
       containers:
         - name: flower
           image: {{ template "default_airflow_image" . }}
-          imagePullPolicy: {{ .Values.images.flower.pullPolicy }}
+          imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
           {{- if semverCompare ">=2.0.0" .Values.airflowVersion }}
           args: ["airflow", "celery", "flower"]
           {{- else }}
