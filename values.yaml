@@ -88,10 +88,6 @@ images:
     repository: quay.io/astronomer/ap-airflow
     tag: ~
     pullPolicy: IfNotPresent
-  flower:
-    repository: quay.io/astronomer/ap-airflow
-    tag: ~
-    pullPolicy: IfNotPresent
   statsd:
     repository: quay.io/astronomer/ap-statsd-exporter
     tag: 0.18.0
