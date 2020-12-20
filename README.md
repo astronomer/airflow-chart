@@ -23,7 +23,8 @@ helm repo update
 
 kubectl create namespace keda
 helm install keda \
-    --namespace keda kedacore/keda
+    --namespace keda kedacore/keda \
+    --version "v1.5.0"
 
 kubectl create namespace airflow
 
