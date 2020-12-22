@@ -67,7 +67,7 @@ executor: "KubernetesExecutor"
 allowPodLaunching: true
 
 # Default airflow repository
-defaultAirflowRepository: astronomerinc/ap-airflow
+defaultAirflowRepository: quay.io/astronomer/ap-airflow
 
 # Default airflow tag to deploy
 defaultAirflowTag: 1.10.10-alpine3.10
@@ -75,27 +75,27 @@ defaultAirflowTag: 1.10.10-alpine3.10
 # Astronomer Airflow images
 images:
   airflow:
-    repository: astronomerinc/ap-airflow
+    repository: quay.io/astronomer/ap-airflow
     tag: ~
     pullPolicy: IfNotPresent
   flower:
-    repository: astronomerinc/ap-airflow
+    repository: quay.io/astronomer/ap-airflow
     tag: ~
     pullPolicy: IfNotPresent
   statsd:
-    repository: astronomerinc/ap-statsd-exporter
+    repository: quay.io/astronomer/ap-statsd-exporter
     tag: 0.11.0
     pullPolicy: IfNotPresent
   redis:
-    repository: astronomerinc/ap-redis
+    repository: quay.io/astronomer/ap-redis
     tag: 0.11.0
     pullPolicy: IfNotPresent
   pgbouncer:
-    repository: astronomerinc/ap-pgbouncer
+    repository: quay.io/astronomer/ap-pgbouncer
     tag: 0.11.0
     pullPolicy: IfNotPresent
   pgbouncerExporter:
-    repository: astronomerinc/ap-pgbouncer-exporter
+    repository: quay.io/astronomer/ap-pgbouncer-exporter
     tag: 0.11.0
     pullPolicy: IfNotPresent
 
