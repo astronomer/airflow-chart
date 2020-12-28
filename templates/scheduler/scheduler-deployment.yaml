@@ -8,7 +8,7 @@
 {{- $kube := eq .Values.executor "KubernetesExecutor" }}
 # Is persistence enabled on the _workers_?
 # This is important because in $local mode, the scheduler assumes the role of the worker
-{{- $persistence := .Values.workers.persistence.enabled }}
+{{- $persistence := false }}
 # If we're using a StatefulSet
 {{- $stateful := and $local $persistence }}
 # If we're using elasticsearch logging
@@ -173,15 +173,17 @@ spec:
         - name: logs
           emptyDir: {}
 {{- else }}
+  {{ range .Values.workers }}
   volumeClaimTemplates:
     - metadata:
         name: logs
       spec:
-      {{- if .Values.workers.persistence.storageClassName }}
-        storageClassName: {{ .Values.workers.persistence.storageClassName }}
+      {{- if .persistence.storageClassName }}
+        storageClassName: {{ .persistence.storageClassName }}
       {{- end }}
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: {{ .Values.workers.persistence.size }}
+            storage: {{ .persistence.size }}
+  {{ end }}
 {{- end }}

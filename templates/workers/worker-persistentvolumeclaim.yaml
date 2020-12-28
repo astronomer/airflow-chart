@@ -1,5 +1,7 @@
-{{- $additionalVolume := .Values.workers.additionalVolume }}
-{{- if and $additionalVolume.enabled (eq .Values.executor "CeleryExecutor")}}
+{{- $executor := .Values.executor }}
+{{- range .Values.workers }}
+{{- $additionalVolume := .additionalVolume }}
+{{- if and $additionalVolume.enabled (eq $executor "CeleryExecutor")}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -20,4 +22,5 @@ spec:
   resources:
     requests:
       storage: {{ default "5Gi" $additionalVolume.capacity }}
+{{- end }}
 {{- end }}

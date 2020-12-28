@@ -1,7 +1,9 @@
 ################################
 ## Airflow Worker HorizontalPodAutoscaler
 #################################
-{{- if (and .Values.workers.autoscaling.enabled (eq .Values.executor "CeleryExecutor")) }}
+{{- $executor := .Values.executor }}
+{{- range .Values.workers }}
+{{- if (and .autoscaling.enabled (eq $executor "CeleryExecutor")) }}
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
@@ -31,4 +33,5 @@ spec:
       resource:
         name: memory
         targetAverageUtilization: {{ .Values.workers.autoscaling.targetMemoryUtilization }}
+{{- end }}
 {{- end }}
