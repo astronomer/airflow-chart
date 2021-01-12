@@ -66,7 +66,7 @@ rbacEnabled: true
 
 # Airflow executor
 # Options: SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor
-executor: "KubernetesExecutor"
+executor: "CeleryExecutor"
 
 # If this is true and using LocalExecutor/SequentialExecutor/KubernetesExecutor, the scheduler's
 # service account will have access to communicate with the api-server and launch pods.
@@ -164,7 +164,7 @@ workers:
   # Allow KEDA autoscaling.
   # Persistence.enabled must be set to false to use KEDA.
   keda:
-    enabled: false
+    enabled: true
     namespaceLabels: {}
 
     # How often KEDA polls the airflow DB to report new scale requests to the HPA
