@@ -364,6 +364,11 @@ pgbouncer:
   # TLS connection is always requested first from PostgreSQL, when refused connection will be established
   # over plain TCP. Server certificate is not validated.
   serverTlsSslmode: prefer
+  
+  # ability to add more custom pgbouncer configuration
+  extraIniDatabaseMetatdata: ''
+  extraIniDatabaseResultBackend: ''
+  extraIniPgbouncerConfig: ''
 redis:
   terminationGracePeriodSeconds: 600
 
