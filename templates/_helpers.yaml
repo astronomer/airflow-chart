@@ -177,8 +177,8 @@ env:
 
 {{ define "pgbouncer_config" }}
 [databases]
-{{ .Release.Name }}-metadata = host={{ .Values.data.metadataConnection.host }} dbname={{ .Values.data.metadataConnection.db }} port={{ .Values.data.metadataConnection.port }} pool_size={{ .Values.pgbouncer.metadataPoolSize }}
-{{ .Release.Name }}-result-backend = host={{ .Values.data.resultBackendConnection.host }} dbname={{ .Values.data.resultBackendConnection.db }} port={{ .Values.data.resultBackendConnection.port }} pool_size={{ .Values.pgbouncer.resultBackendPoolSize }}
+{{ .Release.Name }}-metadata = host={{ .Values.data.metadataConnection.host }} dbname={{ .Values.data.metadataConnection.db }} port={{ .Values.data.metadataConnection.port }} pool_size={{ .Values.pgbouncer.metadataPoolSize }} {{ .Values.pgbouncer.extraIniDatabaseMetatdata }}
+{{ .Release.Name }}-result-backend = host={{ .Values.data.resultBackendConnection.host }} dbname={{ .Values.data.resultBackendConnection.db }} port={{ .Values.data.resultBackendConnection.port }} pool_size={{ .Values.pgbouncer.resultBackendPoolSize }} {{ .Values.pgbouncer.extraIniDatabaseResultBackend }}
 
 [pgbouncer]
 pool_mode = transaction
@@ -193,6 +193,7 @@ max_client_conn = {{ .Values.pgbouncer.maxClientConn }}
 verbose = {{ .Values.pgbouncer.verbose }}
 log_disconnections = {{ .Values.pgbouncer.logDisconnections }}
 log_connections = {{ .Values.pgbouncer.logConnections }}
+{{ .Values.pgbouncer.extraIniPgbouncerConfig }}
 {{- end }}
 
 {{ define "pgbouncer_users" }}
