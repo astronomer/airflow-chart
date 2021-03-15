@@ -23,6 +23,7 @@ rules:
       - "create"
       - "list"
       - "get"
+      - "patch"
       - "watch"
       - "delete"
   - apiGroups:
@@ -38,4 +39,10 @@ rules:
     verbs:
       - "create"
       - "get"
-{{- end }}
+  - apiGroups:
+      - ""
+    resources:
+      - "events"
+    verbs:
+      - "list"
+  {{- end }}
