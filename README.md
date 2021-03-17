@@ -196,7 +196,7 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `webserver.defaultUser`                               | Optional default airflow user information                                                                    | `{}`                                              |
 | `webserver.useDefaultAirflowImage`                    | Prevent Airflow webserver reboot only for Airflow 2.0.0                                                      | `false`                                           |
 | `extraObjects`                                        | Extra K8s Objects to deploy (these are passed through `tpl`). More about [Extra Objects](#extra-objects).    | `[]`                                              |
-| `webserver.extraContainers`                           | Add additional containers to webserver pod                                                                   | `[]`                                              |
+| `webserver.extraContainers`                           | Add additional containers to webserver pod(s)                                                                | `[]`                                              |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
