@@ -1,8 +1,8 @@
 # Astronomer's Helm Chart for Apache Airflow
 
-[Apache Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule and monitor workflows. [Astronomer](https://www.astronomer.io/) is a software company built around Airflow. We have extracted this Helm Chart from our platform Helm chart and made it accessible under Apache 2 license.
+This chart will bootstrap an [Airflow](https://github.com/astronomer/astronomer/tree/master/docker/airflow) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
-## TL;DR
+## Quickstart
 
 To install this helm chart remotely (using helm 3)
 
@@ -23,7 +23,8 @@ helm repo update
 
 kubectl create namespace keda
 helm install keda \
-    --namespace keda kedacore/keda
+    --namespace keda kedacore/keda \
+    --version "v1.5.0"
 
 kubectl create namespace airflow
 
@@ -40,10 +41,6 @@ To install this repository from source
 kubectl create namespace airflow
 helm install --namespace airflow .
 ```
-
-## Introduction
-
-This chart will bootstrap an [Airflow](https://github.com/astronomer/astronomer/tree/master/docker/airflow) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 ## Prerequisites
 
@@ -111,17 +108,18 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `ingress.enabled`                                     | Enable Kubernetes Ingress support                                                                            | `false`                                           |
 | `ingress.acme`                                        | Add acme annotations to Ingress object                                                                       | `false`                                           |
 | `ingress.tlsSecretName`                               | Name of secret that contains a TLS secret                                                                    | `~`                                               |
+| `ingress.webserverAnnotations`                        | Annotations added to Webserver Ingress object                                                                             | `{}`                                              |
+| `ingress.flowerAnnotations`                           | Annotations added to Flower Ingress object                                                                              | `{}`                                              |
 | `ingress.baseDomain`                                  | Base domain for VHOSTs                                                                                       | `~`                                               |
-| `ingress.class`                                       | Ingress class to associate with                                                                              | `nginx`                                           |
 | `ingress.auth.enabled`                                | Enable auth with Astronomer Platform                                                                         | `true`                                            |
 | `networkPolicies.enabled`                             | Enable Network Policies to restrict traffic                                                                  | `true`                                            |
 | `airflowHome`                                         | Location of airflow home directory                                                                           | `/usr/local/airflow`                              |
-| `rbacEnabled`                                         | Deploy pods with Kubernets RBAC enabled                                                                      | `true`                                            |
+| `rbacEnabled`                                         | Deploy pods with Kubernetes RBAC enabled                                                                     | `true`                                            |
 | `airflowVersion`                                      | Default Airflow image version                                                                                | `1.10.5`                                          |
 | `executor`                                            | Airflow executor (eg SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor)                  | `KubernetesExecutor`                              |
 | `allowPodLaunching`                                   | Allow airflow pods to talk to Kubernetes API to launch more pods                                             | `true`                                            |
 | `defaultAirflowRepository`                            | Fallback docker repository to pull airflow image from                                                        | `quay.io/astronomer/ap-airflow`                   |
-| `defaultAirflowTag`                                   | Fallback docker image tag to deploy                                                                          | `1.10.7-alpine3.10`                               |
+| `defaultAirflowTag`                                   | Fallback docker image tag to deploy. This image is also used to Run Database Migrations for Airflow.         | `1.10.7-alpine3.10`                               |
 | `images.airflow.repository`                           | Docker repository to pull image from. Update this to deploy a custom image                                   | `quay.io/astronomer/ap-airflow`                   |
 | `images.airflow.tag`                                  | Docker image tag to pull image from. Update this to deploy a new custom image tag                            | `~`                                               |
 | `images.airflow.pullPolicy`                           | PullPolicy for airflow image                                                                                 | `IfNotPresent`                                    |
@@ -303,3 +301,7 @@ to port-forward the Airflow UI to http://localhost:8080/ to confirm Airflow is w
 ## Contributing
 
 Check out [our contributing guide!](CONTRIBUTING.md)
+
+## License
+
+Apache 2.0 with Commons Clause
