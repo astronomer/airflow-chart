@@ -167,6 +167,7 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `workers.targetCPUUtilization`                        | Target CPU Utilization of workers                                                                            | `80`                                              |
 | `workers.targetMemoryUtilization`                     | Target Memory Utilization of workers                                                                         | `80`                                              |
 | `workers.safeToEvict`                                 | Allow Kubernetes to evict worker pods if needed (node downscaling)                                           | `true`                                            |
+| `workers.extraContainers`                             | Add additional containers to worker pod(s)                                                                   | `[]`                                              |
 | `scheduler.podDisruptionBudget.enabled`               | Enable PDB on Airflow scheduler                                                                              | `false`                                           |
 | `scheduler.podDisruptionBudget.config.maxUnavailable` | MaxUnavailable pods for scheduler                                                                            | `1`                                               |
 | `scheduler.resources.limits.cpu`                      | CPU Limit of scheduler                                                                                       | `~`                                               |
@@ -177,6 +178,7 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `scheduler.safeToEvict`                               | Allow Kubernetes to evict scheduler pods if needed (node downscaling)                                        | `true`                                            |
 | `scheduler.extraVolumes`                              | Extra volumes for the scheduler                                                                              | `[]`                                              |
 | `scheduler.extraVolumeMounts`                         | Extra volume mounts for the scheduler                                                                        | `[]`                                              |
+| `scheduler.extraContainers`                           | Add additional containers to scheduler pod(s)                                                                | `[]`                                              |
 | `webserver.livenessProbe.initialDelaySeconds`         | Webserver LivenessProbe initial delay                                                                        | `15`                                              |
 | `webserver.livenessProbe.timeoutSeconds`              | Webserver LivenessProbe timeout seconds                                                                      | `30`                                              |
 | `webserver.livenessProbe.failureThreshold`            | Webserver LivenessProbe failure threshold                                                                    | `20`                                              |
@@ -194,6 +196,7 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `webserver.defaultUser`                               | Optional default airflow user information                                                                    | `{}`                                              |
 | `webserver.useDefaultAirflowImage`                    | Prevent Airflow webserver reboot only for Airflow 2.0.0                                                      | `false`                                           |
 | `extraObjects`                                        | Extra K8s Objects to deploy (these are passed through `tpl`). More about [Extra Objects](#extra-objects).    | `[]`                                              |
+| `webserver.extraContainers`                           | Add additional containers to webserver pod                                                                   | `[]`                                              |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
