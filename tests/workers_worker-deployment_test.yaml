@@ -9,7 +9,6 @@ tests:
     asserts:
       - isKind:
           of: Deployment
-
   - it: should work
     set:
       workers.updateStrategy:
@@ -42,3 +41,24 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].args
           value: ["airflow", "celery", "worker"]
+  - it: should add extraVolume and extraVolumeMount
+    set:
+      executor: CeleryExecutor
+      workers:
+        extraVolumes:
+          - name: test-volume
+            emptyDir: {}
+        extraVolumeMounts:
+          - name: test-volume
+            mountPath: /opt/test
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: test-volume
+            emptyDir: {}
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-volume
+            mountPath: /opt/test

@@ -135,6 +135,9 @@ spec:
               subPath: pod_template_file.yaml
               mountPath: {{ include "airflow_pod_template_file" . }}/pod_template_file.yaml
               readOnly: true
+{{- if .Values.scheduler.extraVolumeMounts }}
+{{ toYaml .Values.scheduler.extraVolumeMounts | indent 12 }}
+{{- end }}
         # Always start the garbage collector sidecar.
         - name: scheduler-gc
           image: {{ template "airflow_image" . }}
@@ -169,6 +172,9 @@ spec:
         - name: config
           configMap:
             name: {{ template "airflow_config" . }}
+{{- if .Values.scheduler.extraVolumes }}
+{{ toYaml .Values.scheduler.extraVolumes | indent 8 }}
+{{- end }}
 {{- if not $stateful }}
         - name: logs
           emptyDir: {}
