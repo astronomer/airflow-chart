@@ -490,3 +490,6 @@ postgresql:
   enabled: true
   postgresqlPassword: postgres
   postgresqlUsername: postgres
+
+# Extra objects to deploy (these are passed through `tpl`)
+extraObjects: []
