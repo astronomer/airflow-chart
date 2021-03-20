@@ -66,7 +66,7 @@ rbacEnabled: true
 
 # Airflow executor
 # Options: SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor
-executor: "KubernetesExecutor"
+executor: "CeleryExecutor"
 
 # If this is true and using LocalExecutor/SequentialExecutor/KubernetesExecutor, the scheduler's
 # service account will have access to communicate with the api-server and launch pods.
@@ -151,10 +151,78 @@ fernetKeySecretName: ~
 # Enable security context constraints required for OpenShift
 sccEnabled: false
 
+workerConfig:
+  persistence:
 # Airflow Worker Config
 workers:
   # Number of airflow celery workers in StatefulSet
-  replicas: 1
+- replicas: 1
+  queue: "default"
+  updateStrategy:
+  strategy:
+    rollingUpdate:
+      maxSurge: "100%"
+      maxUnavailable: "50%"
+
+  # Allow KEDA autoscaling.
+  # Persistence.enabled must be set to false to use KEDA.
+  keda:
+    enabled: false
+    namespaceLabels: {}
+
+    # How often KEDA polls the airflow DB to report new scale requests to the HPA
+    pollingInterval: 5
+
+    # How many seconds KEDA will wait before scaling to zero.
+    # Note that HPA has a separate cooldown period for scale-downs
+    cooldownPeriod: 30
+
+  persistence:
+    # Enable persistent volumes
+    enabled: false
+    # Volume size for worker StatefulSet
+    size: 100Gi
+    # If using a custom storageClass, pass name ref to all statefulSets here
+    storageClassName:
+    # Execute init container to chown log directory.
+    # This is currently only needed in KinD, due to usage
+    # of local-path provisioner.
+    fixPermissions: false
+
+  # Attach additional volume to celery workers (such as a shared file system)
+  additionalVolume:
+    enabled: false
+    volumeMode: ~
+    accessMode: ~
+    capacity: ~
+    storageClassName:
+    mountPath: ~
+    volumePlugin: {}
+
+  resources: {}
+  #  limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  # Grace period for tasks to finish after SIGTERM is sent from kubernetes
+  terminationGracePeriodSeconds: 600
+
+  # Apply a HorizontalPodAutoscaler
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilization: 80
+    targetMemoryUtilization: 80
+
+  # This setting tells kubernetes that its ok to evict
+  # when it wants to scale a node down.
+  safeToEvict: true
+- replicas: 1
+  queue: "long-running"
   updateStrategy:
   strategy:
     rollingUpdate:
