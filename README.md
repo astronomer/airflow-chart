@@ -108,8 +108,8 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `ingress.enabled`                                     | Enable Kubernetes Ingress support                                                                            | `false`                                           |
 | `ingress.acme`                                        | Add acme annotations to Ingress object                                                                       | `false`                                           |
 | `ingress.tlsSecretName`                               | Name of secret that contains a TLS secret                                                                    | `~`                                               |
-| `ingress.webserverAnnotations`                        | Annotations added to Webserver Ingress object                                                                             | `{}`                                              |
-| `ingress.flowerAnnotations`                           | Annotations added to Flower Ingress object                                                                              | `{}`                                              |
+| `ingress.webserverAnnotations`                        | Annotations added to Webserver Ingress object                                                                | `{}`                                              |
+| `ingress.flowerAnnotations`                           | Annotations added to Flower Ingress object                                                                   | `{}`                                              |
 | `ingress.baseDomain`                                  | Base domain for VHOSTs                                                                                       | `~`                                               |
 | `ingress.auth.enabled`                                | Enable auth with Astronomer Platform                                                                         | `true`                                            |
 | `networkPolicies.enabled`                             | Enable Network Policies to restrict traffic                                                                  | `true`                                            |
@@ -193,7 +193,7 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `webserver.jwtSigningCertificateSecretName`           | Name of secret to mount Airflow Webserver JWT singing certificate from                                       | `~`                                               |
 | `webserver.defaultUser`                               | Optional default airflow user information                                                                    | `{}`                                              |
 | `webserver.useDefaultAirflowImage`                    | Prevent Airflow webserver reboot only for Airflow 2.0.0                                                      | `false`                                           |
-| `extraObjects`                                        | Extra K8s Objects to deploy (these are passed through `tpl`)                                                 | `[]`                                              |
+| `extraObjects`                                        | Extra K8s Objects to deploy (these are passed through `tpl`). More about [Extra Objects](#extra-objects).    | `[]`                                              |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
@@ -302,6 +302,33 @@ to port-forward the Airflow UI to http://localhost:8080/ to confirm Airflow is w
             --set images.airflow.repository=my-dags \
             --set images.airflow.tag=0.0.1 \
             astronomer/airflow
+
+## Extra Objects
+
+This chart can deploy extra Kubernetes objects (assuming the role used by Helm can manage them). For Astronomer Cloud and Enterprise, the role permissions can be found in the [Commander role](https://github.com/astronomer/astronomer/blob/master/charts/astronomer/templates/commander/commander-role.yaml).
+
+```yaml
+extraObjects:
+  - apiVersion: batch/v1beta1
+    kind: CronJob
+    metadata:
+      name: "{{ .Release.Name }}-somejob"
+    spec:
+      schedule: "*/10 * * * *"
+      concurrencyPolicy: Forbid
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              containers:
+              - name: myjob
+                image: ubuntu
+                command:
+                - echo
+                args:
+                - hello
+              restartPolicy: OnFailure
+```
 
 ## Contributing
 
