@@ -130,6 +130,9 @@ spec:
             - name: logs
               mountPath: {{ template "airflow_logs" . }}
 {{- end }}
+{{- if .Values.workers.extraContainers }}
+{{- toYaml .Values.workers.extraContainers | nindent 8 }}
+{{- end }}
       volumes:
 {{- if $additionalVolume.enabled }}
         - name: worker-volume

@@ -223,6 +223,9 @@ workers:
   # when it wants to scale a node down.
   safeToEvict: true
 
+  # Add additional containers to workers.
+  extraContainers: []
+
 # Airflow scheduler settings
 scheduler:
   livenessProbe:
@@ -261,6 +264,9 @@ scheduler:
   # This setting tells kubernetes that its ok to evict
   # when it wants to scale a node down.
   safeToEvict: true
+
+  # Add additional containers to scheduler.
+  extraContainers: []
 
   # Number of schedulers to run
   replicas: 1
@@ -313,6 +319,9 @@ webserver:
     firstName: admin
     lastName: user
     password: admin
+
+  # Add additional containers to webserver.
+  extraContainers: []
 
 # Flower settings
 flower:

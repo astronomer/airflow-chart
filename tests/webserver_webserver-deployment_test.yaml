@@ -29,3 +29,18 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].image
           value: quay.io/astronomer/ap-airflow:2.0.0-buster
+  - it: "should add extraContainer"
+    set:
+      executor: CeleryExecutor
+      webserver:
+        extraContainers:
+          - name: test
+            image: test/image:tag
+            imagePullPolicy: IfNotPresent
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: test
+            image: test/image:tag
+            imagePullPolicy: IfNotPresent
