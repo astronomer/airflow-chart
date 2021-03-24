@@ -118,6 +118,9 @@ spec:
               mountPath: {{ template "airflow_local_setting_path" . }}
               subPath: airflow_local_settings.py
               readOnly: true
+{{- if .Values.workers.extraVolumeMounts }}
+{{ toYaml .Values.workers.extraVolumeMounts | indent 12 }}
+{{- end }}
           {{- include "airflow_environment_variables" . | indent 10 }}
 {{- if $persistence }}
         - name: worker-gc
@@ -136,6 +139,9 @@ spec:
         - name: config
           configMap:
             name: {{ template "airflow_config" . }}
+{{- if .Values.workers.extraVolumes }}
+{{ toYaml .Values.workers.extraVolumes | indent 8 }}
+{{- end }}
 {{- if not $persistence }}
         - name: logs
           emptyDir: {}

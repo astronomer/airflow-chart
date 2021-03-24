@@ -54,6 +54,9 @@ spec:
           mountPath: {{ template "airflow_local_setting_path" . }}
           subPath: airflow_local_settings.py
           readOnly: true
+{{- if .Values.workers.extraVolumeMounts }}
+{{ toYaml .Values.workers.extraVolumeMounts | indent 8 }}
+{{- end }}
   hostNetwork: false
   {{- if or .Values.registry.secretName .Values.registry.connection }}
   imagePullSecrets:
@@ -71,6 +74,9 @@ spec:
   - configMap:
       name: {{ include "airflow_config" . }}
     name: airflow-config
+{{- if .Values.workers.extraVolumes }}
+{{ toYaml .Values.workers.extraVolumes | indent 2 }}
+{{- end }}
 {{- if not $stateful }}
   - name: airflow-logs
     emptyDir: {}
