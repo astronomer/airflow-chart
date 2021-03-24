@@ -88,7 +88,7 @@ data:
     airflow_configmap = {{ include "airflow_config" . }}
     airflow_local_settings_configmap = {{ include "airflow_config" . }}
     worker_container_repository = {{ .Values.images.airflow.repository }}
-    worker_container_tag = {{ .Values.images.airflow.tag }}
+    worker_container_tag = {{ default .Values.defaultAirflowTag .Values.images.airflow.tag }}
     worker_container_image_pull_policy = {{ .Values.images.airflow.pullPolicy }}
     dags_in_image = True
     delete_worker_pods = True

@@ -7,3 +7,18 @@ tests:
     asserts:
       - isKind:
           of: ConfigMap
+  - it: honors default image tag
+    set:
+      defaultAirflowTag: hello
+    asserts:
+      - matchRegex:
+          path: data.airflow\.cfg
+          pattern: "worker_container_tag = hello"
+  - it: uses images.airflow.tag over default
+    set:
+      images.airflow.tag: world
+      defaultAirflowTag: hello
+    asserts:
+      - matchRegex:
+          path: data.airflow\.cfg
+          pattern: "worker_container_tag = world"
