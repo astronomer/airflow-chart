@@ -74,13 +74,13 @@ executor: "KubernetesExecutor"
 allowPodLaunching: true
 
 # Airflow version
-airflowVersion: 1.10.10
+airflowVersion: 2.0.0
 
 # Default airflow repository
 defaultAirflowRepository: quay.io/astronomer/ap-airflow
 
 # Default airflow tag to deploy
-defaultAirflowTag: 1.10.10-buster
+defaultAirflowTag: 2.0.0-buster
 
 # Astronomer Airflow images
 images:
