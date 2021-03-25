@@ -26,9 +26,9 @@ spec:
     # capacity during the rolling update.
     # You can also use percentage based value instead of integer.
     type: RollingUpdate
-      rollingUpdate:
-        maxSurge: 1
-        maxUnavailable: 0
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
     {{- else }}
     type: Recreate
     {{- end}}
