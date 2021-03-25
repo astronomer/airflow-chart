@@ -9,16 +9,16 @@ testinfra simplifies and provides syntactic sugar for doing
 execs into a running container.
 """
 
-import json
 import os
-import pytest
-import subprocess
-import testinfra
-import docker
-from time import sleep
 
+import docker
+import pytest
+import testinfra
 from kubernetes import client, config
 from packaging.version import parse as semantic_version
+
+airflow_version = semantic_version(os.environ.get("AIRFLOW_VERSION"))
+airflow_2 = airflow_version >= semantic_version("2.0.0")
 
 
 def create_kube_client(in_cluster=False):
@@ -42,6 +42,7 @@ def test_pgbouncer_fqdn_trailing_dot(webserver):
     db_conn_string = webserver.check_output('env | grep AIRFLOW_CONN_AIRFLOW_DB')
     assert 'airflow-pgbouncer.airflow.svc.cluster.local.' in db_conn_string, \
         "Expected to find a trailing dot on the pgbouncer FQDN"
+
 
 def test_airflow_in_path(webserver):
     """ Ensure Airflow is in PATH
@@ -77,6 +78,7 @@ def test_elasticsearch_version(webserver):
         "elasticsearch module must be version 5.5.3 or greater"
 
 
+@pytest.mark.skipif(airflow_2, reason="Not needed for Airflow>=2")
 def test_werkzeug_version(webserver):
     """ Werkzeug pip module version >= 1.0.0 has an issue
     """
@@ -119,25 +121,44 @@ def test_airflow_connections(scheduler):
     test_conn_uri = "postgresql://postgres_user:postgres_test@1.1.1.1:5432"
     test_conn_id = "test"
 
-    # Assert Connection can be added
-    assert f"Successfully added `conn_id`={test_conn_id} : {test_conn_uri}" in scheduler.check_output(
-        'airflow connections -a --conn_uri %s --conn_id %s', test_conn_uri, test_conn_id)
+    if airflow_2:
+        # Assert Connection can be added
+        assert f"Successfully added `conn_id`={test_conn_id} : {test_conn_uri}" in scheduler.check_output(
+            'airflow connections add --conn-uri %s %s', test_conn_uri, test_conn_id)
 
-    # Assert Connection can be removed
-    assert f"Successfully deleted `conn_id`={test_conn_id}" in scheduler.check_output(
-        'airflow connections -d --conn_id %s', test_conn_id)
+        # Assert Connection can be removed
+        assert f"Successfully deleted connection with `conn_id`={test_conn_id}" in scheduler.check_output(
+            'airflow connections delete %s', test_conn_id)
+    else:
+        # Assert Connection can be added
+        assert f"Successfully added `conn_id`={test_conn_id} : {test_conn_uri}" in scheduler.check_output(
+            'airflow connections -a --conn_uri %s --conn_id %s', test_conn_uri, test_conn_id)
+
+        # Assert Connection can be removed
+        assert f"Successfully deleted `conn_id`={test_conn_id}" in scheduler.check_output(
+            'airflow connections -d --conn_id %s', test_conn_id)
 
 
 def test_airflow_variables(scheduler):
     """Test Variables can be added, retrieved and deleted"""
-    # Assert Variables can be added
-    assert "" in scheduler.check_output("airflow variables --set test_key test_value")
+    if airflow_2:
+        # Assert Variables can be added
+        assert "" in scheduler.check_output("airflow variables set test_key test_value")
 
-    # Assert Variables can be retrieved
-    assert "test_value" in scheduler.check_output("airflow variables --get test_key")
+        # Assert Variables can be retrieved
+        assert "test_value" in scheduler.check_output("airflow variables get test_key")
 
-    # Assert Variables can be deleted
-    assert "" in scheduler.check_output("airflow variables --delete test_key")
+        # Assert Variables can be deleted
+        assert "" in scheduler.check_output("airflow variables delete test_key")
+    else:
+        # Assert Variables can be added
+        assert "" in scheduler.check_output("airflow variables --set test_key test_value")
+
+        # Assert Variables can be retrieved
+        assert "test_value" in scheduler.check_output("airflow variables --get test_key")
+
+        # Assert Variables can be deleted
+        assert "" in scheduler.check_output("airflow variables --delete test_key")
 
 
 @pytest.fixture(scope='session')
