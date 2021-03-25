@@ -22,3 +22,24 @@ tests:
             name: test
             image: test/image:tag
             imagePullPolicy: IfNotPresent
+  - it: should get correct deployment strategy for airflowVersion 1.10.11
+    set:
+      airflowVersion: 1.10.11
+    asserts:
+      - equal:
+          path: spec.strategy.type
+          value: Recreate
+  - it: should get correct deployment strategy for airflowVersion 2.0.0
+    set:
+      airflowVersion: 2.0.0
+    asserts:
+      - equal:
+          path: spec.strategy.type
+          value: RollingUpdate
+      - equal:
+          path: spec.strategy.rollingUpdate.maxSurge
+          value: 1
+      - equal:
+          path: spec.strategy.rollingUpdate.maxUnavailable
+          value: 0
+
