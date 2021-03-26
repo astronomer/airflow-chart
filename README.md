@@ -194,7 +194,6 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `webserver.resources.requests.memory`                 | Memory Request of webserver                                                                                  | `~`                                               |
 | `webserver.jwtSigningCertificateSecretName`           | Name of secret to mount Airflow Webserver JWT singing certificate from                                       | `~`                                               |
 | `webserver.defaultUser`                               | Optional default airflow user information                                                                    | `{}`                                              |
-| `webserver.useDefaultAirflowImage`                    | Prevent Airflow webserver reboot only for Airflow 2.0.0                                                      | `false`                                           |
 | `extraObjects`                                        | Extra K8s Objects to deploy (these are passed through `tpl`). More about [Extra Objects](#extra-objects).    | `[]`                                              |
 | `webserver.extraContainers`                           | Add additional containers to webserver pod(s)                                                                | `[]`                                              |
 
