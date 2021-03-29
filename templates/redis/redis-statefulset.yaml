@@ -36,6 +36,8 @@ spec:
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
         {{- end }}
     spec:
+      securityContext:
+        RunAsUser: 999
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
       affinity:
