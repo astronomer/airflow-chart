@@ -17,7 +17,7 @@ tests:
           value: 2
   - it: "should create one scheduler if replicas is not specified"
     set:
-        replicas: ~
+      replicas: ~
     asserts:
       - equal:
           path: spec.replicas

@@ -1,5 +1,5 @@
 ---
-exclude: '(venv|.vscode)'  # regex
+exclude: '^(venv|\.vscode)' # regex
 repos:
   - repo: https://github.com/psf/black
     rev: 20.8b1
@@ -15,17 +15,17 @@ repos:
       - id: check-toml
       - id: check-xml
       - id: check-yaml
-        args: ['--allow-multiple-documents']
-        exclude: '(charts|templates|files)'
+        args: ["--allow-multiple-documents"]
+        exclude: "(charts|templates|files)"
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: file-contents-sorter
-        args: ['--ignore-case']
-        files: .gitignore
+        args: ["--ignore-case", "--unique"]
+        files: '^\.gitignore$'
       - id: no-commit-to-branch
-        args: ['-b', 'master']
+        args: ["-b", "master"]
       - id: mixed-line-ending
-        args: ['--fix=lf']
+        args: ["--fix=lf"]
       - id: sort-simple-yaml
       - id: trailing-whitespace
   - repo: https://gitlab.com/pycqa/flake8
