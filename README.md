@@ -332,7 +332,7 @@ extraObjects:
               restartPolicy: OnFailure
 ```
 
-## git-sync
+## Deploying DAGs using `git-sync`
 
 `extraObjects`, `extraContainers`, `extraInitContainers`, `extraVolumes`, and `extraVolumeMounts` can be combined to deploy git-sync. The following example relies on `emptyDir` volumes and works with `KubernetesExecutor`.
 
