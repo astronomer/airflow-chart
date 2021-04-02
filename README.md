@@ -78,12 +78,91 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Updating DAGs
 
-The recommended way to update your DAGs with this chart is to build a new docker image with the latest code (`docker build -t my-company/airflow:8a0da78 .`), push it to an accessible registry (`docker push my-company/airflow:8a0da78`), then update the Airflow pods with that image:
+### Bake DAGs in Docker image
+
+The recommended way to update your DAGs with this chart is to build a new docker image with the  
+latest code (`docker build -t my-company/airflow:8a0da78 .`), push it to an accessible  
+registry (`docker push my-company/airflow:8a0da78`), then update the Airflow pods with that image:
 
 ```bash
 helm upgrade my-release . \
   --set images.airflow.repository=my-company/airflow \
   --set images.airflow.tag=8a0da78
+```
+
+### Deploying DAGs using `git-sync`
+
+`extraContainers`, `extraInitContainers`, `extraVolumes`, and `extraVolumeMounts` can be combined to deploy git-sync. The following example relies on `emptyDir` volumes and works with `KubernetesExecutor`.
+
+```yaml
+env:
+  - name: AIRFLOW__CORE__DAGS_FOLDER
+    value: /usr/local/airflow/dags/latest/airflow/example_dags
+scheduler:
+  extraInitContainers:
+    - name: init-gitsync
+      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: GIT_SYNC_REPO
+          value: https://github.com/apache/airflow.git
+        - name: GIT_SYNC_ROOT
+          value: /usr/local/airflow/dags
+        - name: GIT_SYNC_DEST
+          value: latest
+        - name: GIT_SYNC_ONE_TIME
+          value: "true"
+      volumeMounts:
+        - mountPath: /usr/local/airflow/dags
+          name: dags
+          readOnly: false
+  extraContainers:
+    - name: gitsync
+      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: GIT_SYNC_REPO
+          value: https://github.com/apache/airflow.git
+        - name: GIT_SYNC_ROOT
+          value: /usr/local/airflow/dags
+        - name: GIT_SYNC_DEST
+          value: latest
+        - name: GIT_SYNC_WAIT
+          value: "10"
+      volumeMounts:
+        - mountPath: /usr/local/airflow/dags
+          name: dags
+          readOnly: false
+  extraVolumeMounts:
+    - name: dags
+      mountPath: /usr/local/airflow/dags
+  extraVolumes:
+    - name: dags
+      emptyDir: {}
+workers:
+  extraInitContainers:
+    - name: gitsync
+      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: GIT_SYNC_REPO
+          value: https://github.com/apache/airflow.git
+        - name: GIT_SYNC_ROOT
+          value: /usr/local/airflow/dags
+        - name: GIT_SYNC_DEST
+          value: latest
+        - name: GIT_SYNC_ONE_TIME
+          value: "true"
+      volumeMounts:
+        - mountPath: /usr/local/airflow/dags
+          name: dags
+          readOnly: false
+  extraVolumeMounts:
+    - name: dags
+      mountPath: /usr/local/airflow/dags
+  extraVolumes:
+    - name: dags
+      emptyDir: {}
 ```
 
 ## Docker Images
@@ -330,81 +409,6 @@ extraObjects:
                 args:
                 - hello
               restartPolicy: OnFailure
-```
-
-## Deploying DAGs using `git-sync`
-
-`extraContainers`, `extraInitContainers`, `extraVolumes`, and `extraVolumeMounts` can be combined to deploy git-sync. The following example relies on `emptyDir` volumes and works with `KubernetesExecutor`.
-
-```yaml
-env:
-  - name: AIRFLOW__CORE__DAGS_FOLDER
-    value: /usr/local/airflow/dags/latest/airflow/example_dags
-scheduler:
-  extraInitContainers:
-    - name: init-gitsync
-      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
-      imagePullPolicy: IfNotPresent
-      env:
-        - name: GIT_SYNC_REPO
-          value: https://github.com/apache/airflow.git
-        - name: GIT_SYNC_ROOT
-          value: /usr/local/airflow/dags
-        - name: GIT_SYNC_DEST
-          value: latest
-        - name: GIT_SYNC_ONE_TIME
-          value: "true"
-      volumeMounts:
-        - mountPath: /usr/local/airflow/dags
-          name: dags
-          readOnly: false
-  extraContainers:
-    - name: gitsync
-      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
-      imagePullPolicy: IfNotPresent
-      env:
-        - name: GIT_SYNC_REPO
-          value: https://github.com/apache/airflow.git
-        - name: GIT_SYNC_ROOT
-          value: /usr/local/airflow/dags
-        - name: GIT_SYNC_DEST
-          value: latest
-        - name: GIT_SYNC_WAIT
-          value: "10"
-      volumeMounts:
-        - mountPath: /usr/local/airflow/dags
-          name: dags
-          readOnly: false
-  extraVolumeMounts:
-    - name: dags
-      mountPath: /usr/local/airflow/dags
-  extraVolumes:
-    - name: dags
-      emptyDir: {}
-workers:
-  extraInitContainers:
-    - name: gitsync
-      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
-      imagePullPolicy: IfNotPresent
-      env:
-        - name: GIT_SYNC_REPO
-          value: https://github.com/apache/airflow.git
-        - name: GIT_SYNC_ROOT
-          value: /usr/local/airflow/dags
-        - name: GIT_SYNC_DEST
-          value: latest
-        - name: GIT_SYNC_ONE_TIME
-          value: "true"
-      volumeMounts:
-        - mountPath: /usr/local/airflow/dags
-          name: dags
-          readOnly: false
-  extraVolumeMounts:
-    - name: dags
-      mountPath: /usr/local/airflow/dags
-  extraVolumes:
-    - name: dags
-      emptyDir: {}
 ```
 
 ## Contributing
