@@ -152,6 +152,7 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `workers.persistence.enabled`                         | Enable log persistence in workers via StatefulSet                                                            | `false`                                           |
 | `workers.persistence.size`                            | Size of worker volumes if enabled                                                                            | `100Gi`                                           |
 | `workers.persistence.storageClassName`                | StorageClass worker volumes should use if enabled                                                            | `default`                                         |
+| `workers.extraInitContainers`                         | Extra init containers for workers, including `pod_template_file`                                             | `[]`                                              |
 | `workers.extraVolumes`                                | Extra volumes for workers, including `pod_template_file`                                                     | `[]`                                              |
 | `workers.extraVolumeMounts`                           | Extra volume mounts for workers, including `pod_template_file`                                               | `[]`                                              |
 | `workers.resources.limits.cpu`                        | CPU Limit of workers                                                                                         | `~`                                               |
@@ -174,9 +175,10 @@ The following tables lists the configurable parameters of the Airflow chart and 
 | `scheduler.resources.requests.memory`                 | Memory Request of scheduler                                                                                  | `~`                                               |
 | `scheduler.airflowLocalSettings`                      | Custom Airflow local settings python file                                                                    | `~`                                               |
 | `scheduler.safeToEvict`                               | Allow Kubernetes to evict scheduler pods if needed (node downscaling)                                        | `true`                                            |
+| `scheduler.extraContainers`                           | Extra containers for the scheduler                                                                           | `[]`                                              |
+| `scheduler.extraInitContainers`                       | Extra init containers for the scheduler                                                                      | `[]`                                              |
 | `scheduler.extraVolumes`                              | Extra volumes for the scheduler                                                                              | `[]`                                              |
 | `scheduler.extraVolumeMounts`                         | Extra volume mounts for the scheduler                                                                        | `[]`                                              |
-| `scheduler.extraContainers`                           | Add additional containers to scheduler pod(s)                                                                | `[]`                                              |
 | `webserver.livenessProbe.initialDelaySeconds`         | Webserver LivenessProbe initial delay                                                                        | `15`                                              |
 | `webserver.livenessProbe.timeoutSeconds`              | Webserver LivenessProbe timeout seconds                                                                      | `30`                                              |
 | `webserver.livenessProbe.failureThreshold`            | Webserver LivenessProbe failure threshold                                                                    | `20`                                              |
@@ -328,6 +330,81 @@ extraObjects:
                 args:
                 - hello
               restartPolicy: OnFailure
+```
+
+## Deploying DAGs using `git-sync`
+
+`extraContainers`, `extraInitContainers`, `extraVolumes`, and `extraVolumeMounts` can be combined to deploy git-sync. The following example relies on `emptyDir` volumes and works with `KubernetesExecutor`.
+
+```yaml
+env:
+  - name: AIRFLOW__CORE__DAGS_FOLDER
+    value: /usr/local/airflow/dags/latest/airflow/example_dags
+scheduler:
+  extraInitContainers:
+    - name: init-gitsync
+      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: GIT_SYNC_REPO
+          value: https://github.com/apache/airflow.git
+        - name: GIT_SYNC_ROOT
+          value: /usr/local/airflow/dags
+        - name: GIT_SYNC_DEST
+          value: latest
+        - name: GIT_SYNC_ONE_TIME
+          value: "true"
+      volumeMounts:
+        - mountPath: /usr/local/airflow/dags
+          name: dags
+          readOnly: false
+  extraContainers:
+    - name: gitsync
+      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: GIT_SYNC_REPO
+          value: https://github.com/apache/airflow.git
+        - name: GIT_SYNC_ROOT
+          value: /usr/local/airflow/dags
+        - name: GIT_SYNC_DEST
+          value: latest
+        - name: GIT_SYNC_WAIT
+          value: "10"
+      volumeMounts:
+        - mountPath: /usr/local/airflow/dags
+          name: dags
+          readOnly: false
+  extraVolumeMounts:
+    - name: dags
+      mountPath: /usr/local/airflow/dags
+  extraVolumes:
+    - name: dags
+      emptyDir: {}
+workers:
+  extraInitContainers:
+    - name: gitsync
+      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: GIT_SYNC_REPO
+          value: https://github.com/apache/airflow.git
+        - name: GIT_SYNC_ROOT
+          value: /usr/local/airflow/dags
+        - name: GIT_SYNC_DEST
+          value: latest
+        - name: GIT_SYNC_ONE_TIME
+          value: "true"
+      volumeMounts:
+        - mountPath: /usr/local/airflow/dags
+          name: dags
+          readOnly: false
+  extraVolumeMounts:
+    - name: dags
+      mountPath: /usr/local/airflow/dags
+  extraVolumes:
+    - name: dags
+      emptyDir: {}
 ```
 
 ## Contributing

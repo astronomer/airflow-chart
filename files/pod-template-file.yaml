@@ -22,6 +22,10 @@ metadata:
     platform: "{{ .Values.platform.release }}"
     workspace: "{{ .Values.platform.workspace }}"
 spec:
+{{- if .Values.workers.extraInitContainers }}
+  initContainers:
+{{- toYaml .Values.workers.extraInitContainers | nindent 4 }}
+{{- end }}
   containers:
     - args: []
       name: "base"
