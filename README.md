@@ -201,11 +201,7 @@ helm upgrade my-release . \
 | registry.secretName | string | `nil` |  |
 | runMigrationsJobAnnotations | object | `{}` | Extra annotations to apply to run migrations job |
 | sccEnabled | bool | `false` |  |
-| scheduler.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].key | string | `"component"` |  |
-| scheduler.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].operator | string | `"In"` |  |
-| scheduler.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].values[0] | string | `"scheduler"` |  |
-| scheduler.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.topologyKey | string | `"kubernetes.io/hostname"` |  |
-| scheduler.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].weight | int | `100` |  |
+| scheduler.affinity | object | `{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"component","operator":"In","values":["scheduler"]}]},"topologyKey":"kubernetes.io/hostname"},"weight":100}]}}` | Configure Pod affinity for Scheduler |
 | scheduler.airflowLocalSettings | string | `nil` |  |
 | scheduler.extraContainers | list | `[]` |  |
 | scheduler.extraVolumeMounts | list | `[]` |  |

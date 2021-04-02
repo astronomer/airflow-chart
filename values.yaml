@@ -238,6 +238,7 @@ scheduler:
   #   cpu: 100m
   #   memory: 128Mi
 
+  # -- Configure Pod affinity for Scheduler
   affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
