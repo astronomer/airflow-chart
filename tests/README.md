@@ -4,7 +4,7 @@ This project uses the [helm-unittest project](https://github.com/quintush/helm-u
 
 ## Writing tests
 
-Tests should be written with one template per file. When writing tests, you need to find content to make assertions against. The best way to do this is something like:
+Tests should be written with one test file per template file. When writing tests, you need to find content to make assertions against. The best way to do this is something like:
 
 ```sh
 helm template . \
