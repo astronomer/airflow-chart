@@ -334,12 +334,12 @@ extraObjects:
 
 ## Deploying DAGs using `git-sync`
 
-`extraObjects`, `extraContainers`, `extraInitContainers`, `extraVolumes`, and `extraVolumeMounts` can be combined to deploy git-sync. The following example relies on `emptyDir` volumes and works with `KubernetesExecutor`.
+`extraContainers`, `extraInitContainers`, `extraVolumes`, and `extraVolumeMounts` can be combined to deploy git-sync. The following example relies on `emptyDir` volumes and works with `KubernetesExecutor`.
 
 ```yaml
 env:
   - name: AIRFLOW__CORE__DAGS_FOLDER
-    value: /usr/local/airflow/dags/dags/airflow/example_dags
+    value: /usr/local/airflow/dags/latest/airflow/example_dags
 scheduler:
   extraInitContainers:
     - name: init-gitsync
@@ -351,7 +351,7 @@ scheduler:
         - name: GIT_SYNC_ROOT
           value: /usr/local/airflow/dags
         - name: GIT_SYNC_DEST
-          value: dags
+          value: latest
         - name: GIT_SYNC_ONE_TIME
           value: "true"
       volumeMounts:
@@ -368,7 +368,7 @@ scheduler:
         - name: GIT_SYNC_ROOT
           value: /usr/local/airflow/dags
         - name: GIT_SYNC_DEST
-          value: dags
+          value: latest
         - name: GIT_SYNC_WAIT
           value: "10"
       volumeMounts:
@@ -392,7 +392,7 @@ workers:
         - name: GIT_SYNC_ROOT
           value: /usr/local/airflow/dags
         - name: GIT_SYNC_DEST
-          value: dags
+          value: latest
         - name: GIT_SYNC_ONE_TIME
           value: "true"
       volumeMounts:
