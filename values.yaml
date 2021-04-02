@@ -2,66 +2,64 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# User and group of airflow user
+# -- User of airflow user
 uid: 50000
+# -- Group of airflow user
 gid: 50000
 
-# Select certain nodes for airflow pods.
+# -- Select certain nodes for airflow pods.
 nodeSelector: {}
+# -- Kubernetes affinity
 affinity: {}
-
+# -- Kubernetes tolerations
 tolerations: []
 
-# Add common labels to all objects and pods defined in this chart.
+# -- Add common labels to all objects and pods defined in this chart.
 labels: {}
 
-# Ingress configuration
 ingress:
-  # Enable ingress resource
+  # -- Enable ingress resource
   enabled: false
 
-  # Enable for cert-manager or kube-lego
+  # -- Enable for cert-manager or kube-lego
   acme: false
 
-  # Name of tls secret to use on ingress
+  # -- Name of tls secret to use on ingress
   tlsSecretName: ~
 
-  # Annotations always injected when configuring webserver Ingress object
+  # -- Annotations always injected when configuring webserver Ingress object
   webserverAnnotations: {}
 
-  # Annotations always injected when configuring Flower Ingress object
+  # -- Annotations always injected when configuring Flower Ingress object
   flowerAnnotations: {}
 
-  # Base domain for ingress vhosts
+  # -- Base domain for ingress vhosts
   baseDomain: ~
 
-  # Enable platform authentication
+  # -- Enable platform authentication
   auth:
     enabled: true
 
-# Network policy configuration
 networkPolicies:
-  # Enabled network policies
+  # -- Enabled network policies
   enabled: false
 
-# Airflow home directory
-# Used for mount paths
+# -- Airflow home directory, used for mount paths.
 airflowHome: "/usr/local/airflow"
 
-# Extra annotations to apply to all
-# Airflow pods
+# -- Extra annotations to apply to all airflow pods
 airflowPodAnnotations: {}
 
-# Extra annotations to apply to Create user job
+# -- Extra annotations to apply to Create user job
 createUserJobAnnotations: {}
 
-# Extra annotations to apply to run migrations job
+# -- Extra annotations to apply to run migrations job
 runMigrationsJobAnnotations: {}
 
-# Extra annotations to apply to service accounts
+# -- Extra annotations to apply to service accounts
 serviceAccountAnnotations: {}
 
-# Enable RBAC (default on most clusters these days)
+# -- Enable RBAC (default on most clusters these days)
 rbacEnabled: true
 
 # Airflow executor
@@ -73,13 +71,13 @@ executor: "KubernetesExecutor"
 # If this is true and using the CeleryExecutor, the workers will be able to launch pods.
 allowPodLaunching: true
 
-# Airflow version
+# -- Airflow version
 airflowVersion: 2.0.0
 
-# Default airflow repository
+# -- Default repository in which to look for airflow images
 defaultAirflowRepository: quay.io/astronomer/ap-airflow
 
-# Default airflow tag to deploy
+# -- Default airflow tag to deploy
 defaultAirflowTag: 2.0.0-buster
 
 # Astronomer Airflow images
@@ -105,27 +103,25 @@ images:
     tag: 0.11.0
     pullPolicy: IfNotPresent
 
-# Environment variables for all airflow containers
-# other than init containers.
+# -- Environment variables for all airflow containers other than init containers.
 env: []
 # - name: ""
 #   value: ""
 
-# Secrets for all airflow containers
-# other than init containers.
+# -- Secrets for all airflow containers other than init containers.
 secret: []
 # - envName: ""
 #   secretName: ""
 #   secretKey: ""
 
-# Pass a secret name here to mount all keys as environment variables in
-# the Airflow pods.
+# -- Pass a secret name here to mount all keys as environment variables in the Airflow pods.
 mountAllFromSecretName: ~
 
 # Astronomer Airflow database config
 data:
-  # If secret names are provided, use those secrets
+  # -- If provided, use this secrets
   metadataSecretName: ~
+  # -- If provided, use this secrets
   resultBackendSecretName: ~
 
   # Otherwise pass connection values in
@@ -242,19 +238,19 @@ scheduler:
   #   cpu: 100m
   #   memory: 128Mi
 
-  affinity: 
+  affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-            - key: component
-              operator: In
-              values:
-              - scheduler
-          topologyKey: "kubernetes.io/hostname"
-          
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                    - scheduler
+            topologyKey: "kubernetes.io/hostname"
+
   # This setting can overwrite
   # podMutation settings - be sure
   # to reference the default if you
@@ -293,7 +289,8 @@ webserver:
   # Number of webservers
   replicas: 1
 
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -319,7 +316,8 @@ webserver:
 
 # Flower settings
 flower:
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -330,7 +328,8 @@ flower:
 # Statsd settings
 statsd:
   enabled: true
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -360,7 +359,8 @@ pgbouncer:
     config:
       maxUnavailable: 1
 
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -375,11 +375,11 @@ pgbouncer:
   # TLS connection is always requested first from PostgreSQL, when refused connection will be established
   # over plain TCP. Server certificate is not validated.
   serverTlsSslmode: prefer
-  
+
   # ability to add more custom pgbouncer configuration
-  extraIniDatabaseMetatdata: ''
-  extraIniDatabaseResultBackend: ''
-  extraIniPgbouncerConfig: ''
+  extraIniDatabaseMetatdata: ""
+  extraIniDatabaseResultBackend: ""
+  extraIniPgbouncerConfig: ""
 redis:
   terminationGracePeriodSeconds: 600
 
@@ -416,7 +416,8 @@ redis:
 registry:
   secretName: ~
 
-  connection: {}
+  connection:
+    {}
     # user: ~
     # pass: ~
     # host: ~
