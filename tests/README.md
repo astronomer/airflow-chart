@@ -133,6 +133,6 @@ Error: plugin "unittest" exited with error
 
 If you do not get a useful error, there is likely something wrong other than your assertion, such as referencing the wrong template file.
 
-# See also
+## See also
 
 - The full list of [assertion types](https://github.com/quintush/helm-unittest/blob/master/DOCUMENT.md#assertion-types)
