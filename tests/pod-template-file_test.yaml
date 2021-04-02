@@ -39,9 +39,8 @@ tests:
           content:
             name: test-volume
             mountPath: /opt/test
-  - it: "should add extraContainer"
+  - it: "should add extraContainers"
     set:
-      executor: KubernetesExecutor
       workers:
         extraContainers:
           - name: test
@@ -50,6 +49,20 @@ tests:
     asserts:
       - contains:
           path: spec.containers
+          content:
+            name: test
+            image: test/image:tag
+            imagePullPolicy: IfNotPresent
+  - it: "should add extraInitContainer"
+    set:
+      workers:
+        extraInitContainers:
+          - name: test
+            image: test/image:tag
+            imagePullPolicy: IfNotPresent
+    asserts:
+      - contains:
+          path: spec.initContainers
           content:
             name: test
             image: test/image:tag

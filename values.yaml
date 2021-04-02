@@ -226,6 +226,9 @@ workers:
   # Add additional containers to workers.
   extraContainers: []
 
+  # Add additional init containers to workers.
+  extraInitContainers: []
+
 # Airflow scheduler settings
 scheduler:
   livenessProbe:
@@ -267,6 +270,9 @@ scheduler:
 
   # Add additional containers to scheduler.
   extraContainers: []
+
+  # Add additional init containers to scheduler.
+  extraInitContainers: []
 
   # Number of schedulers to run
   replicas: 1
