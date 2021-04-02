@@ -1,7 +1,11 @@
 ---
+# files/pod-template-file.yaml file must be copied from files in order to be
+# tested, but must remain in files/ so it is not submitted directly to k8s
+# when doing a helm install.
+
 suite: Test templates/pod-template-file.yaml
 templates:
-  - pod-template-file.yaml
+  - templates/pod-template-file.yaml
 tests:
   - it: should work
     asserts:

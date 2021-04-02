@@ -155,7 +155,7 @@ sccEnabled: false
 workers:
   # Number of airflow celery workers in StatefulSet
   replicas: 1
-  updateStrategy:
+  updateStrategy: ~
   strategy:
     rollingUpdate:
       maxSurge: "100%"
@@ -349,8 +349,9 @@ statsd:
 
 # Pgbouncer settings
 pgbouncer:
-  # Enable pgbouncer
   enabled: false
+  networkPolicies:
+    enabled: true
   # additional network policies as needed
   extraNetworkPolicies: []
 
