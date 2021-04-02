@@ -94,15 +94,15 @@ images:
     pullPolicy: IfNotPresent
   redis:
     repository: quay.io/astronomer/ap-redis
-    tag: 0.11.0
+    tag: 6.2.1
     pullPolicy: IfNotPresent
   pgbouncer:
     repository: quay.io/astronomer/ap-pgbouncer
-    tag: 0.11.0
+    tag: 1.8.1
     pullPolicy: IfNotPresent
   pgbouncerExporter:
     repository: quay.io/astronomer/ap-pgbouncer-exporter
-    tag: 0.11.0
+    tag: 0.9.2
     pullPolicy: IfNotPresent
 
 # Environment variables for all airflow containers
@@ -245,19 +245,19 @@ scheduler:
   #   cpu: 100m
   #   memory: 128Mi
 
-  affinity: 
+  affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-            - key: component
-              operator: In
-              values:
-              - scheduler
-          topologyKey: "kubernetes.io/hostname"
-          
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                    - scheduler
+            topologyKey: "kubernetes.io/hostname"
+
   # This setting can overwrite
   # podMutation settings - be sure
   # to reference the default if you
@@ -299,7 +299,8 @@ webserver:
   # Number of webservers
   replicas: 1
 
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -325,7 +326,8 @@ webserver:
 
 # Flower settings
 flower:
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -336,7 +338,8 @@ flower:
 # Statsd settings
 statsd:
   enabled: true
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -366,7 +369,8 @@ pgbouncer:
     config:
       maxUnavailable: 1
 
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -381,11 +385,11 @@ pgbouncer:
   # TLS connection is always requested first from PostgreSQL, when refused connection will be established
   # over plain TCP. Server certificate is not validated.
   serverTlsSslmode: prefer
-  
+
   # ability to add more custom pgbouncer configuration
-  extraIniDatabaseMetatdata: ''
-  extraIniDatabaseResultBackend: ''
-  extraIniPgbouncerConfig: ''
+  extraIniDatabaseMetatdata: ""
+  extraIniDatabaseResultBackend: ""
+  extraIniPgbouncerConfig: ""
 redis:
   terminationGracePeriodSeconds: 600
 
@@ -422,7 +426,8 @@ redis:
 registry:
   secretName: ~
 
-  connection: {}
+  connection:
+    {}
     # user: ~
     # pass: ~
     # host: ~
