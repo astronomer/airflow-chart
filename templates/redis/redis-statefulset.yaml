@@ -37,7 +37,7 @@ spec:
         {{- end }}
     spec:
       securityContext:
-        RunAsUser: 999
+        runAsUser: 999
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
       affinity:
