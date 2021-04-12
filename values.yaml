@@ -299,6 +299,9 @@ webserver:
   # Number of webservers
   replicas: 1
 
+  extraVolumes: []
+  extraVolumeMounts: []
+
   resources:
     {}
     # limits:

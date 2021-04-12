@@ -42,3 +42,27 @@ tests:
       - equal:
           path: spec.strategy.rollingUpdate.maxUnavailable
           value: 0
+  - it: should have extraVolumes
+    set:
+      webserver:
+        extraVolumes:
+          - name: certificate
+            emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: certificate
+            emptyDir: {}
+  - it: should have extraVolumeMounts
+    set:
+      webserver:
+        extraVolumeMounts:
+          - name: certificate
+            mountPath: /certs
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: certificate
+            mountPath: /certs
