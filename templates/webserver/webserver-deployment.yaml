@@ -100,6 +100,9 @@ spec:
               mountPath: {{ template "airflow_webserver_jwt_cert_dir" . }}
               readOnly: true
 {{- end }}
+{{- if .Values.webserver.extraVolumeMounts }}
+{{ toYaml .Values.webserver.extraVolumeMounts | indent 12 }}
+{{- end }}
           ports:
             - name: webserver-ui
               containerPort: {{ .Values.ports.airflowUI }}
@@ -140,3 +143,7 @@ spec:
           secret:
             secretName: {{ .Values.webserver.jwtSigningCertificateSecretName }}
 {{- end }}
+{{- if .Values.webserver.extraVolumes }}
+{{ toYaml .Values.webserver.extraVolumes | indent 8 }}
+{{- end }}
+
