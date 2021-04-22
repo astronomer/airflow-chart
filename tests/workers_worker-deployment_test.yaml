@@ -9,9 +9,9 @@ tests:
     asserts:
       - isKind:
           of: Deployment
-  - it: should work
+  - it: "should add correct strategy for Worker Deployment"
     set:
-      workers.updateStrategy:
+      workers:
         strategy:
           rollingUpdate:
             maxSurge: "100%"
@@ -25,6 +25,20 @@ tests:
         - equal:
             path: deployment.spec.strategy.rollingUpdate.maxUnavailable
             value: "50%"
+  - it: "should add correct updateStrategy for Worker StatefulSet"
+      set:
+        persistence:
+          enabled: true
+        workers:
+          updateStrategy:
+            rollingUpdate:
+              partition: 0
+        asserts:
+          - isKind:
+              of: StatefulSet
+          - equal:
+              path: deployment.spec.updateStrategy.rollingUpdate.partition
+              value: 0
   - it: "should run the correct worker command for airflow 1.x"
     set:
       executor: CeleryExecutor
