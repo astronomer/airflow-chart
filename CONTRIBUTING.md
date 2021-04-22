@@ -1,3 +1,5 @@
+# Contributing
+
 ## Local development
 
 You can run Kubernetes in Docker (kind) in order to develop this chart on your workstation.
@@ -28,3 +30,7 @@ The above script takes the following steps:
 - Start a new kind cluster
 - Install Tiller in the kind cluster
 - Deploy Airflow in the kind cluster
+
+## Testing
+
+See [tests/README.md](tests/README.md) for instruction on how to write tests for chart changes.
