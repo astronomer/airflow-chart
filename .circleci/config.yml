@@ -30,7 +30,9 @@ workflows:
               only:
                 - '/release-[0-9]+\.[0-9]+/'
 
-      - copy-release-from-internal-to-prod:
+      - release-public:
+          context:
+            - github-repo
           requires:
             - approve-release-prod
           filters:
@@ -113,7 +115,7 @@ jobs:
           name: Release the Airflow chart to internal
           command: bin/package-and-release-internal
 
-  copy-release-from-internal-to-prod:
+  release-public:
     docker:
       - image: quay.io/astronomer/ci-helm-release:2021-04
     steps:
