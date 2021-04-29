@@ -8,6 +8,8 @@ workflows:
       - unittest-charts
 
       - build-and-release-internal:
+          context:
+            - gcp-astronomer-prod
           requires:
           - lint
           - unittest-charts
@@ -28,15 +30,18 @@ workflows:
           filters:
             branches:
               only:
-                - '/release-[0-9]+\.[0-9]+/'
+                - '/release-\d+\.\d+/'
 
-      - copy-release-from-internal-to-prod:
+      - release-public:
+          context:
+            - github-repo
+            - gcp-astronomer-prod
           requires:
             - approve-release-prod
           filters:
             branches:
               only:
-                - '/release-[0-9]+\.[0-9]+/'
+                - '/release-\d+\.\d+/'
 
 jobs:
   lint:
@@ -113,7 +118,7 @@ jobs:
           name: Release the Airflow chart to internal
           command: bin/package-and-release-internal
 
-  copy-release-from-internal-to-prod:
+  release-public:
     docker:
       - image: quay.io/astronomer/ci-helm-release:2021-04
     steps:
