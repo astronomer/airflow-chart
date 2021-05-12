@@ -25,3 +25,16 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].args
           value: ["airflow", "celery", "flower"]
+  - it: "should run with customs envs passed through"
+    set:
+      executor: CeleryExecutor
+      airflowVersion: "2.0.0"
+      env:
+        - name: FLOWER_PURGE_OFFLINE_WORKERS
+          value: "300"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: FLOWER_PURGE_OFFLINE_WORKERS
+            value: "300"
