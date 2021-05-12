@@ -80,8 +80,7 @@ spec:
               port: {{ .Values.ports.flowerUI }}
             initialDelaySeconds: 10
             periodSeconds: 5
-          env:
-          {{- include "standard_airflow_environment" . | indent 10 }}
+          {{- include "airflow_environment_variables" . | indent 10 }}
       volumes:
         - name: config
           configMap:
