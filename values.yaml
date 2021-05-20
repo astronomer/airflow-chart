@@ -127,6 +127,7 @@ data:
   # If secret names are provided, use those secrets
   metadataSecretName: ~
   resultBackendSecretName: ~
+  brokerUrlSecretName: ~
 
   # Otherwise pass connection values in
   metadataConnection:
@@ -143,6 +144,7 @@ data:
     port: 5432
     db: postgres
     sslmode: disable
+  brokerUrl: ~
 
 # Fernet key settings
 fernetKey: ~
@@ -397,6 +399,7 @@ pgbouncer:
   extraIniDatabaseResultBackend: ""
   extraIniPgbouncerConfig: ""
 redis:
+  enabled: true
   terminationGracePeriodSeconds: 600
 
   persistence:
@@ -417,7 +420,6 @@ redis:
 
   # If set use as redis secret
   passwordSecretName: ~
-  brokerURLSecretName: ~
 
   # Else, if password is set, create secret with it,
   # else generate a new one on install
