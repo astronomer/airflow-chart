@@ -32,7 +32,7 @@
   - name: AIRFLOW__CELERY__BROKER_URL
     valueFrom:
       secretKeyRef:
-        name: {{ .Release.Name }}-broker-url
+        name: {{ template "airflow_broker_url_secret" . }}
         key: connection
   {{- end }}
   {{- if .Values.elasticsearch.enabled }}
@@ -153,6 +153,10 @@ env:
 
 {{ define "airflow_result_backend_secret" -}}
 {{ default (printf "%s-airflow-result-backend" .Release.Name) .Values.data.resultBackendSecretName }}
+{{- end }}
+
+{{ define "airflow_broker_url_secret" -}}
+{{ default (printf "%s-broker-url" .Release.Name) .Values.data.brokerUrlSecretName }}
 {{- end }}
 
 {{ define "pgbouncer_config_secret" -}}
