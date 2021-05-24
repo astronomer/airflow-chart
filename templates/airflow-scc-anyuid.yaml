@@ -21,6 +21,7 @@ users:
 - system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-scheduler-serviceaccount
 - system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-webserver-serviceaccount
 - system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-worker-serviceaccount
+# TODO: ^^ service account names are different now, _and_ can be changed
 volumes:
 - configMap
 - downwardAPI

@@ -1,7 +1,7 @@
 ################################
 ## Airflow Worker HorizontalPodAutoscaler
 #################################
-{{- if (and .Values.workers.autoscaling.enabled (eq .Values.executor "CeleryExecutor")) }}
+{{- if (and .Values.workers.autoscaling.enabled (eq .Values.airflow.executor "CeleryExecutor")) }}
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
@@ -12,7 +12,7 @@ metadata:
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
-{{- with .Values.labels }}
+{{- with .Values.airflow.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
