@@ -1,9 +1,0 @@
----
-suite: Test templates/statsd/statsd-deployment.yaml
-templates:
-  - templates/statsd/statsd-deployment.yaml
-tests:
-  - it: should work
-    asserts:
-      - isKind:
-          of: Deployment
