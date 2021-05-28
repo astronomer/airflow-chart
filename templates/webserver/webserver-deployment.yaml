@@ -76,6 +76,19 @@ spec:
           env:
           {{- include "standard_airflow_environment" . | indent 10 }}
       containers:
+        {{- if .Values.sidecar.enabled }}
+        - name: nginx
+          image: {{ .Values.sidecar.image }}
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8084
+            name: nginx-ui
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            name: nginx-sidecar-conf
+        {{- end }}
         - name: webserver
           image: {{ template "airflow_image" . }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
@@ -135,6 +148,11 @@ spec:
 {{- toYaml .Values.webserver.extraContainers | nindent 8 }}
 {{- end }}
       volumes:
+        {{- if .Values.sidecar.enabled }}
+        - name: nginx-sidecar-conf
+          configMap:
+            name: {{ .Release.Name }}-nginx-conf
+        {{- end }}
         - name: config
           configMap:
             name: {{ template "airflow_config" . }}

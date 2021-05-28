@@ -28,6 +28,9 @@ spec:
     - secretName: {{ .Release.Name }}-airflow-tls
   {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
+  # this option to be relooked , for the sake of POC we have hardcoded  
+  {{- else if .Values.sidecar.enabled  }}
+    - secretName: astronomer-tls
   {{ else }}
     - secretName: ~
   {{- end }}
@@ -41,14 +44,22 @@ spec:
           - path: /{{ .Release.Name }}/airflow
             backend:
               serviceName: {{ .Release.Name }}-webserver
+              {{- if .Values.sidecar.enabled  }}
+              servicePort: nginx-ui
+              {{- else }}
               servicePort: airflow-ui
+              {{- end }}
     - host: {{- include "airflow_subdomain" . | indent 1 }}
       http:
         paths:
           - path: /
             backend:
               serviceName: {{ .Release.Name }}-webserver
+              {{- if .Values.sidecar.enabled  }}
+              servicePort: nginx-ui
+              {{- else }}
               servicePort: airflow-ui
+              {{- end }}
 {{- end }}
 {{- if and .Values.ingress.enabled (eq .Values.executor "CeleryExecutor") }}
 ---

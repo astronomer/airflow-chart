@@ -25,3 +25,10 @@ spec:
       protocol: TCP
       port: {{ .Values.ports.airflowUI }}
       targetPort: {{ .Values.ports.airflowUI }}
+    {{- if .Values.sidecar.enabled }}
+    - name: nginx-ui
+      protocol: TCP
+      port: 8084
+      targetPort: 8084
+    {{- end }}
+  

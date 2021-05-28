@@ -26,12 +26,18 @@ spec:
 {{- if .Values.platform.release }}
   ingress:
   - from:
+    {{- if .Values.sidecar.enabled  }}
+    - namespaceSelector:
+        matchLabels:
+          network.openshift.io/policy-group: ingress
+    {{- else }}
     - namespaceSelector: {}
       podSelector:
         matchLabels:
           tier: nginx
           component: ingress-controller
           release: {{ .Values.platform.release }}
+    {{- end }}
     ports:
     - protocol: TCP
       port: {{ .Values.ports.flowerUI }}
