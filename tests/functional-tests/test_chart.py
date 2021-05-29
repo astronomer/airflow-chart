@@ -10,6 +10,8 @@ execs into a running container.
 """
 
 import os
+import subprocess
+from time import sleep
 
 import docker
 import pytest
@@ -159,6 +161,62 @@ def test_airflow_variables(scheduler):
 
         # Assert Variables can be deleted
         assert "" in scheduler.check_output("airflow variables --delete test_key")
+
+
+def test_airflow_trigger_dags(scheduler):
+    """Test Triggering of DAGs & Pausing & Unpausing Dags"""
+    if airflow_2:
+        pause_dag_command = "airflow dags pause example_dag"
+        trigger_dag_command = "airflow dags trigger -r test_run -e 2020-05-01 example_dag"
+        unpause_dag_command = "airflow dags unpause example_dag"
+        dag_state_command = "airflow dags state example_dag 2020-05-01"
+    else:
+        pause_dag_command = "airflow pause example_dag"
+        trigger_dag_command = "airflow trigger_dag -r test_run -e 2020-05-01 example_dag"
+        unpause_dag_command = "airflow unpause example_dag"
+        dag_state_command = "airflow dag_state example_dag 2020-05-01"
+
+    assert "Dag: example_dag, paused: True" in scheduler.check_output(pause_dag_command)
+    assert "Created <DagRun example_dag @ 2020-05-01T00:00:00+00:00: " \
+           "test_run, externally triggered: True>" \
+           in scheduler.check_output(trigger_dag_command)
+
+    assert "Dag: example_dag, paused: False" in scheduler.check_output(unpause_dag_command)
+
+    # Verify the DAG succeeds in 100 seconds
+    timeout = 100
+    sleep_count = 0
+    sleep_time_between_polls = 5
+    try_count = 0
+    while "success" not in scheduler.check_output(dag_state_command):
+        sleep_count += sleep_time_between_polls
+        sleep(sleep_time_between_polls)
+        try_count += 1
+        print("Try: ", try_count)
+        if "failed" in scheduler.run(dag_state_command).stdout.rstrip("\r\n"):
+            print("Timed out waiting for DAG to succeed")
+            print()
+            print("Logs: ")
+            subprocess.run(
+                [
+                    "kubectl", "logs", os.environ.get('SCHEDULER_POD'), "-n", os.environ.get('NAMESPACE'),
+                    "-c", "scheduler", "--tail", "100"
+                ]
+            )
+            raise Exception("DAGRun failed !")
+        if sleep_count >= timeout:
+            print("Timed out waiting for DAG to succeed")
+            print()
+            print("Logs: ")
+            subprocess.run(
+                [
+                    "kubectl", "logs", os.environ.get('SCHEDULER_POD'), "-n", os.environ.get('NAMESPACE'),
+                    "-c", "scheduler", "--tail", "100"
+                ]
+            )
+            break
+
+    assert "success" in scheduler.check_output(dag_state_command)
 
 
 @pytest.fixture(scope='session')
