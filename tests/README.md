@@ -111,15 +111,15 @@ $ helm unittest -3 .
 
 ### Chart [ airflow ] .
 
- FAIL  Test templates/pgbouncer/pgbouncer-networkpolicy.yaml	tests/pgbouncer_pgbouncer-networkpolicy_test.yaml
-	- should work with pgbouncer.enabled: True, networkPolicies.enabled: True, pgbouncer.networkPolicies.enabled: False
+ FAIL  Test templates/pgbouncer/pgbouncer-networkpolicy.yaml    tests/pgbouncer_pgbouncer-networkpolicy_test.yaml
+    - should work with pgbouncer.enabled: True, networkPolicies.enabled: True, pgbouncer.networkPolicies.enabled: False
 
-		- asserts[0] `hasDocuments` fail
-			Template:	airflow/templates/pgbouncer/pgbouncer-networkpolicy.yaml
-			Expected documents count to be:
-				1
-			Actual:
-				0
+        - asserts[0] `hasDocuments` fail
+            Template:    airflow/templates/pgbouncer/pgbouncer-networkpolicy.yaml
+            Expected documents count to be:
+                1
+            Actual:
+                0
 
 
 Charts:      1 failed, 0 passed, 1 total

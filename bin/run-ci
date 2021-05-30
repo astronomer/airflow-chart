@@ -46,8 +46,8 @@ cat "$TEST_DOCKERFILE_PATH"
 
 export TEST_TAG=$TAG-test
 
-docker build -t $REPOSITORY:$TEST_TAG $TEST_EXAMPLE_PROJECT_DIR_PATH
-kind load docker-image $REPOSITORY:$TEST_TAG
+docker build -t "$REPOSITORY:$TEST_TAG" "$TEST_EXAMPLE_PROJECT_DIR_PATH"
+kind load docker-image "$REPOSITORY:$TEST_TAG"
 ### (End) Create example-project for running a simple DAG
 
 echo "Deploying Airflow..."
@@ -126,7 +126,7 @@ fi
 
 SCHEDULER_DEPLOYMENT=$(kubectl get deployments -n airflow | grep scheduler |  awk '{ print $1 }')
 export SCHEDULER_DEPLOYMENT
-AIRFLOW_IMAGE=$(kubectl get deployment/$SCHEDULER_DEPLOYMENT -n airflow -o jsonpath="{$.spec.template.spec.initContainers[0].image}")
+AIRFLOW_IMAGE=$(kubectl get deployment/"$SCHEDULER_DEPLOYMENT" -n airflow -o jsonpath="{$.spec.template.spec.initContainers[0].image}")
 export AIRFLOW_IMAGE
 echo "Airflow Image: $AIRFLOW_IMAGE"
 

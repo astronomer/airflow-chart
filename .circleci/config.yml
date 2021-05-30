@@ -55,7 +55,7 @@ jobs:
           name: "Create pre-commit-cache-key.txt"
           command: |
             cp .pre-commit-config.yaml /tmp/pre-commit-cache-key.txt
-            python --version --version | sed 's/^/# /' >> /tmp/pre-commit-cache-key.txt
+            python --version | sed 's/^/# /' >> /tmp/pre-commit-cache-key.txt
       - restore_cache:
           keys:
             - pre-commit-cache-{{ checksum "/tmp/pre-commit-cache-key.txt" }}

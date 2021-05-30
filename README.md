@@ -80,8 +80,8 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ### Bake DAGs in Docker image
 
-The recommended way to update your DAGs with this chart is to build a new docker image with the  
-latest code (`docker build -t my-company/airflow:8a0da78 .`), push it to an accessible  
+The recommended way to update your DAGs with this chart is to build a new docker image with the
+latest code (`docker build -t my-company/airflow:8a0da78 .`), push it to an accessible
 registry (`docker push my-company/airflow:8a0da78`), then update the Airflow pods with that image:
 
 ```bash
