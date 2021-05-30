@@ -13,6 +13,7 @@ workflows:
             - gcp-astronomer-prod
           requires:
           - lint
+          - run_pre_commit
           - unittest-charts
 
       - airflow-test:
