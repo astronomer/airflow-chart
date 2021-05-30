@@ -32,6 +32,24 @@ fi
 
 "$REPO_DIR/bin/clean-slate"
 
+### (Start) Create example-project for running a simple DAG
+REPOSITORY=$(helm show values "$HELM_CHART_PATH" --jsonpath "{.defaultAirflowRepository}")
+TAG=$(helm show values . --jsonpath "{.defaultAirflowTag}")
+export REPOSITORY TAG
+
+export TEST_EXAMPLE_PROJECT_DIR_PATH=$REPO_DIR/bin/example_project
+export TEST_DOCKERFILE_PATH=$TEST_EXAMPLE_PROJECT_DIR_PATH/Dockerfile
+echo "FROM $REPOSITORY:$TAG" > "$TEST_DOCKERFILE_PATH"
+echo "COPY --chown=astro:astro . ." >> "$TEST_DOCKERFILE_PATH"
+echo "Contents of the Dockerfile for example_project: "
+cat "$TEST_DOCKERFILE_PATH"
+
+export TEST_TAG=$TAG-test
+
+docker build -t $REPOSITORY:$TEST_TAG $TEST_EXAMPLE_PROJECT_DIR_PATH
+kind load docker-image $REPOSITORY:$TEST_TAG
+### (End) Create example-project for running a simple DAG
+
 echo "Deploying Airflow..."
 
 kubectl get pods -w &
@@ -51,6 +69,12 @@ helm install \
   --set pgbouncer.enabled=true \
   --set pgbouncer.metadataPoolSize=25 \
   --set pgbouncer.resultBackendPoolSize=25 \
+  --set defaultAirflowRepository=$REPOSITORY \
+  --set defaultAirflowTag=$TEST_TAG \
+  --set images.airflow.repository=$REPOSITORY \
+  --set images.airflow.tag=$TEST_TAG \
+  --set images.airflow.pullPolicy=Never \
+  --set images.flower.pullPolicy=Never \
   --set data.metadataConnection.host="airflow-postgresql.airflow.svc.cluster.local" \
   --set data.resultBackendConnection.host="airflow-postgresql.airflow.svc.cluster.local" \
   airflow \
@@ -100,13 +124,20 @@ else
   exit 1
 fi
 
-export SCHEDULER_DEPLOYMENT=$(kubectl get deployments -n airflow | grep scheduler |  awk '{ print $1 }')
+SCHEDULER_DEPLOYMENT=$(kubectl get deployments -n airflow | grep scheduler |  awk '{ print $1 }')
+export SCHEDULER_DEPLOYMENT
 AIRFLOW_IMAGE=$(kubectl get deployment/$SCHEDULER_DEPLOYMENT -n airflow -o jsonpath="{$.spec.template.spec.initContainers[0].image}")
 export AIRFLOW_IMAGE
 echo "Airflow Image: $AIRFLOW_IMAGE"
 
-docker pull "$AIRFLOW_IMAGE"
-AIRFLOW_VERSION=$(docker inspect --format '{{ index .Config.Labels "io.astronomer.docker.airflow.version" }}' "$AIRFLOW_IMAGE")
+export NAMESPACE=airflow
+export RELEASE_NAME=airflow
+
+WEBSERVER_POD=$(kubectl get pods -n "$NAMESPACE" | grep webserver | awk '{ print $1 }')
+SCHEDULER_POD=$(kubectl get pods -n "$NAMESPACE" | grep scheduler | awk '{ print $1 }')
+export WEBSERVER_POD SCHEDULER_POD
+
+AIRFLOW_VERSION=$(docker inspect --format '{{ index .Config.Labels "io.astronomer.docker.airflow.version" }}' "$REPOSITORY:$TEST_TAG")
 export AIRFLOW_VERSION
 echo "Airflow Version: $AIRFLOW_VERSION"
 
@@ -114,7 +145,5 @@ pip3 install virtualenv
 virtualenv --python=python3 /tmp/venv
 source /tmp/venv/bin/activate
 pip install -r "$REPO_DIR/tests/functional-tests/requirements.txt"
-export NAMESPACE=airflow
-export RELEASE_NAME=airflow
 pytest "$REPO_DIR/tests/functional-tests/"
 deactivate
