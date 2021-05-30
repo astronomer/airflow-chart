@@ -60,12 +60,15 @@ jobs:
           keys:
             - pre-commit-cache-{{ checksum "/tmp/pre-commit-cache-key.txt" }}
       - run:
-          name: Run pre-commit
-          command: pre-commit run --all-files || { git --no-pager diff && false ; }
+          name: Install pre-commit hooks
+          command: pre-commit install-hooks
       - save_cache:
           key: pre-commit-cache-{{ checksum "/tmp/pre-commit-cache-key.txt" }}
           paths:
             - ~/.cache/pre-commit
+      - run:
+          name: Run pre-commit
+          command: pre-commit run --all-files || { git --no-pager diff && false ; }
 
   lint:
     docker:
