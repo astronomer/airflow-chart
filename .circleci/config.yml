@@ -5,6 +5,7 @@ workflows:
   install-airflow-chart:
     jobs:
       - lint
+      - run_pre_commit
       - unittest-charts
 
       - build-and-release-internal:
@@ -44,6 +45,26 @@ workflows:
                 - '/release-\d+\.\d+/'
 
 jobs:
+  run_pre_commit:
+    docker:
+      - image: quay.io/astronomer/ci-pre-commit:2021-05
+    steps:
+      - checkout
+      - run:
+          command: |
+            cp .pre-commit-config.yaml /tmp/pre-commit-cache-key.txt
+            python --version --version | sed 's/^/# /' >> /tmp/pre-commit-cache-key.txt
+      - restore_cache:
+          keys:
+            - pre-commit-cache-{{ checksum "/tmp/pre-commit-cache-key.txt" }}
+      - run:
+          name: Run pre-commit
+          command: pre-commit run --all-files || { git --no-pager diff && false ; }
+      - save_cache:
+          key: pre-commit-cache-{{ checksum "/tmp/pre-commit-cache-key.txt" }}
+          paths:
+            - ~/.cache/pre-commit
+
   lint:
     docker:
       - image: alpine/helm:3.5.3

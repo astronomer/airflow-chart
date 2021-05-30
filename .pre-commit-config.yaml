@@ -2,16 +2,17 @@
 exclude: '^(venv|\.vscode)' # regex
 repos:
   - repo: https://github.com/psf/black
-    rev: 20.8b1
+    rev: 21.5b1
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.0.1
     hooks:
       - id: check-case-conflict
       - id: check-executables-have-shebangs
       - id: check-json
       - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
       - id: check-toml
       - id: check-xml
       - id: check-yaml
@@ -29,7 +30,7 @@ repos:
       - id: sort-simple-yaml
       - id: trailing-whitespace
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.0
+    rev: 3.9.2
     hooks:
       - id: flake8
         args:
@@ -38,3 +39,15 @@ repos:
     rev: 1.0.5
     hooks:
       - id: shell-lint
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.1.10
+    hooks:
+      - id: remove-tabs
+        exclude_types: [makefile, binary]
+  - repo: https://github.com/astronomer/pre-commit-hooks
+    rev: bd325c947efcba13c03b4f4c93d882f2f83ed6ff
+    hooks:
+      - id: remove-en-dashes
+      - id: remove-unicode-non-breaking-spaces
+      - id: remove-unicode-zero-width-non-breaking-spaces
+      - id: remove-unicode-zero-width-space
