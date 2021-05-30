@@ -185,11 +185,9 @@ def test_airflow_trigger_dags(scheduler):
 
     # Verify the DAG succeeds in 100 seconds
     timeout = 100
-    sleep_count = 0
     sleep_time_between_polls = 5
     try_count = 0
     while "success" not in scheduler.check_output(dag_state_command):
-        sleep_count += sleep_time_between_polls
         sleep(sleep_time_between_polls)
         try_count += 1
         print("Try: ", try_count)
@@ -204,7 +202,7 @@ def test_airflow_trigger_dags(scheduler):
                 ]
             )
             raise Exception("DAGRun failed !")
-        if sleep_count >= timeout:
+        if (try_count * sleep_time_between_polls) >= timeout:
             print("Timed out waiting for DAG to succeed")
             print()
             print("Logs: ")
