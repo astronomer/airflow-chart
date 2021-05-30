@@ -146,4 +146,3 @@ spec:
 {{- if .Values.webserver.extraVolumes }}
 {{ toYaml .Values.webserver.extraVolumes | indent 8 }}
 {{- end }}
-
