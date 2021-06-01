@@ -1,14 +1,14 @@
 ################################
-## WebServer sidecar ConfigMap
+## Flower UI sidecar ConfigMap
 #################################
-{{- if .Values.sidecar.enabled  }}
+{{- if (and .Values.sidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ .Release.Name }}-nginx-conf
+  name: {{ .Release.Name }}-flower-nginx-conf
   labels:
     tier: airflow
-    component: webserver
+    component: flower
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
@@ -23,19 +23,12 @@ data:
       }
 
     http {
-        upstream astro-webserver {
-         server {{ .Release.Name }}-webserver:{{ .Values.ports.airflowUI }} ;
+        upstream astro-flower {
+         server {{ .Release.Name }}-flower:{{ .Values.ports.flowerUI }} ;
         }
     server {
-        		server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
+        		server_name {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }} ;
         		listen 8084  ;
-
-            location ^~ /api/ {
-              if ($host = 'deployments.{{ .Values.ingress.baseDomain }}' ) {
-                return 404;
-                }
-                proxy_pass https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/airflow/$request_uri;
-              }
 
         		location  = /auth {
         			internal;
@@ -69,7 +62,7 @@ data:
         		}
 
 
-        		location / {
+        		location ~* "^/{{ .Release.Name }}/flower(/|$)(.*)"  {
         			auth_request        /auth;
 
               # setting custom headers required by authentication
@@ -100,9 +93,21 @@ data:
 
               proxy_set_header X-Original-Forwarded-For $http_x_forwarded_for;
 
-              if ($host = 'astro-vishnuram-airflow.{{ .Values.ingress.baseDomain }}' ) {
-                return 308 https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/airflow/$request_uri;
+              if ($host = 'astro-vishnuram-flower.{{ .Values.ingress.baseDomain }}' ) {
+                rewrite ^ https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/flower permanent;
               }
+
+              proxy_cookie_path                       / /{{ .Release.Name }}/;
+
+              sub_filter_types *;
+              sub_filter '="/' '="/{{ .Release.Name }}/flower/';
+              sub_filter_last_modified on;
+              sub_filter_once off;
+
+
+              rewrite "(?i)/{{ .Release.Name }}/flower(/|$)(.*)" /$2; break;
+
+
 
 
               # Custom headers to proxied server
@@ -118,11 +123,12 @@ data:
               proxy_request_buffering                 on;
               proxy_http_version                      1.1;
               proxy_cookie_domain                     off;
-              proxy_cookie_path                       off;
-              proxy_pass http://astro-webserver;
+              proxy_pass http://astro-flower;
               proxy_redirect                          off;
 
               }
+
+
               }
               }
 {{- end }}

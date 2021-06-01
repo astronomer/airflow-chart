@@ -89,6 +89,8 @@ spec:
     - secretName: {{ .Release.Name }}-airflow-tls
           {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
+          {{- else if .Values.sidecar.enabled  }}
+    - secretName: astronomer-tls
           {{ else }}
     - secretName: ~
             {{- end }}
@@ -99,15 +101,26 @@ spec:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
         paths:
+          {{- if .Values.sidecar.enabled  }}
+          - path: /{{ .Release.Name }}/flower
+            backend:
+              serviceName: {{ .Release.Name }}-flower
+              servicePort: nginx-ui
+          {{- else }}
           - path: /{{ .Release.Name }}/flower(/|$)(.*)
             backend:
               serviceName: {{ .Release.Name }}-flower
               servicePort: flower-ui
+          {{- end }}
     - host: {{- include "flower_subdomain" . | indent 1 }}
       http:
         paths:
           - path: /
             backend:
               serviceName: {{ .Release.Name }}-flower
+              {{- if .Values.sidecar.enabled  }}
+              servicePort: nginx-ui
+              {{- else }}
               servicePort: flower-ui
+              {{- end }}
 {{- end }}

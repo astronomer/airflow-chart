@@ -26,10 +26,13 @@ spec:
 {{- if .Values.platform.release }}
   ingress:
   - from:
-    {{- if .Values.sidecar.enabled  }}
+    {{- if (and .Values.sidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
     - namespaceSelector:
         matchLabels:
           network.openshift.io/policy-group: ingress
+    ports:
+    - protocol: TCP
+      port: 8084
     {{- else }}
     - namespaceSelector: {}
       podSelector:
@@ -37,9 +40,9 @@ spec:
           tier: nginx
           component: ingress-controller
           release: {{ .Values.platform.release }}
-    {{- end }}
     ports:
     - protocol: TCP
       port: {{ .Values.ports.flowerUI }}
+    {{- end }}
 {{- end }}
 {{- end }}

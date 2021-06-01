@@ -26,4 +26,10 @@ spec:
       protocol: TCP
       port: {{ .Values.ports.flowerUI }}
       targetPort: {{ .Values.ports.flowerUI }}
+    {{- if (and .Values.sidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
+    - name: nginx-ui
+      protocol: TCP
+      port: 8084
+      targetPort: 8084
+    {{- end }}
 {{- end }}
