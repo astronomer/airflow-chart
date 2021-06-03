@@ -76,9 +76,9 @@ spec:
           env:
           {{- include "standard_airflow_environment" . | indent 10 }}
       containers:
-        {{- if .Values.sidecar.enabled }}
+        {{- if .Values.authSidecar.enabled }}
         - name: nginx
-          image: {{ .Values.sidecar.image }}
+          image: {{ .Values.authSidecar.image }}
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 8084
@@ -148,7 +148,7 @@ spec:
 {{- toYaml .Values.webserver.extraContainers | nindent 8 }}
 {{- end }}
       volumes:
-        {{- if .Values.sidecar.enabled }}
+        {{- if .Values.authSidecar.enabled }}
         - name: nginx-sidecar-conf
           configMap:
             name: {{ .Release.Name }}-nginx-conf

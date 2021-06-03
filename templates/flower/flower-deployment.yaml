@@ -48,9 +48,9 @@ spec:
         - name: {{ template "registry_secret" . }}
       {{- end }}
       containers:
-        {{- if (and .Values.sidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
+        {{- if (and .Values.authSidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
         - name: nginx
-          image: {{ .Values.sidecar.image }}
+          image: {{ .Values.authSidecar.image }}
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 8084
@@ -98,7 +98,7 @@ spec:
         - name: config
           configMap:
             name: {{ template "airflow_config" . }}
-        {{- if (and .Values.sidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
+        {{- if (and .Values.authSidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
         - name: nginx-sidecar-conf
           configMap:
             name: {{ .Release.Name }}-flower-nginx-conf

@@ -154,7 +154,7 @@ fernetKeySecretName: ~
 sccEnabled: false
 
 # Enable nginx auth sidecar
-sidecar:
+authSidecar:
   enabled: false
   image: nginxinc/nginx-unprivileged
 

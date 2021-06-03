@@ -29,7 +29,7 @@ spec:
   {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
   # this option to be relooked , for the sake of POC we have hardcoded  
-  {{- else if .Values.sidecar.enabled  }}
+  {{- else if .Values.authSidecar.enabled  }}
     - secretName: astronomer-tls
   {{ else }}
     - secretName: ~
@@ -44,7 +44,7 @@ spec:
           - path: /{{ .Release.Name }}/airflow
             backend:
               serviceName: {{ .Release.Name }}-webserver
-              {{- if .Values.sidecar.enabled  }}
+              {{- if .Values.authSidecar.enabled  }}
               servicePort: nginx-ui
               {{- else }}
               servicePort: airflow-ui
@@ -55,7 +55,7 @@ spec:
           - path: /
             backend:
               serviceName: {{ .Release.Name }}-webserver
-              {{- if .Values.sidecar.enabled  }}
+              {{- if .Values.authSidecar.enabled  }}
               servicePort: nginx-ui
               {{- else }}
               servicePort: airflow-ui
@@ -89,7 +89,7 @@ spec:
     - secretName: {{ .Release.Name }}-airflow-tls
           {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
-          {{- else if .Values.sidecar.enabled  }}
+          {{- else if .Values.authSidecar.enabled  }}
     - secretName: astronomer-tls
           {{ else }}
     - secretName: ~
@@ -101,7 +101,7 @@ spec:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
         paths:
-          {{- if .Values.sidecar.enabled  }}
+          {{- if .Values.authSidecar.enabled  }}
           - path: /{{ .Release.Name }}/flower
             backend:
               serviceName: {{ .Release.Name }}-flower
@@ -118,7 +118,7 @@ spec:
           - path: /
             backend:
               serviceName: {{ .Release.Name }}-flower
-              {{- if .Values.sidecar.enabled  }}
+              {{- if .Values.authSidecar.enabled  }}
               servicePort: nginx-ui
               {{- else }}
               servicePort: flower-ui

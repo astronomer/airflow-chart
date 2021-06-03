@@ -1,7 +1,7 @@
 ################################
 ## Flower UI sidecar ConfigMap
 #################################
-{{- if (and .Values.sidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
+{{- if (and .Values.authSidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
