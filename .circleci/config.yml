@@ -69,6 +69,8 @@ jobs:
       - run:
           name: Run pre-commit
           command: pre-commit run --all-files || { git --no-pager diff && false ; }
+          environment:
+            SKIP: no-commit-to-branch
 
   lint:
     docker:
