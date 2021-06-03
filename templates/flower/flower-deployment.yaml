@@ -51,7 +51,7 @@ spec:
         {{- if (and .Values.sidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
         - name: nginx
           image: {{ .Values.sidecar.image }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 8084
             name: nginx-ui
