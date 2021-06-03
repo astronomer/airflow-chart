@@ -79,7 +79,7 @@ spec:
         {{- if .Values.sidecar.enabled }}
         - name: nginx
           image: {{ .Values.sidecar.image }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 8084
             name: nginx-ui
@@ -164,4 +164,3 @@ spec:
 {{- if .Values.webserver.extraVolumes }}
 {{ toYaml .Values.webserver.extraVolumes | indent 8 }}
 {{- end }}
-
