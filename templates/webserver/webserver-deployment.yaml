@@ -64,6 +64,7 @@ spec:
       serviceAccountName: {{ .Release.Name }}-webserver-serviceaccount
       securityContext:
         runAsUser: {{ .Values.uid }}
+        fsGroup: {{ .Values.gid }}
       {{- if or .Values.registry.secretName .Values.registry.connection }}
       imagePullSecrets:
         - name: {{ template "registry_secret" . }}
