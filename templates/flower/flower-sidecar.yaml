@@ -15,7 +15,7 @@ metadata:
 data:
   nginx.conf: |
     pid /tmp/nginx.pid;
-    worker_processes 3;
+    worker_processes auto;
     events {
       multi_accept        on;
       worker_connections  16384;
@@ -23,12 +23,16 @@ data:
       }
 
     http {
-        upstream astro-flower {
-         server {{ .Release.Name }}-flower:{{ .Values.ports.flowerUI }} ;
-        }
+      upstream astro-flower {
+        server {{ .Release.Name }}-flower:{{ .Values.ports.flowerUI }} ;
+      }
+
     server {
       server_name {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }} ;
       listen 8084  ;
+
+      # Disable Nginx Server version
+      server_tokens off;
 
       location  = /auth {
         internal;

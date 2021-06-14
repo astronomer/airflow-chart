@@ -15,7 +15,7 @@ metadata:
 data:
   nginx.conf: |
     pid /tmp/nginx.pid;
-    worker_processes 3;
+    worker_processes auto;
     events {
       multi_accept        on;
       worker_connections  16384;
@@ -29,6 +29,9 @@ data:
       server {
         server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
         listen 8084  ;
+
+        # Disable Nginx Server version
+        server_tokens off;
 
         location ^~ /api/ {
           if ($host = 'deployments.{{ .Values.ingress.baseDomain }}' ) {
