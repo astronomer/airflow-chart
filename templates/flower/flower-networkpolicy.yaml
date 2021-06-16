@@ -26,7 +26,7 @@ spec:
 {{- if .Values.platform.release }}
   ingress:
   - from:
-    {{- if (and .Values.authSidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
+    {{- if .Values.authSidecar.enabled }}
     - namespaceSelector:
         matchLabels:
           network.openshift.io/policy-group: ingress
