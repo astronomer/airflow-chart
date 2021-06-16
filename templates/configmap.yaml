@@ -159,7 +159,7 @@ data:
             "kubernetes_pod_operator": "False"
         }
 
-        if 'airflow-worker' in pod.labels.keys() or \
+        if 'airflow-worker' in pod.labels.keys() and \
                 conf.get('core', 'EXECUTOR') == "KubernetesExecutor":
             extra_labels["kubernetes_executor"] = "True"
         else:
@@ -181,7 +181,7 @@ data:
         }
 
 
-        if 'airflow-worker' in pod.metadata.labels.keys() or \
+        if 'airflow-worker' in pod.metadata.labels.keys() and \
                 conf.get('core', 'EXECUTOR') == "KubernetesExecutor":
             extra_labels["kubernetes_executor"] = "True"
         else:
