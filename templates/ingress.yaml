@@ -19,9 +19,7 @@ metadata:
   {{- if .Values.ingress.webserverAnnotations }}
   annotations:
   {{- if .Values.authSidecar.enabled  }}
-    {{- range $key, $value := .Values.authSidecar.annotations}}
-    {{ $key }}: {{ $value | quote }}
-    {{- end }}
+{{- toYaml .Values.authSidecar.annotations | nindent 4 }}
   {{- else }}
     {{- range $k, $v := .Values.ingress.webserverAnnotations }}
       {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
@@ -86,9 +84,7 @@ metadata:
   {{ $ctx := . }}
   annotations:
   {{- if .Values.authSidecar.enabled  }}
-    {{- range $key, $value := .Values.authSidecar.annotations}}
-    {{ $key }}: {{ $value | quote }}
-    {{- end }}
+{{- toYaml .Values.authSidecar.annotations | nindent 4 }}
   {{- else }}
     {{- range $k, $v := .Values.ingress.flowerAnnotations }}
       {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
