@@ -157,6 +157,7 @@ sccEnabled: false
 authSidecar:
   enabled: false
   image: nginxinc/nginx-unprivileged
+  pullPolicy: IfNotPresent
 
 
 # Airflow Worker Config
