@@ -77,7 +77,7 @@ spec:
           {{- include "standard_airflow_environment" . | indent 10 }}
       containers:
         {{- if .Values.authSidecar.enabled }}
-        - name: nginx
+        - name: auth-sidecar
           image: {{ .Values.authSidecar.image }}
           imagePullPolicy: IfNotPresent
           ports:
