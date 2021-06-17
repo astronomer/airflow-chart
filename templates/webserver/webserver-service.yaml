@@ -28,6 +28,6 @@ spec:
     {{- if .Values.authSidecar.enabled }}
     - name: auth-proxy
       protocol: TCP
-      port: {{ .Values.authSidecar.authproxyPort }}
+      port: {{ .Values.authSidecar.port }}
     {{- end }}
   

@@ -32,7 +32,7 @@ spec:
           network.openshift.io/policy-group: ingress
     ports:
     - protocol: TCP
-      port: {{ .Values.authSidecar.authproxyPort }}
+      port: {{ .Values.authSidecar.port }}
     {{- else }}
     - namespaceSelector: {}
       podSelector:

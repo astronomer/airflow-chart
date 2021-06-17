@@ -27,7 +27,7 @@ data:
       }
       server {
         server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
-        listen {{ .Values.authSidecar.authproxyPort }}  ;
+        listen {{ .Values.authSidecar.port }}  ;
         # Disable Nginx Server version
         server_tokens off;
 

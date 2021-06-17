@@ -81,13 +81,13 @@ spec:
           image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
           imagePullPolicy: {{ .Values.authSidecar.pullPolicy }}
           ports:
-          - containerPort: {{ .Values.authSidecar.authproxyPort }}
+          - containerPort: {{ .Values.authSidecar.port }}
             name: auth-proxy
             protocol: TCP
           readinessProbe:
             httpGet:
               path: /healthz
-              port: {{ .Values.authSidecar.authproxyPort }}
+              port: {{ .Values.authSidecar.port }}
               scheme: HTTP
             initialDelaySeconds: 15
             timeoutSeconds: 30
@@ -97,7 +97,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: {{ .Values.authSidecar.authproxyPort }}
+              port: {{ .Values.authSidecar.port }}
               scheme: HTTP
             initialDelaySeconds: 15
             timeoutSeconds: 30
