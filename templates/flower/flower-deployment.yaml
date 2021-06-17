@@ -48,6 +48,39 @@ spec:
         - name: {{ template "registry_secret" . }}
       {{- end }}
       containers:
+        {{- if .Values.authSidecar.enabled }}
+        - name: auth-proxy
+          image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
+          imagePullPolicy: {{ .Values.authSidecar.pullPolicy }}
+          ports:
+          - containerPort: {{ .Values.authSidecar.port }}
+            name: auth-proxy
+            protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.authSidecar.port }}
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 20
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.authSidecar.port }}
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 20
+          volumeMounts:
+          - mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            name: nginx-sidecar-conf
+        {{- end }}
         - name: flower
           image: {{ template "default_airflow_image" . }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
@@ -85,4 +118,9 @@ spec:
         - name: config
           configMap:
             name: {{ template "airflow_config" . }}
+        {{- if .Values.authSidecar.enabled }}
+        - name: nginx-sidecar-conf
+          configMap:
+            name: {{ .Release.Name }}-flower-nginx-conf
+        {{- end }}
 {{- end }}

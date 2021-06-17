@@ -153,6 +153,15 @@ fernetKeySecretName: ~
 # Enable security context constraints required for OpenShift
 sccEnabled: false
 
+# Enable nginx auth sidecar
+authSidecar:
+  enabled: false
+  repository: nginxinc/nginx-unprivileged
+  tag: stable
+  pullPolicy: IfNotPresent
+  port: 8084 
+
+
 # Airflow Worker Config
 workers:
   # Number of airflow celery workers in StatefulSet

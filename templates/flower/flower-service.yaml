@@ -26,4 +26,9 @@ spec:
       protocol: TCP
       port: {{ .Values.ports.flowerUI }}
       targetPort: {{ .Values.ports.flowerUI }}
+    {{- if .Values.authSidecar.enabled }}
+    - name: auth-proxy
+      protocol: TCP
+      port: {{ .Values.authSidecar.port }}
+    {{- end }}
 {{- end }}

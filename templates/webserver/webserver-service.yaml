@@ -25,3 +25,9 @@ spec:
       protocol: TCP
       port: {{ .Values.ports.airflowUI }}
       targetPort: {{ .Values.ports.airflowUI }}
+    {{- if .Values.authSidecar.enabled }}
+    - name: auth-proxy
+      protocol: TCP
+      port: {{ .Values.authSidecar.port }}
+    {{- end }}
+  

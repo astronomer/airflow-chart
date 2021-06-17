@@ -77,6 +77,39 @@ spec:
           env:
           {{- include "standard_airflow_environment" . | indent 10 }}
       containers:
+        {{- if .Values.authSidecar.enabled }}
+        - name: auth-proxy
+          image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
+          imagePullPolicy: {{ .Values.authSidecar.pullPolicy }}
+          ports:
+          - containerPort: {{ .Values.authSidecar.port }}
+            name: auth-proxy
+            protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.authSidecar.port }}
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 20
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.authSidecar.port }}
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 20
+          volumeMounts:
+          - mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            name: nginx-sidecar-conf
+        {{- end }}
         - name: webserver
           image: {{ template "airflow_image" . }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
@@ -136,6 +169,11 @@ spec:
 {{- toYaml .Values.webserver.extraContainers | nindent 8 }}
 {{- end }}
       volumes:
+        {{- if .Values.authSidecar.enabled }}
+        - name: nginx-sidecar-conf
+          configMap:
+            name: {{ .Release.Name }}-nginx-conf
+        {{- end }}
         - name: config
           configMap:
             name: {{ template "airflow_config" . }}

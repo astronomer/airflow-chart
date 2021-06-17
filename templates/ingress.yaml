@@ -18,8 +18,12 @@ metadata:
 {{- end }}
   {{- if .Values.ingress.webserverAnnotations }}
   annotations:
-  {{- range $k, $v := .Values.ingress.webserverAnnotations }}
-    {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
+  {{- if .Values.authSidecar.enabled  }}
+{{- toYaml .Values.authSidecar.annotations | nindent 4 }}
+  {{- else }}
+    {{- range $k, $v := .Values.ingress.webserverAnnotations }}
+      {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
+    {{- end }}
   {{- end }}
   {{- end }}
 spec:
@@ -28,6 +32,9 @@ spec:
     - secretName: {{ .Release.Name }}-airflow-tls
   {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
+  # this option to be relooked, for the sake of POC we have hardcoded  
+  {{- else if .Values.authSidecar.enabled  }}
+    - secretName: astronomer-tls
   {{ else }}
     - secretName: ~
   {{- end }}
@@ -41,14 +48,22 @@ spec:
           - path: /{{ .Release.Name }}/airflow
             backend:
               serviceName: {{ .Release.Name }}-webserver
+              {{- if .Values.authSidecar.enabled  }}
+              servicePort: auth-proxy
+              {{- else }}
               servicePort: airflow-ui
+              {{- end }}
     - host: {{- include "airflow_subdomain" . | indent 1 }}
       http:
         paths:
           - path: /
             backend:
               serviceName: {{ .Release.Name }}-webserver
+              {{- if .Values.authSidecar.enabled  }}
+              servicePort: auth-proxy
+              {{- else }}
               servicePort: airflow-ui
+              {{- end }}
 {{- end }}
 {{- if and .Values.ingress.enabled (eq .Values.executor "CeleryExecutor") }}
 ---
@@ -68,8 +83,12 @@ metadata:
   {{- if .Values.ingress.flowerAnnotations }}
   {{ $ctx := . }}
   annotations:
-  {{- range $k, $v := .Values.ingress.flowerAnnotations }}
-    {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
+  {{- if .Values.authSidecar.enabled  }}
+{{- toYaml .Values.authSidecar.annotations | nindent 4 }}
+  {{- else }}
+    {{- range $k, $v := .Values.ingress.flowerAnnotations }}
+      {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
+    {{- end }}
   {{- end }}
   {{- end }}
 spec:
@@ -78,6 +97,8 @@ spec:
     - secretName: {{ .Release.Name }}-airflow-tls
           {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
+          {{- else if .Values.authSidecar.enabled  }}
+    - secretName: astronomer-tls
           {{ else }}
     - secretName: ~
             {{- end }}
@@ -88,15 +109,26 @@ spec:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
         paths:
+          {{- if .Values.authSidecar.enabled  }}
+          - path: /{{ .Release.Name }}/flower
+            backend:
+              serviceName: {{ .Release.Name }}-flower
+              servicePort: auth-proxy
+          {{- else }}
           - path: /{{ .Release.Name }}/flower(/|$)(.*)
             backend:
               serviceName: {{ .Release.Name }}-flower
               servicePort: flower-ui
+          {{- end }}
     - host: {{- include "flower_subdomain" . | indent 1 }}
       http:
         paths:
           - path: /
             backend:
               serviceName: {{ .Release.Name }}-flower
+              {{- if .Values.authSidecar.enabled  }}
+              servicePort: auth-proxy
+              {{- else }}
               servicePort: flower-ui
+              {{- end }}
 {{- end }}
