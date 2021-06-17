@@ -52,13 +52,13 @@ data:
 
         location / {
 {{ include "default_nginx_settings_location" . | indent 8  }}
-          
+
 
           #proxy_set_header X-Original-URI        $request_uri;
           if ($host = '{{ .Values.platform.release }}-airflow.{{ .Values.ingress.baseDomain }}' ) {
             return 308 https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/airflow/$request_uri;
           }
-          
+
           # Custom headers to proxied server
           proxy_set_header  Host  deployments.{{ .Values.ingress.baseDomain}};
           #proxy_set_header  X-Forwarded-Proto https;
