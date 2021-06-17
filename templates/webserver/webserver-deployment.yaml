@@ -81,9 +81,29 @@ spec:
           image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
           imagePullPolicy: {{ .Values.authSidecar.pullPolicy }}
           ports:
-          - containerPort: {{ .Values.authSidecar.authproxyport }}
+          - containerPort: {{ .Values.authSidecar.authproxyPort }}
             name: auth-proxy
             protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.authSidecar.authproxyPort }}
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 20
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.authSidecar.authproxyPort }}
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 20
           volumeMounts:
           - mountPath: /etc/nginx/nginx.conf
             subPath: nginx.conf

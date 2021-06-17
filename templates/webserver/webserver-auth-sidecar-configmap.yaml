@@ -27,7 +27,7 @@ data:
       }
       server {
         server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
-        listen {{ .Values.authSidecar.authproxyport }}  ;
+        listen {{ .Values.authSidecar.authproxyPort }}  ;
         # Disable Nginx Server version
         server_tokens off;
 
@@ -66,6 +66,11 @@ data:
           proxy_pass http://astro-webserver;
 
         }
+
+        location /healthz {
+          return 200;
+        }
+
       }
     }
 {{- end }}

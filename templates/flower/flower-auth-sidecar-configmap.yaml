@@ -27,7 +27,7 @@ data:
       }
       server {
         server_name {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }} ;
-        listen {{ .Values.authSidecar.authproxyport }}  ;
+        listen {{ .Values.authSidecar.authproxyPort }}  ;
         # Disable Nginx Server version
         server_tokens off;
         
@@ -60,6 +60,10 @@ data:
           #proxy_set_header  X-Forwarded-Proto https;
           proxy_pass http://astro-flower;
 
+        }
+
+        location /healthz {
+          return 200;
         }
       }
     }
