@@ -27,9 +27,8 @@ spec:
       port: {{ .Values.ports.flowerUI }}
       targetPort: {{ .Values.ports.flowerUI }}
     {{- if .Values.authSidecar.enabled }}
-    - name: nginx-ui
+    - name: auth-proxy
       protocol: TCP
-      port: 8084
-      targetPort: 8084
+      port: {{ .Values.authSidecar.authproxyport }}
     {{- end }}
 {{- end }}

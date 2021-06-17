@@ -26,9 +26,8 @@ spec:
       port: {{ .Values.ports.airflowUI }}
       targetPort: {{ .Values.ports.airflowUI }}
     {{- if .Values.authSidecar.enabled }}
-    - name: nginx-ui
+    - name: auth-proxy
       protocol: TCP
-      port: 8084
-      targetPort: 8084
+      port: {{ .Values.authSidecar.authproxyport }}
     {{- end }}
   

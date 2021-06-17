@@ -49,7 +49,7 @@ spec:
             backend:
               serviceName: {{ .Release.Name }}-webserver
               {{- if .Values.authSidecar.enabled  }}
-              servicePort: nginx-ui
+              servicePort: auth-proxy
               {{- else }}
               servicePort: airflow-ui
               {{- end }}
@@ -60,7 +60,7 @@ spec:
             backend:
               serviceName: {{ .Release.Name }}-webserver
               {{- if .Values.authSidecar.enabled  }}
-              servicePort: nginx-ui
+              servicePort: auth-proxy
               {{- else }}
               servicePort: airflow-ui
               {{- end }}
@@ -113,7 +113,7 @@ spec:
           - path: /{{ .Release.Name }}/flower
             backend:
               serviceName: {{ .Release.Name }}-flower
-              servicePort: nginx-ui
+              servicePort: auth-proxy
           {{- else }}
           - path: /{{ .Release.Name }}/flower(/|$)(.*)
             backend:
@@ -127,7 +127,7 @@ spec:
             backend:
               serviceName: {{ .Release.Name }}-flower
               {{- if .Values.authSidecar.enabled  }}
-              servicePort: nginx-ui
+              servicePort: auth-proxy
               {{- else }}
               servicePort: flower-ui
               {{- end }}

@@ -77,12 +77,12 @@ spec:
           {{- include "standard_airflow_environment" . | indent 10 }}
       containers:
         {{- if .Values.authSidecar.enabled }}
-        - name: auth-sidecar
-          image: {{ .Values.authSidecar.image }}
-          imagePullPolicy: IfNotPresent
+        - name: auth-proxy
+          image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
+          imagePullPolicy: {{ .Values.authSidecar.pullPolicy }}
           ports:
-          - containerPort: 8084
-            name: nginx-ui
+          - containerPort: {{ .Values.authSidecar.authproxyport }}
+            name: auth-proxy
             protocol: TCP
           volumeMounts:
           - mountPath: /etc/nginx/nginx.conf
