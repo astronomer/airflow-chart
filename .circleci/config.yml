@@ -20,7 +20,7 @@ workflows:
           matrix:
             parameters:
               # https://hub.docker.com/r/kindest/node/tags
-              kube_version: ["1.16.15", "1.17.17", "1.18.15", "1.19.7"]
+              kube_version: ["1.16.15", "1.17.17", "1.18.19", "1.19.11", "1.20.7"]
               executor: ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
           requires:
           - build-and-release-internal
@@ -68,7 +68,7 @@ jobs:
             - ~/.cache/pre-commit
       - run:
           name: Run pre-commit
-          command: pre-commit run --all-files || { git --no-pager diff && false ; }
+          command: pre-commit run --all-files --show-diff-on-failure
           environment:
             SKIP: no-commit-to-branch
 
