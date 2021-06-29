@@ -95,7 +95,7 @@ jobs:
             helm dep update
             helm plugin install https://github.com/astronomer/helm-unittest/
             cp files/pod-template-file.yaml templates
-            helm unittest .
+            helm unittest -3 .
 
   build-and-release-internal:
     docker:

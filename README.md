@@ -45,7 +45,7 @@ helm install --namespace airflow .
 ## Prerequisites
 
 - Kubernetes 1.12+
-- Helm 2.11+ or Helm 3.0+
+- Helm 3.0+
 - PV provisioner support in the underlying infrastructure
 
 ## Installing the Chart
