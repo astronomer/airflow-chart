@@ -1,24 +1,38 @@
 ---
 suite: Test templates/configmap.yaml
 templates:
-  - templates/configmap.yaml
+  - charts/airflow/templates/configmaps/configmap.yaml
 tests:
   - it: should work
     asserts:
       - isKind:
           of: ConfigMap
-  - it: honors default image tag
+  - it: should use our default for airflowLocalSettings
     set:
-      defaultAirflowTag: hello
+      airflow:
+        podMutation:
+          tolerations:
+            - somekey: somevalue
+          affinity:
+            anotherkey: anothervalue
     asserts:
       - matchRegex:
-          path: data.airflow\.cfg
-          pattern: "worker_container_tag = hello"
-  - it: uses images.airflow.tag over default
+          path: data.airflow_local_settings\.py
+          pattern: '{"somekey":"somevalue"}'
+      - matchRegex:
+          path: data.airflow_local_settings\.py
+          pattern: '{"anotherkey":"anothervalue"}'
+  - it: should still be settable
     set:
-      images.airflow.tag: world
-      defaultAirflowTag: hello
+      airflow:
+        podMutation:
+          tolerations:
+            - somekey: somevalue
+        airflowLocalSettings: "# well hello"
     asserts:
       - matchRegex:
-          path: data.airflow\.cfg
-          pattern: "worker_container_tag = world"
+          path: data.airflow_local_settings\.py
+          pattern: "# well hello"
+      - notMatchRegex:
+          path: data.airflow_local_settings\.py
+          pattern: '{"somekey":"somevalue"}'

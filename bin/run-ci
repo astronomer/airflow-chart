@@ -33,8 +33,8 @@ fi
 "$REPO_DIR/bin/clean-slate"
 
 ### (Start) Create example-project for running a simple DAG
-REPOSITORY=$(helm show values "$HELM_CHART_PATH" --jsonpath "{.defaultAirflowRepository}")
-TAG=$(helm show values . --jsonpath "{.defaultAirflowTag}")
+REPOSITORY=$(helm show values "$HELM_CHART_PATH" --jsonpath "{.airflow.defaultAirflowRepository}")
+TAG=$(helm show values . --jsonpath "{.airflow.defaultAirflowTag}")
 export REPOSITORY TAG
 
 export TEST_EXAMPLE_PROJECT_DIR_PATH=$REPO_DIR/bin/example_project
@@ -65,18 +65,16 @@ export EXECUTOR="${EXECUTOR:-CeleryExecutor}"
 # shellcheck disable=SC2086
 helm install \
   -n airflow \
-  --set executor="$EXECUTOR" \
-  --set pgbouncer.enabled=true \
-  --set pgbouncer.metadataPoolSize=25 \
-  --set pgbouncer.resultBackendPoolSize=25 \
-  --set defaultAirflowRepository=$REPOSITORY \
-  --set defaultAirflowTag=$TEST_TAG \
-  --set images.airflow.repository=$REPOSITORY \
-  --set images.airflow.tag=$TEST_TAG \
-  --set images.airflow.pullPolicy=Never \
-  --set images.flower.pullPolicy=Never \
-  --set data.metadataConnection.host="airflow-postgresql.airflow.svc.cluster.local" \
-  --set data.resultBackendConnection.host="airflow-postgresql.airflow.svc.cluster.local" \
+  --set airflow.executor="$EXECUTOR" \
+  --set airflow.pgbouncer.enabled=true \
+  --set airflow.pgbouncer.metadataPoolSize=25 \
+  --set airflow.pgbouncer.resultBackendPoolSize=25 \
+  --set airflow.defaultAirflowRepository=$REPOSITORY \
+  --set airflow.defaultAirflowTag=$TEST_TAG \
+  --set airflow.images.airflow.repository=$REPOSITORY \
+  --set airflow.images.airflow.tag=$TEST_TAG \
+  --set airflow.images.airflow.pullPolicy=Never \
+  --set airflow.images.flower.pullPolicy=Never \
   airflow \
   $HELM_CHART_PATH
 

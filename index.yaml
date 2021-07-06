@@ -1,0 +1,48 @@
+apiVersion: v1
+entries:
+  airflow:
+  - apiVersion: v1
+    appVersion: 2.0.0
+    created: "2021-07-06T09:48:41.436273-07:00"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: '@stable'
+      version: 6.3.12
+    description: Airflow component of Astronomer Platform
+    digest: 16e36d09cae4436b9eee34a33497223319e47cba59a449f3965a1fffe1af0f66
+    icon: https://airflow.apache.org/docs/apache-airflow/stable/_images/pin_large.png
+    keywords:
+    - astronomer
+    - airflow
+    name: airflow
+    urls:
+    - https://aliotta.github.io/helm-repo/airflow-0.20.0.tgz
+    version: 0.20.0
+  postgresql:
+  - apiVersion: v1
+    appVersion: 11.5.0
+    created: "2021-07-06T09:48:41.437706-07:00"
+    description: Chart for PostgreSQL, an object-relational database management system (ORDBMS) with an emphasis on extensibility and on standards-compliance.
+    digest: e3d8f710db745334731a5ed5d0a3b8731bb74109388e4755cc1ef6b9c4b2f288
+    home: https://www.postgresql.org/
+    icon: https://bitnami.com/assets/stacks/postgresql/img/postgresql-stack-110x117.png
+    keywords:
+    - postgresql
+    - postgres
+    - database
+    - sql
+    - replication
+    - cluster
+    maintainers:
+    - email: containers@bitnami.com
+      name: Bitnami
+    - email: cedric@desaintmartin.fr
+      name: desaintmartin
+    name: postgresql
+    sources:
+    - https://github.com/bitnami/bitnami-docker-postgresql
+    urls:
+    - https://aliotta.github.io/helm-repo/charts/postgresql-6.3.12.tgz
+    version: 6.3.12
+generated: "2021-07-06T09:48:41.432214-07:00"
