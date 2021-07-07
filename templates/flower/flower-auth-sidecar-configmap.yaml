@@ -1,0 +1,69 @@
+######################################
+## Flower UI auth sidecar ConfigMap ##
+######################################
+{{- if (and .Values.authSidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-flower-nginx-conf
+  labels:
+    tier: airflow
+    component: flower
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+data:
+  nginx.conf: |
+    pid /tmp/nginx.pid;
+    worker_processes auto;
+    events {
+      multi_accept        on;
+      worker_connections  16384;
+      use                 epoll;
+      }
+    http {
+      upstream astro-flower {
+        server localhost:{{ .Values.ports.flowerUI }} ;
+      }
+      server {
+        server_name {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }} ;
+        listen {{ .Values.authSidecar.port }}  ;
+        # Disable Nginx Server version
+        server_tokens off;
+        location  = /auth {
+{{ include "default_nginx_settings" . | indent 8  }}
+          proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};
+          proxy_pass  https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization;
+        }
+
+        location @401_auth_error {
+          internal;
+          add_header Set-Cookie $auth_cookie;
+          return 302 https://app.{{ .Values.ingress.baseDomain }}/login?rd=https://$http_host$request_uri;
+        }
+
+        location ~* "^/{{ .Release.Name }}/flower(/|$)(.*)"  {
+{{ include "default_nginx_settings_location" . | indent 8  }}
+
+          if ($host = '{{ .Values.platform.release }}-flower.{{ .Values.ingress.baseDomain }}' ) {
+            rewrite ^ https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/flower permanent;
+          }
+          proxy_cookie_path                       / /{{ .Release.Name }}/;
+          sub_filter_types *;
+          sub_filter '="/' '="/{{ .Release.Name }}/flower/';
+          sub_filter_last_modified on;
+          sub_filter_once off;
+          rewrite "(?i)/{{ .Release.Name }}/flower(/|$)(.*)" /$2; break;
+          # Custom headers to proxied server
+          proxy_set_header  Host  deployments.{{ .Values.ingress.baseDomain}};
+          #proxy_set_header  X-Forwarded-Proto https;
+          proxy_pass http://astro-flower;
+
+        }
+
+        location /healthz {
+          return 200;
+        }
+      }
+    }
+{{- end }}
