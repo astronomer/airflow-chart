@@ -119,6 +119,10 @@ data:
     jwt_audience = {{ printf "%s/%s" ( include "deployments_subdomain" . ) .Release.Name }}
 {{- end }}
 
+{{- if .Values.webserver.webserverConfig }}
+  webserver_config.py: |
+    {{ .Values.webserver.webserverConfig | nindent 4 }}
+{{- else }}
   webserver_config.py: |
     import os
     from airflow import configuration as conf
@@ -134,6 +138,7 @@ data:
     # ----------------------------------------------------
     # AUTHENTICATION CONFIG
     # ----------------------------------------------------
+{{- end }}
 {{- if .Values.webserver.jwtSigningCertificateSecretName }}
     AUTH_TYPE = AUTH_REMOTE_USER
 
