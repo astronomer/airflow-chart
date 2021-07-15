@@ -1,7 +1,7 @@
 ######################################
 ## Flower UI auth sidecar ConfigMap ##
 ######################################
-{{- if (and .Values.authSidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
+{{- if (and .Values.airflow.authSidecar.enabled ( eq .Values.airflow.executor "CeleryExecutor" )) }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -27,7 +27,7 @@ data:
       }
       server {
         server_name {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }} ;
-        listen {{ .Values.authSidecar.port }}  ;
+        listen {{ .Values.airflow.authSidecar.port }}  ;
         # Disable Nginx Server version
         server_tokens off;
         location  = /auth {
