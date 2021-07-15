@@ -1,7 +1,7 @@
 ######################################
 ## WebServer auth sidecar ConfigMap ##
 ######################################
-{{- if .Values.airflow.authSidecar.enabled  }}
+{{- if .Values.authSidecar.enabled  }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
