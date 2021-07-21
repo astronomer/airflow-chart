@@ -23,7 +23,7 @@ data:
       }
     http {
       upstream astro-webserver {
-        server localhost:{{ .Values.ports.airflowUI }} ;
+        server localhost:{{ .Values.airflow.ports.airflowUI }} ;
       }
       server {
         server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;

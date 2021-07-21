@@ -260,7 +260,6 @@ ingress:
 
 platform:
   release: ~
-  workspace: ""
 ports:
   flowerUI: 5555
   airflowUI: 8080
