@@ -3,7 +3,7 @@ entries:
   airflow:
   - apiVersion: v2
     appVersion: 2.1.0
-    created: "2021-07-21T13:13:04.341399-05:00"
+    created: "2021-07-21T13:15:57.224951-05:00"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -26,11 +26,11 @@ entries:
     - https://github.com/apache/airflow
     type: application
     urls:
-    - https://bote795.github.io/helm-repo/charts/airflow-1.1.0-rc1.tgz
+    - https://nicolasbotello.com/helm-repo/charts/airflow-1.1.0-rc1.tgz
     version: 1.1.0-rc1
   - apiVersion: v1
     appVersion: 2.0.0
-    created: "2021-07-21T13:13:04.333958-05:00"
+    created: "2021-07-21T13:15:57.217593-05:00"
     dependencies:
     - name: airflow
       repository: https://github.com/astronomer/airflow/releases/download/oss-helm-chart%2F1.1.0-rc1/
@@ -43,6 +43,6 @@ entries:
     - airflow
     name: airflow
     urls:
-    - https://bote795.github.io/helm-repo/airflow-1.0.0-rc1.tgz
+    - https://nicolasbotello.com/helm-repo/airflow-1.0.0-rc1.tgz
     version: 1.0.0-rc1
-generated: "2021-07-21T13:13:04.322605-05:00"
+generated: "2021-07-21T13:15:57.2076-05:00"
