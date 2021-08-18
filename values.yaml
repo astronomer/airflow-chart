@@ -257,3 +257,6 @@ ingress:
 #  networkPolicies:
 #    enabled: true
 #    # TODO: Originated from https://github.com/astronomer/issues/issues/2516
+
+platform:
+  release: ~
