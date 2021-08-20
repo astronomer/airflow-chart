@@ -52,6 +52,7 @@ helm install --namespace airflow .
 To install the chart with the release name `my-release`:
 
 ```bash
+helm dependency update
 helm install --name my-release .
 ```
 
