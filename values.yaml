@@ -94,7 +94,7 @@ images:
     pullPolicy: IfNotPresent
   redis:
     repository: quay.io/astronomer/ap-redis
-    tag: 6.2.1
+    tag: 6.2.5-1
     pullPolicy: IfNotPresent
   pgbouncer:
     repository: quay.io/astronomer/ap-pgbouncer
@@ -102,7 +102,7 @@ images:
     pullPolicy: IfNotPresent
   pgbouncerExporter:
     repository: quay.io/astronomer/ap-pgbouncer-exporter
-    tag: 0.9.2
+    tag: 0.11.0-1
     pullPolicy: IfNotPresent
 
 # Environment variables for all airflow containers
