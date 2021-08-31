@@ -24,11 +24,11 @@ subjects:
 {{- if $grantScheduler }}
   - kind: ServiceAccount
     name: {{ .Release.Name }}-scheduler-serviceaccount
-    namespace: {{ .Release.Namespace }}
+    namespace: "{{ .Release.Namespace }}"
 {{- end }}
 {{- if $grantWorker }}
   - kind: ServiceAccount
     name: {{ .Release.Name }}-worker-serviceaccount
-    namespace: {{ .Release.Namespace }}
+    namespace: "{{ .Release.Namespace }}"
 {{- end }}
 {{- end }}
