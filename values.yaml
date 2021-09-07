@@ -104,6 +104,10 @@ airflow:
     connection:
       scheme: http
 
+  cleanup:
+    command: ["airflow-cleanup-pods", "--namespace={{ .Release.Namespace }}"]
+    args: ~
+
   airflowLocalSettings: |
     {{- if semverCompare "<1.10.12" .Values.airflowVersion }}
 
