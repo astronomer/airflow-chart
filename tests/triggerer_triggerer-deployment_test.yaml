@@ -1,0 +1,87 @@
+---
+suite: Test templates/triggerer/triggerer-deployment.yaml
+templates:
+  - templates/triggerer/triggerer-deployment.yaml
+tests:
+  - it: "should work"
+    asserts:
+      - isKind:
+          of: Deployment
+  - it: "should create multiple triggerers"
+    set:
+      triggerer:
+        replicas: 2
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 2
+  - it: "should create one triggerer if replicas is not specified"
+    set:
+      replicas: ~
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+
+  - it: "should wait for migrations"
+    set:
+      executor: CeleryExecutor
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].args
+          value: ["airflow-migration-spinner", "--timeout=60"]
+  - it: should add extraVolume and extraVolumeMount
+    set:
+      triggerer:
+        extraVolumes:
+          - name: test-volume
+            emptyDir: {}
+        extraVolumeMounts:
+          - name: test-volume
+            mountPath: /opt/test
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: test-volume
+            emptyDir: {}
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-volume
+            mountPath: /opt/test
+  - it: "should add extraContainers"
+    set:
+      executor: CeleryExecutor
+      triggerer:
+        extraContainers:
+          - name: test
+            image: test/image:tag
+            imagePullPolicy: IfNotPresent
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: test
+            image: test/image:tag
+            imagePullPolicy: IfNotPresent
+  - it: "should add extraInitContainers"
+    set:
+      triggerer:
+        extraInitContainers:
+          - name: test
+            image: test/image:tag
+            imagePullPolicy: IfNotPresent
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: test
+            image: test/image:tag
+            imagePullPolicy: IfNotPresent
+  - it: "should not be created for Airflow <= 2.2"
+    set:
+      airflowVersion: 2.1.0
+    asserts:
+      - hasDocuments:
+          count: 0
