@@ -193,6 +193,7 @@ airflow:
     webserver:
       expose_config: True
     elasticsearch:
+      write_stdout: True
       elasticsearch_write_stdout: True
     kubernetes:
       dags_in_image: True
