@@ -191,6 +191,8 @@ airflow:
     elasticsearch:
       write_stdout: True
       elasticsearch_write_stdout: True
+      elasticsearch_json_format: True
+      elasticsearch_log_id_template: "{dag_id}_{task_id}_{execution_date}_{try_number}"
     kubernetes:
       dags_in_image: True
     # Only required when running on the platform, but works elsewhere too
