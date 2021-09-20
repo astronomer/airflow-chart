@@ -121,3 +121,11 @@ extraObjects:
         requests:
           storage: 5Gi
 ```
+
+### Auth Side Car Config
+
+To enable authside car with the new oss chart you will need to add the following
+
+- make sure the service ports for webserver and flower are updated to hit the sidecar instead of the services directly
+- the network policies for webserver and flower will need to be modified to allow traffic to the sidecar
+- an extra container will need to be spun up for the auth proxy and any extra volumes that your container may need
