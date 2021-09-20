@@ -194,19 +194,14 @@ The following tables lists the configurable parameters of the Astronomer chart a
 | `workers.autoscaling.maxReplicas`                     | Maximum amount of workers                                                                                 | `10`                                                              |    |
 | `workers.autoscaling.targetCPUUtilization`            | Target CPU Utilization of workers                                                                         | `80`                                                              |    |
 | `workers.autoscaling.targetMemoryUtilization`         | Target Memory Utilization of workers                                                                      | `80`                                                              |    |
-| `extraObjects`                                        | Extra K8s Objects to deploy (these are passed through `tpl`). More about [Extra Objects](#extra-objects). | `[]`                                                                 |    |
+| `extraObjects`                                        | Extra K8s Objects to deploy (these are passed through `tpl`). More about [Extra Objects](#extra-objects). | `[]`                                                              |    |
 | `sccEnabled`                                          | Enable security context constraints required for OpenShift                                                | `false`                                                           |    |
 | `authSidecar.enabled`                                 | Enable authSidecar                                                                                        | `false`                                                           |    |
-| `authSidecar.repository`                              | The image for the auth sidecar proxy                                                                      | `nginxinc/nginx-unprivileged`                                               |    |
+| `authSidecar.repository`                              | The image for the auth sidecar proxy                                                                      | `nginxinc/nginx-unprivileged`                                     |    |
 | `authSidecar.tag`                                     | The image tag for the auth sidecar proxy                                                                  | `stable`                                                          |    |
 | `authSidecar.pullPolicy`                              | The K8s pullPolicy for the the auth sidecar proxy image                                                   | `IfNotPresent`                                                    |    |
 | `authSidecar.port`                                    | The port the auth sidecar exposes                                                                         | `8084`                                                            |    |
-authSidecar:
-  enabled: false
-  repository: nginxinc/nginx-unprivileged
-  tag: stable
-  pullPolicy: IfNotPresent
-  port: 8084
+
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
 ```bash
