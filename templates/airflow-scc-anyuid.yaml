@@ -18,10 +18,9 @@ supplementalGroups:
   type: RunAsAny
 users:
 - system:serviceaccount:{{ .Release.Namespace }}:default
-- system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-scheduler-serviceaccount
-- system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-webserver-serviceaccount
-- system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-worker-serviceaccount
-# TODO: ^^ service account names are different now, _and_ can be changed
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "scheduler.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "webserver.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "worker.serviceAccountName" . }}
 volumes:
 - configMap
 - downwardAPI
