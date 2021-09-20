@@ -1,5 +1,4 @@
 dependencies:
-  - name: postgresql
-    version: 6.3.12
-    repository: "@stable"
-    condition: postgresql.enabled
+  - name: airflow
+    version: 1.2.0-rc1
+    repository: https://github.com/astronomer/airflow/releases/download/oss-helm-chart%2F1.2.0-rc1/

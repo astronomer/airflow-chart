@@ -1,7 +1,7 @@
 ######################################
 ## Flower UI auth sidecar ConfigMap ##
 ######################################
-{{- if (and .Values.authSidecar.enabled ( eq .Values.executor "CeleryExecutor" )) }}
+{{- if (and .Values.authSidecar.enabled ( eq .Values.airflow.executor "CeleryExecutor" )) }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -23,14 +23,13 @@ data:
       }
     http {
       upstream astro-flower {
-        server localhost:{{ .Values.ports.flowerUI }} ;
+        server localhost:{{ .Values.airflow.ports.flowerUI }} ;
       }
       server {
         server_name {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }} ;
         listen {{ .Values.authSidecar.port }}  ;
         # Disable Nginx Server version
         server_tokens off;
-
         location  = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
           proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};

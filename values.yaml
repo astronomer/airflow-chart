@@ -2,18 +2,235 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# User and group of airflow user
-uid: 50000
-gid: 50000
+airflow:
+  # group of airflow user
+  gid: 50000
 
-# Select certain nodes for airflow pods.
-nodeSelector: {}
-affinity: {}
+  # Airflow home directory; Used for mount paths
+  airflowHome: "/usr/local/airflow"
 
-tolerations: []
+  # Airflow executor
+  # Options: SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor
+  executor: "KubernetesExecutor"
 
-# Add common labels to all objects and pods defined in this chart.
-labels: {}
+  # Airflow version
+  airflowVersion: 2.0.0
+
+  # Default airflow repository
+  defaultAirflowRepository: quay.io/astronomer/ap-airflow
+
+  # Default airflow tag to deploy
+  defaultAirflowTag: 2.0.0-buster
+
+  # Astronomer Airflow images
+  images:
+    airflow:
+    statsd:
+      repository: quay.io/astronomer/ap-statsd-exporter
+      tag: 0.18.0
+    redis:
+      repository: quay.io/astronomer/ap-redis
+      tag: 6.2.1
+    pgbouncer:
+      repository: quay.io/astronomer/ap-pgbouncer
+      tag: 1.8.1
+    pgbouncerExporter:
+      repository: quay.io/astronomer/ap-pgbouncer-exporter
+      tag: 0.9.2
+
+  # Airflow scheduler settings
+  scheduler:
+    livenessProbe:
+      timeoutSeconds: 30
+    strategy:
+      type: Recreate
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - scheduler
+              topologyKey: "kubernetes.io/hostname"
+    logGroomerSidecar:
+      args: ["/usr/local/bin/clean-airflow-logs"]
+
+  # Airflow webserver settings
+  webserver:
+    allowPodLogReading: false
+    args: ["airflow", "webserver"]
+    webserverConfig: |
+      import os
+      from airflow import configuration as conf
+      from flask_appbuilder.security.manager import AUTH_REMOTE_USER
+      basedir = os.path.abspath(os.path.dirname(__file__))
+
+      # The SQLAlchemy connection string.
+      SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
+
+      # Flask-WTF flag for CSRF
+      CSRF_ENABLED = True
+
+      # ----------------------------------------------------
+      # AUTHENTICATION CONFIG
+      # ----------------------------------------------------
+      {{- if .Values.useAstroSecurityManager }}
+      AUTH_TYPE = AUTH_REMOTE_USER
+
+      from astronomer.flask_appbuilder.security import AirflowAstroSecurityManager
+      SECURITY_MANAGER_CLASS = AirflowAstroSecurityManager
+      {{- end }}
+
+  # Airflow worker settings
+  workers:
+    persistence:
+      # Enable persistent volumes
+      enabled: false
+    logGroomerSidecar:
+      args: ["/usr/local/bin/clean-airflow-logs"]
+
+  # Pgbouncer settings
+  pgbouncer:
+    # Pool sizes
+    metadataPoolSize: 3
+    resultBackendPoolSize: 2
+
+  # Elasticsearch logging configuration
+  elasticsearch:
+    connection:
+      scheme: http
+
+  cleanup:
+    command: ["airflow-cleanup-pods", "--namespace={{ .Release.Namespace }}"]
+    args: ~
+
+  airflowLocalSettings: |
+    {{- if semverCompare "<1.10.12" .Values.airflowVersion }}
+
+    from airflow.contrib.kubernetes.pod import Pod
+    from airflow.configuration import conf
+
+    def pod_mutation_hook(pod: Pod):
+
+        extra_labels = {
+            "kubernetes_executor": "False",
+            "kubernetes_pod_operator": "False"
+        }
+
+        if 'airflow-worker' in pod.labels.keys() or \
+                conf.get('core', 'EXECUTOR') == "KubernetesExecutor":
+            extra_labels["kubernetes_executor"] = "True"
+        else:
+            extra_labels["kubernetes_pod_operator"] = "True"
+
+        pod.labels.update(extra_labels)
+        pod.tolerations += {{ toJson .Values.podMutation.tolerations }}
+        pod.affinity.update({{ toJson .Values.podMutation.affinity }})
+    {{- else }}
+    from kubernetes.client import models as k8s
+    from airflow.configuration import conf
+
+    def pod_mutation_hook(pod: k8s.V1Pod):
+
+        extra_labels = {
+            "kubernetes_executor": "False",
+            "kubernetes_pod_operator": "False"
+        }
+
+        if 'airflow-worker' in pod.metadata.labels.keys() or \
+                conf.get('core', 'EXECUTOR') == "KubernetesExecutor":
+            extra_labels["kubernetes_executor"] = "True"
+        else:
+            extra_labels["kubernetes_pod_operator"] = "True"
+
+        pod.metadata.labels.update(extra_labels)
+        if pod.spec.tolerations:
+            pod.spec.tolerations += {{ toJson .Values.podMutation.tolerations }}
+        else:
+            pod.spec.tolerations = {{ toJson .Values.podMutation.tolerations }}
+
+        if pod.spec.affinity:
+            pod.spec.affinity = pod.spec.affinity.to_dict().update({{ toJson .Values.podMutation.affinity }})
+        else:
+            pod.spec.affinity = {{ toJson .Values.podMutation.affinity }}
+
+    {{- end }}
+
+  # Config Settings for pod_mutation_hook
+  podMutation:
+    # Tolerations provided here would be applied using pod_mutation_hook
+    # So any pods spun up using KubernetesExecutor or KubernetesPodOperator will contain these tolerations.
+    tolerations: []
+    #  - key: "dynamic-pods"
+    #    operator: "Equal"
+    #    value: "true"
+    #    effect: "NoSchedule"
+
+    # Pods spun up would land in the node that matches the affinity
+    affinity: {}
+    #  nodeAffinity:
+    #    requiredDuringSchedulingIgnoredDuringExecution:
+    #      nodeSelectorTerms:
+    #        - matchExpressions:
+    #            - key: "astronomer.io/dynamic-pods"
+    #              operator: In
+    #              values:
+    #                - "true"
+
+  migrateDatabaseJob:
+    annotations:
+      "sidecar.istio.io/inject": "false"
+
+  config:
+    operators:
+      default_queue: celery
+    celery: # compat
+      default_queue: celery
+    webserver:
+      expose_config: True
+    elasticsearch:
+      write_stdout: True
+      elasticsearch_write_stdout: True
+      elasticsearch_json_format: True
+      elasticsearch_log_id_template: "{dag_id}_{task_id}_{execution_date}_{try_number}"
+    kubernetes:
+      dags_in_image: True
+    # Only required when running on the platform, but works elsewhere too
+    astronomer:
+      jwt_signing_cert: /etc/airflow/tls/tls.crt
+
+  # Should the Astronomer Security Manager be used for the webserver
+  useAstroSecurityManager: False
+
+# Airflow Worker Config
+# TODO: should this be under airflow.workers just for consistency?
+# TODO: does the platform actually enable this in some cases?
+workers:
+  # Apply a HorizontalPodAutoscaler
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilization: 80
+    targetMemoryUtilization: 80
+
+# Enable security context constraints required for OpenShift
+sccEnabled: false
+
+# Extra objects to deploy (these are passed through `tpl`)
+extraObjects: []
+
+# Enable nginx auth sidecar
+authSidecar:
+  enabled: false
+  repository: nginxinc/nginx-unprivileged
+  tag: stable
+  pullPolicy: IfNotPresent
+  port: 8084
 
 # Ingress configuration
 ingress:
@@ -39,561 +256,14 @@ ingress:
   auth:
     enabled: true
 
-# Network policy configuration
-networkPolicies:
-  # Enabled network policies
-  enabled: false
-
-# Airflow home directory
-# Used for mount paths
-airflowHome: "/usr/local/airflow"
-
-# Extra annotations to apply to all
-# Airflow pods
-airflowPodAnnotations: {}
-
-# Extra annotations to apply to Create user job
-createUserJobAnnotations: {}
-
-# Extra annotations to apply to run migrations job
-runMigrationsJobAnnotations: {}
-
-# Extra annotations to apply to service accounts
-serviceAccountAnnotations: {}
-
-# Enable RBAC (default on most clusters these days)
-rbacEnabled: true
-
-# Airflow executor
-# Options: SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor
-executor: "KubernetesExecutor"
-
-# If this is true and using LocalExecutor/SequentialExecutor/KubernetesExecutor, the scheduler's
-# service account will have access to communicate with the api-server and launch pods.
-# If this is true and using the CeleryExecutor, the workers will be able to launch pods.
-allowPodLaunching: true
-
-# Airflow version
-airflowVersion: 2.0.0
-
-# Default airflow repository
-defaultAirflowRepository: quay.io/astronomer/ap-airflow
-
-# Default airflow tag to deploy
-defaultAirflowTag: 2.0.0-buster
-
-# Astronomer Airflow images
-images:
-  airflow:
-    repository: quay.io/astronomer/ap-airflow
-    tag: ~
-    pullPolicy: IfNotPresent
-  statsd:
-    repository: quay.io/astronomer/ap-statsd-exporter
-    tag: 0.18.0
-    pullPolicy: IfNotPresent
-  redis:
-    repository: quay.io/astronomer/ap-redis
-    tag: 6.2.5-1
-    pullPolicy: IfNotPresent
-  pgbouncer:
-    repository: quay.io/astronomer/ap-pgbouncer
-    tag: 1.8.1
-    pullPolicy: IfNotPresent
-  pgbouncerExporter:
-    repository: quay.io/astronomer/ap-pgbouncer-exporter
-    tag: 0.11.0-1
-    pullPolicy: IfNotPresent
-
-# Environment variables for all airflow containers
-# other than init containers.
-env: []
-# - name: ""
-#   value: ""
-
-# Secrets for all airflow containers
-# other than init containers.
-secret: []
-# - envName: ""
-#   secretName: ""
-#   secretKey: ""
-
-# Pass a secret name here to mount all keys as environment variables in
-# the Airflow pods.
-mountAllFromSecretName: ~
-
-# Astronomer Airflow database config
-data:
-  # If secret names are provided, use those secrets
-  metadataSecretName: ~
-  resultBackendSecretName: ~
-  brokerUrlSecretName: ~
-
-  # Otherwise pass connection values in
-  metadataConnection:
-    user: postgres
-    pass: postgres
-    host: ~
-    port: 5432
-    db: postgres
-    sslmode: disable
-  resultBackendConnection:
-    user: postgres
-    pass: postgres
-    host: ~
-    port: 5432
-    db: postgres
-    sslmode: disable
-  brokerUrl: ~
-
-# Fernet key settings
-fernetKey: ~
-fernetKeySecretName: ~
-
-# Enable security context constraints required for OpenShift
-sccEnabled: false
-
-# Enable nginx auth sidecar
-authSidecar:
-  enabled: false
-  repository: nginxinc/nginx-unprivileged
-  tag: stable
-  pullPolicy: IfNotPresent
-  port: 8084
-
-
-# Airflow Worker Config
-workers:
-  # Number of airflow celery workers in StatefulSet
-  replicas: 1
-  # Update Strategy when worker is deployed as a StatefulSet
-  updateStrategy: ~
-  # Update Strategy when worker is deployed as a Deployment
-  strategy:
-    rollingUpdate:
-      maxSurge: "100%"
-      maxUnavailable: "50%"
-
-  # Allow KEDA autoscaling.
-  # Persistence.enabled must be set to false to use KEDA.
-  keda:
-    enabled: false
-    namespaceLabels: {}
-
-    # How often KEDA polls the airflow DB to report new scale requests to the HPA
-    pollingInterval: 5
-
-    # How many seconds KEDA will wait before scaling to zero.
-    # Note that HPA has a separate cooldown period for scale-downs
-    cooldownPeriod: 30
-
-  persistence:
-    # Enable persistent volumes
-    enabled: false
-    # Volume size for worker StatefulSet
-    size: 100Gi
-    # If using a custom storageClass, pass name ref to all statefulSets here
-    storageClassName:
-    # Execute init container to chown log directory.
-    # This is currently only needed in KinD, due to usage
-    # of local-path provisioner.
-    fixPermissions: false
-
-  # Attach additional volume to celery workers (such as a shared file system)
-  additionalVolume:
-    enabled: false
-    volumeMode: ~
-    accessMode: ~
-    capacity: ~
-    storageClassName:
-    mountPath: ~
-    volumePlugin: {}
-
-  # Mount additional volumes into worker.
-  extraVolumes: []
-  extraVolumeMounts: []
-
-  resources: {}
-  #  limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  #  requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-  # Grace period for tasks to finish after SIGTERM is sent from kubernetes
-  terminationGracePeriodSeconds: 600
-
-  # Apply a HorizontalPodAutoscaler
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 10
-    targetCPUUtilization: 80
-    targetMemoryUtilization: 80
-
-  # This setting tells kubernetes that its ok to evict
-  # when it wants to scale a node down.
-  safeToEvict: true
-
-  # Add additional containers to workers.
-  extraContainers: []
-
-  # Add additional init containers to workers.
-  extraInitContainers: []
-
-# Airflow scheduler settings
-scheduler:
-  livenessProbe:
-    initialDelaySeconds: 10
-    timeoutSeconds: 30
-    failureThreshold: 10
-    periodSeconds: 30
-
-  resources: {}
-  #  limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  #  requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-  affinity:
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-                - key: component
-                  operator: In
-                  values:
-                    - scheduler
-            topologyKey: "kubernetes.io/hostname"
-
-  # This setting can overwrite
-  # podMutation settings - be sure
-  # to reference the default if you
-  # are making use of those settings.
-  airflowLocalSettings: ~
-
-  # This setting tells kubernetes that its ok to evict
-  # when it wants to scale a node down.
-  safeToEvict: true
-
-  # Add additional containers to scheduler.
-  extraContainers: []
-
-  # Add additional init containers to scheduler.
-  extraInitContainers: []
-
-  # Number of schedulers to run
-  replicas: 1
-
-  # Mount additional volumes into scheduler.
-  extraVolumes: []
-  extraVolumeMounts: []
-
-# Airflow webserver settings
-webserver:
-  allowPodLogReading: false
-  livenessProbe:
-    initialDelaySeconds: 15
-    timeoutSeconds: 30
-    failureThreshold: 20
-    periodSeconds: 5
-
-  readinessProbe:
-    initialDelaySeconds: 15
-    timeoutSeconds: 30
-    failureThreshold: 20
-    periodSeconds: 5
-
-  # Number of webservers
-  replicas: 1
-
-  extraVolumes: []
-  extraVolumeMounts: []
-
-  resources:
-    {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-
-  # Secret that contains the cert to verify JWTs
-  jwtSigningCertificateSecretName: ~
-
-  # Create initial user.
-  defaultUser:
-    enabled: true
-    role: Admin
-    username: admin
-    email: admin@example.com
-    firstName: admin
-    lastName: user
-    password: admin
-
-  # Add additional containers to webserver.
-  extraContainers: []
-
-# Airflow Triggerer Config
-triggerer:
-  # Number of airflow triggerers in the deployment
-  replicas: 1
-
-  # Command to use when running Airflow triggerers (templated).
-  command: ~
-  # Args to use when running Airflow triggerer (templated).
-  args: ["airflow", "triggerer"]
-
-  # Update Strategy for triggerers
-  strategy:
-    rollingUpdate:
-      maxSurge: "100%"
-      maxUnavailable: "50%"
-
-  # If the triggerer stops heartbeating for 5 minutes (10*30s) kill the
-  # triggerer and let Kubernetes restart it
-  livenessProbe:
-    initialDelaySeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 10
-    periodSeconds: 30
-
-  # Create ServiceAccount
-  serviceAccount:
-    # Specifies whether a ServiceAccount should be created
-    create: true
-    # The name of the ServiceAccount to use.
-    # If not set and create is true, a name is generated using the release name
-    name: ~
-
-    # Annotations to add to triggerer kubernetes service account.
-    annotations: {}
-
-  resources: {}
-  #  limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  #  requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-  # Grace period for triggerer to finish after SIGTERM is sent from kubernetes
-  terminationGracePeriodSeconds: 60
-
-  # This setting tells kubernetes that its ok to evict
-  # when it wants to scale a node down.
-  safeToEvict: true
-
-  # Launch additional containers into triggerer.
-  extraContainers: []
-  # Add additional init containers into triggerers.
-  extraInitContainers: []
-
-  # Mount additional volumes into triggerer.
-  extraVolumes: []
-  extraVolumeMounts: []
-
-  # Select certain nodes for airflow triggerer pods.
-  nodeSelector: {}
-  affinity:
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchLabels:
-                component: triggerer
-            topologyKey: "kubernetes.io/hostname"
-  tolerations: []
-
-
-# Flower settings
-flower:
-  resources:
-    {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-
-# Statsd settings
-statsd:
-  enabled: true
-  resources:
-    {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+#####################################
+# Leftovers
 
 # Pgbouncer settings
-pgbouncer:
-  enabled: false
-  networkPolicies:
-    enabled: true
-  # additional network policies as needed
-  extraNetworkPolicies: []
+#pgbouncer:
+#  networkPolicies:
+#    enabled: true
+#    # TODO: Originated from https://github.com/astronomer/issues/issues/2516
 
-  # Pool sizes
-  metadataPoolSize: 3
-  resultBackendPoolSize: 2
-
-  # Maximum clients that can connect to pgbouncer (higher = more file descriptors)
-  maxClientConn: 100
-
-  # Pgbouncer pod disruption budget
-  podDisruptionBudget:
-    enabled: false
-
-    # PDB configuration
-    config:
-      maxUnavailable: 1
-
-  resources:
-    {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-
-  # https://www.pgbouncer.org/config.html
-  verbose: 0
-  logDisconnections: 0
-  logConnections: 0
-  # TLS connection is always requested first from PostgreSQL, when refused connection will be established
-  # over plain TCP. Server certificate is not validated.
-  serverTlsSslmode: prefer
-
-  # ability to add more custom pgbouncer configuration
-  extraIniDatabaseMetatdata: ""
-  extraIniDatabaseResultBackend: ""
-  extraIniPgbouncerConfig: ""
-redis:
-  enabled: true
-  terminationGracePeriodSeconds: 600
-
-  persistence:
-    # Enable persistent volumes
-    enabled: true
-    # Volume size for worker StatefulSet
-    size: 1Gi
-    # If using a custom storageClass, pass name ref to all statefulSets here
-    storageClassName: ~
-
-  resources: {}
-  #  limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  #  requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-  # If set use as redis secret
-  passwordSecretName: ~
-
-  # Else, if password is set, create secret with it,
-  # else generate a new one on install
-  password: ~
-
-  # This setting tells kubernetes that its ok to evict
-  # when it wants to scale a node down.
-  safeToEvict: true
-
-# Auth secret for a private registry
-# This is used if pulling airflow images from a private registry
-registry:
-  secretName: ~
-
-  connection:
-    {}
-    # user: ~
-    # pass: ~
-    # host: ~
-    # email: ~
-
-# Elasticsearch logging configuration
-elasticsearch:
-  # Enable elasticsearch task logging
-  enabled: false
-  # A secret containing the connection
-  secretName: ~
-  # Or an object representing the connection
-  connection:
-    scheme: http
-    # user: ~
-    # pass: ~
-    # host: ~
-    # port: ~
-
-# All ports used by chart
-ports:
-  flowerUI: 5555
-  airflowUI: 8080
-  workerLogs: 8793
-  redisDB: 6379
-  statsdIngest: 9125
-  statsdScrape: 9102
-  pgbouncer: 6543
-  pgbouncerScrape: 9127
-
-# Define any ResourceQuotas for namespace
-quotas: {}
-
-# Define default/max/min values for pods and containers in namespace
-limits: []
-
-# Config Settings for pod_mutation_hook
-podMutation:
-  # Tolerations provided here would be applied using pod_mutation_hook
-  # So any pods spun up using KubernetesExecutor or KubernetesPodOperator will contain these tolerations.
-  tolerations: []
-  #  - key: "dynamic-pods"
-  #    operator: "Equal"
-  #    value: "true"
-  #    effect: "NoSchedule"
-
-  # Pods spun up would land in the node that matches the affinity
-  affinity: {}
-#    nodeAffinity:
-#      requiredDuringSchedulingIgnoredDuringExecution:
-#        nodeSelectorTerms:
-#          - matchExpressions:
-#              - key: "astronomer.io/dynamic-pods"
-#                operator: In
-#                values:
-#                  - "true"
-
-# This runs as a CronJob to cleanup old pods.
-cleanup:
-  enabled: false
-  # Run every 15 minutes
-  schedule: "*/15 * * * *"
-
-# This block contains settings strictly used to integrate into the Astronomer platform.
-# This is what allows for integration into platform ingress, network policies, metrics collection, etc.
-# This chart is completely deployable without specifying these values.
 platform:
   release: ~
-  workspace: ""
-
-# Configuration for postgresql subchart
-# Not recommended for production
-postgresql:
-  enabled: true
-  postgresqlPassword: postgres
-  postgresqlUsername: postgres
-
-# Extra objects to deploy (these are passed through `tpl`)
-extraObjects: []

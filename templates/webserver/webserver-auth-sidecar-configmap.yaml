@@ -23,21 +23,19 @@ data:
       }
     http {
       upstream astro-webserver {
-        server localhost:{{ .Values.ports.airflowUI }} ;
+        server localhost:{{ .Values.airflow.ports.airflowUI }} ;
       }
       server {
         server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
         listen {{ .Values.authSidecar.port }}  ;
         # Disable Nginx Server version
         server_tokens off;
-
         location ^~ /api/ {
           if ($host = 'deployments.{{ .Values.ingress.baseDomain }}' ) {
             return 404;
             }
             proxy_pass https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/airflow/$request_uri;
           }
-
         location  = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
           proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};

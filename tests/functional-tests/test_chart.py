@@ -38,14 +38,6 @@ def create_kube_client(in_cluster=False):
     return client.CoreV1Api()
 
 
-def test_pgbouncer_fqdn_trailing_dot(webserver):
-    """Ensure the FQDN for pgbouncer has a dot at the end"""
-    db_conn_string = webserver.check_output("env | grep AIRFLOW_CONN_AIRFLOW_DB")
-    assert (
-        "airflow-pgbouncer.airflow.svc.cluster.local." in db_conn_string
-    ), "Expected to find a trailing dot on the pgbouncer FQDN"
-
-
 def test_airflow_in_path(webserver):
     """Ensure Airflow is in PATH"""
     assert webserver.exists("airflow"), "Expected 'airflow' to be in PATH"

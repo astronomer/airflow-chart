@@ -13,7 +13,7 @@ metadata:
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
-{{- with .Values.labels }}
+{{- with .Values.airflow.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
   {{- if .Values.ingress.webserverAnnotations }}
@@ -65,7 +65,7 @@ spec:
               servicePort: airflow-ui
               {{- end }}
 {{- end }}
-{{- if and .Values.ingress.enabled (eq .Values.executor "CeleryExecutor") }}
+{{- if and .Values.ingress.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
 ---
 kind: Ingress
 apiVersion: networking.k8s.io/v1beta1
@@ -77,7 +77,7 @@ metadata:
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
-{{- with .Values.labels }}
+{{- with .Values.airflow.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
   {{- if .Values.ingress.flowerAnnotations }}
