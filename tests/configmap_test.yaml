@@ -41,6 +41,9 @@ tests:
       - matchRegex:
           path: data.airflow\.cfg
           pattern: "airflow.api.auth.backend.deny_all"
+      - notMatchRegex:
+          path: data.airflow\.cfg
+          pattern: "astronomer.flask_appbuilder.current_user_backend"
   - it: should use fab security auth_backend value when useAstroSecurityManager is enabled
     set:
       airflow:
@@ -49,3 +52,6 @@ tests:
       - matchRegex:
           path: data.airflow\.cfg
           pattern: "astronomer.flask_appbuilder.current_user_backend"
+      - notMatchRegex:
+          path: data.airflow\.cfg
+          pattern: "airflow.api.auth.backend.deny_all"
