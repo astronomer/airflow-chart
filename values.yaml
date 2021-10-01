@@ -186,6 +186,8 @@ airflow:
       "sidecar.istio.io/inject": "false"
 
   config:
+    api:
+      auth_backend: '{{ ternary "astronomer.flask_appbuilder.current_user_backend" "airflow.api.auth.backend.deny_all" .Values.useAstroSecurityManager }}'
     operators:
       default_queue: celery
     celery: # compat
