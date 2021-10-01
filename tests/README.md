@@ -1,6 +1,6 @@
 # Testing
 
-This project uses the [helm-unittest project](https://github.com/quintush/helm-unittest) to test the helm charts included within. Once that plugin is installed, you can run tests with `helm unitest -3 .`
+This project uses the [helm-unittest project](https://github.com/quintush/helm-unittest) to test the helm charts included within. Once that plugin is installed, you can run tests with `helm unittest -3 .`
 
 ## Writing tests
 
