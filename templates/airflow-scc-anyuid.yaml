@@ -18,9 +18,9 @@ supplementalGroups:
   type: RunAsAny
 users:
 - system:serviceaccount:{{ .Release.Namespace }}:default
-- system:serviceaccount:{{ .Release.Namespace }}:{{ include "scheduler.serviceAccountName" . }}
-- system:serviceaccount:{{ .Release.Namespace }}:{{ include "webserver.serviceAccountName" . }}
-- system:serviceaccount:{{ .Release.Namespace }}:{{ include "worker.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "scheduler.serviceAccountName" .Values.airflow }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "webserver.serviceAccountName" .Values.airflow }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "worker.serviceAccountName" .Values.airflow }}
 volumes:
 - configMap
 - downwardAPI
