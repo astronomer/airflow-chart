@@ -25,6 +25,8 @@ airflow:
   # Astronomer Airflow images
   images:
     airflow:
+      repository: quay.io/astronomer/ap-airflow
+      tag: ~
     statsd:
       repository: quay.io/astronomer/ap-statsd-exporter
       tag: 0.18.0
@@ -106,7 +108,7 @@ airflow:
 
   cleanup:
     command: ["airflow-cleanup-pods", "--namespace={{ .Release.Namespace }}"]
-    args: ~
+    args: []
 
   airflowLocalSettings: |
     {{- if semverCompare "<1.10.12" .Values.airflowVersion }}

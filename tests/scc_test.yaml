@@ -5,13 +5,32 @@ templates:
 tests:
   - it: Should not be created by default
     asserts:
-      - not: yes
-        isKind:
-          of: SecurityContextConstraint
+      - hasDocuments:
+          count: 0
   - it: Should be created with configuration enabled
     set:
-      global:
-        sccEnabled: true
+      airflow:
+        scheduler:
+          serviceAccount:
+            create: true
+            name: mockName
+
+      sccEnabled: true
+
     asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: users[0]
+          value: "system:serviceaccount:NAMESPACE:default"
+      - equal:
+          path: users[1]
+          value: "system:serviceaccount:NAMESPACE:mockName"
+      - equal:
+          path: users[2]
+          value: "system:serviceaccount:NAMESPACE:RELEASE-NAME-airflow-webserver"
+      - equal:
+          path: users[3]
+          value: "system:serviceaccount:NAMESPACE:RELEASE-NAME-airflow-worker"
       - isKind:
-          of: SecurityContextConstraint
+          of: SecurityContextConstraints
