@@ -5,13 +5,27 @@ templates:
 tests:
   - it: Should not be created by default
     asserts:
-      - not: yes
-        isKind:
-          of: SecurityContextConstraint
+      - hasDocuments:
+          count: 0
   - it: Should be created with configuration enabled
     set:
-      global:
-        sccEnabled: true
+      airflow:
+        scheduler:
+          serviceAccount:
+            create: true
+            name: mockName
+        webserver:
+          serviceAccount:
+            create: true
+            name: mockName
+        worker:
+          serviceAccount:
+            create: true
+            name: mockName
+      sccEnabled: true
+
     asserts:
+      - hasDocuments:
+          count: 1
       - isKind:
-          of: SecurityContextConstraint
+          of: SecurityContextConstraints
