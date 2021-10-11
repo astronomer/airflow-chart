@@ -25,6 +25,8 @@ airflow:
   # Astronomer Airflow images
   images:
     airflow:
+      repository: quay.io/astronomer/ap-airflow
+      tag: ~
     statsd:
       repository: quay.io/astronomer/ap-statsd-exporter
       tag: 0.18.0
