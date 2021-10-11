@@ -117,3 +117,37 @@ proxy_http_version                      1.1;
 proxy_cookie_domain                     off;
 proxy_redirect                          off;
 {{ end }}
+
+
+{{/*
+Create the name of the scheduler service account to use
+*/}}
+{{- define "scheduler.serviceAccountNameParentChart" -}}
+{{- if .Values.airflow.scheduler.serviceAccount.create -}}
+    {{ default (printf "%s-scheduler" (include "airflow.fullname" .)) .Values.airflow.scheduler.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.airflow.scheduler.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the name of the webserver service account to use
+*/}}
+{{- define "webserver.serviceAccountNameParentChart" -}}
+{{- if .Values.airflow.webserver.serviceAccount.create -}}
+    {{ default (printf "%s-webserver" (include "airflow.fullname" .)) .Values.airflow.webserver.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.airflow.webserver.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the name of the worker service account to use
+*/}}
+{{- define "worker.serviceAccountNameParentChart" -}}
+{{- if .Values.airflow.workers.serviceAccount.create -}}
+    {{ default (printf "%s-worker" (include "airflow.fullname" .)) .Values.airflow.workers.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.airflow.workers.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
