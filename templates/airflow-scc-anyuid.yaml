@@ -18,9 +18,9 @@ supplementalGroups:
   type: RunAsAny
 users:
 - system:serviceaccount:{{ .Release.Namespace }}:default
-- system:serviceaccount:{{ .Release.Namespace }}:{{ include "scheduler.serviceAccountNameParentChart" . }}
-- system:serviceaccount:{{ .Release.Namespace }}:{{ include "webserver.serviceAccountNameParentChart" . }}
-- system:serviceaccount:{{ .Release.Namespace }}:{{ include "worker.serviceAccountNameParentChart" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.scheduler.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.webserver.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.worker.serviceAccountName" . }}
 volumes:
 - configMap
 - downwardAPI

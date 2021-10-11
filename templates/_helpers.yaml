@@ -122,7 +122,7 @@ proxy_redirect                          off;
 {{/*
 Create the name of the scheduler service account to use
 */}}
-{{- define "scheduler.serviceAccountNameParentChart" -}}
+{{- define "astro.scheduler.serviceAccountName" -}}
 {{- if .Values.airflow.scheduler.serviceAccount.create -}}
     {{ default (printf "%s-scheduler" (include "airflow.fullname" .)) .Values.airflow.scheduler.serviceAccount.name }}
 {{- else -}}
@@ -133,7 +133,7 @@ Create the name of the scheduler service account to use
 {{/*
 Create the name of the webserver service account to use
 */}}
-{{- define "webserver.serviceAccountNameParentChart" -}}
+{{- define "astro.webserver.serviceAccountName" -}}
 {{- if .Values.airflow.webserver.serviceAccount.create -}}
     {{ default (printf "%s-webserver" (include "airflow.fullname" .)) .Values.airflow.webserver.serviceAccount.name }}
 {{- else -}}
@@ -144,7 +144,7 @@ Create the name of the webserver service account to use
 {{/*
 Create the name of the worker service account to use
 */}}
-{{- define "worker.serviceAccountNameParentChart" -}}
+{{- define "astro.worker.serviceAccountName" -}}
 {{- if .Values.airflow.workers.serviceAccount.create -}}
     {{ default (printf "%s-worker" (include "airflow.fullname" .)) .Values.airflow.workers.serviceAccount.name }}
 {{- else -}}
