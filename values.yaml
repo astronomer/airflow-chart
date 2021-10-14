@@ -189,7 +189,10 @@ airflow:
 
   config:
     api:
-      auth_backend: '{{ ternary "astronomer.flask_appbuilder.current_user_backend" "airflow.api.auth.backend.deny_all" .Values.useAstroSecurityManager }}'
+      # if astroSecurity manager is enabled and the airflow version is greater than 2 we want this to equal astronomer.flask_appbuilder.current_user_backend
+      # if astroSecurity manager is disabled and the airflow version is greater than 2 we want this to equal airflow.api.auth.backend.deny_all
+      # if astroSecurity manager is disabled and the airflow version is less than 2 we want this to equal airflow.api.auth.backend.default
+      auth_backend: '{{ ternary "astronomer.flask_appbuilder.current_user_backend" (ternary "airflow.api.auth.backend.deny_all" "airflow.api.auth.backend.default"  (semverCompare ">=2.0.0" .Values.airflowVersion)) (and (.Values.useAstroSecurityManager) (semverCompare ">=2.0.0" .Values.airflowVersion)) }}'
     operators:
       default_queue: celery
     celery: # compat
