@@ -37,6 +37,9 @@ tests:
           path: data.airflow_local_settings\.py
           pattern: '{"somekey":"somevalue"}'
   - it: should use default auth_backend value deny_all
+    set:
+      airflow:
+        airflowVersion: 2.0.0
     asserts:
       - matchRegex:
           path: data.airflow\.cfg
@@ -44,12 +47,42 @@ tests:
       - notMatchRegex:
           path: data.airflow\.cfg
           pattern: "astronomer.flask_appbuilder.current_user_backend"
-  - it: should use fab security auth_backend value when useAstroSecurityManager is enabled
+  - it: should use fab security auth_backend value when useAstroSecurityManager is enabled and airflowVersion >= 2.0.0
     set:
       airflow:
         useAstroSecurityManager: true
+        airflowVersion: 2.0.0
     asserts:
       - matchRegex:
+          path: data.airflow\.cfg
+          pattern: "astronomer.flask_appbuilder.current_user_backend"
+      - notMatchRegex:
+          path: data.airflow\.cfg
+          pattern: "airflow.api.auth.backend.deny_all"
+  - it: should not set auth_backend for airflowVersion < 2.0.0
+    set:
+      airflow:
+        airflowVersion: 1.10.10
+    asserts:
+      - matchRegex:
+          path: data.airflow\.cfg
+          pattern: "airflow.api.auth.backend.default"
+      - notMatchRegex:
+          path: data.airflow\.cfg
+          pattern: "airflow.api.auth.backend.deny_all"
+      - notMatchRegex:
+          path: data.airflow\.cfg
+          pattern: "astronomer.flask_appbuilder.current_user_backend"
+  - it: should not set auth_backend for airflowVersion < 2.0.0 even with useAstroSecurityManager enabled
+    set:
+      airflow:
+        useAstroSecurityManager: true
+        airflowVersion: 1.10.10
+    asserts:
+      - matchRegex:
+          path: data.airflow\.cfg
+          pattern: "airflow.api.auth.backend.default"
+      - notMatchRegex:
           path: data.airflow\.cfg
           pattern: "astronomer.flask_appbuilder.current_user_backend"
       - notMatchRegex:
