@@ -10,8 +10,6 @@ tests:
   - it: should use our default for airflowLocalSettings
     set:
       airflow:
-        ingress:
-          enabled: false
         podMutation:
           tolerations:
             - somekey: somevalue
@@ -78,8 +76,6 @@ tests:
   - it: should not set auth_backend for airflowVersion < 2.0.0 even with useAstroSecurityManager enabled
     set:
       airflow:
-        ingress:
-          enabled: false
         useAstroSecurityManager: true
         airflowVersion: 1.10.10
     asserts:
