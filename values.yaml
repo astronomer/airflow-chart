@@ -189,6 +189,7 @@ airflow:
       labels:
         tier: airflow
         component: worker
+        vendor: astronomer
         release: {{ .Release.Name }}
     {{- with .Values.labels }}
     {{ toYaml . | indent 4 }}
