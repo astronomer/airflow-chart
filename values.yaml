@@ -185,11 +185,10 @@ airflow:
     apiVersion: v1
     kind: Pod
     metadata:
-      name: dummy-name
+      name: astronomer-pod-template-file
       labels:
         tier: airflow
         component: worker
-        vendor: astronomer
         release: {{ .Release.Name }}
     {{- with .Values.labels }}
     {{ toYaml . | indent 4 }}

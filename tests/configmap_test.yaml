@@ -95,4 +95,4 @@ tests:
     asserts:
       - matchRegex:
           path: data.pod_template_file\.yaml
-          pattern: "vendor: astronomer"
+          pattern: "name: astronomer-pod-template-file"
