@@ -88,3 +88,11 @@ tests:
       - notMatchRegex:
           path: data.airflow\.cfg
           pattern: "airflow.api.auth.backend.deny_all"
+  - it: should create a pod template file
+    set:
+      airflow:
+        airflowVersion: 1.10.12
+    asserts:
+      - matchRegex:
+          path: data.pod_template_file\.yaml
+          pattern: "name: astronomer-pod-template-file"
