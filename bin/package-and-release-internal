@@ -28,7 +28,7 @@ if [[ "${CIRCLE_BRANCH}" =~ release-[0-9]+\.[0-9]+ ]] ; then
     exit 1
   fi
 else
-  version=$(awk '$1 ~ /^version/ {printf "%s-build%s\n", $2, ENVIRON["CIRCLE_BUILD_NUM"]}' airflow/Chart.yaml)
+  version=$(awk '$0 ~ /^version/ {printf "%s-build%s\n", $2, ENVIRON["CIRCLE_BUILD_NUM"]}' airflow/Chart.yaml)
   echo "Doing internal release for CIRCLE_BUILD_NUM $CIRCLE_BUILD_NUM version ${version}"
   filename="airflow-${version}.tgz"
   extra_args=( '--version' "${version}" )
