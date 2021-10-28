@@ -1,4 +1,0 @@
-dependencies:
-  - name: airflow
-    version: 1.2.0
-    repository: https://airflow.apache.org
