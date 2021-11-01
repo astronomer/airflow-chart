@@ -18,9 +18,17 @@ supplementalGroups:
   type: RunAsAny
 users:
 - system:serviceaccount:{{ .Release.Namespace }}:default
-- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.scheduler.serviceAccountName" . }}
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.webserver.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.redis.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.flower.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.scheduler.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.statsd.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.createUserJob.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.migrateDatabaseJob.serviceAccountName" . }}
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.worker.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.triggerer.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.pgbouncer.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.cleanup.serviceAccountName" . }}
 volumes:
 - configMap
 - downwardAPI
