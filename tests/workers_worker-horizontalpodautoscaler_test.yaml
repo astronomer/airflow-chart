@@ -13,7 +13,8 @@ templates:
 tests:
   - it: should work
     set:
-      executor: CeleryExecutor
+      airflow:
+        executor: CeleryExecutor
       workers.autoscaling.enabled: true
     asserts:
       - isKind:

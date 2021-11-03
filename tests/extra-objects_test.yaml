@@ -17,9 +17,8 @@ tests:
           count: 0
   - it: should add extra objects
     set:
-      something: world
       extraObjects:
-        - name: "hello {{ .Values.something }}"
+        - name: "hello world"
           another:
             something: yes
     asserts:
