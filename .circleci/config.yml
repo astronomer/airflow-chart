@@ -2,7 +2,7 @@
 version: 2.1
 
 workflows:
-  version: 2.1
+  version: 2
   install-airflow-chart:
     jobs:
       - lint
@@ -49,7 +49,7 @@ workflows:
 jobs:
   run_pre_commit:
     docker:
-      - image: quay.io/astronomer/ci-pre-commit:2021-10
+      - image: quay.io/astronomer/ci-pre-commit:2021-11
     steps:
       - checkout
       - run:
@@ -75,7 +75,7 @@ jobs:
 
   lint:
     docker:
-      - image: alpine/helm:3.5.3
+      - image: alpine/helm:3.7.1
     steps:
       - checkout
       - run:
@@ -84,7 +84,7 @@ jobs:
 
   unittest-charts:
     docker:
-      - image: alpine/helm:3.5.3
+      - image: alpine/helm:3.7.1
         entrypoint: /bin/sh
     steps:
       - checkout
@@ -98,7 +98,7 @@ jobs:
 
   build-and-release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-10
+      - image: quay.io/astronomer/ci-helm-release:2021-11
     steps:
       - checkout
       - run:
@@ -138,7 +138,7 @@ jobs:
 
   release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-10
+      - image: quay.io/astronomer/ci-helm-release:2021-11
     steps:
       - checkout
       - run:
@@ -147,7 +147,7 @@ jobs:
 
   release-public:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-10
+      - image: quay.io/astronomer/ci-helm-release:2021-11
     steps:
       - checkout
       - publish-github-release
