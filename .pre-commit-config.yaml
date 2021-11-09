@@ -1,10 +1,26 @@
 ---
 exclude: '^(venv|\.vscode)' # regex
 repos:
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.1.10
+    hooks:
+      - id: remove-tabs
+        exclude_types: [makefile, binary]
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: "v2.4.1"
+    hooks:
+      - id: prettier
+        args: ["--print-width=135"]
+        exclude: "(charts|templates|files)"
   - repo: https://github.com/psf/black
-    rev: 21.9b0
+    rev: 21.10b0
     hooks:
       - id: black
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.29.0
+    hooks:
+      - id: pyupgrade
+        args: ["--py38-plus"]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
@@ -18,6 +34,7 @@ repos:
       - id: check-yaml
         args: ["--allow-multiple-documents"]
         exclude: "(charts|templates|files)"
+      - id: debug-statements
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: file-contents-sorter
@@ -27,6 +44,8 @@ repos:
         args: ["-b", "master"]
       - id: mixed-line-ending
         args: ["--fix=lf"]
+      - id: requirements-txt-fixer
+        args: ["tests/functional-tests/requirements.txt"]
       - id: sort-simple-yaml
       - id: trailing-whitespace
   - repo: https://gitlab.com/pycqa/flake8

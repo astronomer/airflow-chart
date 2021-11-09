@@ -13,25 +13,25 @@ As we now build on top of the official community Helm chart, most of the paramet
 For example, to set `airflowVersion`, `defaultAirflowTag`, and `executor`:
 
 ```yaml
- airflow:
-   airflowVersion: 2.1.0
-   defaultAirflowTag: 2.1.0-1-buster
-   executor: CeleryExecutor
+airflow:
+  airflowVersion: 2.1.0
+  defaultAirflowTag: 2.1.0-1-buster
+  executor: CeleryExecutor
 ```
 
 The complete list of parameters supported by the community chart can be found on the [Parameteres Reference](https://airflow.apache.org/docs/helm-chart/stable/parameters-ref.html) page.
 
 ### Renamed Parameters
 
-| From                                      | To                                                |
-| ----------------------------------------- | ------------------------------------------------- |
-| `createUserJobAnnotations`                | `airflow.createUserJob.annotations`               |
-| `runMigrationsJobAnnotations`             | `airflow.migrateDatabaseJob.annotations`          |
-| `rbacEnabled`                             | `airflow.rbac.create`                             |
-| `scheduler.airflowLocalSettings`          | `airflow.airflowLocalSettings`                    |
-| `pgbouncer.extraIniDatabaseMetatdata` (yes, typo is correct) | `airflow.pgbouncer.extaIniMetadata` |
-| `pgbouncer.extraIniDatabaseResultBackend` | `airflow.pgbouncer.extaIniResultBackend`          |
-| `pgbouncer.extraIniPgbouncerConfig`       | `airflow.pgbouncer.extaIni`                       |
+| From                                                         | To                                       |
+| ------------------------------------------------------------ | ---------------------------------------- |
+| `createUserJobAnnotations`                                   | `airflow.createUserJob.annotations`      |
+| `runMigrationsJobAnnotations`                                | `airflow.migrateDatabaseJob.annotations` |
+| `rbacEnabled`                                                | `airflow.rbac.create`                    |
+| `scheduler.airflowLocalSettings`                             | `airflow.airflowLocalSettings`           |
+| `pgbouncer.extraIniDatabaseMetatdata` (yes, typo is correct) | `airflow.pgbouncer.extaIniMetadata`      |
+| `pgbouncer.extraIniDatabaseResultBackend`                    | `airflow.pgbouncer.extaIniResultBackend` |
+| `pgbouncer.extraIniPgbouncerConfig`                          | `airflow.pgbouncer.extaIni`              |
 
 ### ServiceAccount Annotations
 

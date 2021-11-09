@@ -39,16 +39,16 @@ spec:
       component: pgbouncer
       release: RELEASE-NAME
   policyTypes:
-  - Ingress
+    - Ingress
   ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          tier: airflow
-          release: RELEASE-NAME
-    ports:
-    - protocol: TCP
-      port: 6543
+    - from:
+        - podSelector:
+            matchLabels:
+              tier: airflow
+              release: RELEASE-NAME
+      ports:
+        - protocol: TCP
+          port: 6543
 ```
 
 From this output, we can make the following assertions:
@@ -94,14 +94,14 @@ Which produces:
 With that empty content, there's pretty much only one thing we can do, which is to essentially assert that it is empty:
 
 ```yaml
-  - it: "should work with pgbouncer.enabled: True, networkPolicies.enabled: True, pgbouncer.networkPolicies.enabled: False"
-    set:
-      pgbouncer.enabled: True
-      networkPolicies.enabled: True
-      pgbouncer.networkPolicies.enabled: False
-    asserts:
-      - hasDocuments:
-          count: 0
+- it: "should work with pgbouncer.enabled: True, networkPolicies.enabled: True, pgbouncer.networkPolicies.enabled: False"
+  set:
+    pgbouncer.enabled: True
+    networkPolicies.enabled: True
+    pgbouncer.networkPolicies.enabled: False
+  asserts:
+    - hasDocuments:
+        count: 0
 ```
 
 This is a little counterintuitive because the output has one yaml document, but there is no parseable content inside of it, so this is seen as 0 documents that would be relevant to kubernetes. If we try to assert that there is 1 document, we see the following helpful error:

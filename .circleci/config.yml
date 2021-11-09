@@ -1,3 +1,4 @@
+---
 version: 2.1
 
 workflows:
@@ -12,9 +13,9 @@ workflows:
           context:
             - gcp-astronomer-prod
           requires:
-          - lint
-          - run_pre_commit
-          - unittest-charts
+            - lint
+            - run_pre_commit
+            - unittest-charts
 
       - airflow-test:
           matrix:
@@ -23,12 +24,12 @@ workflows:
               kube_version: ["1.16.15", "1.17.17", "1.18.19", "1.19.11", "1.20.7"]
               executor: ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
           requires:
-          - build-and-release-internal
+            - build-and-release-internal
 
       - approve-release-prod:
           type: approval
           requires:
-            - 'airflow-test'
+            - "airflow-test"
           filters:
             branches:
               only:
@@ -106,7 +107,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/airflow-chart-package
           paths:
-            - './*.tgz'
+            - "./*.tgz"
 
   airflow-test:
     machine:
@@ -160,7 +161,7 @@ commands:
     parameters:
       tag:
         type: string
-        default:  "$NEXT_TAG"
+        default: "$NEXT_TAG"
     steps:
       - run:
           name: Create a release on GitHub
