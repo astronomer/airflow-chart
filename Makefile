@@ -6,11 +6,11 @@ help: ## Print Makefile help.
 
 venv: ## Setup venv required for unit testing the helm chart
 	[ -d venv ] || virtualenv venv -p python3
-	venv/bin/pip install -r tests/chart-tests/requirements.txt
+	venv/bin/pip install -r tests/chart_tests/requirements.txt
 
 .PHONY: unittest-chart
 unittest-chart: venv ## Unittest the helm chart
-	venv/bin/python -m pytest -n auto tests/chart-tests
+	venv/bin/python -m pytest -n auto tests/chart_tests
 
 .PHONY: clean
 clean: ## Clean build and test artifacts
@@ -18,5 +18,5 @@ clean: ## Clean build and test artifacts
 
 .PHONY: update-requirements
 update-requirements: ## Update all requirements.txt files
-	for FILE in tests/chart-tests/requirements.in tests/functional-tests/requirements.in ; do pip-compile --quiet --allow-unsafe --upgrade --generate-hashes $${FILE} ; done ;
+	for FILE in tests/chart_tests/requirements.in tests/functional-tests/requirements.in ; do pip-compile --quiet --allow-unsafe --upgrade --generate-hashes $${FILE} ; done ;
 	-pre-commit run requirements-txt-fixer --all-files --show-diff-on-failure

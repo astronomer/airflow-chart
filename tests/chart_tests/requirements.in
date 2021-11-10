@@ -2,6 +2,7 @@ docker
 filelock
 GitPython
 jmespath
+jsonschema
 kubernetes
 pytest
 pytest-forked

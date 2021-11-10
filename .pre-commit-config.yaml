@@ -53,8 +53,8 @@ repos:
       - id: requirements-txt-fixer
         args:
           [
-            "tests/chart-tests/requirements.in",
-            "tests/chart-tests/requirements.txt",
+            "tests/chart_tests/requirements.in",
+            "tests/chart_tests/requirements.txt",
             "tests/functional-tests/requirements.in",
             "tests/functional-tests/requirements.txt",
           ]
