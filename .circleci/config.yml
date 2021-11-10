@@ -84,17 +84,12 @@ jobs:
 
   unittest-charts:
     docker:
-      - image: alpine/helm:3.7.1
-        entrypoint: /bin/sh
+      - image: quay.io/astronomer/ci-helm-release:2021-11
     steps:
       - checkout
       - run:
           name: unittest the Airflow chart
-          command: |
-            apk add git bash
-            helm dep update
-            helm plugin install https://github.com/astronomer/helm-unittest/
-            helm unittest -3 .
+          command: make unittest-charts
 
   build-and-release-internal:
     docker:
