@@ -8,8 +8,11 @@ venv: ## Setup venv required for unit testing the helm chart
 	[ -d venv ] || virtualenv venv -p python3
 	venv/bin/pip install -r tests/chart_tests/requirements.txt
 
+charts: ## Update dependent charts
+	helm dep update
+
 .PHONY: unittest-chart
-unittest-chart: venv ## Unittest the helm chart
+unittest-chart: charts venv ## Unittest the helm chart
 	venv/bin/python -m pytest -n auto tests/chart_tests
 
 .PHONY: clean

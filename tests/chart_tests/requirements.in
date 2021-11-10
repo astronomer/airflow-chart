@@ -8,6 +8,7 @@ pytest
 pytest-forked
 pytest-profiling
 pytest-sugar
+pytest-testinfra
 pytest-xdist
 PyYAML
 requests

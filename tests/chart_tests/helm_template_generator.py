@@ -70,7 +70,6 @@ def render_chart(
     show_only=None,
     chart_dir=None,
     kube_version="1.18.0",
-    baseDomain="example.com",
 ):
     """
     Render a helm chart into dictionaries. For helm chart testing only
@@ -88,8 +87,6 @@ def render_chart(
             kube_version,
             name,
             chart_dir,
-            "--set",
-            f"global.baseDomain={baseDomain}",
             "--values",
             tmp_file.name,
         ]
