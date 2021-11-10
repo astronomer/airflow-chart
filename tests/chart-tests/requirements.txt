@@ -42,9 +42,9 @@ gitpython==3.1.24 \
     --hash=sha256:dc0a7f2f697657acc8d7f89033e8b1ea94dd90356b2983bca89dc8d2ab3cc647 \
     --hash=sha256:df83fdf5e684fef7c6ee2c02fc68a5ceb7e7e759d08b694088d0cacb4eba59e5
     # via -r tests/chart-tests/requirements.in
-google-auth==2.3.2 \
-    --hash=sha256:2dc5218ee1192f9d67147cece18f47a929a9ef746cb69c50ab5ff5cfc983647b \
-    --hash=sha256:6e99f4b3b099feb50de20302f2f8987c1c36e80a3f856ce852675bdf7a0935d3
+google-auth==2.3.3 \
+    --hash=sha256:a348a50b027679cb7dae98043ac8dbcc1d7951f06d8387496071a1e05a2465c0 \
+    --hash=sha256:d83570a664c10b97a1dc6f8df87e5fdfff012f48f62be131e449c20dfc32630e
     # via kubernetes
 gprof2dot==2021.2.21 \
     --hash=sha256:1223189383b53dcc8ecfd45787ac48c0ed7b4dbc16ee8b88695d053eea1acabf
@@ -79,9 +79,9 @@ pluggy==1.0.0 \
     --hash=sha256:4224373bacce55f955a878bf9cfa763c1e360858e330072059e10bad68531159 \
     --hash=sha256:74134bbf457f031a36d68416e1509f34bd5ccc019f0bcc952c7b909d06b37bd3
     # via pytest
-py==1.10.0 \
-    --hash=sha256:21b81bda15b66ef5e1a777a21c4dcd9c20ad3efd0b3f817e7a809035269e1bd3 \
-    --hash=sha256:3b80836aa6d1feeaa108e046da6423ab8f6ceda6468545ae8d02d9d58d18818a
+py==1.11.0 \
+    --hash=sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719 \
+    --hash=sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378
     # via
     #   pytest
     #   pytest-forked
@@ -186,9 +186,9 @@ rsa==4.7.2 \
     #   kubernetes
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==58.3.0 \
-    --hash=sha256:1a24f0e5c14b91ad6810745a7242721fd5011ed164553136f946f768b06559f7 \
-    --hash=sha256:b0c2461641b58fe30e11d4c3dfba316c513bdf9ec85f9fed0c871c678447205e
+setuptools==58.5.3 \
+    --hash=sha256:a481fbc56b33f5d8f6b33dce41482e64c68b668be44ff42922903b03872590bf \
+    --hash=sha256:dae6b934a965c8a59d6d230d3867ec408bb95e73bd538ff77e71fedf1eaca729
     # via google-auth
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
