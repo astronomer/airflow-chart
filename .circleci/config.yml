@@ -89,7 +89,7 @@ jobs:
       - checkout
       - run:
           name: unittest the Airflow chart
-          command: make unittest-charts
+          command: make unittest-chart
 
   build-and-release-internal:
     docker:
