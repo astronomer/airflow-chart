@@ -12,6 +12,12 @@ repos:
       - id: prettier
         args: ["--print-width=135"]
         exclude: "(charts|templates|files)"
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ["--profile", "black"]
   - repo: https://github.com/psf/black
     rev: 21.10b0
     hooks:
@@ -40,12 +46,18 @@ repos:
       - id: file-contents-sorter
         args: ["--ignore-case", "--unique"]
         files: '^\.gitignore$'
-      - id: no-commit-to-branch
-        args: ["-b", "master"]
       - id: mixed-line-ending
         args: ["--fix=lf"]
+      - id: no-commit-to-branch
+        args: ["-b", "master"]
       - id: requirements-txt-fixer
-        args: ["tests/functional-tests/requirements.txt"]
+        args:
+          [
+            "tests/chart_tests/requirements.in",
+            "tests/chart_tests/requirements.txt",
+            "tests/functional-tests/requirements.in",
+            "tests/functional-tests/requirements.txt",
+          ]
       - id: sort-simple-yaml
       - id: trailing-whitespace
   - repo: https://gitlab.com/pycqa/flake8
