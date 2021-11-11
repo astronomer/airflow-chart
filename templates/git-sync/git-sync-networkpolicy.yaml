@@ -1,0 +1,6 @@
+{{- if .Values.airflow.dags.gitSync.enabled }}
+############################
+## git-sync NetworkPolicy ##
+############################
+
+{{- end -}}
