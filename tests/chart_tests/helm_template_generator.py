@@ -65,11 +65,12 @@ def validate_k8s_object(instance, kube_version="1.18.0"):
 
 
 def render_chart(
-    name="RELEASE-NAME",
-    values=None,
-    show_only=None,
-    chart_dir=None,
-    kube_version="1.18.0",
+    *,  # require keyword args
+    name: str = "RELEASE-NAME",
+    values: dict = {},
+    show_only: list = [],
+    chart_dir: str = None,
+    kube_version: str = "1.18.0",
 ):
     """
     Render a helm chart into dictionaries. For helm chart testing only
@@ -91,6 +92,9 @@ def render_chart(
             tmp_file.name,
         ]
         if show_only:
+            if isinstance(show_only, str):
+                show_only = [show_only]
+
             for i in show_only:
                 if not Path(i).exists():
                     raise FileNotFoundError(f"ERROR: {i} not found")
