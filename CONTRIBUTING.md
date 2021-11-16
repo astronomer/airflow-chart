@@ -9,6 +9,7 @@ You can run Kubernetes in Docker (kind) in order to develop this chart on your w
 - Docker
 
 Make sure your user has access to Docker:
+
 ```
 docker run --rm hello-world:latest
 ```
@@ -25,6 +26,7 @@ bin/reset-local-dev
 ```
 
 The above script takes the following steps:
+
 - Install dependencies: kind, kubectl, helm
 - Delete existing kind cluster named 'kind', if it exists
 - Start a new kind cluster

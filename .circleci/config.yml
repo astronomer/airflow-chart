@@ -1,7 +1,8 @@
+---
 version: 2.1
 
 workflows:
-  version: 2.1
+  version: 2
   install-airflow-chart:
     jobs:
       - lint
@@ -12,9 +13,9 @@ workflows:
           context:
             - gcp-astronomer-prod
           requires:
-          - lint
-          - run_pre_commit
-          - unittest-charts
+            - lint
+            - run_pre_commit
+            - unittest-charts
 
       - airflow-test:
           matrix:
@@ -23,12 +24,12 @@ workflows:
               kube_version: ["1.16.15", "1.17.17", "1.18.19", "1.19.11", "1.20.7"]
               executor: ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
           requires:
-          - build-and-release-internal
+            - build-and-release-internal
 
       - approve-release-prod:
           type: approval
           requires:
-            - 'airflow-test'
+            - "airflow-test"
           filters:
             branches:
               only:
@@ -48,7 +49,7 @@ workflows:
 jobs:
   run_pre_commit:
     docker:
-      - image: quay.io/astronomer/ci-pre-commit:2021-10
+      - image: quay.io/astronomer/ci-pre-commit:2021-11
     steps:
       - checkout
       - run:
@@ -74,7 +75,7 @@ jobs:
 
   lint:
     docker:
-      - image: alpine/helm:3.5.3
+      - image: alpine/helm:3.7.1
     steps:
       - checkout
       - run:
@@ -83,21 +84,16 @@ jobs:
 
   unittest-charts:
     docker:
-      - image: alpine/helm:3.5.3
-        entrypoint: /bin/sh
+      - image: quay.io/astronomer/ci-helm-release:2021-11
     steps:
       - checkout
       - run:
           name: unittest the Airflow chart
-          command: |
-            apk add git bash
-            helm dep update
-            helm plugin install https://github.com/astronomer/helm-unittest/
-            helm unittest -3 .
+          command: make unittest-chart
 
   build-and-release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-10
+      - image: quay.io/astronomer/ci-helm-release:2021-11
     steps:
       - checkout
       - run:
@@ -106,7 +102,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/airflow-chart-package
           paths:
-            - './*.tgz'
+            - "./*.tgz"
 
   airflow-test:
     machine:
@@ -137,7 +133,7 @@ jobs:
 
   release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-10
+      - image: quay.io/astronomer/ci-helm-release:2021-11
     steps:
       - checkout
       - run:
@@ -146,7 +142,7 @@ jobs:
 
   release-public:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-10
+      - image: quay.io/astronomer/ci-helm-release:2021-11
     steps:
       - checkout
       - publish-github-release
@@ -160,7 +156,7 @@ commands:
     parameters:
       tag:
         type: string
-        default:  "$NEXT_TAG"
+        default: "$NEXT_TAG"
     steps:
       - run:
           name: Create a release on GitHub
