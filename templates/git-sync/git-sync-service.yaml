@@ -1,6 +1,7 @@
-{{- if .Values.airflow.dags.gitSync.enabled }}
 ######################
 ## git-sync Service ##
 ######################
-
+{{- if .Values.airflow.dags.gitSync.enabled }}
+apiVersion: v1
+kind: Service
 {{- end -}}

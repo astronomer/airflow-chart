@@ -1,7 +1,7 @@
-{{- if .Values.airflow.dags.gitSync.enabled }}
 #########################
 ## git-sync Deployment ##
 #########################
+{{- if .Values.airflow.dags.gitSync.enabled }}
 # Largely taken from <https://github.com/kubernetes/git-sync/blob/2b471ba2d799/docs/kubernetes.md>
 
 apiVersion: apps/v1
@@ -19,7 +19,7 @@ spec:
         app: git-sync-example
     spec:
       securityContext:
-        fsGroup: "{{ .Values.airflow.dags.gitSync.uid }}"
+        fsGroup: {{ .Values.airflow.dags.gitSync.uid }}
       volumes:
         - name: git-repo-contents
           emptyDir: {}
