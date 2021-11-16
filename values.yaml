@@ -42,7 +42,7 @@ airflow:
     gitSync:
       repository: k8s.gcr.io/git-sync/git-sync
       tag: v3.3.4
-    # Airflow scheduler settings
+  # Airflow scheduler settings
   scheduler:
     livenessProbe:
       timeoutSeconds: 30
