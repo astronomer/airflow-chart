@@ -39,8 +39,10 @@ airflow:
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
       tag: 0.11.0-2
-
-  # Airflow scheduler settings
+    gitSync:
+      repository: k8s.gcr.io/git-sync/git-sync
+      tag: v3.3.4
+    # Airflow scheduler settings
   scheduler:
     livenessProbe:
       timeoutSeconds: 30
