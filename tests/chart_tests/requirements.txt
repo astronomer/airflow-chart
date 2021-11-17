@@ -8,6 +8,8 @@ attrs==21.2.0
     # via
     #   jsonschema
     #   pytest
+black==21.11b0
+    # via -r tests/chart_tests/requirements.in
 cachetools==4.2.4
     # via google-auth
 certifi==2021.10.8
@@ -16,11 +18,13 @@ certifi==2021.10.8
     #   requests
 charset-normalizer==2.0.7
     # via requests
+click==8.0.3
+    # via black
 docker==5.0.3
     # via -r tests/chart_tests/requirements.in
 execnet==1.9.0
     # via pytest-xdist
-filelock==3.3.2
+filelock==3.4.0
     # via -r tests/chart_tests/requirements.in
 gitdb==4.0.9
     # via gitpython
@@ -40,12 +44,18 @@ jsonschema==4.2.1
     # via -r tests/chart_tests/requirements.in
 kubernetes==19.15.0
     # via -r tests/chart_tests/requirements.in
+mypy-extensions==0.4.3
+    # via black
 oauthlib==3.1.1
     # via requests-oauthlib
 packaging==21.2
     # via
     #   pytest
     #   pytest-sugar
+pathspec==0.9.0
+    # via black
+platformdirs==2.4.0
+    # via black
 pluggy==1.0.0
     # via pytest
 py==1.11.0
@@ -88,6 +98,8 @@ pyyaml==6.0
     # via
     #   -r tests/chart_tests/requirements.in
     #   kubernetes
+regex==2021.11.10
+    # via black
 requests==2.26.0
     # via
     #   -r tests/chart_tests/requirements.in
@@ -102,7 +114,7 @@ rsa==4.7.2
     #   kubernetes
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==58.5.3
+setuptools==59.1.1
     # via google-auth
 six==1.16.0
     # via
@@ -116,8 +128,12 @@ termcolor==1.1.0
     # via pytest-sugar
 toml==0.10.2
     # via pytest
-typing-extensions==3.10.0.2
-    # via gitpython
+tomli==1.2.2
+    # via black
+typing-extensions==4.0.0
+    # via
+    #   black
+    #   gitpython
 urllib3==1.26.7
     # via
     #   kubernetes

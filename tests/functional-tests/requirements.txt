@@ -22,11 +22,11 @@ distlib==0.3.3
     # via virtualenv
 docker==4.1.0
     # via -r tests/functional-tests/requirements.in
-filelock==3.3.2
+filelock==3.4.0
     # via virtualenv
 google-auth==2.3.3
     # via kubernetes
-identify==2.3.5
+identify==2.3.6
     # via pre-commit
 idna==3.3
     # via requests
@@ -81,7 +81,7 @@ rsa==4.7.2
     #   kubernetes
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==58.5.3
+setuptools==59.1.1
     # via google-auth
 six==1.16.0
     # via
