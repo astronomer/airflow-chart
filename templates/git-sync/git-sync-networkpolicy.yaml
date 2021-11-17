@@ -28,5 +28,5 @@ spec:
           component: airflow ## TODO: validate this
     ports:
     - protocol: TCP
-      port: {{ .Values.ports.git-sync-ssh }}
+      port: {{ .Values.airflow.dags.gitSync.port }}
 {{- end -}}
