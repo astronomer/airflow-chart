@@ -40,7 +40,7 @@ spec:
           # "current" (see -dest below) which points to a checked-out copy of
           # the master branch (see -branch) of the repo (see -repo).
           # NOTE: git-sync already runs as non-root.
-          image: k8s.gcr.io/git-sync:v4.0.0
+          image: "{{ .Values.airflow.images.gitSync.repository }}:{{ .Values.airflow.images.gitSync.tag }}"
           args:
             - "--repo={{ .Values.airflow.dags.gitSync.repo }}"
             - "--branch={{ .Values.airflow.dags.gitSync.branch }}"
