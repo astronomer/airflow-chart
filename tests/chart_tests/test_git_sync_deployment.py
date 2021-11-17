@@ -1,3 +1,4 @@
+import jmespath
 import pytest
 
 from tests.chart_tests.helm_template_generator import render_chart
@@ -25,3 +26,14 @@ class TestIngress:
             values=values,
         )
         assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "RELEASE-NAME-git-sync"
+        assert any(
+            image_name.startswith("quay.io/astronomer/ap-git-sync:")
+            for image_name in jmespath.search(
+                "spec.template.spec.containers[*].image", doc
+            )
+        )
+        assert len(doc["spec"]["template"]["spec"]["containers"]) == 1

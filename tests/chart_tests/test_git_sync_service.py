@@ -24,3 +24,7 @@ class TestIngress:
             values=values,
         )
         assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Service"
+        assert doc["apiVersion"] == "v1"
+        assert doc["metadata"]["name"] == "RELEASE-NAME-git-sync"

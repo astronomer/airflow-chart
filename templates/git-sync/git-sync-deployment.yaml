@@ -7,16 +7,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: git-sync-example
+  name: {{ .Release.Name }}-git-sync
+  labels:
+    component: git-sync
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: git-sync-example
+      app: git-sync
   template:
     metadata:
       labels:
-        app: git-sync-example
+        app: git-sync
     spec:
       securityContext:
         fsGroup: {{ .Values.airflow.dags.gitSync.uid }}

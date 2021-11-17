@@ -4,4 +4,12 @@
 {{- if .Values.airflow.dags.gitSync.enabled }}
 apiVersion: v1
 kind: Service
+metadata:
+  name: {{ .Release.Name }}-git-sync
+  labels:
+    component: git-sync
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
 {{- end -}}

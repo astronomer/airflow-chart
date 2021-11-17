@@ -4,4 +4,29 @@
 {{- if .Values.airflow.dags.gitSync.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-git-sync
+  labels:
+    component: git-sync
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  podSelector:
+    matchLabels:
+      tier: astronomer
+      component: git-sync
+      release: {{ .Release.Name }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          tier: airflow
+          component: airflow ## TODO: validate this
+    ports:
+    - protocol: TCP
+      port: {{ .Values.ports.git-sync-ssh }}
 {{- end -}}
