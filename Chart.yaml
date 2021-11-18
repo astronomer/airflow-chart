@@ -1,7 +1,7 @@
 # apiVersion v2 is Helm 3
 apiVersion: v2
 name: airflow
-version: 1.0.8
+version: 1.0.9
 description: Helm chart to deploy the Astronomer Platform Airflow module
 icon: https://airflow.apache.org/docs/apache-airflow/stable/_images/pin_large.png
 keywords:
@@ -9,5 +9,5 @@ keywords:
   - airflow
 dependencies:
   - name: airflow
-    version: 1.3.0
+    version: 1.2.0
     repository: https://airflow.apache.org
