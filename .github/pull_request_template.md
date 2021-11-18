@@ -1,4 +1,3 @@
-
 ## Description
 
 > Describe the purpose of this pull request.
@@ -11,7 +10,7 @@
 
 Resolves astronomer/issues#XXXX
 
-## 🧪  Testing
+## 🧪 Testing
 
 > What are the main risks associated with this change, and how are they addressed by tests added in this PR?
 
