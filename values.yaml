@@ -325,8 +325,19 @@ airflow:
       elasticsearch_write_stdout: True
       elasticsearch_json_format: True
       elasticsearch_log_id_template: "{dag_id}_{task_id}_{execution_date}_{try_number}"
+    # The following kubernetes config is required to support Airflow 1.10.10
     kubernetes:
       dags_in_image: True
+      worker_service_account_name: '{{ include "worker.serviceAccountName" . }}'
+      image_pull_secrets: '{{ template "registry_secret" . }}'
+    kubernetes_labels:
+      tier: airflow
+      component: worker
+      release: "{{ .Release.Name }}"
+    kubernetes_secrets:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: '{{ printf "%s=connection" (include "airflow_metadata_secret" .) }}'
+      AIRFLOW_CONN_AIRFLOW_DB: '{{ printf "%s=connection" (include "airflow_metadata_secret" .) }}'
+      AIRFLOW__CORE__FERNET_KEY: '{{ printf "%s=fernet-key" (include "fernet_key_secret" .) }}'
     # Only required when running on the platform, but works elsewhere too
     astronomer:
       jwt_signing_cert: /etc/airflow/tls/tls.crt
