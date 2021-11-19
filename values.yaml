@@ -340,6 +340,7 @@ airflow:
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: '{{ printf "%s=connection" (include "airflow_metadata_secret" .) }}'
       AIRFLOW_CONN_AIRFLOW_DB: '{{ printf "%s=connection" (include "airflow_metadata_secret" .) }}'
       AIRFLOW__CORE__FERNET_KEY: '{{ printf "%s=fernet-key" (include "fernet_key_secret" .) }}'
+      AIRFLOW__ELASTICSEARCH__ELASTICSEARCH_HOST: '{{ printf "%s=connection" (include "elasticsearch_secret" .) }}'
     # Only required when running on the platform, but works elsewhere too
     astronomer:
       jwt_signing_cert: /etc/airflow/tls/tls.crt
