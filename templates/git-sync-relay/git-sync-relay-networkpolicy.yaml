@@ -1,15 +1,15 @@
-############################
-## git-sync NetworkPolicy ##
-############################
+##################################
+## git-sync-relay NetworkPolicy ##
+##################################
 # https://kubernetes.io/docs/concepts/services-networking/network-policies/
 
 {{- if .Values.airflow.dags.gitSync.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ .Release.Name }}-git-sync
+  name: {{ .Release.Name }}-git-sync-relay
   labels:
-    component: git-sync
+    component: git-sync-relay
     tier: airflow
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -18,7 +18,7 @@ spec:
   podSelector:
     matchLabels:
       tier: astronomer
-      component: git-sync
+      component: git-sync-relay
       release: {{ .Release.Name }}
   policyTypes:
   - Ingress
@@ -30,5 +30,6 @@ spec:
           tier: airflow
     ports:
     - protocol: TCP
-      port: {{ .Values.airflow.dags.gitSync.port }}
+      # port: {{ .Values.airflow.dags.gitSync.port }}
+      port: 80
 {{- end -}}

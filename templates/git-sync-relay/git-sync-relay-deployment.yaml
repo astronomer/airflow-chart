@@ -1,15 +1,15 @@
-#########################
-## git-sync Deployment ##
-#########################
+###############################
+## git-sync-relay Deployment ##
+###############################
 {{- if .Values.airflow.dags.gitSync.enabled }}
 # Largely taken from <https://github.com/kubernetes/git-sync/blob/2b471ba2d799/docs/kubernetes.md>
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-git-sync
+  name: {{ .Release.Name }}-git-sync-relay
   labels:
-    component: git-sync
+    component: git-sync-relay
     tier: airflow
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -18,11 +18,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: git-sync
+      app: git-sync-relay
   template:
     metadata:
       labels:
-        app: git-sync
+        app: git-sync-relay
     spec:
       securityContext:
         fsGroup: {{ .Values.airflow.dags.gitSync.uid }}

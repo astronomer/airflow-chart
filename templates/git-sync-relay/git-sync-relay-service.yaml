@@ -1,13 +1,13 @@
-######################
-## git-sync Service ##
-######################
+############################
+## git-sync-relay Service ##
+############################
 {{- if .Values.airflow.dags.gitSync.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-git-sync
+  name: {{ .Release.Name }}-git-sync-relay
   labels:
-    component: git-sync
+    component: git-sync-relay
     tier: airflow
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
