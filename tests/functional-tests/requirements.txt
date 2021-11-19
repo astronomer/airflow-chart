@@ -26,7 +26,7 @@ filelock==3.4.0
     # via virtualenv
 google-auth==2.3.3
     # via kubernetes
-identify==2.3.6
+identify==2.4.0
     # via pre-commit
 idna==3.3
     # via requests
@@ -40,7 +40,7 @@ nodeenv==1.6.0
     # via pre-commit
 oauthlib==3.1.1
     # via requests-oauthlib
-packaging==21.2
+packaging==21.3
     # via pytest
 platformdirs==2.4.0
     # via virtualenv
@@ -56,7 +56,7 @@ pyasn1==0.4.8
     #   rsa
 pyasn1-modules==0.2.8
     # via google-auth
-pyparsing==2.4.7
+pyparsing==3.0.6
     # via packaging
 pytest==6.0.1
     # via
@@ -81,7 +81,7 @@ rsa==4.7.2
     #   kubernetes
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==59.1.1
+setuptools==59.2.0
     # via google-auth
 six==1.16.0
     # via

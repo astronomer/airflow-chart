@@ -8,7 +8,7 @@ attrs==21.2.0
     # via
     #   jsonschema
     #   pytest
-black==21.11b0
+black==21.11b1
     # via -r tests/chart_tests/requirements.in
 cachetools==4.2.4
     # via google-auth
@@ -48,7 +48,7 @@ mypy-extensions==0.4.3
     # via black
 oauthlib==3.1.1
     # via requests-oauthlib
-packaging==21.2
+packaging==21.3
     # via
     #   pytest
     #   pytest-sugar
@@ -68,7 +68,7 @@ pyasn1==0.4.8
     #   rsa
 pyasn1-modules==0.2.8
     # via google-auth
-pyparsing==2.4.7
+pyparsing==3.0.6
     # via packaging
 pyrsistent==0.18.0
     # via jsonschema
@@ -114,7 +114,7 @@ rsa==4.7.2
     #   kubernetes
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==59.1.1
+setuptools==59.2.0
     # via google-auth
 six==1.16.0
     # via
