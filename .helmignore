@@ -1,6 +1,4 @@
-# Patterns to ignore when building packages.
-# This supports shell glob matching, relative path matching, and
-# negation (prefixed with !). Only one pattern per line.
+# https://helm.sh/docs/chart_template_guide/helm_ignore_file/
 .DS_Store
 # Common VCS dirs
 .git/
@@ -22,3 +20,4 @@
 bin
 # Astronomer helm repository directory
 configs
+README.md
