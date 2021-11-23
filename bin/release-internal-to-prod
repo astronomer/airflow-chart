@@ -15,7 +15,7 @@ fi
 dev_repo=internal-helm.astronomer.io
 prod_repo=helm.astronomer.io
 git_root="$(git rev-parse --show-toplevel)"
-version=$(awk '$1 ~ /^version/ {printf $2}' "${git_root}/Chart.yaml")
+version=$(awk '$0 ~ /^version/ {printf $2}' "${git_root}/Chart.yaml")
 filename="airflow-${version}.tgz"
 max_age=300
 
