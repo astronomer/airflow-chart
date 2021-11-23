@@ -21,3 +21,6 @@ bin
 # Astronomer helm repository directory
 configs
 README.md
+venv
+__pycache__
+.pytest_cache
