@@ -7,9 +7,9 @@ from .. import supported_k8s_versions
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
-class TestIngress:
+class TestGitSyncRelayDeployment:
     def test_gsr_deployment_default(self, kube_version):
-        """Test that each template used with just baseDomain set renders."""
+        """Test that no git-sync-relay templates are rendered by default."""
         docs = render_chart(
             kube_version=kube_version,
             show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
@@ -17,8 +17,8 @@ class TestIngress:
         assert len(docs) == 0
 
     def test_gsr_deployment_gsr_enabled(self, kube_version):
-        """Test that each template used with just baseDomain set renders."""
-        values = {"airflow": {"dags": {"gitSync": {"enabled": True}}}}
+        """Test that a valid deployment are rendered when git-sync-relay is enabled."""
+        values = {"gitSyncRelay": {"enabled": True}}
 
         docs = render_chart(
             kube_version=kube_version,

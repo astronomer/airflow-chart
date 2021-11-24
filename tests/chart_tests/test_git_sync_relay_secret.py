@@ -6,25 +6,25 @@ from .. import supported_k8s_versions
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
-class TestGitSyncRelayService:
-    def test_gsr_service_default(self, kube_version):
+class TestGitSyncRelaySecret:
+    def test_gsr_secret_default(self, kube_version):
         """Test that no git-sync-relay templates are rendered by default."""
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/git-sync-relay/git-sync-relay-service.yaml",
+            show_only="templates/git-sync-relay/git-sync-relay-secret.yaml",
         )
         assert len(docs) == 0
 
-    def test_gsr_service_gsr_enabled(self, kube_version):
-        """Test that a valid service is rendered when git-sync-relay is enabled."""
+    def test_gsr_secret_gsr_enabled(self, kube_version):
+        """Test that valid secrets are rendered when git-sync-relay is enabled."""
         values = {"gitSyncRelay": {"enabled": True}}
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/git-sync-relay/git-sync-relay-service.yaml",
+            show_only="templates/git-sync-relay/git-sync-relay-secret.yaml",
             values=values,
         )
         assert len(docs) == 1
         doc = docs[0]
-        assert doc["kind"] == "Service"
+        assert doc["kind"] == "Secret"
         assert doc["apiVersion"] == "v1"
         assert doc["metadata"]["name"] == "RELEASE-NAME-git-sync-relay"

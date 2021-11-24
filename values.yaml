@@ -39,9 +39,6 @@ airflow:
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
       tag: 0.11.0-2
-    gitSync:
-      repository: quay.io/astronomer/ap-git-sync
-      tag: v3.3.4
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
@@ -408,3 +405,16 @@ ingress:
 
 platform:
   release: ~
+
+gitSyncRelay:
+  enabled: ~
+  uid: ~
+  images:
+    repository: quay.io/astronomer/ap-git-sync
+    tag: v3.3.4
+
+  repo:
+    url: ~
+    branch: master
+    depth: 1 # default to a shallow clone because it is faster and this isn't a dev environment
+    wait: 60 # seconds between synchronizations with upstream git repo

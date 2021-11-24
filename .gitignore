@@ -14,3 +14,4 @@ dev-account.json
 kubeconfig
 letsencrypt*
 repository
+scratch*

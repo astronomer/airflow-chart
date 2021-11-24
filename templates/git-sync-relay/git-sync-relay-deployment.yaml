@@ -1,7 +1,7 @@
 ###############################
 ## git-sync-relay Deployment ##
 ###############################
-{{- if .Values.airflow.dags.gitSync.enabled }}
+{{- if .Values.gitSyncRelay.enabled }}
 # Largely taken from <https://github.com/kubernetes/git-sync/blob/2b471ba2d799/docs/kubernetes.md>
 
 apiVersion: apps/v1
@@ -25,29 +25,30 @@ spec:
         app: git-sync-relay
     spec:
       securityContext:
-        fsGroup: {{ .Values.airflow.dags.gitSync.uid }}
+        fsGroup: {{ .Values.gitSyncRelay.uid }}
       volumes:
         - name: git-repo-contents
           emptyDir: {}
         - name: git-secret
           secret:
-            secretName: git-creds
+            secretName: upstream-git-credentials
             defaultMode: 0400
       containers:
-        - name: "{{ .Values.airflow.dags.gitSync.repo }}"
+        - name: "git-sync-relay"
           # This container pulls git data and publishes it into volume
           # "git-repo-contents".  In that volume you will find a symlink
           # "current" (see -dest below) which points to a checked-out copy of
           # the master branch (see -branch) of the repo (see -repo).
           # NOTE: git-sync already runs as non-root.
-          image: "{{ .Values.airflow.images.gitSync.repository }}:{{ .Values.airflow.images.gitSync.tag }}"
+          image: "{{ .Values.gitSyncRelay.images.repository }}:{{ .Values.gitSyncRelay.images.tag }}"
           args:
-            - "--repo={{ .Values.airflow.dags.gitSync.repo }}"
-            - "--branch={{ .Values.airflow.dags.gitSync.branch }}"
-            - "--depth={{ .Values.airflow.dags.gitSync.depth }}"
-            - "--period={{ .Values.airflow.dags.gitSync.wait }}"
+            # https://github.com/kubernetes/git-sync#parameters
+            - "--repo={{ .Values.gitSyncRelay.repo.url }}"
+            - "--branch={{ .Values.gitSyncRelay.repo.branch }}"
+            - "--depth={{ .Values.gitSyncRelay.repo.depth }}"
+            - "--period={{ .Values.gitSyncRelay.repo.wait }}"
             - "--link=current"
-            - "--root={{ .Values.airflow.dags.gitSync.root }}"
+            - "--root=/git"
           volumeMounts:
             - name: git-secret
               mountPath: /etc/git-secret
