@@ -12,7 +12,7 @@ metadata:
     component: git-sync-relay
     tier: airflow
     release: {{ .Release.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
 spec:
   replicas: 1
@@ -31,10 +31,10 @@ spec:
           emptyDir: {}
         - name: git-secret
           secret:
-            secretName: upstream-git-credentials
+            secretName: {{ .Release.Name }}-upstream-git-credentials
             defaultMode: 0400
       containers:
-        - name: "git-sync-relay"
+        - name: "git-sync"
           # This container pulls git data and publishes it into volume
           # "git-repo-contents".  In that volume you will find a symlink
           # "current" (see -dest below) which points to a checked-out copy of
@@ -46,8 +46,7 @@ spec:
             - "--repo={{ .Values.gitSyncRelay.repo.url }}"
             - "--branch={{ .Values.gitSyncRelay.repo.branch }}"
             - "--depth={{ .Values.gitSyncRelay.repo.depth }}"
-            - "--period={{ .Values.gitSyncRelay.repo.wait }}"
-            - "--link=current"
+            - "--wait={{ .Values.gitSyncRelay.repo.wait }}"
             - "--root=/git"
           volumeMounts:
             - name: git-secret
@@ -55,7 +54,7 @@ spec:
               readOnly: true
             - name: git-repo-contents
               mountPath: /git
-        - name: server
+        - name: git-server
           # This container serves the data pulled from git, via the volume
           # "git-repo-contents".
           # NOTE: apache runs as root to expose port 80, and there's not a

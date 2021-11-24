@@ -12,7 +12,7 @@ metadata:
     component: git-sync-relay
     tier: airflow
     release: {{ .Release.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
 spec:
   podSelector:

@@ -410,8 +410,8 @@ gitSyncRelay:
   enabled: ~
   uid: ~
   images:
-    repository: quay.io/astronomer/ap-git-sync
-    tag: v3.3.4
+    repository: "quay.io/astronomer/ap-git-sync"
+    tag: "3.3.4"
 
   repo:
     url: ~
