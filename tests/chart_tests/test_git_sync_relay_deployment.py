@@ -36,4 +36,4 @@ class TestGitSyncRelayDeployment:
                 "spec.template.spec.containers[*].image", doc
             )
         )
-        assert len(doc["spec"]["template"]["spec"]["containers"]) == 2
+        assert len(doc["spec"]["template"]["spec"]["containers"]) == 3
