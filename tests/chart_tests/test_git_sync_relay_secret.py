@@ -27,4 +27,4 @@ class TestGitSyncRelaySecret:
         doc = docs[0]
         assert doc["kind"] == "Secret"
         assert doc["apiVersion"] == "v1"
-        assert doc["metadata"]["name"] == "RELEASE-NAME-git-sync-relay"
+        assert doc["metadata"]["name"] == "RELEASE-NAME-upstream-git-credentials"
