@@ -21,7 +21,7 @@ workflows:
           matrix:
             parameters:
               # https://hub.docker.com/r/kindest/node/tags
-              kube_version: ["1.16.15", "1.17.17", "1.18.19", "1.19.11", "1.20.7"]
+              kube_version: ["1.17.17", "1.18.19", "1.19.11", "1.20.7", "1.21.2"]
               executor: ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
           requires:
             - build-and-release-internal
@@ -107,7 +107,7 @@ jobs:
   airflow-test:
     machine:
       # https://circleci.com/docs/2.0/configuration-reference/#available-machine-images
-      image: ubuntu-2004:202107-02
+      image: ubuntu-2004:202111-01
       resource_class: large
     parameters:
       executor:
@@ -123,7 +123,7 @@ jobs:
       - run:
           name: Install Airflow chart
           command: |
-            pyenv global 3.9.4
+            pyenv global 3.9.7
             export KUBE_VERSION=<< parameters.kube_version >>
             export EXECUTOR=<< parameters.executor >>
             HELM_CHART_PATH=$(find /tmp/workspace/ -name 'airflow-*.tgz')
