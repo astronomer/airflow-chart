@@ -2,11 +2,11 @@
 set -e
 
 if [[ -z "${KIND_VERSION}" ]]; then
-  export KIND_VERSION="0.7.0"
+  export KIND_VERSION="0.11.1"
 fi
 
 if [[ -z "${HELM_VERSION}" ]]; then
-  export HELM_VERSION="3.6.0"
+  export HELM_VERSION="3.7.1"
 fi
 
 # Determine the platform we are running on
