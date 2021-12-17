@@ -23,7 +23,7 @@ $ git cherry-pick -x d2f74461
 
 3. Bump the chart version in `Chart.yaml`
 
-4. Push the branch
+4. Push the branch:
 
 ```shell
 $ git push
