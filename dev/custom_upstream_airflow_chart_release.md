@@ -37,3 +37,20 @@ $ git tag -s oss-helm-chart/1.3.1 -m "Version 1.3.1"
 
 At this point, GitHub Actions will build and release the chart. It can be found here:
 https://github.com/astronomer/airflow/releases
+
+6. Use it in the `airflow-chart` chart:
+
+Set the newly released chart in `Chart.yaml`:
+
+```yaml
+dependencies:
+  - name: airflow
+    version: 1.3.1
+    repository: https://github.com/astronomer/airflow/releases/download/oss-helm-chart/1.3.1
+```
+
+Then update dependencies:
+
+```shell
+$ helm depenency update
+```
