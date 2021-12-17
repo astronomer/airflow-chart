@@ -29,7 +29,7 @@ $ git cherry-pick -x d2f74461
 $ git push
 ```
 
-5. Create and push tag
+5. Create and push tag:
 
 ```shell
 $ git tag -s oss-helm-chart/1.3.1 -m "Version 1.3.1"
