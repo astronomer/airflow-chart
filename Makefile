@@ -28,9 +28,6 @@ update-requirements: ## Update all requirements.txt files
 
 .PHONY: show-containers
 show-containers:
-ifndef NAMESPACE
-$(error NAMESPACE is not defined)
-endif
 	@kubectl get pods -n "$$NAMESPACE" -o json | \
 	  jq -r '.items[] | .metadata.name as $$podname | .spec.containers[] | "\($$podname) \(.name)"' | \
 	  column -t
