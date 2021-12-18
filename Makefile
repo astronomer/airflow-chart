@@ -23,6 +23,5 @@ clean: ## Clean build and test artifacts
 
 .PHONY: update-requirements
 update-requirements: ## Update all requirements.txt files
-	# Once we hit python 3.9 we should go back to using --generate-hashes
-	for FILE in tests/chart_tests/requirements.in tests/functional-tests/requirements.in ; do pip-compile --quiet --allow-unsafe --upgrade $${FILE} ; done ;
+	for FILE in tests/chart_tests/requirements.in tests/functional-tests/requirements.in ; do pip-compile --generate-hashes --quiet --allow-unsafe --upgrade $${FILE} ; done ;
 	-pre-commit run requirements-txt-fixer --all-files --show-diff-on-failure
