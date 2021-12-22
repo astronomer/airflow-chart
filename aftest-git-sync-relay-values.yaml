@@ -1,0 +1,9 @@
+# TEST FILE DELETE BEFORE MERGING
+gitSyncRelay:
+  enabled: True
+
+  repo:
+    url: https://github.com/octocat/Hello-World
+    branch: master
+    depth: 1 # default to a shallow clone because it is faster and this isn't a dev environment
+    wait: 60 # seconds between synchronizations with upstream git repo
