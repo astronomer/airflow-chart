@@ -20,7 +20,7 @@ import sys
 from functools import lru_cache
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import jsonschema
 import requests
@@ -69,11 +69,12 @@ def render_chart(
     name: str = "RELEASE-NAME",
     values: dict = {},
     show_only: list = [],
-    chart_dir: str = None,
-    kube_version: str = "1.18.0",
+    chart_dir: Optional[str] = None,
+    kube_version: str = "1.21.0",
+    namespace: Optional[str] = None,
 ):
     """
-    Render a helm chart into dictionaries. For helm chart testing only
+    Render a helm chart into dictionaries. For helm chart testing only.
     """
     values = values or {}
     chart_dir = chart_dir or sys.path[0]
@@ -91,6 +92,8 @@ def render_chart(
             "--values",
             tmp_file.name,
         ]
+        if namespace:
+            command.extend(["--namespace", namespace])
         if show_only:
             if isinstance(show_only, str):
                 show_only = [show_only]
