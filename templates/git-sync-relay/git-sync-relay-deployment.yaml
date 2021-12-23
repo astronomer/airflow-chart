@@ -18,11 +18,16 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: git-sync-relay
+      component: git-sync-relay
+      tier: airflow
   template:
     metadata:
       labels:
-        app: git-sync-relay
+        component: git-sync-relay
+        tier: airflow
+        release: {{ .Release.Name }}
+        chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+        heritage: {{ .Release.Service }}
     spec:
       securityContext:
         fsGroup: {{ .Values.gitSyncRelay.uid }}
@@ -54,17 +59,20 @@ spec:
               readOnly: true
             - name: git-repo-contents
               mountPath: /git
-        - name: git-server
+        - name: git-daemon
           # This container serves the data pulled from git, via the volume
           # "git-repo-contents".
           # NOTE: apache runs as root to expose port 80, and there's not a
           # trivial flag to change that.  Real servers should not run as root
           # when possible.
-          image: httpd:alpine
+          image: quay.io/astronomer/git-daemon:3.15.0
           volumeMounts:
             - name: git-repo-contents
-              mountPath: /usr/local/apache2/htdocs/
-              readOnly: true # no need to ever write to the volume
+              mountPath: /git
+              readOnly: False
+          env:
+            - name: GIT_ROOT
+              value: /git
         - name: "debug"
           image: quay.io/danielhoherd/uw:latest
           command:
