@@ -373,6 +373,9 @@ authSidecar:
   pullPolicy: IfNotPresent
   port: 8084
 
+loggingSidecar:
+  enabled: false
+
 # Ingress configuration
 ingress:
   # Enable ingress resource
