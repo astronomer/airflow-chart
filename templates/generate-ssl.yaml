@@ -1,0 +1,83 @@
+###########################################
+## Pgbouncer SSL Pre install/update Hook ##
+###########################################
+{{- if (and .Values.airflow.pgbouncer.enabled (eq .Values.airflow.pgbouncer.sslmode "require")) }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-weight": "-2"
+  name: {{ .Release.Name }}-create-secret-role
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list", "create", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-weight": "-2"
+  name: {{ .Release.Name }}-create-secret-role-binding
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-pgbouncer-ssl
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Release.Name }}-create-secret-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-weight": "3"
+  labels:
+    tier: airflow
+    component: pgbouncer
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  name:  {{ .Release.Name }}-pgbouncer-ssl
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-pgbouncerssl-job
+  labels:
+    tier: airflow
+    component: pgbouncer
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook-weight": "5"
+spec:
+  template:
+    metadata:
+      labels:
+        tier: airflow
+        component: pgbouncer
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ .Release.Name }}-pgbouncer-ssl
+      containers:
+        - name: pgbouncercert-genertor
+          image: "{{ .Values.astronomer.images.certgenerator.repository }}:{{ .Values.astronomer.images.certgenerator.tag}}"
+          imagePullPolicy: Always
+          args: [
+            "--hostname={{ .Release.Name }}-pgbouncer.{{ .Release.Name }}.svc.cluster.local",
+            "--secret-name={{ .Release.Name }}-pgbouncer-client-certificates",
+            "--namespace={{ .Release.Namespace }}",
+            "--in-cluster=True"
+          ]
+
+{{ end }}
