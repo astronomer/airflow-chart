@@ -1,3 +1,4 @@
+# Implementation was largely taken from <https://github.com/kubernetes/git-sync/blob/2b471ba2d799/docs/kubernetes.md>
 # TEST FILE DELETE BEFORE MERGING
 gitSyncRelay:
   enabled: True

@@ -2,7 +2,6 @@
 ## git-sync-relay Deployment ##
 ###############################
 {{- if .Values.gitSyncRelay.enabled }}
-# Largely taken from <https://github.com/kubernetes/git-sync/blob/2b471ba2d799/docs/kubernetes.md>
 
 apiVersion: apps/v1
 kind: Deployment
@@ -40,11 +39,6 @@ spec:
             defaultMode: 0400
       containers:
         - name: "git-sync"
-          # This container pulls git data and publishes it into volume
-          # "git-repo-contents".  In that volume you will find a symlink
-          # "current" (see -dest below) which points to a checked-out copy of
-          # the master branch (see -branch) of the repo (see -repo).
-          # NOTE: git-sync already runs as non-root.
           image: "{{ .Values.gitSyncRelay.images.repository }}:{{ .Values.gitSyncRelay.images.tag }}"
           args:
             # https://github.com/kubernetes/git-sync#parameters
@@ -60,11 +54,6 @@ spec:
             - name: git-repo-contents
               mountPath: /git
         - name: git-daemon
-          # This container serves the data pulled from git, via the volume
-          # "git-repo-contents".
-          # NOTE: apache runs as root to expose port 80, and there's not a
-          # trivial flag to change that.  Real servers should not run as root
-          # when possible.
           image: quay.io/astronomer/git-daemon:3.15.0
           volumeMounts:
             - name: git-repo-contents
