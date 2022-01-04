@@ -39,7 +39,7 @@ spec:
             defaultMode: 0400
       containers:
         - name: "git-sync"
-          image: "{{ .Values.gitSyncRelay.images.repository }}:{{ .Values.gitSyncRelay.images.tag }}"
+          image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
           args:
             # https://github.com/kubernetes/git-sync#parameters
             - "--repo={{ .Values.gitSyncRelay.repo.url }}"
@@ -54,17 +54,21 @@ spec:
             - name: git-repo-contents
               mountPath: /git
         - name: git-daemon
-          image: quay.io/astronomer/git-daemon:3.15.0
+          image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
           volumeMounts:
             - name: git-repo-contents
               mountPath: /git
               readOnly: False
           env:
             - name: GIT_ROOT
-              value: /git
+              value: "/git"
         - name: "debug"
           image: quay.io/danielhoherd/uw:latest
           command:
             - /bin/sleep
             - infinity
+          volumeMounts:
+            - name: git-repo-contents
+              mountPath: /git
+              readOnly: False
 {{- end -}}
