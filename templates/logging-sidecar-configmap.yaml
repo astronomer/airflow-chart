@@ -1,3 +1,6 @@
+######################################
+## Logging sidecar configmap        ##
+######################################
 {{- if .Values.loggingSidecar.enabled }}
 kind: ConfigMap
 apiVersion: v1
