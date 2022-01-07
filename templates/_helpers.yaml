@@ -3,6 +3,10 @@
   # Hard Coded Airflow Envs
   - name: ASTRONOMER__AIRFLOW__WORKER_LOG_RETENTION_DAYS
     value: "3"
+  - name: COMPONENT # Checked by entrypoint when sidecar logging is enabled
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.labels['component']
   {{- /*
     Everything below here needs to be kept in sync with the airflow oss chart
   */}}
