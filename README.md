@@ -250,7 +250,7 @@ helm install airflow \
 
 ## Walkthrough using kind
 
-**Install kind, and create a cluster:**
+### Install kind, and create a cluster
 
 We recommend testing with Kubernetes 1.16+, example:
 
@@ -265,14 +265,14 @@ Confirm it's up:
 kubectl cluster-info --context kind-kind
 ```
 
-**Add Astronomer's Helm repo:**
+### Add Astronomer's Helm repo
 
 ```
 helm repo add astronomer https://helm.astronomer.io
 helm repo update
 ```
 
-**Create namespace + install the chart:**
+### Create namespace + install the chart
 
 ```
 kubectl create namespace airflow
@@ -289,7 +289,7 @@ helm list -n airflow
 Run `kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow`
 to port-forward the Airflow UI to http://localhost:8080/ to confirm Airflow is working.
 
-**Build a Docker image from your DAGs:**
+### Build a Docker image from your DAGs
 
 1.  Start a project using [astro-cli](https://github.com/astronomer/astro-cli), which will generate a Dockerfile, and load your DAGs in. You can test locally before pushing to kind with `astro airflow start`.
 
