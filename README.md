@@ -128,7 +128,12 @@ The following tables lists the configurable parameters of the Astronomer chart a
 | `authSidecar.tag`                             | The image tag for the auth sidecar proxy                                                                  | `stable`                      |
 | `authSidecar.pullPolicy`                      | The K8s pullPolicy for the the auth sidecar proxy image                                                   | `IfNotPresent`                |
 | `authSidecar.port`                            | The port the auth sidecar exposes                                                                         | `8084`                        |
-| `gitSyncRelay.enabled`                        | Enables [git sync relay](docs/git-sync-relay.md) feature.                                                 | False                         |
+| `gitSyncRelay.enabled`                        | Enables [git sync relay](docs/git-sync-relay.md) feature.                                                 | `False`                       |
+| `gitSyncRelay.repo.url`                       | Upstream URL to the git repo to clone.                                                                    | `~`                           |
+| `gitSyncRelay.repo.branch`                    | Branch of the upstream git repo to checkout.                                                              | `main`                        |
+| `gitSyncRelay.repo.depth`                     | How many revisions to check out. Leave as default `1` except in dev where history is needed.              | `1`                           |
+| `gitSyncRelay.repo.wait`                      | Seconds to wait before pulling from the upstream remote.                                                  | `60`                          |
+| `gitSyncRelay.repo.subPath`                   | Path to the dags directory within the git repository.                                                     | `~`                           |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 

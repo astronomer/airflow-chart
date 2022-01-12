@@ -419,6 +419,7 @@ gitSyncRelay:
 
   repo:
     url: ~
-    branch: master
+    branch: main
     depth: 1 # default to a shallow clone because it is faster and this isn't a dev environment
     wait: 60 # seconds between synchronizations with upstream git repo
+    subPath: ~ # if your dags dir is not the repo root, specify the path relative to the repo root
