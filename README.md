@@ -96,81 +96,6 @@ helm upgrade my-release . \
   --set images.airflow.tag=8a0da78
 ```
 
-### Deploying DAGs using `git-sync`
-
-`extraContainers`, `extraInitContainers`, `extraVolumes`, and `extraVolumeMounts` can be combined to deploy git-sync. The following example relies on `emptyDir` volumes and works with `KubernetesExecutor`.
-
-```yaml
-env:
-  - name: AIRFLOW__CORE__DAGS_FOLDER
-    value: /usr/local/airflow/dags/latest/airflow/example_dags
-scheduler:
-  extraInitContainers:
-    - name: init-gitsync
-      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
-      imagePullPolicy: IfNotPresent
-      env:
-        - name: GIT_SYNC_REPO
-          value: https://github.com/apache/airflow.git
-        - name: GIT_SYNC_ROOT
-          value: /usr/local/airflow/dags
-        - name: GIT_SYNC_DEST
-          value: latest
-        - name: GIT_SYNC_ONE_TIME
-          value: "true"
-      volumeMounts:
-        - mountPath: /usr/local/airflow/dags
-          name: dags
-          readOnly: false
-  extraContainers:
-    - name: gitsync
-      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
-      imagePullPolicy: IfNotPresent
-      env:
-        - name: GIT_SYNC_REPO
-          value: https://github.com/apache/airflow.git
-        - name: GIT_SYNC_ROOT
-          value: /usr/local/airflow/dags
-        - name: GIT_SYNC_DEST
-          value: latest
-        - name: GIT_SYNC_WAIT
-          value: "10"
-      volumeMounts:
-        - mountPath: /usr/local/airflow/dags
-          name: dags
-          readOnly: false
-  extraVolumeMounts:
-    - name: dags
-      mountPath: /usr/local/airflow/dags
-  extraVolumes:
-    - name: dags
-      emptyDir: {}
-workers:
-  extraInitContainers:
-    - name: gitsync
-      image: k8s.gcr.io/git-sync/git-sync:v3.2.2
-      imagePullPolicy: IfNotPresent
-      env:
-        - name: GIT_SYNC_REPO
-          value: https://github.com/apache/airflow.git
-        - name: GIT_SYNC_ROOT
-          value: /usr/local/airflow/dags
-        - name: GIT_SYNC_DEST
-          value: latest
-        - name: GIT_SYNC_ONE_TIME
-          value: "true"
-      volumeMounts:
-        - mountPath: /usr/local/airflow/dags
-          name: dags
-          readOnly: false
-  extraVolumeMounts:
-    - name: dags
-      mountPath: /usr/local/airflow/dags
-  extraVolumes:
-    - name: dags
-      emptyDir: {}
-```
-
 ## Docker Images
 
 - The Airflow image that are referenced as the default values in this chart are generated from this repository: https://github.com/astronomer/ap-airflow.
@@ -182,27 +107,28 @@ The complete list of parameters supported by the community chart can be found on
 
 The following tables lists the configurable parameters of the Astronomer chart and their default values.
 
-| Parameter                                     | Description                                                                                               | Default                       |     |
-| :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------- | :---------------------------- | :-- |
-| `ingress.enabled`                             | Enable Kubernetes Ingress support                                                                         | `false`                       |     |
-| `ingress.acme`                                | Add acme annotations to Ingress object                                                                    | `false`                       |     |
-| `ingress.tlsSecretName`                       | Name of secret that contains a TLS secret                                                                 | `~`                           |     |
-| `ingress.webserverAnnotations`                | Annotations added to Webserver Ingress object                                                             | `{}`                          |     |
-| `ingress.flowerAnnotations`                   | Annotations added to Flower Ingress object                                                                | `{}`                          |     |
-| `ingress.baseDomain`                          | Base domain for VHOSTs                                                                                    | `~`                           |     |
-| `ingress.auth.enabled`                        | Enable auth with Astronomer Platform                                                                      | `true`                        |     |
-| `workers.autoscaling.enabled`                 | Traditional HorizontalPodAutoscaler                                                                       | `false`                       |     |
-| `workers.autoscaling.minReplicas`             | Minimum amount of workers                                                                                 | `1`                           |     |
-| `workers.autoscaling.maxReplicas`             | Maximum amount of workers                                                                                 | `10`                          |     |
-| `workers.autoscaling.targetCPUUtilization`    | Target CPU Utilization of workers                                                                         | `80`                          |     |
-| `workers.autoscaling.targetMemoryUtilization` | Target Memory Utilization of workers                                                                      | `80`                          |     |
-| `extraObjects`                                | Extra K8s Objects to deploy (these are passed through `tpl`). More about [Extra Objects](#extra-objects). | `[]`                          |     |
-| `sccEnabled`                                  | Enable security context constraints required for OpenShift                                                | `false`                       |     |
-| `authSidecar.enabled`                         | Enable authSidecar                                                                                        | `false`                       |     |
-| `authSidecar.repository`                      | The image for the auth sidecar proxy                                                                      | `nginxinc/nginx-unprivileged` |     |
-| `authSidecar.tag`                             | The image tag for the auth sidecar proxy                                                                  | `stable`                      |     |
-| `authSidecar.pullPolicy`                      | The K8s pullPolicy for the the auth sidecar proxy image                                                   | `IfNotPresent`                |     |
-| `authSidecar.port`                            | The port the auth sidecar exposes                                                                         | `8084`                        |     |
+| Parameter                                     | Description                                                                                               | Default                       |
+| :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------- | :---------------------------- |
+| `ingress.enabled`                             | Enable Kubernetes Ingress support                                                                         | `false`                       |
+| `ingress.acme`                                | Add acme annotations to Ingress object                                                                    | `false`                       |
+| `ingress.tlsSecretName`                       | Name of secret that contains a TLS secret                                                                 | `~`                           |
+| `ingress.webserverAnnotations`                | Annotations added to Webserver Ingress object                                                             | `{}`                          |
+| `ingress.flowerAnnotations`                   | Annotations added to Flower Ingress object                                                                | `{}`                          |
+| `ingress.baseDomain`                          | Base domain for VHOSTs                                                                                    | `~`                           |
+| `ingress.auth.enabled`                        | Enable auth with Astronomer Platform                                                                      | `true`                        |
+| `workers.autoscaling.enabled`                 | Traditional HorizontalPodAutoscaler                                                                       | `false`                       |
+| `workers.autoscaling.minReplicas`             | Minimum amount of workers                                                                                 | `1`                           |
+| `workers.autoscaling.maxReplicas`             | Maximum amount of workers                                                                                 | `10`                          |
+| `workers.autoscaling.targetCPUUtilization`    | Target CPU Utilization of workers                                                                         | `80`                          |
+| `workers.autoscaling.targetMemoryUtilization` | Target Memory Utilization of workers                                                                      | `80`                          |
+| `extraObjects`                                | Extra K8s Objects to deploy (these are passed through `tpl`). More about [Extra Objects](#extra-objects). | `[]`                          |
+| `sccEnabled`                                  | Enable security context constraints required for OpenShift                                                | `false`                       |
+| `authSidecar.enabled`                         | Enable authSidecar                                                                                        | `false`                       |
+| `authSidecar.repository`                      | The image for the auth sidecar proxy                                                                      | `nginxinc/nginx-unprivileged` |
+| `authSidecar.tag`                             | The image tag for the auth sidecar proxy                                                                  | `stable`                      |
+| `authSidecar.pullPolicy`                      | The K8s pullPolicy for the the auth sidecar proxy image                                                   | `IfNotPresent`                |
+| `authSidecar.port`                            | The port the auth sidecar exposes                                                                         | `8084`                        |
+| `gitSyncRelay.enabled`                        | Enables [git sync relay](docs/git-sync-relay.md) feature.                                                 | False                         |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
