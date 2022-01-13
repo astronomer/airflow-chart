@@ -24,12 +24,14 @@ spec:
   - Ingress
   ingress:
   - from:
-    - podSelector:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ .Release.Namespace }}
+      podSelector:
         matchLabels:
           release: {{ .Release.Name }}
           tier: airflow
     ports:
     - protocol: TCP
-      # port: {{ .Values.airflow.dags.gitSync.port }}
-      port: 80
+      port: 9418
 {{- end -}}
