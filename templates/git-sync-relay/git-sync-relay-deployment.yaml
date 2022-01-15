@@ -54,9 +54,13 @@ spec:
             - name: git-secret
               mountPath: /etc/git-secret/ssh
               readOnly: true
+              subPath: gitSshKey
 {{- end }}
             - name: git-repo-contents
               mountPath: /git
+          env:
+            - name: GIT_ROOT
+              value: "/git"
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
           volumeMounts:
@@ -64,8 +68,8 @@ spec:
               mountPath: /git
               readOnly: False
           env:
-            - name: GIT_ROOT
-              value: "/git"
+            - name: GIT_SSH_KEY_FILE
+              value: /etc/git-secret/ssh
         - name: "debug"
           image: quay.io/danielhoherd/uw:latest
           command:
@@ -75,4 +79,10 @@ spec:
             - name: git-repo-contents
               mountPath: /git
               readOnly: False
+{{- if .Values.gitSyncRelay.repo.sshPrivateKey }}
+            - name: git-secret
+              mountPath: /etc/git-secret/ssh
+              readOnly: true
+              subPath: gitSshKey
+{{- end }}
 {{- end -}}
