@@ -33,10 +33,12 @@ spec:
       volumes:
         - name: git-repo-contents
           emptyDir: {}
+{{- if .Values.gitSyncRelay.repo.sshPrivateKey }}
         - name: git-secret
           secret:
             secretName: {{ .Release.Name }}-upstream-git-credentials
-            defaultMode: 0400
+            defaultMode: 0600
+{{- end }}
       containers:
         - name: "git-sync"
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
@@ -48,9 +50,11 @@ spec:
             - "--wait={{ .Values.gitSyncRelay.repo.wait }}"
             - "--root=/git"
           volumeMounts:
+{{- if .Values.gitSyncRelay.repo.sshPrivateKey }}
             - name: git-secret
-              mountPath: /etc/git-secret
+              mountPath: /etc/git-secret/ssh
               readOnly: true
+{{- end }}
             - name: git-repo-contents
               mountPath: /git
         - name: git-daemon

@@ -275,7 +275,7 @@ airflow:
       - emptyDir: {}
         name: logs
       {{- end }}
-      {{- if and  .Values.dags.gitSync.enabled  .Values.dags.gitSync.sshKeySecret }}
+      {{- if and .Values.dags.gitSync.enabled .Values.dags.gitSync.sshKeySecret }}
       {{- include "git_sync_ssh_key_volume" . | nindent 2 }}
       {{- end }}
       - configMap:
@@ -429,3 +429,5 @@ gitSyncRelay:
     depth: 1 # default to a shallow clone because it is faster and this isn't a dev environment
     wait: 60 # seconds between synchronizations with upstream git repo
     subPath: ~ # if your dags dir is not the repo root, specify the path relative to the repo root
+    sshPrivateKey: ~ # Private key that is authorized to clone the upstream repo. Leave blank if not using SSH to connect to upstream.
+    gitSyncTimeout: 300 # How long to wait for the clone or fetch to take before aborting
