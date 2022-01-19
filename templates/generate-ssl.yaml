@@ -70,7 +70,7 @@ spec:
       restartPolicy: Never
       serviceAccountName: {{ .Release.Name }}-pgbouncer-ssl
       containers:
-        - name: pgbouncercert-genertor
+        - name: pgbouncer-certgenerator
           image: "{{ .Values.astronomer.images.certgenerator.repository }}:{{ .Values.astronomer.images.certgenerator.tag}}"
           imagePullPolicy: Always
           args: [
