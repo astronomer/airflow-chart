@@ -32,16 +32,16 @@ airflow:
       tag: 0.18.0
     redis:
       repository: quay.io/astronomer/ap-redis
-      tag: 6.2.5-1
+      tag: 6.2.6
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
-      tag: 1.16.0
+      tag: 1.16.1
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.11.0-2
+      tag: 0.13.0
     gitSync:
-      repository: k8s.gcr.io/git-sync/git-sync
-      tag: v3.3.4
+      repository: quay.io/astronomer/ap-git-sync
+      tag: 3.3.5
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
@@ -372,6 +372,9 @@ authSidecar:
   tag: stable
   pullPolicy: IfNotPresent
   port: 8084
+
+loggingSidecar:
+  enabled: false
 
 # Ingress configuration
 ingress:
