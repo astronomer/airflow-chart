@@ -33,12 +33,12 @@ spec:
       volumes:
         - name: git-repo-contents
           emptyDir: {}
-{{- if .Values.gitSyncRelay.repo.sshPrivateKey }}
         - name: git-secret
           secret:
-            secretName: {{ .Release.Name }}-upstream-git-credentials
-            defaultMode: 0600
-{{- end }}
+            secretName: {{ .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
+        - name: {{ .Release.Name }}-git-sync-config
+          configMap:
+            name: {{ .Release.Name }}-git-sync-config
       containers:
         - name: "git-sync"
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
@@ -50,23 +50,28 @@ spec:
             - "--wait={{ .Values.gitSyncRelay.repo.wait }}"
             - "--root=/git"
           volumeMounts:
-{{- if .Values.gitSyncRelay.repo.sshPrivateKey }}
+            {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: git-secret
               mountPath: /etc/git-secret/ssh
               readOnly: true
               subPath: gitSshKey
             {{- if .Values.gitSyncRelay.repo.knownHosts }}
-            - name: config
+            - name: {{ .Release.Name }}-git-sync-config
               mountPath: /etc/git-secret/known_hosts
               readOnly: true
               subPath: known_hosts
             {{- end }}
-{{- end }}
+            {{- end }}
             - name: git-repo-contents
               mountPath: /git
           env:
             - name: GIT_ROOT
               value: "/git"
+            {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
+            - name: GIT_SYNC_SSH
+              value: "true"
+            - name: GIT_SSH_KEY_FILE
+              value: "/etc/git-secret/ssh"
             {{- if .Values.gitSyncRelay.repo.knownHosts }}
             - name: GIT_KNOWN_HOSTS
               value: "true"
@@ -76,6 +81,7 @@ spec:
             - name: GIT_KNOWN_HOSTS
               value: "false"
             {{- end }}
+            {{- end }}
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
           volumeMounts:
@@ -83,8 +89,8 @@ spec:
               mountPath: /git
               readOnly: False
           env:
-            - name: GIT_SSH_KEY_FILE
-              value: /etc/git-secret/ssh
+            - name: GIT_ROOT
+              value: /git
         - name: "debug"
           image: quay.io/danielhoherd/uw:latest
           command:
@@ -94,16 +100,16 @@ spec:
             - name: git-repo-contents
               mountPath: /git
               readOnly: False
-{{- if .Values.gitSyncRelay.repo.sshPrivateKey }}
+            {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: git-secret
               mountPath: /etc/git-secret/ssh
               readOnly: true
               subPath: gitSshKey
             {{- if .Values.gitSyncRelay.repo.knownHosts }}
-            - name: config
+            - name: {{ .Release.Name }}-git-sync-config
               mountPath: /etc/git-secret/known_hosts
               readOnly: true
               subPath: known_hosts
             {{- end }}
-{{- end }}
+            {{- end }}
 {{- end -}}
