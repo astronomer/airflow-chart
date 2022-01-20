@@ -72,7 +72,7 @@ spec:
       containers:
         - name: pgbouncer-certgenerator
           image: "{{ .Values.astronomer.images.certgenerator.repository }}:{{ .Values.astronomer.images.certgenerator.tag}}"
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           args: [
             "--hostname={{ .Release.Name }}-pgbouncer.{{ .Release.Name }}.svc.cluster.local",
             "--secret-name={{ .Release.Name }}-pgbouncer-client-certificates",
