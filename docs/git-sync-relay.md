@@ -18,4 +18,9 @@ gitSyncRelay:
     depth: 1 # default to a shallow clone because it is faster, though it sacrifices git history
     wait: 60 # seconds between synchronizations with upstream git repo
     subPath: dags # if your dags dir is not the repo root, specify the path relative to the repo root
+    sshPrivateKeySecretName: theGitSshPrivateKeyName # The name of a secret that holds the private key.
 ```
+
+## Non-helm setup
+
+When using this chart outside of Astronomer, for instance when testing or developing, if you are authenticating the git-sync-relay using ssh, you must manage a kubernetes secret that contains the ssh key. This is not managed by helm so that it is never stored in plaintext in the houston database. This is standard practice for any fields that can contain credentials, such as environment variables. This is also how it is implemented in the OSS helm chart <https://github.com/apache/airflow/blob/c8e6e5d52f999e9f/chart/values.yaml#L1493-L1511>

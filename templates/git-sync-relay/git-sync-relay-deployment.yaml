@@ -55,12 +55,27 @@ spec:
               mountPath: /etc/git-secret/ssh
               readOnly: true
               subPath: gitSshKey
+            {{- if .Values.gitSyncRelay.repo.knownHosts }}
+            - name: config
+              mountPath: /etc/git-secret/known_hosts
+              readOnly: true
+              subPath: known_hosts
+            {{- end }}
 {{- end }}
             - name: git-repo-contents
               mountPath: /git
           env:
             - name: GIT_ROOT
               value: "/git"
+            {{- if .Values.gitSyncRelay.repo.knownHosts }}
+            - name: GIT_KNOWN_HOSTS
+              value: "true"
+            - name: GIT_SSH_KNOWN_HOSTS_FILE
+              value: "/etc/git-secret/known_hosts"
+            {{- else }}
+            - name: GIT_KNOWN_HOSTS
+              value: "false"
+            {{- end }}
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
           volumeMounts:
@@ -84,5 +99,11 @@ spec:
               mountPath: /etc/git-secret/ssh
               readOnly: true
               subPath: gitSshKey
+            {{- if .Values.gitSyncRelay.repo.knownHosts }}
+            - name: config
+              mountPath: /etc/git-secret/known_hosts
+              readOnly: true
+              subPath: known_hosts
+            {{- end }}
 {{- end }}
 {{- end -}}
