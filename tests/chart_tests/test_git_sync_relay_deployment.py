@@ -46,13 +46,13 @@ class TestGitSyncRelayDeployment:
             "gitSyncRelay": {
                 "enabled": True,
                 "repo": {
-                    "url": "git@github.com:astronomer/astronomer.git",
-                    "branch": "git-sync-test",
-                    "depth": 1,
-                    "wait": 60,
-                    "subPath": "dags",
-                    "sshPrivateKeySecretName": "git-sync-ssh-key",
-                    "knownHosts": "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl\ngitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf\n",
+                    "url": "not-the-default-url",
+                    "branch": "not-the-default-branch",
+                    "depth": 22,
+                    "wait": 333,
+                    "subPath": "not-the-default-subPath",
+                    "sshPrivateKeySecretName": "not-the-default-ssh-key-secret-name",
+                    "knownHosts": "not-the-default-knownHosts",
                 },
             }
         }
@@ -70,10 +70,54 @@ class TestGitSyncRelayDeployment:
         c_by_name = {
             c["name"]: c for c in doc["spec"]["template"]["spec"]["containers"]
         }
+
         assert len(c_by_name) == 2
+        assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-repo-contents", "emptyDir": {}},
+            {
+                "name": "git-secret",
+                "secret": {"secretName": "not-the-default-ssh-key-secret-name"},
+            },
+            {
+                "name": "RELEASE-NAME-git-sync-config",
+                "configMap": {"name": "RELEASE-NAME-git-sync-config"},
+            },
+        ]
         assert c_by_name["git-sync"]["image"].startswith(
             "quay.io/astronomer/ap-git-sync:"
         )
         assert c_by_name["git-daemon"]["image"].startswith(
             "quay.io/astronomer/ap-git-daemon:"
         )
+        assert c_by_name["git-sync"]["volumeMounts"] == [
+            {
+                "name": "git-secret",
+                "mountPath": "/etc/git-secret/ssh",
+                "readOnly": True,
+                "subPath": "gitSshKey",
+            },
+            {
+                "name": "RELEASE-NAME-git-sync-config",
+                "mountPath": "/etc/git-secret/known_hosts",
+                "readOnly": True,
+                "subPath": "known_hosts",
+            },
+            {"name": "git-repo-contents", "mountPath": "/git"},
+        ]
+        assert c_by_name["git-sync"]["env"] == [
+            {"name": "GIT_ROOT", "value": "/git"},
+            {"name": "GIT_SYNC_SSH", "value": "true"},
+            {"name": "GIT_SSH_KEY_FILE", "value": "/etc/git-secret/ssh"},
+            {"name": "GIT_KNOWN_HOSTS", "value": "true"},
+            {
+                "name": "GIT_SSH_KNOWN_HOSTS_FILE",
+                "value": "/etc/git-secret/known_hosts",
+            },
+        ]
+        assert c_by_name["git-sync"]["args"] == [
+            "--repo=not-the-default-url",
+            "--branch=not-the-default-branch",
+            "--depth=22",
+            "--wait=333",
+            "--root=/git",
+        ]
