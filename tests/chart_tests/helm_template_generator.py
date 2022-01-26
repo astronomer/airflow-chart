@@ -91,6 +91,9 @@ def render_chart(
             tmp_file.name,
         ]
         if show_only:
+            if isinstance(show_only, str):
+                show_only = [show_only]
+
             for i in show_only:
                 if not Path(i).exists():
                     raise FileNotFoundError(f"ERROR: {i} not found")
