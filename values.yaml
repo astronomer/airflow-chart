@@ -411,3 +411,9 @@ ingress:
 
 platform:
   release: ~
+
+astronomer:
+  images:
+    certgenerator:
+      repository: quay.io/astronomer/ap-certgenerator
+      tag: 0.1.0
