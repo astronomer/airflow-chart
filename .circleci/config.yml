@@ -21,7 +21,7 @@ workflows:
           matrix:
             parameters:
               # https://hub.docker.com/r/kindest/node/tags
-              kube_version: ["1.18.19", "1.19.11", "1.20.7", "1.21.2"]
+              kube_version: ["1.19.11", "1.20.7", "1.21.2"]
               executor: ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
           requires:
             - build-and-release-internal
@@ -49,7 +49,7 @@ workflows:
 jobs:
   run_pre_commit:
     docker:
-      - image: quay.io/astronomer/ci-pre-commit:2021-12
+      - image: quay.io/astronomer/ci-pre-commit:2022-01
     steps:
       - checkout
       - run:
@@ -84,7 +84,7 @@ jobs:
 
   unittest-charts:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-12
+      - image: quay.io/astronomer/ci-helm-release:2022-01
     steps:
       - checkout
       - run:
@@ -93,7 +93,7 @@ jobs:
 
   build-and-release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-12
+      - image: quay.io/astronomer/ci-helm-release:2022-01
     steps:
       - checkout
       - run:
@@ -115,7 +115,7 @@ jobs:
         default: "LocalExecutor"
       kube_version:
         type: string
-        default: "1.18.19"
+        default: "1.21.2"
     steps:
       - attach_workspace:
           at: /tmp/workspace
@@ -133,7 +133,7 @@ jobs:
 
   release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-12
+      - image: quay.io/astronomer/ci-helm-release:2022-01
     steps:
       - checkout
       - run:
@@ -142,7 +142,7 @@ jobs:
 
   release-public:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-12
+      - image: quay.io/astronomer/ci-helm-release:2022-01
     steps:
       - checkout
       - publish-github-release
