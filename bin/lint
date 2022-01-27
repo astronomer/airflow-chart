@@ -8,5 +8,6 @@ set -e
 # before we do 'helm lint'
 rm -rf /tmp/airflow-chart-lint/ || true
 mkdir -p /tmp/airflow-chart-lint
+helm dependency update
 cp -R . /tmp/airflow-chart-lint/airflow
 helm lint /tmp/airflow-chart-lint/airflow
