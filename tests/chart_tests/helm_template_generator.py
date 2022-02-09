@@ -70,12 +70,14 @@ def render_chart(
     show_only=None,
     chart_dir=None,
     kube_version="1.21.0",
+    namespace=None,
 ):
     """
     Render a helm chart into dictionaries. For helm chart testing only
     """
     values = values or {}
     chart_dir = chart_dir or sys.path[0]
+    namespace = namespace or "default"
     with NamedTemporaryFile() as tmp_file:
         content = yaml.dump(values)
         tmp_file.write(content.encode())
@@ -89,6 +91,9 @@ def render_chart(
             chart_dir,
             "--values",
             tmp_file.name,
+            "--namespace",
+            namespace,
+
         ]
         if show_only:
             if isinstance(show_only, str):
