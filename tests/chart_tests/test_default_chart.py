@@ -9,6 +9,6 @@ def test_default_chart_with_basedomain():
 
 
 @pytest.mark.parametrize("namespace", ["abc", "123", "123abc", "123-abc"])
-def test_namespace_names(self, namespace):
+def test_namespace_names(namespace):
     """Test various namespace names to make sure they render correctly in templates"""
     render_chart(namespace=namespace)
