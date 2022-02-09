@@ -1,5 +1,6 @@
-from tests.chart_tests.helm_template_generator import render_chart
 import pytest
+
+from tests.chart_tests.helm_template_generator import render_chart
 
 
 def test_default_chart_with_basedomain():
