@@ -59,7 +59,7 @@ def create_validator(api_version, kind, kube_version="1.21.0"):
 
 def validate_k8s_object(instance, kube_version="1.21.0"):
     """Validate the k8s object."""
-    # Skip PostgreSQL chart
+    # Skip PostgreSQL chart because it doesn't pass kubernetes json schema validation
     labels = jmespath.search("metadata.labels", instance) or {}
     if "helm.sh/chart" in labels:
         chart = labels["helm.sh/chart"]
