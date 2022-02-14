@@ -22,6 +22,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, Dict, Optional, Tuple
 
+import jmespath
 import jsonschema
 import requests
 import yaml
@@ -58,6 +59,14 @@ def create_validator(api_version, kind, kube_version="1.21.0"):
 
 def validate_k8s_object(instance, kube_version="1.21.0"):
     """Validate the k8s object."""
+    # Skip PostgreSQL chart because it doesn't pass kubernetes json schema validation with all-numeric namespace
+    labels = jmespath.search("metadata.labels", instance) or {}
+    if "helm.sh/chart" in labels:
+        chart = labels["helm.sh/chart"]
+    else:
+        chart = labels.get("chart")
+    if chart and "postgresql" in chart:
+        return
     validate = create_validator(
         instance.get("apiVersion"), instance.get("kind"), kube_version=kube_version
     )
@@ -78,6 +87,7 @@ def render_chart(
     """
     values = values or {}
     chart_dir = chart_dir or sys.path[0]
+    namespace = namespace or "default"
     with NamedTemporaryFile() as tmp_file:
         content = yaml.dump(values)
         tmp_file.write(content.encode())
@@ -91,6 +101,8 @@ def render_chart(
             chart_dir,
             "--values",
             tmp_file.name,
+            "--namespace",
+            namespace,
         ]
         if namespace:
             command.extend(["--namespace", namespace])
