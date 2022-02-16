@@ -49,7 +49,7 @@ workflows:
 jobs:
   run_pre_commit:
     docker:
-      - image: quay.io/astronomer/ci-pre-commit:2021-11
+      - image: quay.io/astronomer/ci-pre-commit:2022-01
     steps:
       - checkout
       - run:
@@ -84,7 +84,7 @@ jobs:
 
   unittest-charts:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-11
+      - image: quay.io/astronomer/ci-helm-release:2022-01
     steps:
       - checkout
       - run:
@@ -93,7 +93,7 @@ jobs:
 
   build-and-release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2021-11
+      - image: quay.io/astronomer/ci-helm-release:2022-01
     steps:
       - checkout
       - run:
@@ -107,7 +107,7 @@ jobs:
   airflow-test:
     machine:
       # https://circleci.com/docs/2.0/configuration-reference/#available-machine-images
-      image: ubuntu-2004:202107-02
+      image: ubuntu-2004:202111-01
       resource_class: large
     parameters:
       executor:
@@ -123,7 +123,7 @@ jobs:
       - run:
           name: Install Airflow chart
           command: |
-            pyenv global 3.9.4
+            pyenv global 3.9.7
             export KUBE_VERSION=<< parameters.kube_version >>
             export EXECUTOR=<< parameters.executor >>
             HELM_CHART_PATH=$(find /tmp/workspace/ -name 'airflow-*.tgz')
