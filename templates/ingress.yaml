@@ -46,24 +46,30 @@ spec:
       http:
         paths:
           - path: /{{ .Release.Name }}/airflow
+            pathType: Prefix
             backend:
-              serviceName: {{ .Release.Name }}-webserver
-              {{- if .Values.authSidecar.enabled  }}
-              servicePort: auth-proxy
-              {{- else }}
-              servicePort: airflow-ui
-              {{- end }}
+              service:
+                name: {{ .Release.Name }}-webserver
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: airflow-ui
+                  {{- end }}
     - host: {{- include "airflow_subdomain" . | indent 1 }}
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: {{ .Release.Name }}-webserver
-              {{- if .Values.authSidecar.enabled  }}
-              servicePort: auth-proxy
-              {{- else }}
-              servicePort: airflow-ui
-              {{- end }}
+              service:
+                name: {{ .Release.Name }}-webserver
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: airflow-ui
+                  {{- end }}
 {{- end }}
 {{- if and .Values.ingress.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
 ---
@@ -111,24 +117,33 @@ spec:
         paths:
           {{- if .Values.authSidecar.enabled  }}
           - path: /{{ .Release.Name }}/flower
+            pathType: Prefix
             backend:
-              serviceName: {{ .Release.Name }}-flower
-              servicePort: auth-proxy
+              service:
+                name: {{ .Release.Name }}-flower
+                port:
+                  name: auth-proxy
           {{- else }}
           - path: /{{ .Release.Name }}/flower(/|$)(.*)
+            pathType: Prefix
             backend:
-              serviceName: {{ .Release.Name }}-flower
-              servicePort: flower-ui
-          {{- end }}
+              service:
+                name: {{ .Release.Name }}-flower
+                port:
+                  name: flower-ui
+          {{ end }}
     - host: {{- include "flower_subdomain" . | indent 1 }}
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: {{ .Release.Name }}-flower
-              {{- if .Values.authSidecar.enabled  }}
-              servicePort: auth-proxy
-              {{- else }}
-              servicePort: flower-ui
-              {{- end }}
+              service:
+                name: {{ .Release.Name }}-flower
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: flower-ui
+                  {{- end }}
 {{- end }}
