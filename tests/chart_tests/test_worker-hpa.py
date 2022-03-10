@@ -6,7 +6,7 @@ from .. import supported_k8s_versions
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
-class TestWorkerHPA:
+class TestWorkerHpa:
     def test_worker_hpa_defaults(self, kube_version):
         """Test worker hpa with defaults - disabled."""
         docs = render_chart(
