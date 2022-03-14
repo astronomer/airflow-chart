@@ -1,3 +1,6 @@
+###########################################
+## Airflow SecurityContextConstraints    ##
+###########################################
 {{- if .Values.sccEnabled }}
 apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
