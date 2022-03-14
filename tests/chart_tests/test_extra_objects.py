@@ -1,36 +1,45 @@
-# follow up to https://github.com/astronomer/airflow-chart/pull/301/files
-# suite: Test templates/extra-objects.yaml
-#  templates:
-#    - templates/extra-objects.yaml
-#  tests:
-#    - it: should be empty be default
-#      asserts:
-#        - hasDocuments:
-#            count: 0
-#    - it: should add extra objects
-#      set:
-#        something: world
-#        extraObjects:
-#          - name: "hello {{ .Values.something }}"
-#            another:
-#              something: yes
-#      asserts:
-#        - hasDocuments:
-#            count: 1
-#        - equal:
-#            path: name
-#            value: "hello world"
-#        - equal:
-#            path: another.something
-#            value: yes
-#    - it: should handle multiples
-#      set:
-#        extraObjects:
-#          - name: hello
-#            another:
-#              something: yes
-#          - name: number2
-#      asserts:
-#        - hasDocuments:
-#            count: 2
-#        # and further testing with documentId appears to be broken :(
+import json
+
+import pytest
+
+from tests.chart_tests.helm_template_generator import render_chart
+
+from .. import supported_k8s_versions
+
+
+@pytest.mark.parametrize("kube_version", supported_k8s_versions)
+class TestExtraObjects:
+    def test_extra_objects_defaults(self, kube_version):
+        """Test that extra-objects works as default."""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={},
+            show_only="templates/extra-objects.yaml",
+        )
+        assert False
+        assert len(docs) == 0
+
+    def test_extra_objects_configured(self, kube_version):
+        """Test that extra-objects works as default."""
+
+        eo1 = json.loads(
+            """{"apiVersion": "networking.k8s.io/v1", "kind": "Ingress", "metadata":
+            {"name": "minimal-ingress", "annotations": {"nginx.ingress.kubernetes.io/rewrite-target": "/"}},
+            "spec": {"ingressClassName": "nginx-example", "rules": [{"http": {"paths": [{"path": "/testpath",
+            "pathType": "Prefix", "backend": {"service": {"name": "test", "port": {"number": 80}}}}]}}]}}"""
+        )
+        eo2 = json.loads(
+            """{"apiVersion":"storage.k8s.io/v1","kind":"StorageClass","metadata":
+            {"name":"gluster-vol-default"},"provisioner":"kubernetes.io/glusterfs","parameters":
+            {"resturl":"http://192.168.10.100:8080","restuser":"","secretNamespace":"","secretName":""},
+            "allowVolumeExpansion":true}"""
+        )
+
+        docs = render_chart(
+            kube_version=kube_version,
+            values={"extraObjects": [eo1, eo2]},
+            show_only="templates/extra-objects.yaml",
+        )
+        assert len(docs) == 2
+        assert eo1 in docs
+        assert eo2 in docs
