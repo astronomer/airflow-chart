@@ -86,6 +86,8 @@ jobs:
     docker:
       - image: quay.io/astronomer/ci-helm-release:2022-03
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - run:
           name: unittest the Airflow chart
