@@ -1,5 +1,6 @@
-docker==4.1.0
-kubernetes==11.0.0
-pre-commit==2.4.0
-pytest==6.0.1
-testinfra==3.2.1
+docker
+kubernetes
+pdbpp
+pre-commit
+pytest
+pytest-testinfra
