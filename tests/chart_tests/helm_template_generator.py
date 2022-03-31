@@ -74,7 +74,7 @@ def validate_k8s_object(instance, kube_version="1.21.0"):
 
 
 def render_chart(
-    name="RELEASE-NAME",
+    name="release-name",
     values=None,
     show_only=None,
     chart_dir=None,
