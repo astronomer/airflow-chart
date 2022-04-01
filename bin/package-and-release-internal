@@ -36,10 +36,10 @@ else
   sed -i "s#^description: .*#description: $(date "+%FT%T%z") ${short_git_url} ${CIRCLE_BRANCH} ${CIRCLE_BUILD_URL}#" airflow/Chart.yaml
 fi
 
-helm3 package airflow --dependency-update --app-version "${app_version}" "${extra_args[@]}"
+helm package airflow --dependency-update --app-version "${app_version}" "${extra_args[@]}"
 
 curl -sSLo "index-orig.yaml" https://${helm_repo}/index.yaml
-helm3 repo index . --url "https://${helm_repo}" --merge "index-orig.yaml"
+helm repo index . --url "https://${helm_repo}" --merge "index-orig.yaml"
 
 gsutil cp "${filename}" "gs://${helm_repo}/"
 gsutil -h "Cache-Control: public, max-age=60" cp index.yaml "gs://${helm_repo}/"
