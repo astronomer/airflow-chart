@@ -136,7 +136,8 @@ jobs:
             export HELM_CHART_PATH
             bin/install-ci-tools
             bin/run-ci
-
+      - store_test_results:
+          path: test-results
   release-internal:
     docker:
       - image: quay.io/astronomer/ci-helm-release:2022-04
