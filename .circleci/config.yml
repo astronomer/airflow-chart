@@ -91,7 +91,11 @@ jobs:
       - checkout
       - run:
           name: unittest the Airflow chart
-          command: make unittest-chart
+          command: |
+            mkdir test-results
+            make unittest-chart
+      - store_test_results:
+          path: test-results
 
   build-and-release-internal:
     docker:
