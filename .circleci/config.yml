@@ -86,10 +86,16 @@ jobs:
     docker:
       - image: quay.io/astronomer/ci-helm-release:2022-04
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - run:
           name: unittest the Airflow chart
-          command: make unittest-chart
+          command: |
+            mkdir test-results
+            make unittest-chart
+      - store_test_results:
+          path: test-results
 
   build-and-release-internal:
     docker:
@@ -130,7 +136,8 @@ jobs:
             export HELM_CHART_PATH
             bin/install-ci-tools
             bin/run-ci
-
+      - store_test_results:
+          path: test-results
   release-internal:
     docker:
       - image: quay.io/astronomer/ci-helm-release:2022-04

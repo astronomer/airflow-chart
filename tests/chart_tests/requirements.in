@@ -9,6 +9,7 @@ pdbpp
 pytest
 pytest-forked
 pytest-profiling
+pytest-rerunfailures
 pytest-sugar
 pytest-testinfra
 pytest-xdist
