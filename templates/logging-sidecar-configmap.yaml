@@ -18,7 +18,7 @@ data:
     sources:
       generate_syslog:
         type: file
-        include: 
+        include:
           - #{ENV['SIDECAR_LOGS_DIR']}/*.log
         read_from: beginning
     sinks:
@@ -28,7 +28,7 @@ data:
           - generate_syslog
         mode: bulk
         compression: none
-        endpoint: "http://{{.Values.loggingSidecar.enabled}}:9200"
+        endpoint: "http://{{.Values.loggingSidecar.host}}:{{ .Values.loggingSidecar.port }}"
         auth:
           strategy: "basic"
           user: {{ .Values.loggingSidecar.user }}
