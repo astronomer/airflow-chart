@@ -14,7 +14,7 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   vector-config.yaml: |
-    data_dir = "#{ENV['SIDECAR_LOGS_DIR']}"
+    data_dir : #{ENV['SIDECAR_LOGS_DIR']}
     sources:
       generate_syslog:
         type: file
