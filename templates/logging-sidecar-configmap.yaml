@@ -5,7 +5,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ .Release.Name }}-logging-sidecar
+  name: sidecar-logging
   labels:
     tier: airflow
     component: logging-sidecar
@@ -13,86 +13,25 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
 data:
-  main.conf: |-
-    <source>
-      @id unstructured-logging
-      @type tcp
-      tag tcp.events
-      bind 127.0.0.1
-      port 5170
-      <parse>
-        @type regexp
-        expression /(?<version>[^ ]+) (?<logtime>[^ ]+) (?<stream>[^ ]+) (?<component>[^ ]+) (?<message>.*)/
-      </parse>
-    </source>
+  vector-config.yaml: |
+    data_dir = "#{ENV['SIDECAR_LOGS_DIR']}"
+    sources:
+      generate_syslog:
+        type: file
+        include: 
+          - #{ENV['SIDECAR_LOGS_DIR']}/*.log
+        read_from: beginning
+    sinks:
+      out:
+        type: elasticsearch
+        inputs:
+          - generate_syslog
+        mode: bulk
+        compression: none
+        endpoint: "http://{{.Values.loggingSidecar.enabled}}:9200"
+        auth:
+          strategy: "basic"
+          user: {{ .Values.loggingSidecar.user }}
+          password : {{ .Values.loggingSidecar.password }}
 
-    <filter tcp.events>
-      @type record_transformer
-      enable_ruby
-      renew_record
-      <record>
-        workspace "#{ENV['WORKSPACE']}"
-        release "#{ENV['RELEASE']}"
-        logtime ${record["logtime"]}
-        component ${record["component"]}
-        stream ${record["stream"]}
-        message ${record["message"]}
-      </record>
-      <inject>
-        time_key @logtime
-        time_type unixtime_nanos
-      </inject>
-    </filter>
-
-    <match tcp.events>
-      @type rewrite_tag_filter
-      <rule>
-        key release
-        pattern /^(.+)/
-        tag airflow.$1
-      </rule>
-    </match>
-
-    <match airflow.*>
-      @type rewrite_tag_filter
-      <rule>
-        key component
-        pattern /^(.+)/
-        tag ${tag}.$1
-      </rule>
-    </match>
-
-    <match airflow.**>
-      @type copy
-      <store>
-        @id elasticsearch
-        @type elasticsearch_dynamic
-        @log_level info
-        include_timestamp true
-        reconnect_on_error true
-        reload_on_failure true
-        reload_connections false
-        request_timeout 120s
-        suppress_type_name true
-        host "#{ENV['OUTPUT_HOST']}"
-        port "#{ENV['OUTPUT_PORT']}"
-        index_name fluentd.${record["release"]}.${Time.at(time).getutc.strftime(@logstash_dateformat)}
-        <buffer>
-          @type file
-          path "/tmp/buffer"
-          flush_mode interval
-          retry_type exponential_backoff
-          flush_thread_count 2
-          flush_interval 5s
-          retry_forever
-          retry_max_interval 30
-          chunk_limit_size "#{ENV['OUTPUT_BUFFER_CHUNK_LIMIT']}"
-          queue_limit_length "#{ENV['OUTPUT_BUFFER_QUEUE_LIMIT']}"
-          overflow_action block
-        </buffer>
-        #<buffer>
-        #  @type memory
-        #</buffer>
-      </store>
-    </match>
 {{- end }}
