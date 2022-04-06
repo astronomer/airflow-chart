@@ -28,7 +28,7 @@ data:
           - generate_syslog
         mode: bulk
         compression: none
-        endpoint: "http://{{.Values.loggingSidecar.host}}:{{ .Values.loggingSidecar.port }}"
+        endpoint: "http://{{ .Values.loggingSidecar.host }}:{{ .Values.loggingSidecar.port }}"
         auth:
           strategy: "basic"
           user: {{ .Values.loggingSidecar.user }}
