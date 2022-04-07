@@ -5,7 +5,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: sidecar-logging
+  name: sidecar-config
   labels:
     tier: airflow
     component: logging-sidecar
@@ -28,10 +28,14 @@ data:
           - generate_syslog
         mode: bulk
         compression: none
-        endpoint: "http://{{ .Values.loggingSidecar.host }}:{{ .Values.loggingSidecar.port }}"
+      {{- if .Values.airflow.elasticsearch.enabled  }}
+        endpoint: "http://{{ .Values.airflow.elasticsearch.connection.host }}:{{ .Values.airflow.elasticsearch.connection.port }}"
         auth:
           strategy: "basic"
-          user: {{ .Values.loggingSidecar.user }}
-          password : {{ .Values.loggingSidecar.password }}
+          user: {{ .Values.airflow.elasticsearch.connection.user }}
+          password : {{ .Values.airflow.elasticsearch.connection.password }}
+      {{ else }}
+      # TODO - confirm what needs to be done incase ES config disabled and not provided
+      {{- end }}
 
 {{- end }}
