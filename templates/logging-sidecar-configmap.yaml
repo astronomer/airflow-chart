@@ -14,18 +14,27 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   vector-config.yaml: |
-    data_dir : #{ENV['SIDECAR_LOGS_DIR']}
+    data_dir: "${SIDECAR_LOGS}"
     sources:
       generate_syslog:
         type: file
         include:
-          - #{ENV['SIDECAR_LOGS_DIR']}/*.log
+          - "${SIDECAR_LOGS}/*.log"
         read_from: beginning
+    transforms:
+      transform_syslog:
+        type: add_fields
+        inputs: 
+          - generate_syslog
+        fields:
+          component: "${COMPONENT:--}"
+          workspace: "${WORKSPACE:--}"
+          release: "${RELEASE:--}"
     sinks:
       out:
         type: elasticsearch
         inputs:
-          - generate_syslog
+          - transform_syslog
         mode: bulk
         compression: none
       {{- if .Values.airflow.elasticsearch.enabled  }}
