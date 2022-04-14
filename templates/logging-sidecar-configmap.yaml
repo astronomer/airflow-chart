@@ -24,7 +24,7 @@ data:
     transforms:
       transform_syslog:
         type: add_fields
-        inputs: 
+        inputs:
           - generate_syslog
         fields:
           component: "${COMPONENT:--}"
