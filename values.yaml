@@ -223,10 +223,6 @@ airflow:
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
           name: base
           ports: []
-          lifecycle:
-            preStop:
-              exec:
-                command: ["/bin/sh","-c","curl -XPOST http://127.0.0.1:8000/quitquitquit"]
           volumeMounts:
             - mountPath: {{ template "airflow_logs" . }}
               name: logs
