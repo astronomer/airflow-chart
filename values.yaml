@@ -226,7 +226,7 @@ airflow:
           lifecycle:
             preStop:
               exec:
-                command: ["/bin/sh","-c","curl http://127.0.0.1:8000/quitquitquit]
+                command: ["/bin/sh","-c","curl -XPOST http://127.0.0.1:8000/quitquitquit"]
           volumeMounts:
             - mountPath: {{ template "airflow_logs" . }}
               name: logs

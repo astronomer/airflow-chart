@@ -43,8 +43,6 @@ data:
           strategy: "basic"
           user: {{ .Values.airflow.elasticsearch.connection.user }}
           password : {{ .Values.airflow.elasticsearch.connection.pass }}
-      {{ else }}
-      # TODO - confirm what needs to be done incase ES config disabled and not provided
       {{- end }}
 
 {{- end }}
