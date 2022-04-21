@@ -223,6 +223,12 @@ airflow:
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
           name: base
           ports: []
+    {{- if .Values.loggingSidecar.enabled }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh","-c","curl http://127.0.0.1:8000/quitquitquit]
+    {{- end }}
           volumeMounts:
             - mountPath: {{ template "airflow_logs" . }}
               name: logs
@@ -374,7 +380,8 @@ authSidecar:
   port: 8084
 
 loggingSidecar:
-  enabled: false
+  enabled: true
+  name: sidecar-logging-consumer
 
 # Ingress configuration
 ingress:
