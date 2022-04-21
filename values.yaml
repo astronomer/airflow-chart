@@ -374,7 +374,7 @@ authSidecar:
   port: 8084
 
 loggingSidecar:
-  enabled: true
+  enabled: false
   name: sidecar-logging-consumer
 
 # Ingress configuration
