@@ -32,8 +32,7 @@ else
   echo "Doing internal release for CIRCLE_BUILD_NUM $CIRCLE_BUILD_NUM version ${version}"
   filename="airflow-${version}.tgz"
   extra_args=( '--version' "${version}" )
-  short_git_url=$(curl -sS -i https://git.io -F "url=https://github.com/astronomer/airflow-chart/commits/${CIRCLE_SHA1}" | awk '$1 == "Location:" {print $2}')
-  sed -i "s#^description: .*#description: $(date "+%FT%T%z") ${short_git_url} ${CIRCLE_BRANCH} ${CIRCLE_BUILD_URL}#" airflow/Chart.yaml
+  sed -i "s#^description: .*#description: $(date "+%FT%T%z") ${CIRCLE_BRANCH} ${CIRCLE_BUILD_URL} https://github.com/astronomer/airflow-chart/commits/${CIRCLE_SHA1}#" airflow/Chart.yaml
 fi
 
 helm package airflow --dependency-update --app-version "${app_version}" "${extra_args[@]}"
