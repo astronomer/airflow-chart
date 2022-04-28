@@ -29,16 +29,16 @@ airflow:
       tag: ~
     statsd:
       repository: quay.io/astronomer/ap-statsd-exporter
-      tag: 0.18.0
+      tag: 0.22.4
     redis:
       repository: quay.io/astronomer/ap-redis
       tag: 6.2.6
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
-      tag: 1.17.0-1
+      tag: 1.17.0-2
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.13.0-2
+      tag: 0.13.0-3
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
       tag: 3.3.5
