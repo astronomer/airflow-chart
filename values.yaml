@@ -41,7 +41,7 @@ airflow:
       tag: 0.13.0-3
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
-      tag: 3.3.5
+      tag: 3.5.0
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
