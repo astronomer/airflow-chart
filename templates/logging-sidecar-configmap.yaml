@@ -44,5 +44,8 @@ data:
           user: {{ .Values.airflow.elasticsearch.connection.user }}
           password : {{ .Values.airflow.elasticsearch.connection.pass }}
       {{- end }}
+        bulk:
+          index: "vector.${RELEASE:--}.%Y-%m-%d-%s"
+          action: create
 
 {{- end }}
