@@ -8,6 +8,7 @@
 /config.yaml
 /config.yml
 /secrets
+/test-results
 backup
 certs
 dev-account.json
