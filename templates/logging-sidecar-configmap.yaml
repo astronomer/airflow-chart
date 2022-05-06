@@ -32,6 +32,11 @@ data:
           component: "${COMPONENT:--}"
           workspace: "${WORKSPACE:--}"
           release: "${RELEASE:--}"
+      transform_log_id:
+        type: "concat"
+        items: ["dag_id", "task_id", "execution_date"]
+        target = "log_id"
+        joiner = "_"
     sinks:
       out:
         type: elasticsearch
