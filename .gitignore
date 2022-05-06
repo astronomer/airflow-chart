@@ -11,6 +11,7 @@
 /test-results
 backup
 certs
+charts
 dev-account.json
 kubeconfig
 letsencrypt*
