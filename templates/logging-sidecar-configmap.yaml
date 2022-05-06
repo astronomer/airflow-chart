@@ -14,6 +14,8 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   vector-config.yaml: |
+    log_schema:
+      timestamp_key : "@timestamp"
     data_dir: "${SIDECAR_LOGS}"
     sources:
       generate_syslog:
@@ -44,5 +46,8 @@ data:
           user: {{ .Values.airflow.elasticsearch.connection.user }}
           password : {{ .Values.airflow.elasticsearch.connection.pass }}
       {{- end }}
+        bulk:
+          index: "vector.${RELEASE:--}.%Y-%m-%d"
+          action: create
 
 {{- end }}
