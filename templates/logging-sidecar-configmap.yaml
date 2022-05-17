@@ -32,11 +32,31 @@ data:
           component: "${COMPONENT:--}"
           workspace: "${WORKSPACE:--}"
           release: "${RELEASE:--}"
+
+      transform_task_log:
+        type: remap
+        inputs:
+          - transform_syslog
+        source: |-
+          # Parse Syslog input. The "!" means that the script should abort on error.
+          . = parse_json!(.message)
+          .@timestamp = parse_timestamp(.timestamp, "%Y-%m-%dT%H:%M:%S%Z") ?? now()
+          .log_id = join!([.dag_id, .task_id, .execution_date, .try_number], "_")
+          .offset = to_int(to_unix_timestamp(now(), unit: "nanoseconds"))
+
+      transform_remove_fields:
+        type: remove_fields
+        inputs:
+          - transform_task_log
+        fields:
+          - host
+          - file
+
     sinks:
       out:
         type: elasticsearch
         inputs:
-          - transform_syslog
+          - transform_remove_fields
         mode: bulk
         compression: none
       {{- if .Values.airflow.elasticsearch.enabled  }}
