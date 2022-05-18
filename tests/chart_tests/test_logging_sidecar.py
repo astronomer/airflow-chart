@@ -1,4 +1,5 @@
 import pytest
+import yaml
 
 from tests.chart_tests.helm_template_generator import render_chart
 
@@ -26,8 +27,12 @@ class TestLoggingSidecar:
         doc = docs[0]
         assert "ConfigMap" == doc["kind"]
         assert "v1" == doc["apiVersion"]
-        assert "testuser" in doc["data"]["vector-config.yaml"]
-        assert "testpass" in doc["data"]["vector-config.yaml"]
+        assert (vc := yaml.safe_load(doc["data"]["vector-config.yaml"]))
+        assert vc["sinks"]["out"]["auth"] == {
+            "strategy": "basic",
+            "user": "testuser",
+            "password": "testpass",
+        }
 
     def test_logging_sidecar_config_disabled(self, kube_version):
         """Test logging sidecar config with flag disabled"""

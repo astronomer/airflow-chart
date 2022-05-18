@@ -14,9 +14,11 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   vector-config.yaml: |
+    log_schema:
+      timestamp_key : "@timestamp"
     data_dir: "${SIDECAR_LOGS}"
     sources:
-      generate_syslog:
+      airflow_log_files:
         type: file
         include:
           - "${SIDECAR_LOGS}/*.log"
@@ -25,16 +27,36 @@ data:
       transform_syslog:
         type: add_fields
         inputs:
-          - generate_syslog
+          - airflow_log_files
         fields:
           component: "${COMPONENT:--}"
           workspace: "${WORKSPACE:--}"
           release: "${RELEASE:--}"
+
+      transform_task_log:
+        type: remap
+        inputs:
+          - transform_syslog
+        source: |-
+          # Parse Syslog input. The "!" means that the script should abort on error.
+          . = parse_json!(.message)
+          .@timestamp = parse_timestamp(.timestamp, "%Y-%m-%dT%H:%M:%S%Z") ?? now()
+          .log_id = join!([.dag_id, .task_id, .execution_date, .try_number], "_")
+          .offset = to_int(now()) * 1000000000 + to_unix_timestamp(now()) * 1000000
+
+      transform_remove_fields:
+        type: remove_fields
+        inputs:
+          - transform_task_log
+        fields:
+          - host
+          - file
+
     sinks:
       out:
         type: elasticsearch
         inputs:
-          - transform_syslog
+          - transform_remove_fields
         mode: bulk
         compression: none
       {{- if .Values.airflow.elasticsearch.enabled  }}
@@ -44,5 +66,8 @@ data:
           user: {{ .Values.airflow.elasticsearch.connection.user }}
           password : {{ .Values.airflow.elasticsearch.connection.pass }}
       {{- end }}
+        bulk:
+          index: "vector.${RELEASE:--}.%Y.%m.%d"
+          action: create
 
 {{- end }}
