@@ -18,7 +18,7 @@ data:
       timestamp_key : "@timestamp"
     data_dir: "${SIDECAR_LOGS}"
     sources:
-      generate_syslog:
+      airflow_log_files:
         type: file
         include:
           - "${SIDECAR_LOGS}/*.log"
@@ -27,7 +27,7 @@ data:
       transform_syslog:
         type: add_fields
         inputs:
-          - generate_syslog
+          - airflow_log_files
         fields:
           component: "${COMPONENT:--}"
           workspace: "${WORKSPACE:--}"
@@ -42,7 +42,7 @@ data:
           . = parse_json!(.message)
           .@timestamp = parse_timestamp(.timestamp, "%Y-%m-%dT%H:%M:%S%Z") ?? now()
           .log_id = join!([.dag_id, .task_id, .execution_date, .try_number], "_")
-          .offset = to_int(to_unix_timestamp(now(), unit: "nanoseconds"))
+          .offset = to_int(now()) * 1000000000 + to_unix_timestamp(now()) * 1000000
 
       transform_remove_fields:
         type: remove_fields
