@@ -21,7 +21,7 @@ workflows:
           matrix:
             parameters:
               # https://hub.docker.com/r/kindest/node/tags
-              kube_version: ["1.19.11", "1.20.7", "1.21.2", "1.22.7", "1.23.4"]
+              kube_version: ["1.19.16", "1.20.15", "1.21.12", "1.22.9", "1.23.6"]
               executor: ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
           requires:
             - build-and-release-internal
