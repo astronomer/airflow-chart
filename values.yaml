@@ -89,12 +89,12 @@ airflow:
       SECURITY_MANAGER_CLASS = AirflowAstroSecurityManager
       {{- end }}
 
-  # Airflow redis settings    
+  # Airflow redis settings
   redis:
-      securityContext:
+    securityContext:
       # Set user to redis:999
-        runAsUser: 999
-        fsGroup: 999
+      runAsUser: 999
+      fsGroup: 999
 
   # Airflow worker settings
   workers:
