@@ -32,7 +32,7 @@ airflow:
       tag: 0.22.4
     redis:
       repository: quay.io/astronomer/ap-redis
-      tag: 6.2.6
+      tag: 6.2.7
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
       tag: 1.17.0-2
@@ -88,6 +88,13 @@ airflow:
       from astronomer.flask_appbuilder.security import AirflowAstroSecurityManager
       SECURITY_MANAGER_CLASS = AirflowAstroSecurityManager
       {{- end }}
+
+  # Airflow redis settings    
+  redis:
+      securityContext:
+      # Set user to redis:999
+        runAsUser: 999
+        fsGroup: 999
 
   # Airflow worker settings
   workers:
