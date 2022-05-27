@@ -335,7 +335,9 @@ airflow:
       elasticsearch_json_format: True
       # "{dag_id}-{task_id}-{run_id}-{map_index}-{try_number}" for airflow >= 2.3.0 ref https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#log-id-template
       # "{dag_id}_{task_id}_{execution_date}_{try_number}" for airflow < 2.3.0
-      elasticsearch_log_id_template: '{{ternary "{dag_id}-{task_id}-{run_id}-{map_index}-{try_number}" "{dag_id}_{task_id}_{execution_date}_{try_number}" (semverCompare ">=2.3.0" .Values.airflowVersion)}}'
+      log_id_template: '{{ternary "{dag_id}-{task_id}-{run_id}-{map_index}-{try_number}" "{dag_id}_{task_id}_{execution_date}_{try_number}" (semverCompare ">=2.3.0" .Values.airflowVersion)}}'
+      # For Airflow <1.10.4
+      elasticsearch_log_id_template: "{dag_id}_{task_id}_{execution_date}_{try_number}"
     # The following kubernetes config is required to support Airflow 1.10.10
     kubernetes:
       dags_in_image: True
