@@ -28,8 +28,6 @@ bin
 CODEOWNERS
 CONTRIBUTING.md
 Makefile
-README.md
-UPDATING.md
 configs
 dev
 tests
