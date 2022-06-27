@@ -383,6 +383,7 @@ authSidecar:
 loggingSidecar:
   enabled: false
   name: sidecar-logging-consumer
+  customConfig: false
 
 # Ingress configuration
 ingress:
