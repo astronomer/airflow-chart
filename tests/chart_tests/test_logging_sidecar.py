@@ -42,3 +42,49 @@ class TestLoggingSidecar:
             show_only="templates/logging-sidecar-configmap.yaml",
         )
         assert len(docs) == 0
+
+    def test_logging_sidecar_custom_config(self, kube_version):
+        """Test logging sidecar config with customConfig flag enabled"""
+        airflowSidecarConfig = """
+  airflowSidecarConfig: |2
+      log_schema:
+        timestamp_key : "@timestamp"
+      data_dir: "${SIDECAR_LOGS}"
+      sources:
+        generate_syslog:
+          type: file
+          include:
+            - "${SIDECAR_LOGS}/*.log"
+          read_from: beginning
+      transforms:
+        transform_syslog:
+          type: add_fields
+          inputs:
+            - generate_syslog
+          fields:
+            component: "${COMPONENT:--}"
+            workspace: "${WORKSPACE:--}"
+            release: "${RELEASE:--}"
+      sinks:
+        out:
+          type: datadog
+          inputs:
+            - transform_syslog
+"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "loggingSidecar": {
+                    "enabled": True,
+                    "customConfig": True,
+                    "airflowSidecarConfig": airflowSidecarConfig,
+                },
+            },
+            show_only="templates/logging-sidecar-configmap.yaml",
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert "ConfigMap" == doc["kind"]
+        assert "v1" == doc["apiVersion"]
+        assert (vc := yaml.safe_load(doc["data"]["vector-config.yaml"]))
+        assert vc["sinks"]["out"]["type"] == "datadog"
