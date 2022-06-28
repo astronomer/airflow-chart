@@ -47,13 +47,13 @@ class TestLoggingSidecar:
 
     def test_logging_sidecar_custom_config(self, kube_version):
         """Test logging sidecar config with customConfig flag enabled"""
-        custom_side_carconfig = textwrap.dedent(
+        test_custom_sidecar_config = textwrap.dedent(
             """
         loggingSidecar:
           enabled: true
           customConfig: true
           name: sidecar-logging-consumer
-          airflowSidecarConfig: |2
+          airflowSidecarConfig: |
               log_schema:
                 timestamp_key : "@timestamp"
               data_dir: "${SIDECAR_LOGS}"
@@ -79,7 +79,7 @@ class TestLoggingSidecar:
                     - transform_syslog
                 """
         )
-        values = yaml.safe_load(custom_side_carconfig)
+        values = yaml.safe_load(test_custom_sidecar_config)
         docs = render_chart(
             kube_version=kube_version,
             values=values,
