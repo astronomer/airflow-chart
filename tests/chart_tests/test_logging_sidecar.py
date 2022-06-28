@@ -54,29 +54,29 @@ class TestLoggingSidecar:
           customConfig: true
           name: sidecar-logging-consumer
           airflowSidecarConfig: |
-              log_schema:
-                timestamp_key : "@timestamp"
-              data_dir: "${SIDECAR_LOGS}"
-              sources:
-                generate_syslog:
-                  type: file
-                  include:
-                    - "${SIDECAR_LOGS}/*.log"
-                  read_from: beginning
-              transforms:
-                transform_syslog:
-                  type: add_fields
-                  inputs:
-                    - generate_syslog
-                  fields:
-                    component: "${COMPONENT:--}"
-                    workspace: "${WORKSPACE:--}"
-                    release: "${RELEASE:--}"
-              sinks:
-                out:
-                  type: datadog
-                  inputs:
-                    - transform_syslog
+            log_schema:
+              timestamp_key : "@timestamp"
+            data_dir: "${SIDECAR_LOGS}"
+            sources:
+              generate_syslog:
+                type: file
+                include:
+                  - "${SIDECAR_LOGS}/*.log"
+                read_from: beginning
+            transforms:
+              transform_syslog:
+                type: add_fields
+                inputs:
+                  - generate_syslog
+                fields:
+                  component: "${COMPONENT:--}"
+                  workspace: "${WORKSPACE:--}"
+                  release: "${RELEASE:--}"
+            sinks:
+              out:
+                type: datadog
+                inputs:
+                  - transform_syslog
                 """
         )
         values = yaml.safe_load(test_custom_sidecar_config)
