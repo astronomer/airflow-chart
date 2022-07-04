@@ -1,7 +1,7 @@
 ######################################
 ## Logging sidecar configmap        ##
 ######################################
-{{- if .Values.loggingSidecar.enabled }}
+{{- if and .Values.loggingSidecar.enabled (not .Values.loggingSidecar.customConfig) }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -14,9 +14,6 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   vector-config.yaml: |
-{{- if .Values.loggingSidecar.customConfig }}
-    {{ tpl .Values.loggingSidecar.airflowSidecarConfig . | nindent 4 }}
-{{- else }}
     log_schema:
       timestamp_key : "@timestamp"
     data_dir: "${SIDECAR_LOGS}"
@@ -75,5 +72,4 @@ data:
         bulk:
           index: "vector.${RELEASE:--}.%Y.%m.%d"
           action: create
-{{- end }}
 {{- end }}
