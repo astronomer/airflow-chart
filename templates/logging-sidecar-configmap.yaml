@@ -1,7 +1,7 @@
 ######################################
 ## Logging sidecar configmap        ##
 ######################################
-{{- if .Values.loggingSidecar.enabled }}
+{{- if and .Values.loggingSidecar.enabled (not .Values.loggingSidecar.customConfig) }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -72,5 +72,4 @@ data:
         bulk:
           index: "vector.${RELEASE:--}.%Y.%m.%d"
           action: create
-
 {{- end }}
