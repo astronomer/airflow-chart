@@ -388,7 +388,6 @@ loggingSidecar:
   enabled: false
   name: sidecar-logging-consumer
   customConfig: false
-  airflowSidecarConfig: ""
 
 # Ingress configuration
 ingress:
