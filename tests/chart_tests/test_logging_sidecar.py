@@ -1,3 +1,5 @@
+import textwrap
+
 import pytest
 import yaml
 
@@ -39,6 +41,24 @@ class TestLoggingSidecar:
         docs = render_chart(
             kube_version=kube_version,
             values={"loggingSidecar": {"enabled": False}},
+            show_only="templates/logging-sidecar-configmap.yaml",
+        )
+        assert len(docs) == 0
+
+    def test_logging_sidecar_custom_config(self, kube_version):
+        """Test logging sidecar config with customConfig flag enabled"""
+        test_custom_sidecar_config = textwrap.dedent(
+            """
+        loggingSidecar:
+          enabled: true
+          customConfig: true
+          name: sidecar-logging-consumer
+            """
+        )
+        values = yaml.safe_load(test_custom_sidecar_config)
+        docs = render_chart(
+            kube_version=kube_version,
+            values=values,
             show_only="templates/logging-sidecar-configmap.yaml",
         )
         assert len(docs) == 0
