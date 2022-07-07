@@ -5,7 +5,7 @@ from tests.chart_tests.helm_template_generator import render_chart
 
 class TestPgbouncerSecret:
     def test_pgbouncer_secret_defaults(self):
-        """Test pgbouncer secret custom server_idle_timeout"""
+        """Test pgbouncer defaults with pgbouncer enabled."""
         doc = render_chart(
             values={
                 "airflow": {
@@ -21,12 +21,13 @@ class TestPgbouncerSecret:
         assert "server_idle_timeout" not in ini
 
     def test_pgbouncer_secret_custom_server_idle_timeout(self):
-        """Test pgbouncer secret custom server_idle_timeout"""
+        """Test pgbouncer secret custom server_idle_timeout."""
         doc = render_chart(
             values={
                 "airflow": {
                     "pgbouncer": {
                         "enabled": True,
+                        "extraIni": "server_idle_timeout = 30",
                     },
                 },
             },
