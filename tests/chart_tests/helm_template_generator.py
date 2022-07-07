@@ -81,12 +81,12 @@ def render_chart(
     namespace=None,
 ):
     """
-    Render a helm chart into dictionaries. For helm chart testing only
+    Render a helm chart into dictionaries. For helm chart testing only.
     """
     values = values or {}
     chart_dir = chart_dir or sys.path[0]
     namespace = namespace or "default"
-    with NamedTemporaryFile() as tmp_file:
+    with NamedTemporaryFile(delete=False) as tmp_file:
         content = yaml.dump(values)
         tmp_file.write(content.encode())
         tmp_file.flush()
@@ -102,9 +102,11 @@ def render_chart(
             "--namespace",
             namespace,
         ]
-        if show_only and isinstance(show_only, str):
-            show_only = [show_only]
-            command.extend(["--show-only", show_only])
+        if show_only:
+            if isinstance(show_only, str):
+                show_only = [show_only]
+            for i in show_only:
+                command.extend(["--show-only", i])
         try:
             templates = subprocess.check_output(command, stderr=subprocess.PIPE)
             if not templates:
