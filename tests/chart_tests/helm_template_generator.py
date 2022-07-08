@@ -86,7 +86,7 @@ def render_chart(
     values = values or {}
     chart_dir = chart_dir or sys.path[0]
     namespace = namespace or "default"
-    with NamedTemporaryFile(delete=False) as tmp_file:
+    with NamedTemporaryFile() as tmp_file:
         content = yaml.dump(values)
         tmp_file.write(content.encode())
         tmp_file.flush()
