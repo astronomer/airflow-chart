@@ -18,7 +18,6 @@
 import subprocess
 import sys
 from functools import lru_cache
-from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, Dict, Tuple
 
@@ -82,7 +81,7 @@ def render_chart(
     namespace=None,
 ):
     """
-    Render a helm chart into dictionaries. For helm chart testing only
+    Render a helm chart into dictionaries. For helm chart testing only.
     """
     values = values or {}
     chart_dir = chart_dir or sys.path[0]
@@ -106,12 +105,8 @@ def render_chart(
         if show_only:
             if isinstance(show_only, str):
                 show_only = [show_only]
-
             for i in show_only:
-                if not Path(i).exists():
-                    raise FileNotFoundError(f"ERROR: {i} not found")
-                else:
-                    command.extend(["--show-only", i])
+                command.extend(["--show-only", i])
         try:
             templates = subprocess.check_output(command, stderr=subprocess.PIPE)
             if not templates:
