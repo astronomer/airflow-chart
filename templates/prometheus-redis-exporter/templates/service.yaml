@@ -1,3 +1,7 @@
+###########################################
+## Redis Exporter Deployment             ##
+###########################################
+{{- if and .Values.astronomer.redisExporter.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -18,3 +22,4 @@ spec:
       protocol: TCP
   selector:
     {{- include "prometheus-redis-exporter.selectorLabels" . | nindent 4 }}
+{{- end }}
