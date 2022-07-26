@@ -426,3 +426,25 @@ astronomer:
     certgenerator:
       repository: quay.io/astronomer/ap-certgenerator
       tag: 0.1.2
+  redisExporter:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: oliver006/redis_exporter
+      tag: v1.27.0
+      pullPolicy: IfNotPresent
+    redisAddress: redis://myredis:6379
+    service:
+      type: ClusterIP
+      port: 9121
+      portName: redis-exporter
+      annotations: {}
+      labels:
+        {}
+        # prometheus.io/path: /metrics
+        # prometheus.io/port: "9121"
+        # prometheus.io/scrape: "true"
+    redisAddressConfig:
+      enabled: false
+    auth:
+      enabled: false

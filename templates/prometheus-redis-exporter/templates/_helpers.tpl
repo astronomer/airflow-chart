@@ -32,17 +32,6 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
-Create the name of the service account to use
-*/}}
-{{- define "prometheus-redis-exporter.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-    {{ default (include "prometheus-redis-exporter.fullname" .) .Values.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Return the appropriate apiVersion for rbac.
 */}}
 {{- define "rbac.apiVersion" -}}
@@ -57,13 +46,7 @@ Return the appropriate apiVersion for rbac.
 Common labels
 */}}
 {{- define "prometheus-redis-exporter.labels" -}}
-helm.sh/chart: {{ include "prometheus-redis-exporter.chart" . }}
-{{ include "prometheus-redis-exporter.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- if .Values.customLabels}}
+{{- if .Values.astronomer.redisExporter.customLabels}}
 {{ toYaml .Values.customLabels }}
 {{- end }}
 {{- end }}

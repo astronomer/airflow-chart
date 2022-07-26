@@ -2,17 +2,21 @@
 ## Redis Exporter Deployment             ##
 ###########################################
 {{- if and .Values.astronomer.redisExporter.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "prometheus-redis-exporter.fullname" . }}
+  name: {{ .Release.Name }}-redis-exporter
   labels:
-{{ include "prometheus-redis-exporter.labels" . | indent 4 }}
+    tier: airflow
+    component: redis-exporter
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+
   annotations:
-{{ toYaml .Values.annotations | indent 8 }}
+{{ toYaml .Values.astronomer.redisExporter.annotations | indent 8 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.astronomer.redisExporter.replicaCount }}
   selector:
     matchLabels:
       {{- include "prometheus-redis-exporter.selectorLabels" . | nindent 6 }}
@@ -26,17 +30,17 @@ spec:
 {{ toYaml .Values.labels | indent 8 }}
       {{- end }}
     spec:
-      serviceAccountName: {{ template "prometheus-redis-exporter.serviceAccountName" . }}
-      {{- if .Values.image.pullSecrets }}
+      serviceAccountName: {{ .Release.Name }}-redis-exporter
+      {{- if .Values.astronomer.redisExporter.image.pullSecrets }}
       imagePullSecrets:
-      {{- range .Values.image.pullSecrets }}
+      {{- range .Values.astronomer.redisExporter.image.pullSecrets }}
         - name: {{ . }}
       {{- end}}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.astronomer.redisExporter.image.repository }}:{{ .Values.astronomer.redisExporter.image.tag }}"
+          imagePullPolicy: {{ .Values.astronomer.redisExporter.image.pullPolicy }}
           args:
           {{- range $key, $value := .Values.extraArgs }}
             - --{{ $key }}={{ $value }}
@@ -50,37 +54,37 @@ spec:
               containerPort: 9121
           env:
             - name: REDIS_ADDR
-            {{- if .Values.redisAddressConfig.enabled }}
+            {{- if .Values.astronomer.redisExporter.redisAddressConfig.enabled }}
               valueFrom:
                 configMapKeyRef:
-                  name: {{ .Values.redisAddressConfig.configmap.name }}
-                  key: {{ .Values.redisAddressConfig.configmap.key }}
+                  name: {{ .Values.astronomer.redisExporter.redisAddressConfig.configmap.name }}
+                  key: {{ .Values.astronomer.redisExporter.redisAddressConfig.configmap.key }}
             {{- else }}
-              value: {{ .Values.redisAddress }}
+              value: {{ .Values.astronomer.redisExporter.redisAddress }}
             {{- end }}
-          {{- if .Values.auth.enabled }}
+          {{- if .Values.astronomer.redisExporter.auth.enabled }}
             - name: REDIS_PASSWORD
-            {{- if .Values.auth.secret.name }}
+            {{- if .Values.astronomer.redisExporter.auth.secret.name }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.auth.secret.name }}
-                  key: {{ .Values.auth.secret.key }}
+                  name: {{ .Values.astronomer.redisExporter.auth.secret.name }}
+                  key: {{ .Values.astronomer.redisExporter.auth.secret.key }}
             {{- else }}
-              value: {{ .Values.auth.redisPassword }}
+              value: {{ .Values.astronomer.redisExporter.auth.redisPassword }}
             {{- end }}
-            {{- if .Values.auth.redisUser }}
+            {{- if .Values.astronomer.redisExporter.auth.redisUser }}
             - name: REDIS_USER
-              value: {{ .Values.auth.redisUser }}
+              value: {{ .Values.astronomer.redisExporter.auth.redisUser }}
             {{- end }}
           {{- end }}
-{{- if .Values.script }}
+{{- if .Values.astronomer.redisExporter.script }}
             - name: REDIS_EXPORTER_SCRIPT
               value: /script/script.lua
 {{- end }}
-{{- if .Values.env }}
-{{ toYaml .Values.env | indent 12 }}
+{{- if .Values.astronomer.redisExporter.env }}
+{{ toYaml .Values.astronomer.redisExporter.env | indent 12 }}
 {{- end }}
-{{- if .Values.script }}
+{{- if .Values.astronomer.redisExporter.script }}
           volumeMounts:
               - mountPath: /script
                 name: script-mount
@@ -94,25 +98,25 @@ spec:
               path: /
               port: exporter-port
           resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- if .Values.script }}
+{{ toYaml .Values.astronomer.redisExporter.resources | indent 12 }}
+    {{- if .Values.astronomer.redisExporter.script }}
       volumes:
         - name: script-mount
           configMap:
-             name: {{ .Values.script.configmap }}
+             name: {{ .Values.astronomer.redisExporter.script.configmap }}
              items:
-              - key: {{ .Values.script.keyname }}
+              - key: {{ .Values.astronomer.redisExporter.script.keyname }}
                 path: script.lua
     {{- end }}
-    {{- if .Values.nodeSelector }}
+    {{- if .Values.astronomer.redisExporter.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
+{{ toYaml .Values.astronomer.redisExporter.nodeSelector | indent 8 }}
     {{- end }}
-    {{- with .Values.affinity }}
+    {{- with .Values.astronomer.redisExporter.affinity }}
       affinity:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.tolerations }}
+    {{- with .Values.astronomer.redisExporter.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}

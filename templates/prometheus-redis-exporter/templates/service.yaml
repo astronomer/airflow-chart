@@ -1,23 +1,22 @@
 ###########################################
-## Redis Exporter Deployment             ##
+##     Redis Exporter Service            ##
 ###########################################
 {{- if and .Values.astronomer.redisExporter.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "prometheus-redis-exporter.fullname" . }}
+  name: {{ .Release.Name }}-redis-exporter
   labels:
-{{ include "prometheus-redis-exporter.labels" . | indent 4 }}
-{{- if .Values.service.labels }}
-{{ toYaml .Values.service.labels | indent 4 }}
-{{- end }}
-  annotations:
-{{ toYaml .Values.service.annotations | indent 4 }}
+    tier: airflow
+    component: redis-exporter
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
   ports:
-    - name: {{ .Values.service.portName }}
-      port: {{ .Values.service.port }}
+    - name: redis-exporter
+      port: 9121
       targetPort: exporter-port
       protocol: TCP
   selector:
