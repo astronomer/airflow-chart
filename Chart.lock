@@ -3,4 +3,4 @@ dependencies:
   repository: https://airflow.apache.org
   version: 1.6.0
 digest: sha256:88f5a8d12d66eae1424902b048ac77c3ec5cd133ebb7634710005d300eb42777
-generated: "2022-06-28T00:44:42.650889+05:30"
+generated: "2022-07-28T16:53:17.860732+05:30"
