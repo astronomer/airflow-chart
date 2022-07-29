@@ -8,6 +8,9 @@ metadata:
   name: {{ .Release.Name }}-celery-exporter
   labels:
     {{- include "celery-exporter.labels" . | nindent 4 }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: {{ .Values.astronomer.celeryExporter.service.port }}
 spec:
   type: {{ .Values.astronomer.celeryExporter.service.type }}
   ports:
