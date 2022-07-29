@@ -16,12 +16,10 @@ fullnameOverride: "celery-exporter"
 
 env:
 - name: CE_BROKER_URL
-  value: <MY_BROKER_URL>
-# - name: CE_BROKER_URL
-#   valueFrom:
-#     secretKeyRef:
-#       name: MY_SECRET
-#       key: MY_SECRET_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.name}}-broker-url
+      key: connection
 
 podAnnotations: {}
 

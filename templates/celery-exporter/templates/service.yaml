@@ -1,3 +1,6 @@
+#################################################
+## Deployment                                ####
+#################################################
 {{- if and .Values.astronomer.celeryExporter.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
 apiVersion: v1
 kind: Service
