@@ -451,8 +451,8 @@ astronomer:
         memory: 100Mi
     service:
       type: ClusterIP
-      port: 9121
-      portName: redis-exporter
+      port: 9808
+      portName: celery-exporter
 #      labels:
 #        {}
 #        # prometheus.io/path: /metrics
