@@ -10,7 +10,7 @@ metadata:
     {{- include "celery-exporter.labels" . | nindent 4 }}
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: {{ .Values.astronomer.celeryExporter.service.port }}
+    prometheus.io/port: {{ .Values.astronomer.celeryExporter.service.port | quote }}
 spec:
   type: {{ .Values.astronomer.celeryExporter.service.type }}
   ports:
