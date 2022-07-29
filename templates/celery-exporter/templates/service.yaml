@@ -9,9 +9,9 @@ metadata:
   labels:
     {{- include "celery-exporter.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.astronomer.celeryExporter.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ .Values.astronomer.celeryExporter.service.port }}
       targetPort: http
       protocol: TCP
       name: http

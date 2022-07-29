@@ -430,15 +430,29 @@ astronomer:
   celeryExporter:
     enabled: true
     replicaCount: 1
+    podAnnotations: {}
+    podSecurityContext: {}
+    env:
+      - name: CE_BROKER_URL
+        valueFrom:
+          secretKeyRef:
+            name: "{{ .Release.Name }}"
+            key: connection
     image:
       repository: danihodovic/celery-exporter
       pullPolicy: IfNotPresent
       tag: 0.5.2
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 100Mi
     service:
       type: ClusterIP
       port: 9121
       portName: redis-exporter
-      annotations: {}
 #      labels:
 #        {}
 #        # prometheus.io/path: /metrics

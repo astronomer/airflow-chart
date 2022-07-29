@@ -13,7 +13,6 @@ image:
 imagePullSecrets: []
 nameOverride: "celery-exporter"
 fullnameOverride: "celery-exporter"
-
 env:
 - name: CE_BROKER_URL
   valueFrom:

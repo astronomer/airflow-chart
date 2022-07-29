@@ -46,16 +46,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "celery-exporter.selectorLabels" -}}
-tier: airflow
-component: {{ .Release.Name }}
+tier: celery
+component: celery-exporter
 release: {{ .Release.Name }}
 chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 heritage: {{ .Release.Service }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "celery-exporter.serviceAccountName" -}}
-{{- default "default" .Values.serviceAccount.name }}
 {{- end }}

@@ -10,30 +10,24 @@ metadata:
   labels:
     {{- include "celery-exporter.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.astronomer.celeryExporter.replicaCount }}
   selector:
     matchLabels:
       {{- include "celery-exporter.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
+      {{- with .Values.astronomer.celeryExporter.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
         {{- include "celery-exporter.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       serviceAccountName: {{ .Release.Name }}-celery-exporter
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.astronomer.celeryExporter.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.astronomer.celeryExporter.image.repository }}:{{ .Values.astronomer.celeryExporter.image.tag  }}"
           imagePullPolicy: {{ .Values.astronomer.celeryExporter.image.pullPolicy }}
           ports:
@@ -45,21 +39,12 @@ spec:
               path: /health
               port: http
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.env }}
+            {{- toYaml .Values.astronomer.celeryExporter.resources | nindent 12 }}
           env:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+          - name: CE_BROKER_URL
+            valueFrom:
+              secretKeyRef:
+                name: "{{ .Release.Name }}-broker-url"
+                key: connection
+
   {{ end }}
