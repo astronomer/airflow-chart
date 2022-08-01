@@ -65,10 +65,20 @@ data:
           }
           .offset = to_int(now()) * 1000000000 + to_unix_timestamp(now()) * 1000000
 
+      final_task_log:
+        type: add_fields
+        inputs:
+          - transform_task_log
+        fields:
+          component: "${COMPONENT:--}"
+          workspace: "${WORKSPACE:--}"
+          release: "${RELEASE:--}"
+
+
       transform_remove_fields:
         type: remove_fields
         inputs:
-          - transform_task_log
+          - final_task_log
           - filter_common_logs
         fields:
           - host
