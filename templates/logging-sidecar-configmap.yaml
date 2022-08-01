@@ -54,7 +54,6 @@ data:
       transform_task_log:
         type: remap
         inputs:
-          - filter_common_logs
           - filter_task_logs
         source: |-
           # Parse Syslog input. The "!" means that the script should abort on error.
@@ -70,6 +69,7 @@ data:
         type: remove_fields
         inputs:
           - transform_task_log
+          - filter_common_logs
         fields:
           - host
           - file
