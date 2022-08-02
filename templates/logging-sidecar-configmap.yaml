@@ -72,7 +72,6 @@ data:
           workspace: "${WORKSPACE:--}"
           release: "${RELEASE:--}"
 
-
       transform_remove_fields:
         type: remove_fields
         inputs:
