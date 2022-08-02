@@ -49,7 +49,6 @@ data:
           type: "vrl"
           source: 'includes(["worker"], .component)'
 
-
       transform_task_log:
         type: remap
         inputs:
