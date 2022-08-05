@@ -33,10 +33,26 @@ data:
           workspace: "${WORKSPACE:--}"
           release: "${RELEASE:--}"
 
+      filter_common_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: '!includes(["worker"], .component)'
+
+      filter_worker_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: 'includes(["worker"], .component)'
+
       transform_task_log:
         type: remap
         inputs:
-          - transform_syslog
+          - filter_worker_logs
         source: |-
           # Parse Syslog input. The "!" means that the script should abort on error.
           . = parse_json!(.message)
@@ -47,10 +63,20 @@ data:
           }
           .offset = to_int(now()) * 1000000000 + to_unix_timestamp(now()) * 1000000
 
+      final_task_log:
+        type: add_fields
+        inputs:
+          - transform_task_log
+        fields:
+          component: "${COMPONENT:--}"
+          workspace: "${WORKSPACE:--}"
+          release: "${RELEASE:--}"
+
       transform_remove_fields:
         type: remove_fields
         inputs:
-          - transform_task_log
+          - final_task_log
+          - filter_common_logs
         fields:
           - host
           - file
