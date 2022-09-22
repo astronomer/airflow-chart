@@ -66,6 +66,7 @@ data:
           # Parse Syslog input. The "!" means that the script should abort on error.
           . = parse_json!(.message)
           .@timestamp = parse_timestamp(.timestamp, "%Y-%m-%dT%H:%M:%S%Z") ?? now()
+          date_nano = parse_timestamp(.timestamp, "%Y-%m-%dT%H:%M:%S%Z") ?? now()
           .check_log_id = exists(.log_id)
           if .check_log_id != true {
           .log_id = join!([.dag_id, .task_id, .execution_date, .try_number], "_")
