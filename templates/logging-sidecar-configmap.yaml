@@ -34,60 +34,10 @@ data:
           release: "${RELEASE:--}"
           date_nano: "%Y-%m-%dT%H:%M:%S.%f%Z"
 
-      filter_common_logs:
-        type: filter
-        inputs:
-          - transform_syslog
-        condition:
-          type: "vrl"
-          source: '!includes(["worker","scheduler"], .component)'
-
-      filter_scheduler_logs:
-        type: filter
-        inputs:
-          - transform_syslog
-        condition:
-          type: "vrl"
-          source: 'includes(["scheduler"], .component)'
-
-      filter_worker_logs:
-        type: filter
-        inputs:
-          - transform_syslog
-        condition:
-          type: "vrl"
-          source: 'includes(["worker"], .component)'
-
-      transform_task_log:
-        type: remap
-        inputs:
-          - filter_worker_logs
-          - filter_scheduler_logs
-        source: |-
-          # Parse Syslog input. The "!" means that the script should abort on error.
-          . = parse_json!(.message)
-          .@timestamp = parse_timestamp(.timestamp, "%Y-%m-%dT%H:%M:%S%Z") ?? now()
-          .check_log_id = exists(.log_id)
-          if .check_log_id != true {
-          .log_id = join!([.dag_id, .task_id, .execution_date, .try_number], "_")
-          }
-          .offset = to_int(now()) * 1000000000 + to_unix_timestamp(now()) * 1000000
-
-      final_task_log:
-        type: add_fields
-        inputs:
-          - transform_task_log
-        fields:
-          component: "${COMPONENT:--}"
-          workspace: "${WORKSPACE:--}"
-          release: "${RELEASE:--}"
-          date_nano: "%Y-%m-%dT%H:%M:%S.%f%Z"
-
       transform_remove_fields:
         type: remove_fields
         inputs:
-          - final_task_log
-          - filter_common_logs
+          - transform_syslog
         fields:
           - host
           - file
