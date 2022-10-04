@@ -2,13 +2,14 @@ black
 docker
 filelock
 GitPython
+jmespath
 jsonschema
 kubernetes
 pdbpp
 pytest
 pytest-forked
 pytest-profiling
-pytest-sugar
+pytest-rerunfailures
 pytest-testinfra
 pytest-xdist
 PyYAML
