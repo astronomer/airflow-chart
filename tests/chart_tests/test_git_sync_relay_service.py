@@ -27,4 +27,4 @@ class TestGitSyncRelayService:
         doc = docs[0]
         assert doc["kind"] == "Service"
         assert doc["apiVersion"] == "v1"
-        assert doc["metadata"]["name"] == "RELEASE-NAME-git-sync-relay"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"

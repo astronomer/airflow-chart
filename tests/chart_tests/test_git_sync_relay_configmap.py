@@ -37,13 +37,13 @@ class TestGitSyncRelayConfigmap:
             "kind": "ConfigMap",
             "metadata": {
                 "labels": {
-                    "chart": "RELEASE-NAME-1.1.0-rc1",
-                    "component": "RELEASE-NAME-git-sync-relay",
+                    "chart": "release-name-1.1.0-rc1",
+                    "component": "release-name-git-sync-relay",
                     "heritage": "Helm",
-                    "release": "RELEASE-NAME",
+                    "release": "release-name",
                     "tier": "airflow",
                 },
-                "name": "RELEASE-NAME-git-sync-config",
+                "name": "release-name-git-sync-config",
             },
         }
 

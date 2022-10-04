@@ -28,7 +28,7 @@ class TestGitSyncRelayDeployment:
         doc = docs[0]
         assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
-        assert doc["metadata"]["name"] == "RELEASE-NAME-git-sync-relay"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
         c_by_name = {
             c["name"]: c for c in doc["spec"]["template"]["spec"]["containers"]
         }
@@ -66,7 +66,7 @@ class TestGitSyncRelayDeployment:
         doc = docs[0]
         assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
-        assert doc["metadata"]["name"] == "RELEASE-NAME-git-sync-relay"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
         c_by_name = {
             c["name"]: c for c in doc["spec"]["template"]["spec"]["containers"]
         }
@@ -79,8 +79,8 @@ class TestGitSyncRelayDeployment:
                 "secret": {"secretName": "not-the-default-ssh-key-secret-name"},
             },
             {
-                "name": "RELEASE-NAME-git-sync-config",
-                "configMap": {"name": "RELEASE-NAME-git-sync-config"},
+                "name": "release-name-git-sync-config",
+                "configMap": {"name": "release-name-git-sync-config"},
             },
         ]
         assert c_by_name["git-sync"]["image"].startswith(
@@ -97,7 +97,7 @@ class TestGitSyncRelayDeployment:
                 "subPath": "gitSshKey",
             },
             {
-                "name": "RELEASE-NAME-git-sync-config",
+                "name": "release-name-git-sync-config",
                 "mountPath": "/etc/git-secret/known_hosts",
                 "readOnly": True,
                 "subPath": "known_hosts",
