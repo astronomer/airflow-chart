@@ -18,7 +18,6 @@
 import subprocess
 import sys
 from functools import lru_cache
-from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, Dict, Optional, Tuple
 
@@ -75,7 +74,7 @@ def validate_k8s_object(instance, kube_version="1.21.0"):
 
 def render_chart(
     *,  # require keyword args
-    name: str = "RELEASE-NAME",
+    name: str = "release-name",
     values: Optional[dict] = None,
     show_only: Optional[list] = None,
     chart_dir: Optional[str] = None,
@@ -109,12 +108,8 @@ def render_chart(
         if show_only:
             if isinstance(show_only, str):
                 show_only = [show_only]
-
             for i in show_only:
-                if not Path(i).exists():
-                    raise FileNotFoundError(f"ERROR: {i} not found")
-                else:
-                    command.extend(["--show-only", i])
+                command.extend(["--show-only", i])
         try:
             templates = subprocess.check_output(command, stderr=subprocess.PIPE)
             if not templates:

@@ -1,32 +1,31 @@
-# https://helm.sh/docs/chart_template_guide/helm_ignore_file/
+*.bak
+*.swp
+*.tmp
+*.tmproj
+*~
 .DS_Store
-# Common VCS dirs
-.git/
-.gitignore
 .bzr/
 .bzrignore
+.circleci
+.git/
+.github
+.gitignore
 .hg/
 .hgignore
-.svn/
-# Common backup files
-*.swp
-*.bak
-*.tmp
-*~
-# Various IDEs
-.project
 .idea/
-*.tmproj
-# Astronomer helm repository directory
+.pre-commit-config.yaml
+.project
 .pytest_cache
-bin
+.svn/
 CODEOWNERS
+CONTRIBUTING.md
+Makefile
+README.md
+UPDATING.md
+__pycache__
+bin
 configs
 dev
 docs
-Makefile
-README.md
 tests
-UPDATING.md
 venv
-__pycache__

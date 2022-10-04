@@ -1,11 +1,11 @@
 ######################################
 ## Logging sidecar configmap        ##
 ######################################
-{{- if .Values.loggingSidecar.enabled }}
+{{- if and .Values.loggingSidecar.enabled (not .Values.loggingSidecar.customConfig) }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ .Release.Name }}-logging-sidecar
+  name: {{ .Release.Name }}-sidecar-config
   labels:
     tier: airflow
     component: logging-sidecar
@@ -13,86 +13,100 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
 data:
-  main.conf: |-
-    <source>
-      @id unstructured-logging
-      @type tcp
-      tag tcp.events
-      bind 127.0.0.1
-      port 5170
-      <parse>
-        @type regexp
-        expression /(?<version>[^ ]+) (?<logtime>[^ ]+) (?<stream>[^ ]+) (?<component>[^ ]+) (?<message>.*)/
-      </parse>
-    </source>
+  vector-config.yaml: |
+    log_schema:
+      timestamp_key : "@timestamp"
+    data_dir: "${SIDECAR_LOGS}"
+    sources:
+      airflow_log_files:
+        type: file
+        include:
+          - "${SIDECAR_LOGS}/*.log"
+        read_from: beginning
+    transforms:
+      transform_syslog:
+        type: add_fields
+        inputs:
+          - airflow_log_files
+        fields:
+          component: "${COMPONENT:--}"
+          workspace: "${WORKSPACE:--}"
+          release: "${RELEASE:--}"
+          date_nano: "%Y-%m-%dT%H:%M:%S.%f%Z"
 
-    <filter tcp.events>
-      @type record_transformer
-      enable_ruby
-      renew_record
-      <record>
-        workspace "#{ENV['WORKSPACE']}"
-        release "#{ENV['RELEASE']}"
-        logtime ${record["logtime"]}
-        component ${record["component"]}
-        stream ${record["stream"]}
-        message ${record["message"]}
-      </record>
-      <inject>
-        time_key @logtime
-        time_type unixtime_nanos
-      </inject>
-    </filter>
+      filter_common_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: '!includes(["worker","scheduler"], .component)'
 
-    <match tcp.events>
-      @type rewrite_tag_filter
-      <rule>
-        key release
-        pattern /^(.+)/
-        tag airflow.$1
-      </rule>
-    </match>
+      filter_scheduler_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: 'includes(["scheduler"], .component)'
 
-    <match airflow.*>
-      @type rewrite_tag_filter
-      <rule>
-        key component
-        pattern /^(.+)/
-        tag ${tag}.$1
-      </rule>
-    </match>
+      filter_worker_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: 'includes(["worker"], .component)'
 
-    <match airflow.**>
-      @type copy
-      <store>
-        @id elasticsearch
-        @type elasticsearch_dynamic
-        @log_level info
-        include_timestamp true
-        reconnect_on_error true
-        reload_on_failure true
-        reload_connections false
-        request_timeout 120s
-        suppress_type_name true
-        host "#{ENV['OUTPUT_HOST']}"
-        port "#{ENV['OUTPUT_PORT']}"
-        index_name fluentd.${record["release"]}.${Time.at(time).getutc.strftime(@logstash_dateformat)}
-        <buffer>
-          @type file
-          path "/tmp/buffer"
-          flush_mode interval
-          retry_type exponential_backoff
-          flush_thread_count 2
-          flush_interval 5s
-          retry_forever
-          retry_max_interval 30
-          chunk_limit_size "#{ENV['OUTPUT_BUFFER_CHUNK_LIMIT']}"
-          queue_limit_length "#{ENV['OUTPUT_BUFFER_QUEUE_LIMIT']}"
-          overflow_action block
-        </buffer>
-        #<buffer>
-        #  @type memory
-        #</buffer>
-      </store>
-    </match>
+      transform_task_log:
+        type: remap
+        inputs:
+          - filter_worker_logs
+          - filter_scheduler_logs
+        source: |-
+          # Parse Syslog input. The "!" means that the script should abort on error.
+          . = parse_json!(.message)
+          .@timestamp = parse_timestamp(.timestamp, "%Y-%m-%dT%H:%M:%S%Z") ?? now()
+          .check_log_id = exists(.log_id)
+          if .check_log_id != true {
+          .log_id = join!([.dag_id, .task_id, .execution_date, .try_number], "_")
+          }
+          .offset = to_int(now()) * 1000000000 + to_unix_timestamp(now()) * 1000000
+
+      final_task_log:
+        type: add_fields
+        inputs:
+          - transform_task_log
+        fields:
+          component: "${COMPONENT:--}"
+          workspace: "${WORKSPACE:--}"
+          release: "${RELEASE:--}"
+          date_nano: "%Y-%m-%dT%H:%M:%S.%f%Z"
+
+      transform_remove_fields:
+        type: remove_fields
+        inputs:
+          - final_task_log
+          - filter_common_logs
+        fields:
+          - host
+          - file
+
+    sinks:
+      out:
+        type: elasticsearch
+        inputs:
+          - transform_remove_fields
+        mode: bulk
+        compression: none
+      {{- if .Values.airflow.elasticsearch.enabled  }}
+        endpoint: "http://{{ .Values.airflow.elasticsearch.connection.host }}:{{ .Values.airflow.elasticsearch.connection.port }}"
+        auth:
+          strategy: "basic"
+          user: {{ .Values.airflow.elasticsearch.connection.user }}
+          password : {{ .Values.airflow.elasticsearch.connection.pass }}
+      {{- end }}
+        bulk:
+          index: "vector.${RELEASE:--}.%Y.%m.%d"
+          action: create
 {{- end }}
