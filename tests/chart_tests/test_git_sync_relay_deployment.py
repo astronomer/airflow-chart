@@ -51,7 +51,7 @@ class TestGitSyncRelayDeployment:
                     "depth": 22,
                     "wait": 333,
                     "subPath": "not-the-default-subPath",
-                    "sshPrivateKeySecretName": "not-the-default-ssh-key-secret-name",
+                    "sshPrivateKeySecretName": "a-custom-secret-name",
                     "knownHosts": "not-the-default-knownHosts",
                 },
             }
@@ -76,7 +76,7 @@ class TestGitSyncRelayDeployment:
             {"name": "git-repo-contents", "emptyDir": {}},
             {
                 "name": "git-secret",
-                "secret": {"secretName": "not-the-default-ssh-key-secret-name"},
+                "secret": {"secretName": "a-custom-secret-name"},
             },
             {
                 "name": "release-name-git-sync-config",
