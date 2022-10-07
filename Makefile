@@ -13,8 +13,8 @@ charts: ## Update dependent charts
 
 .PHONY: unittest-chart
 unittest-chart: charts venv ## Unittest the helm chart
-	# Protip: you can modify pytest behavior like: PYTEST_ADDOPTS='-v --maxfail=1 --pdb -k 1.20' make unittest-chart
-	venv/bin/python -m pytest -v --junitxml=test-results/junit.xml tests/chart_tests
+	# Protip: you can modify pytest behavior like: make unittest-chart PYTEST_ADDOPTS='-v --maxfail=1 --pdb -k 1.20'
+	venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml tests/chart_tests
 
 .PHONY: clean
 clean: ## Clean build and test artifacts
@@ -37,15 +37,3 @@ setup-kind: ## setup a kind cluster with calico
 	kind create cluster --config kind-config.yaml
 	kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
 	kubectl -n kube-system set env daemonset/calico-node FELIX_IGNORELOOSERPF=true
-
-.PHONY: install-aftest-chart
-install-aftest-chart: ## install the aftest chart setup
-	helm install --create-namespace -n aftest -f aftest-git-sync-relay-values.yaml --set .Values.defaultDenyNetworkPolicy=True --timeout 800s airflow .
-
-.PHONY: upgrade-aftest-chart
-upgrade-aftest-chart: ## upgrade the aftest chart setup with defaultDenyNetworkPolicy=True
-	helm upgrade --create-namespace -n aftest -f aftest-git-sync-relay-values.yaml --set .Values.defaultDenyNetworkPolicy=True --timeout 800s airflow .
-
-.PHONY: upgrade-aftest-chart-deny-false
-upgrade-aftest-chart-deny-false: ## upgrade the aftest chart setup with defaultDenyNetworkPolicy=False
-	helm upgrade --create-namespace -n aftest -f aftest-git-sync-relay-values.yaml --set .Values.defaultDenyNetworkPolicy=True --timeout 800s airflow .
