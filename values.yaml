@@ -35,10 +35,10 @@ airflow:
       tag: 6.2.6
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
-      tag: 1.17.0-4
+      tag: 1.17.0-5
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.13.0-5
+      tag: 0.13.0-6
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
       tag: 3.6.1
