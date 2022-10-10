@@ -2,7 +2,7 @@
 
 .PHONY: help
 help: ## Print Makefile help.
-	@grep -Eh '^[a-z.A-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-31s\033[0m %s\n", $$1, $$2}'
+	@grep -Eh '^[a-z.A-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-25s\033[0m %s\n", $$1, $$2}'
 
 venv: ## Setup venv required for unit testing the helm chart
 	virtualenv venv -p python3
@@ -25,15 +25,3 @@ clean: ## Clean build and test artifacts
 update-requirements: ## Update all requirements.txt files
 	for FILE in tests/chart_tests/requirements.in tests/functional-tests/requirements.in ; do pip-compile --generate-hashes --quiet --allow-unsafe --upgrade $${FILE} ; done ;
 	-pre-commit run requirements-txt-fixer --all-files --show-diff-on-failure
-
-.PHONY: show-containers
-show-containers:
-	@kubectl get pods -n "$$NAMESPACE" -o json | \
-	  jq -r '.items[] | .metadata.name as $$podname | .spec.containers[] | "\($$podname) \(.name)"' | \
-	  column -t
-
-.PHONY: setup-kind
-setup-kind: ## setup a kind cluster with calico
-	kind create cluster --config kind-config.yaml
-	kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
-	kubectl -n kube-system set env daemonset/calico-node FELIX_IGNORELOOSERPF=true

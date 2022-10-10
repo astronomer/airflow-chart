@@ -9,8 +9,6 @@
 /config.yml
 /secrets
 /test-results
-aftest-key
-aftest-key.pub
 backup
 certs
 charts
@@ -18,4 +16,3 @@ dev-account.json
 kubeconfig
 letsencrypt*
 repository
-scratch*

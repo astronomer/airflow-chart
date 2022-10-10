@@ -91,26 +91,4 @@ spec:
           env:
             - name: GIT_ROOT
               value: /git
-        # TODO: delete this debug container
-        # - name: "debug"
-        #   image: quay.io/danielhoherd/uw:latest
-        #   command:
-        #     - /bin/sleep
-        #     - infinity
-        #   volumeMounts:
-        #     - name: git-repo-contents
-        #       mountPath: /git
-        #       readOnly: False
-        #     {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
-        #     - name: git-secret
-        #       mountPath: /etc/git-secret/ssh
-        #       readOnly: true
-        #       subPath: gitSshKey
-        #     {{- if .Values.gitSyncRelay.repo.knownHosts }}
-        #     - name: {{ .Release.Name }}-git-sync-config
-        #       mountPath: /etc/git-secret/known_hosts
-        #       readOnly: true
-        #       subPath: known_hosts
-        #     {{- end }}
-        #     {{- end }}
 {{- end -}}

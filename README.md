@@ -6,7 +6,7 @@ This chart will bootstrap an [Airflow](https://github.com/astronomer/ap-airflow)
 
 To install this helm chart remotely (using helm 3)
 
-```bash
+```sh
 kubectl create namespace airflow
 
 helm repo add astronomer https://helm.astronomer.io
@@ -15,7 +15,7 @@ helm install airflow --namespace airflow astronomer/airflow
 
 To install airflow with the KEDA autoscaler
 
-```bash
+```sh
 helm repo add kedacore https://kedacore.github.io/charts
 helm repo add astronomer https://helm.astronomer.io
 
@@ -39,7 +39,7 @@ helm install airflow \
 
 To install this repository from source
 
-```bash
+```sh
 kubectl create namespace airflow
 helm install --namespace airflow .
 ```
@@ -54,7 +54,7 @@ helm install --namespace airflow .
 
 To install the chart with the release name `my-release`:
 
-```bash
+```sh
 helm install --name my-release .
 ```
 
@@ -68,7 +68,7 @@ First, look at the [updating documentation](UPDATING.md) to identify any backwar
 
 To upgrade the chart with the release name `my-release`:
 
-```bash
+```sh
 helm upgrade --name my-release .
 ```
 
@@ -76,7 +76,7 @@ helm upgrade --name my-release .
 
 To uninstall/delete the `my-release` deployment:
 
-```bash
+```sh
 helm delete my-release
 ```
 
@@ -90,7 +90,7 @@ The recommended way to update your DAGs with this chart is to build a new docker
 latest code (`docker build -t my-company/airflow:8a0da78 .`), push it to an accessible
 registry (`docker push my-company/airflow:8a0da78`), then update the Airflow pods with that image:
 
-```bash
+```sh
 helm upgrade my-release . \
   --set images.airflow.repository=my-company/airflow \
   --set images.airflow.tag=8a0da78
@@ -137,7 +137,7 @@ The following tables lists the configurable parameters of the Astronomer chart a
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
-```bash
+```sh
 helm install --name my-release \
   --set executor=CeleryExecutor \
   --set enablePodLaunching=false .
@@ -150,7 +150,7 @@ to the Kubernetes [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/r
 We've built an experimental scaler that allows users to create scalers based on postgreSQL queries. For the moment this exists
 on a separate branch, but will be merged upstream soon. To install our custom version of KEDA on your cluster, please run
 
-```bash
+```sh
 helm repo add kedacore https://kedacore.github.io/charts
 
 helm repo update
@@ -165,7 +165,7 @@ Once KEDA is installed (which should be pretty quick since there is only one pod
 on this chart by setting `workers.keda.enabled=true` your helm command or in the `values.yaml`.
 (Note: KEDA does not support StatefulSets so you need to set `worker.persistence.enabled` to `false`)
 
-```bash
+```sh
 helm repo add astronomer https://helm.astronomer.io
 helm repo update
 
@@ -183,36 +183,35 @@ helm install airflow \
 
 ### Install kind, and create a cluster
 
-We recommend testing with Kubernetes 1.16+, example:
+We recommend testing with Kubernetes 1.21+, example:
 
-```
-kind create cluster \
-  --image kindest/node:v1.18.15
+```sh
+kind create cluster --image kindest/node:v1.21.14
 ```
 
 Confirm it's up:
 
-```
+```sh
 kubectl cluster-info --context kind-kind
 ```
 
 ### Add Astronomer's Helm repo
 
-```
+```sh
 helm repo add astronomer https://helm.astronomer.io
 helm repo update
 ```
 
 ### Create namespace + install the chart
 
-```
+```sh
 kubectl create namespace airflow
 helm install airflow -n airflow astronomer/airflow
 ```
 
 It may take a few minutes. Confirm the pods are up:
 
-```
+```sh
 kubectl get pods --all-namespaces
 helm list -n airflow
 ```
@@ -224,24 +223,26 @@ Login as _admin_ and password _admin_.
 ### Build a Docker image from your DAGs
 
 1.  Start a project using [astro-cli](https://github.com/astronomer/astro-cli), which will generate a Dockerfile, and load your DAGs in. You can test locally before pushing to kind with `astro airflow start`.
-
-        mkdir my-airflow-project && cd my-airflow-project
-        astro dev init
-
+    ```sh
+    mkdir my-airflow-project && cd my-airflow-project
+    astro dev init
+    ```
 2.  Then build the image:
-
-        docker build -t my-dags:0.0.1 .
-
+    ```sh
+    docker build -t my-dags:0.0.1 .
+    ```
 3.  Load the image into kind:
-
-        kind load docker-image my-dags:0.0.1
-
+    ```sh
+    kind load docker-image my-dags:0.0.1
+    ```
 4.  Upgrade Helm deployment:
 
-        helm upgrade airflow -n airflow \
-            --set images.airflow.repository=my-dags \
-            --set images.airflow.tag=0.0.1 \
-            astronomer/airflow
+    ```sh
+    helm upgrade airflow -n airflow \
+        --set images.airflow.repository=my-dags \
+        --set images.airflow.tag=0.0.1 \
+        astronomer/airflow
+    ```
 
 ## Extra Objects
 
