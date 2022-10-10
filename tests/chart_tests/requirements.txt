@@ -39,9 +39,9 @@ cachetools==5.2.0 \
     --hash=sha256:6a94c6402995a99c3970cc7e4884bb60b4a8639938157eeed436098bf9831757 \
     --hash=sha256:f9f17d2aec496a9aa6b76f53e3b614c965223c061982d434d160f930c698a9db
     # via google-auth
-certifi==2022.9.14 \
-    --hash=sha256:36973885b9542e6bd01dea287b2b4b3b21236307c56324fcc3f1160f2d655ed5 \
-    --hash=sha256:e232343de1ab72c2aa521b625c80f699e356830fd0e2c620b465b304b17b0516
+certifi==2022.9.24 \
+    --hash=sha256:0d9c601124e5a6ba9712dbc60d9c53c21e34f5f641fe83002317394311bdce14 \
+    --hash=sha256:90c1a32f1d68f940488354e36370f6cca89f0f106db09518524c88d6ed83f382
     # via
     #   kubernetes
     #   requests
@@ -77,9 +77,9 @@ gitpython==3.1.27 \
     --hash=sha256:1c885ce809e8ba2d88a29befeb385fcea06338d3640712b59ca623c220bb5704 \
     --hash=sha256:5b68b000463593e05ff2b261acff0ff0972df8ab1b70d3cdbd41b546c8b8fc3d
     # via -r tests/chart_tests/requirements.in
-google-auth==2.11.0 \
-    --hash=sha256:be62acaae38d0049c21ca90f27a23847245c9f161ff54ede13af2cb6afecbac9 \
-    --hash=sha256:ed65ecf9f681832298e29328e1ef0a3676e3732b2e56f41532d45f70a22de0fb
+google-auth==2.12.0 \
+    --hash=sha256:98f601773978c969e1769f97265e732a81a8e598da3263895023958d456ee625 \
+    --hash=sha256:f12d86502ce0f2c0174e2e70ecc8d36c69593817e67e1d9c5e34489120422e4b
     # via kubernetes
 gprof2dot==2022.7.29 \
     --hash=sha256:45b4d298bd36608fccf9511c3fd88a773f7a1abc04d6cd39445b11ba43133ec5 \
@@ -283,9 +283,9 @@ rsa==4.9 \
     # via pdbpp
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==65.3.0 \
-    --hash=sha256:2e24e0bec025f035a2e72cdd1961119f557d78ad331bb00ff82efb2ab8da8e82 \
-    --hash=sha256:7732871f4f7fa58fb6bdcaeadb0161b2bd046c85905dbaa066bdcbcc81953b57
+setuptools==65.4.1 \
+    --hash=sha256:1b6bdc6161661409c5f21508763dc63ab20a9ac2f8ba20029aaaa7fdb9118012 \
+    --hash=sha256:3050e338e5871e70c72983072fe34f6032ae1cdeeeb67338199c2f74e083a80e
     # via google-auth
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \

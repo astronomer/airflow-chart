@@ -12,9 +12,9 @@ cachetools==5.2.0 \
     --hash=sha256:6a94c6402995a99c3970cc7e4884bb60b4a8639938157eeed436098bf9831757 \
     --hash=sha256:f9f17d2aec496a9aa6b76f53e3b614c965223c061982d434d160f930c698a9db
     # via google-auth
-certifi==2022.9.14 \
-    --hash=sha256:36973885b9542e6bd01dea287b2b4b3b21236307c56324fcc3f1160f2d655ed5 \
-    --hash=sha256:e232343de1ab72c2aa521b625c80f699e356830fd0e2c620b465b304b17b0516
+certifi==2022.9.24 \
+    --hash=sha256:0d9c601124e5a6ba9712dbc60d9c53c21e34f5f641fe83002317394311bdce14 \
+    --hash=sha256:90c1a32f1d68f940488354e36370f6cca89f0f106db09518524c88d6ed83f382
     # via
     #   kubernetes
     #   requests
@@ -42,13 +42,13 @@ filelock==3.8.0 \
     --hash=sha256:55447caa666f2198c5b6b13a26d2084d26fa5b115c00d065664b2124680c4edc \
     --hash=sha256:617eb4e5eedc82fc5f47b6d61e4d11cb837c56cb4544e39081099fa17ad109d4
     # via virtualenv
-google-auth==2.11.0 \
-    --hash=sha256:be62acaae38d0049c21ca90f27a23847245c9f161ff54ede13af2cb6afecbac9 \
-    --hash=sha256:ed65ecf9f681832298e29328e1ef0a3676e3732b2e56f41532d45f70a22de0fb
+google-auth==2.12.0 \
+    --hash=sha256:98f601773978c969e1769f97265e732a81a8e598da3263895023958d456ee625 \
+    --hash=sha256:f12d86502ce0f2c0174e2e70ecc8d36c69593817e67e1d9c5e34489120422e4b
     # via kubernetes
-identify==2.5.5 \
-    --hash=sha256:322a5699daecf7c6fd60e68852f36f2ecbb6a36ff6e6e973e0d2bb6fca203ee6 \
-    --hash=sha256:ef78c0d96098a3b5fe7720be4a97e73f439af7cf088ebf47b620aeaa10fadf97
+identify==2.5.6 \
+    --hash=sha256:6c32dbd747aa4ceee1df33f25fed0b0f6e0d65721b15bd151307ff7056d50245 \
+    --hash=sha256:b276db7ec52d7e89f5bc4653380e33054ddc803d25875952ad90b0f012cbcdaa
     # via pre-commit
 idna==3.4 \
     --hash=sha256:814f528e8dead7d329833b91c5faa87d60bf71824cd12a7530b5526063d02cb4 \
@@ -192,9 +192,9 @@ rsa==4.9 \
     # via pdbpp
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==65.3.0 \
-    --hash=sha256:2e24e0bec025f035a2e72cdd1961119f557d78ad331bb00ff82efb2ab8da8e82 \
-    --hash=sha256:7732871f4f7fa58fb6bdcaeadb0161b2bd046c85905dbaa066bdcbcc81953b57
+setuptools==65.4.1 \
+    --hash=sha256:1b6bdc6161661409c5f21508763dc63ab20a9ac2f8ba20029aaaa7fdb9118012 \
+    --hash=sha256:3050e338e5871e70c72983072fe34f6032ae1cdeeeb67338199c2f74e083a80e
     # via google-auth
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
