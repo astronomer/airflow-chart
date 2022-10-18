@@ -170,7 +170,6 @@ class TestGitSyncRelayDeployment:
         ]
         assert c_by_name["git-sync"]["env"] == [
             {"name": "GIT_ROOT", "value": "/git"},
-
         ]
         assert c_by_name["git-sync"]["args"] == [
             "--repo=not-the-default-url",
