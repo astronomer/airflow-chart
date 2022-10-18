@@ -33,9 +33,11 @@ spec:
       volumes:
         - name: git-repo-contents
           emptyDir: {}
+        {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
         - name: git-secret
           secret:
             secretName: {{ .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
+        {{- end }}
         - name: {{ .Release.Name }}-git-sync-config
           configMap:
             name: {{ .Release.Name }}-git-sync-config
