@@ -121,3 +121,60 @@ class TestGitSyncRelayDeployment:
             "--wait=333",
             "--root=/git",
         ]
+
+    def test_gsr_deployment_without_ssh_credentials_and_known_hosts(self, kube_version):
+        """Test that a valid deployment is rendered when enabling git-sync without ssh credentials."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "not-the-default-url",
+                    "branch": "not-the-default-branch",
+                    "depth": 22,
+                    "wait": 333,
+                    "subPath": "not-the-default-subPath",
+                },
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        c_by_name = {
+            c["name"]: c for c in doc["spec"]["template"]["spec"]["containers"]
+        }
+
+        assert len(c_by_name) == 2
+        assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-repo-contents", "emptyDir": {}},
+            {
+                "name": "release-name-git-sync-config",
+                "configMap": {"name": "release-name-git-sync-config"},
+            },
+        ]
+        assert c_by_name["git-sync"]["image"].startswith(
+            "quay.io/astronomer/ap-git-sync:"
+        )
+        assert c_by_name["git-daemon"]["image"].startswith(
+            "quay.io/astronomer/ap-git-daemon:"
+        )
+        assert c_by_name["git-sync"]["volumeMounts"] == [
+            {"name": "git-repo-contents", "mountPath": "/git"},
+        ]
+        assert c_by_name["git-sync"]["env"] == [
+            {"name": "GIT_ROOT", "value": "/git"},
+        ]
+        assert c_by_name["git-sync"]["args"] == [
+            "--repo=not-the-default-url",
+            "--branch=not-the-default-branch",
+            "--depth=22",
+            "--wait=333",
+            "--root=/git",
+        ]
