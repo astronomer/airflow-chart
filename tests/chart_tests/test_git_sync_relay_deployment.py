@@ -123,7 +123,7 @@ class TestGitSyncRelayDeployment:
         ]
 
     def test_gsr_deployment_without_ssh_credentials_and_known_hosts(self, kube_version):
-        """Test that a valid deployment is rendered when enabling git-sync with ssh credentials and known hosts and other custom configs."""
+        """Test that a valid deployment is rendered when enabling git-sync without ssh credentials."""
         values = {
             "gitSyncRelay": {
                 "enabled": True,
