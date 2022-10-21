@@ -11,5 +11,10 @@ with open(f"{git_root_dir}/.circleci/config.yml") as f:
     circleci_config = yaml.safe_load(f.read())
 
 # fmt: off
-supported_k8s_versions = circleci_config["workflows"]["install-airflow-chart"]["jobs"][4]["airflow-test"]["matrix"]["parameters"]["kube_version"]
+# Load supported versions and replace patch segment with 0
+supported_k8s_versions = [
+    '.'.join(zero_version_list)
+    for version_str in circleci_config["workflows"]["install-airflow-chart"]["jobs"][4]["airflow-test"]["matrix"]["parameters"]["kube_version"]
+    for zero_version_list in [version_str.split('.')[:2] + ['0']]
+]
 # fmt: on

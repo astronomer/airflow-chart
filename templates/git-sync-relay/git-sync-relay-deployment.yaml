@@ -1,0 +1,103 @@
+###############################
+## git-sync-relay Deployment ##
+###############################
+{{- if .Values.gitSyncRelay.enabled }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-git-sync-relay
+  labels:
+    component: git-sync-relay
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: git-sync-relay
+      tier: airflow
+  template:
+    metadata:
+      labels:
+        component: git-sync-relay
+        tier: airflow
+        release: {{ .Release.Name }}
+        chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+        heritage: {{ .Release.Service }}
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.gitSyncRelay.uid }}
+      volumes:
+        - name: git-repo-contents
+          emptyDir: {}
+        {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
+        - name: git-secret
+          secret:
+            secretName: {{ .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
+        {{- end }}
+        - name: {{ .Release.Name }}-git-sync-config
+          configMap:
+            name: {{ .Release.Name }}-git-sync-config
+      containers:
+        - name: "git-sync"
+          image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+          args:
+            # https://github.com/kubernetes/git-sync#parameters
+            - "--repo={{ .Values.gitSyncRelay.repo.url }}"
+            - "--branch={{ .Values.gitSyncRelay.repo.branch }}"
+            - "--depth={{ .Values.gitSyncRelay.repo.depth }}"
+            - "--wait={{ .Values.gitSyncRelay.repo.wait }}"
+            - "--root=/git"
+          volumeMounts:
+            {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
+            - name: git-secret
+              mountPath: /etc/git-secret/ssh
+              readOnly: true
+              subPath: gitSshKey
+            {{- if .Values.gitSyncRelay.repo.knownHosts }}
+            - name: {{ .Release.Name }}-git-sync-config
+              mountPath: /etc/git-secret/known_hosts
+              readOnly: true
+              subPath: known_hosts
+            {{- end }}
+            {{- end }}
+            - name: git-repo-contents
+              mountPath: /git
+          env:
+            - name: GIT_ROOT
+              value: "/git"
+            {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
+            - name: GIT_SYNC_SSH
+              value: "true"
+            - name: GIT_SSH_KEY_FILE
+              value: "/etc/git-secret/ssh"
+            {{- if .Values.gitSyncRelay.repo.knownHosts }}
+            - name: GIT_KNOWN_HOSTS
+              value: "true"
+            - name: GIT_SSH_KNOWN_HOSTS_FILE
+              value: "/etc/git-secret/known_hosts"
+            {{- else }}
+            - name: GIT_KNOWN_HOSTS
+              value: "false"
+            {{- end }}
+            {{- end }}
+        - name: git-daemon
+          image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
+          volumeMounts:
+            - name: git-repo-contents
+              mountPath: /git
+              readOnly: False
+          env:
+            - name: GIT_ROOT
+              value: /git
+          livenessProbe:
+            exec:
+              command:
+              - touch
+              - /git/.git/git-daemon-export-ok
+            initialDelaySeconds: 5
+            periodSeconds: 15
+{{- end -}}

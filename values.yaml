@@ -41,7 +41,7 @@ airflow:
       tag: 0.13.0-6
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
-      tag: 3.5.0
+      tag: 3.6.1
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
@@ -282,7 +282,7 @@ airflow:
       - emptyDir: {}
         name: logs
       {{- end }}
-      {{- if and  .Values.dags.gitSync.enabled  .Values.dags.gitSync.sshKeySecret }}
+      {{- if and .Values.dags.gitSync.enabled .Values.dags.gitSync.sshKeySecret }}
       {{- include "git_sync_ssh_key_volume" . | nindent 2 }}
       {{- end }}
       - configMap:
@@ -426,3 +426,27 @@ astronomer:
     certgenerator:
       repository: quay.io/astronomer/ap-certgenerator
       tag: 0.1.2
+
+gitSyncRelay:
+  enabled: ~
+  uid: ~
+  images:
+    gitDaemon:
+      repository: "quay.io/astronomer/ap-git-daemon"
+      tag: "3.16.2-1"
+    gitSync:
+      repository: "quay.io/astronomer/ap-git-sync"
+      tag: "3.6.1"
+
+  repo:
+    url: ~
+    branch: main
+    depth: 1 # default to a shallow clone because it is faster and this isn't a dev environment
+    wait: 60 # seconds between synchronizations with upstream git repo
+    subPath: ~ # if your dags dir is not the repo root, specify the path relative to the repo root
+    sshPrivateKeySecretName: ~ # The name of a secret that holds the private key. This secret is not maintained by this chart. TODO: replace this URL with the master branch location https://github.com/astronomer/airflow-chart/blob/3708-git-sync/docs/git-sync-relay.md#configuration
+    gitSyncTimeout: 300 # How long to wait for the clone or fetch to take before aborting
+    # knownHosts can be generated with: ssh-keyscan -t ed25519 github.com 2>/dev/null
+    knownHosts: |
+      github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+      gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf

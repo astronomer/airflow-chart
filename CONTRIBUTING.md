@@ -10,7 +10,7 @@ You can run Kubernetes in Docker (kind) in order to develop this chart on your w
 
 Make sure your user has access to Docker:
 
-```
+```sh
 docker run --rm hello-world:latest
 ```
 
@@ -18,9 +18,9 @@ docker run --rm hello-world:latest
 
 To delete an existing kind cluster and reinstall the helm chart from scratch
 
-```
-# Optionally, you can specify a kubernetes version
-KUBE_VERSION=1.15.6
+```sh
+# Optionally, you can specify a kubernetes version available from https://hub.docker.com/r/kindest/node/tags
+KUBE_VERSION=1.21.2
 
 bin/reset-local-dev
 ```

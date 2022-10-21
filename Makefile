@@ -13,8 +13,8 @@ charts: ## Update dependent charts
 
 .PHONY: unittest-chart
 unittest-chart: charts venv ## Unittest the helm chart
-	# Protip: you can modify pytest behavior like: PYTEST_ADDOPTS='-v --maxfail=1 --pdb -k 1.20' make unittest-chart
-	venv/bin/python -m pytest -v --junitxml=test-results/junit.xml tests/chart_tests
+	# Protip: you can modify pytest behavior like: make unittest-chart PYTEST_ADDOPTS='-v --maxfail=1 --pdb -k 1.20'
+	venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml tests/chart_tests
 
 .PHONY: clean
 clean: ## Clean build and test artifacts
@@ -24,4 +24,4 @@ clean: ## Clean build and test artifacts
 .PHONY: update-requirements
 update-requirements: ## Update all requirements.txt files
 	for FILE in tests/chart_tests/requirements.in tests/functional-tests/requirements.in ; do pip-compile --generate-hashes --quiet --allow-unsafe --upgrade $${FILE} ; done ;
-	pre-commit run requirements-txt-fixer --all-files --show-diff-on-failure
+	-pre-commit run requirements-txt-fixer --all-files --show-diff-on-failure
