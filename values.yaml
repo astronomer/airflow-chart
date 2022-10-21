@@ -433,10 +433,10 @@ gitSyncRelay:
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
-      tag: "3.15.0"
+      tag: "3.16.2-1"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync"
-      tag: "3.3.4"
+      tag: "3.6.1"
 
   repo:
     url: ~
