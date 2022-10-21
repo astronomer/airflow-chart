@@ -39,6 +39,7 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-daemon"]["image"].startswith(
             "quay.io/astronomer/ap-git-daemon:"
         )
+        assert c_by_name["git-daemon"]["livenessProbe"]
 
     def test_gsr_deployment_with_ssh_credentials_and_known_hosts(self, kube_version):
         """Test that a valid deployment is rendered when enabling git-sync with ssh credentials and known hosts and other custom configs."""
@@ -121,6 +122,7 @@ class TestGitSyncRelayDeployment:
             "--wait=333",
             "--root=/git",
         ]
+        assert c_by_name["git-daemon"]["livenessProbe"]
 
     def test_gsr_deployment_without_ssh_credentials_and_known_hosts(self, kube_version):
         """Test that a valid deployment is rendered when enabling git-sync without ssh credentials."""
@@ -178,3 +180,4 @@ class TestGitSyncRelayDeployment:
             "--wait=333",
             "--root=/git",
         ]
+        assert c_by_name["git-daemon"]["livenessProbe"]
