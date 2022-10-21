@@ -93,4 +93,11 @@ spec:
           env:
             - name: GIT_ROOT
               value: /git
+          livenessProbe:
+            exec:
+              command:
+              - touch
+              - /git/.git/git-daemon-export-ok
+            initialDelaySeconds: 5
+            periodSeconds: 15
 {{- end -}}
