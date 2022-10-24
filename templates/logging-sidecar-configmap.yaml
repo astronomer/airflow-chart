@@ -32,6 +32,55 @@ data:
           component: "${COMPONENT:--}"
           workspace: "${WORKSPACE:--}"
           release: "${RELEASE:--}"
+          date_nano: "%Y-%m-%dT%H:%M:%S.%f%Z"
+
+      filter_common_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: '!includes(["worker","scheduler"], .component)'
+
+      filter_scheduler_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: 'includes(["scheduler"], .component)'
+
+      filter_worker_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: 'includes(["worker"], .component)'
+
+      filter_common_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: '!includes(["worker","scheduler"], .component)'
+
+      filter_scheduler_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: 'includes(["scheduler"], .component)'
+
+      filter_worker_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: 'includes(["worker"], .component)'
 
       filter_common_logs:
         type: filter
@@ -80,6 +129,7 @@ data:
           component: "${COMPONENT:--}"
           workspace: "${WORKSPACE:--}"
           release: "${RELEASE:--}"
+          date_nano: "%Y-%m-%dT%H:%M:%S.%f%Z"
 
       transform_remove_fields:
         type: remove_fields

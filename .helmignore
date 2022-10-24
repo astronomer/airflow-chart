@@ -1,33 +1,31 @@
-# Patterns to ignore when building packages.
-# This supports shell glob matching, relative path matching, and
-# negation (prefixed with !). Only one pattern per line.
+*.bak
+*.swp
+*.tmp
+*.tmproj
+*~
 .DS_Store
-# Common VCS dirs
-.git/
-.gitignore
 .bzr/
 .bzrignore
-.hg/
-.hgignore
-.svn/
-# Common backup files
-*.swp
-*.bak
-*.tmp
-*~
-# Various IDEs
-.project
-.idea/
-*.tmproj
-bin
-# Astronomer helm repository directory
 .circleci
+.git/
 .github
 .gitignore
+.hg/
+.hgignore
+.idea/
 .pre-commit-config.yaml
+.project
+.pytest_cache
+.svn/
 CODEOWNERS
 CONTRIBUTING.md
 Makefile
+README.md
+UPDATING.md
+__pycache__
+bin
 configs
 dev
+docs
 tests
+venv

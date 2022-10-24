@@ -19,7 +19,7 @@ import subprocess
 import sys
 from functools import lru_cache
 from tempfile import NamedTemporaryFile
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import jmespath
 import jsonschema
@@ -73,12 +73,13 @@ def validate_k8s_object(instance, kube_version="1.21.0"):
 
 
 def render_chart(
-    name="release-name",
-    values=None,
-    show_only=None,
-    chart_dir=None,
-    kube_version="1.21.0",
-    namespace=None,
+    *,  # require keyword args
+    name: str = "release-name",
+    values: Optional[dict] = None,
+    show_only: Optional[list] = None,
+    chart_dir: Optional[str] = None,
+    kube_version: str = "1.21.0",
+    namespace: Optional[str] = None,
 ):
     """
     Render a helm chart into dictionaries. For helm chart testing only.
@@ -86,7 +87,7 @@ def render_chart(
     values = values or {}
     chart_dir = chart_dir or sys.path[0]
     namespace = namespace or "default"
-    with NamedTemporaryFile() as tmp_file:
+    with NamedTemporaryFile(delete=True) as tmp_file:  # use delete=False when debugging
         content = yaml.dump(values)
         tmp_file.write(content.encode())
         tmp_file.flush()
@@ -102,6 +103,8 @@ def render_chart(
             "--namespace",
             namespace,
         ]
+        if namespace:
+            command.extend(["--namespace", namespace])
         if show_only:
             if isinstance(show_only, str):
                 show_only = [show_only]
