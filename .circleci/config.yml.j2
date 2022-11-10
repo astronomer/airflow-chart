@@ -22,7 +22,7 @@ workflows:
       - airflow-test:
           name: test-{{ version | replace(".", "-") }}-{{ executor }}
           kube_version: {{ version }}
-          executor: exectuor
+          executor: {{ executor }}
           requires:
             - build-and-release-internal
 {% if version in kube_versions[1:-1] %}
