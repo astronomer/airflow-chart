@@ -20,7 +20,7 @@ workflows:
 {%- for version in kube_versions %}
 {%- for executor in executors %}
       - airflow-test:
-          name: test-{{ version }}-{{ executor }}
+          name: test-{{ version | replace(".", "-") }}-{{ executor }}
           kube_version: version
           executor: exectuor
           requires:
@@ -35,7 +35,7 @@ workflows:
           requires:
 {%- for version in kube_versions %}
 {%- for executor in executors %}
-            - "test-{{ version }}-{{ executor }}"
+            - "test-{{ version | replace(".", "-") }}-{{ executor }}"
 {%- endfor %}
 {%- endfor %}
           filters:
