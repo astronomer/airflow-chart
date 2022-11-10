@@ -82,3 +82,11 @@ repos:
       - id: remove-unicode-non-breaking-spaces
       - id: remove-unicode-zero-width-non-breaking-spaces
       - id: remove-unicode-zero-width-space
+  - repo: local
+    hooks:
+      - id: circle-config-yaml
+        name: Ensure .circleci/config.yml is up to date
+        language: python
+        files: "config.yml$|config.yml.j2|generate_circleci_config.py$"
+        entry: .circleci/generate_circleci_config.py
+        additional_dependencies: ["jinja2"]

@@ -1,5 +1,3 @@
-# Warning: automatically generated file
-# Please edit config.yml.j2, and use the script generate_circleci_config.py
 ---
 version: 2.1
 
@@ -19,111 +17,27 @@ workflows:
             - lint
             - run_pre_commit
             - unittest-charts
+{%- for version in kube_versions %}
+{%- for executor in executors %}
       - airflow-test:
-          name: test-1.21.14-CeleryExecutor
+          name: test-{{ version }}-{{ executor }}
           kube_version: version
           executor: exectuor
           requires:
             - build-and-release-internal
-
-      - airflow-test:
-          name: test-1.21.14-LocalExecutor
-          kube_version: version
-          executor: exectuor
-          requires:
-            - build-and-release-internal
-
-      - airflow-test:
-          name: test-1.21.14-KubernetesExecutor
-          kube_version: version
-          executor: exectuor
-          requires:
-            - build-and-release-internal
-
-      - airflow-test:
-          name: test-1.22.15-CeleryExecutor
-          kube_version: version
-          executor: exectuor
-          requires:
-            - build-and-release-internal
-
+{% if version in kube_versions[1:-1] %}
             - approve-test-all
-      - airflow-test:
-          name: test-1.22.15-LocalExecutor
-          kube_version: version
-          executor: exectuor
-          requires:
-            - build-and-release-internal
-
-            - approve-test-all
-      - airflow-test:
-          name: test-1.22.15-KubernetesExecutor
-          kube_version: version
-          executor: exectuor
-          requires:
-            - build-and-release-internal
-
-            - approve-test-all
-      - airflow-test:
-          name: test-1.23.13-CeleryExecutor
-          kube_version: version
-          executor: exectuor
-          requires:
-            - build-and-release-internal
-
-            - approve-test-all
-      - airflow-test:
-          name: test-1.23.13-LocalExecutor
-          kube_version: version
-          executor: exectuor
-          requires:
-            - build-and-release-internal
-
-            - approve-test-all
-      - airflow-test:
-          name: test-1.23.13-KubernetesExecutor
-          kube_version: version
-          executor: exectuor
-          requires:
-            - build-and-release-internal
-
-            - approve-test-all
-      - airflow-test:
-          name: test-1.24.7-CeleryExecutor
-          kube_version: version
-          executor: exectuor
-          requires:
-            - build-and-release-internal
-
-      - airflow-test:
-          name: test-1.24.7-LocalExecutor
-          kube_version: version
-          executor: exectuor
-          requires:
-            - build-and-release-internal
-
-      - airflow-test:
-          name: test-1.24.7-KubernetesExecutor
-          kube_version: version
-          executor: exectuor
-          requires:
-            - build-and-release-internal
-
+{%- endif %}
+{%- endfor %}
+{%- endfor %}
       - approve-release-prod:
           type: approval
           requires:
-            - "test-1.21.14-CeleryExecutor"
-            - "test-1.21.14-LocalExecutor"
-            - "test-1.21.14-KubernetesExecutor"
-            - "test-1.22.15-CeleryExecutor"
-            - "test-1.22.15-LocalExecutor"
-            - "test-1.22.15-KubernetesExecutor"
-            - "test-1.23.13-CeleryExecutor"
-            - "test-1.23.13-LocalExecutor"
-            - "test-1.23.13-KubernetesExecutor"
-            - "test-1.24.7-CeleryExecutor"
-            - "test-1.24.7-LocalExecutor"
-            - "test-1.24.7-KubernetesExecutor"
+{%- for version in kube_versions %}
+{%- for executor in executors %}
+            - "test-{{ version }}-{{ executor }}"
+{%- endfor %}
+{%- endfor %}
           filters:
             branches:
               only:
@@ -144,7 +58,7 @@ workflows:
 jobs:
   run_pre_commit:
     docker:
-      - image: quay.io/astronomer/ci-pre-commit:2022-11
+      - image: quay.io/astronomer/ci-pre-commit:{{ ci_runner_version }}
     steps:
       - checkout
       - run:
@@ -154,12 +68,12 @@ jobs:
             python --version --version | sed 's/^/# /' >> /tmp/pre-commit-cache-key.txt
       - restore_cache:
           keys:
-            - pre-commit-cache-{{ checksum "/tmp/pre-commit-cache-key.txt" }}
+            - pre-commit-cache-{{ '{{' }} checksum "/tmp/pre-commit-cache-key.txt" }}
       - run:
           name: Install pre-commit hooks
           command: pre-commit install-hooks
       - save_cache:
-          key: pre-commit-cache-{{ checksum "/tmp/pre-commit-cache-key.txt" }}
+          key: pre-commit-cache-{{ '{{' }} checksum "/tmp/pre-commit-cache-key.txt" }}
           paths:
             - ~/.cache/pre-commit
       - run:
@@ -179,10 +93,10 @@ jobs:
 
   unittest-charts:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2022-11
+      - image: quay.io/astronomer/ci-helm-release:{{ ci_runner_version }}
     steps:
       - setup_remote_docker:
-          version: 20.10.18
+          version: {{ remote_docker_version }}
           docker_layer_caching: true
       - checkout
       - run:
@@ -195,7 +109,7 @@ jobs:
 
   build-and-release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2022-11
+      - image: quay.io/astronomer/ci-helm-release:{{ ci_runner_version }}
     steps:
       - checkout
       - run:
@@ -236,7 +150,7 @@ jobs:
           path: test-results
   release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2022-11
+      - image: quay.io/astronomer/ci-helm-release:{{ ci_runner_version }}
     steps:
       - checkout
       - run:
@@ -245,7 +159,7 @@ jobs:
 
   release-public:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2022-11
+      - image: quay.io/astronomer/ci-helm-release:{{ ci_runner_version }}
     steps:
       - checkout
       - publish-github-release
