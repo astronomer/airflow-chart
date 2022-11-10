@@ -128,6 +128,7 @@ workflows:
             branches:
               only:
                 - '/^release-\d+\.\d+$/'
+                - 5180-only-test-some-k8s-versions-by-default
 
       - release-public:
           context:
@@ -140,6 +141,7 @@ workflows:
             branches:
               only:
                 - '/^release-\d+\.\d+$/'
+                - 5180-only-test-some-k8s-versions-by-default
 
 jobs:
   run_pre_commit:
