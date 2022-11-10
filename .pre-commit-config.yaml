@@ -6,12 +6,6 @@ repos:
     hooks:
       - id: remove-tabs
         exclude_types: [makefile, binary]
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: "v2.7.1"
-    hooks:
-      - id: prettier
-        args: ["--print-width=135"]
-        exclude: "(charts|templates|files)"
   - repo: https://github.com/pycqa/isort
     rev: 5.10.1
     hooks:
@@ -90,3 +84,9 @@ repos:
         files: "config.yml$|config.yml.j2|generate_circleci_config.py$"
         entry: .circleci/generate_circleci_config.py
         additional_dependencies: ["jinja2"]
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: "v2.7.1"
+    hooks:
+      - id: prettier
+        args: ["--print-width=135"]
+        exclude: "(charts|templates|files)"
