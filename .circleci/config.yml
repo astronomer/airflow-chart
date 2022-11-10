@@ -21,28 +21,28 @@ workflows:
             - unittest-charts
       - airflow-test:
           name: test-1-21-14-CeleryExecutor
-          kube_version: version
+          kube_version: 1.21.14
           executor: exectuor
           requires:
             - build-and-release-internal
 
       - airflow-test:
           name: test-1-21-14-LocalExecutor
-          kube_version: version
+          kube_version: 1.21.14
           executor: exectuor
           requires:
             - build-and-release-internal
 
       - airflow-test:
           name: test-1-21-14-KubernetesExecutor
-          kube_version: version
+          kube_version: 1.21.14
           executor: exectuor
           requires:
             - build-and-release-internal
 
       - airflow-test:
           name: test-1-22-15-CeleryExecutor
-          kube_version: version
+          kube_version: 1.22.15
           executor: exectuor
           requires:
             - build-and-release-internal
@@ -50,7 +50,7 @@ workflows:
             - approve-test-all
       - airflow-test:
           name: test-1-22-15-LocalExecutor
-          kube_version: version
+          kube_version: 1.22.15
           executor: exectuor
           requires:
             - build-and-release-internal
@@ -58,7 +58,7 @@ workflows:
             - approve-test-all
       - airflow-test:
           name: test-1-22-15-KubernetesExecutor
-          kube_version: version
+          kube_version: 1.22.15
           executor: exectuor
           requires:
             - build-and-release-internal
@@ -66,7 +66,7 @@ workflows:
             - approve-test-all
       - airflow-test:
           name: test-1-23-13-CeleryExecutor
-          kube_version: version
+          kube_version: 1.23.13
           executor: exectuor
           requires:
             - build-and-release-internal
@@ -74,7 +74,7 @@ workflows:
             - approve-test-all
       - airflow-test:
           name: test-1-23-13-LocalExecutor
-          kube_version: version
+          kube_version: 1.23.13
           executor: exectuor
           requires:
             - build-and-release-internal
@@ -82,7 +82,7 @@ workflows:
             - approve-test-all
       - airflow-test:
           name: test-1-23-13-KubernetesExecutor
-          kube_version: version
+          kube_version: 1.23.13
           executor: exectuor
           requires:
             - build-and-release-internal
@@ -90,21 +90,21 @@ workflows:
             - approve-test-all
       - airflow-test:
           name: test-1-24-7-CeleryExecutor
-          kube_version: version
+          kube_version: 1.24.7
           executor: exectuor
           requires:
             - build-and-release-internal
 
       - airflow-test:
           name: test-1-24-7-LocalExecutor
-          kube_version: version
+          kube_version: 1.24.7
           executor: exectuor
           requires:
             - build-and-release-internal
 
       - airflow-test:
           name: test-1-24-7-KubernetesExecutor
-          kube_version: version
+          kube_version: 1.24.7
           executor: exectuor
           requires:
             - build-and-release-internal
