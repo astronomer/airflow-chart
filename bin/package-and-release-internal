@@ -33,7 +33,7 @@ else
   filename="airflow-${version}.tgz"
   extra_args=( '--version' "${version}" )
   sed -i "s#^description: .*#description: $(date "+%FT%T%z") ${CIRCLE_BRANCH} ${CIRCLE_BUILD_URL} https://github.com/astronomer/airflow-chart/commits/${CIRCLE_SHA1}#" airflow/Chart.yaml
-  bin/repo-state-report.sh > airflow/repo_state.log
+  (cd airflow && bin/repo-state-report.sh > repo_state.log)
 fi
 
 helm package airflow --dependency-update --app-version "${app_version}" "${extra_args[@]}"
