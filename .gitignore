@@ -14,4 +14,5 @@ certs
 dev-account.json
 kubeconfig
 letsencrypt*
+repo_state.log
 repository
