@@ -208,8 +208,8 @@ jobs:
 
   airflow-test:
     machine:
-      # https://circleci.com/docs/2.0/configuration-reference/#available-machine-images
-      image: ubuntu-2204:2022.07.1
+      # https://circleci.com/developer/machine/image/ubuntu-2204
+      image: ubuntu-2204:2022.10.2
       resource_class: large
     parameters:
       executor:
@@ -225,7 +225,6 @@ jobs:
       - run:
           name: Install Airflow chart
           command: |
-            pyenv global 3.10.5
             export KUBE_VERSION=<< parameters.kube_version >>
             export EXECUTOR=<< parameters.executor >>
             HELM_CHART_PATH=$(find /tmp/workspace/ -name 'airflow-*.tgz')
