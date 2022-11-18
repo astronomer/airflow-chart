@@ -103,8 +103,6 @@ def render_chart(
             "--namespace",
             namespace,
         ]
-        if namespace:
-            command.extend(["--namespace", namespace])
         if show_only:
             if isinstance(show_only, str):
                 show_only = [show_only]
