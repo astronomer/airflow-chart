@@ -327,6 +327,11 @@ airflow:
       default_queue: celery
     celery: # compat
       default_queue: celery
+
+      # Set Flower URL prefix to empty string
+      # Remove after https://github.com/apache/airflow/issues/27402 is resolved
+      flower_url_prefix: ""
+
     webserver:
       expose_config: True
     elasticsearch:
