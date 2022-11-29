@@ -25,14 +25,14 @@ data:
         read_from: beginning
     transforms:
       transform_syslog:
-        type: add_fields
+        type: remap
         inputs:
           - airflow_log_files
-        fields:
-          component: "${COMPONENT:--}"
-          workspace: "${WORKSPACE:--}"
-          release: "${RELEASE:--}"
-          date_nano: "%Y-%m-%dT%H:%M:%S.%f%Z"
+        source: |
+          .component = "${COMPONENT:--}"
+          .workspace = "${WORKSPACE:--}"
+          .release = "${RELEASE:--}"
+          .date_nano = parse_timestamp!(.@timestamp, format: "%Y-%m-%dT%H:%M:%S.%f%Z")
 
       filter_common_logs:
         type: filter
@@ -74,23 +74,23 @@ data:
           .offset = to_int(now()) * 1000000000 + to_unix_timestamp(now()) * 1000000
 
       final_task_log:
-        type: add_fields
+        type: remap
         inputs:
           - transform_task_log
-        fields:
-          component: "${COMPONENT:--}"
-          workspace: "${WORKSPACE:--}"
-          release: "${RELEASE:--}"
-          date_nano: "%Y-%m-%dT%H:%M:%S.%f%Z"
+        source: |
+          .component = "${COMPONENT:--}"
+          .workspace = "${WORKSPACE:--}"
+          .release = "${RELEASE:--}"
+          .date_nano = parse_timestamp!(.@timestamp, format: "%Y-%m-%dT%H:%M:%S.%f%Z")
 
       transform_remove_fields:
-        type: remove_fields
+        type: remap
         inputs:
           - final_task_log
           - filter_common_logs
-        fields:
-          - host
-          - file
+        source: |
+          del(.host)
+          del(.file)
 
     sinks:
       out:
