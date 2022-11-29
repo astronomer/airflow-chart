@@ -32,7 +32,7 @@ data:
           .component = "${COMPONENT:--}"
           .workspace = "${WORKSPACE:--}"
           .release = "${RELEASE:--}"
-          .date_nano = "%Y-%m-%dT%H:%M:%S.%f%Z"
+          .date_nano = timestamp(.date, "%Y-%m-%dT%H:%M:%S.%f%Z")
 
       filter_common_logs:
         type: filter
@@ -81,7 +81,7 @@ data:
           .component = "${COMPONENT:--}"
           .workspace = "${WORKSPACE:--}"
           .release = "${RELEASE:--}"
-          .date_nano = "%Y-%m-%dT%H:%M:%S.%f%Z"
+          .date_nano = timestamp(.date, "%Y-%m-%dT%H:%M:%S.%f%Z")
 
       transform_remove_fields:
         type: remap
