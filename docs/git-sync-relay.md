@@ -13,7 +13,7 @@ When using this chart outside of Astronomer, for instance when testing or develo
 First, create an ssh key that has no passphrase:
 
 ```sh
-ssh-keygen -P '' -t ed25519 -f ssh-sync-key-id -C "test key $USER@$HOSTNAME $(date +%FT%T%z)"
+ssh-keygen -P '' -t ed25519 -f airflow-git-ssh -C "test key $USER@$HOSTNAME $(date +%FT%T%z)"
 ```
 
 ### Create a k8s secret from the private key
@@ -21,12 +21,12 @@ ssh-keygen -P '' -t ed25519 -f ssh-sync-key-id -C "test key $USER@$HOSTNAME $(da
 We create a k8s generic secret where the key is stored under `data.gitSshKey`, which is the required location for the private key:
 
 ```sh
-kubectl create secret generic my-secret --from-file=gitSshKey=ssh-sync-key-id
+kubectl create secret generic git-ssh-private-key --from-file=gitSshKey=airflow-git-ssh
 ```
 
 ### Add the pub key to your repo
 
-Take the `ssh-sync-key-id.pub` contents and add it to your https://github.com/settings/keys or whatever server you're cloning from.
+Take the `airflow-git-ssh.pub` contents and add it to your https://github.com/settings/keys or whatever the equivalent is on the server you're cloning from.
 
 ### Install airflow-chart
 
@@ -36,18 +36,18 @@ Create a `values.yaml` file with contents similar to the following:
 gitSyncRelay:
   enabled: True
   repo:
-    url: https://github.com/astronomer/airflow-example-dags
+    url: ssh+git://git@github.com/astronomer/2-4-example-dags.git # this can be https:// for public repositories
     branch: main
     depth: 1 # default to a shallow clone because it is faster, though it sacrifices git history
     wait: 60 # seconds between synchronizations with upstream git repo
     subPath: dags # if your dags dir is not the repo root, specify the path relative to the repo root
-    sshPrivateKeySecretName: theGitSshPrivateKeyName # The name of a secret that holds the private key.
+    sshPrivateKeySecretName: git-ssh-private-key # This is the secret we created earlier. This is not requred with https git remotes.
 ```
 
 ### Install airflow
 
-Then install airflow like you normally would. Assuming your cwd is the root dir or the astronomer/airflow-chart repo:
+You must also follow the git-sync configuration setup that you would normally follow to install the apache airflow chart. The one customization you must make is to use the git repo served by the git-sync-relay's git-daemon pod as your git remote. That URL is `git://airflow-git-sync-relay.${NAMESPACE}.svc.cluster.local./git` where `${NAMESPACE}` is the airflow installation namespace. Once you have those values set up in your values.yaml file, you can install the astronomer airflow-chart:
 
 ```sh
-helm install airflow . -n aftest -f values.yaml
+helm install airflow . -n aftest -f values.yaml  # where `.` is the root of this repository checked out to your filesystem
 ```

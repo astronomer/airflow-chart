@@ -449,7 +449,7 @@ gitSyncRelay:
     depth: 1 # default to a shallow clone because it is faster and this isn't a dev environment
     wait: 60 # seconds between synchronizations with upstream git repo
     subPath: ~ # if your dags dir is not the repo root, specify the path relative to the repo root
-    sshPrivateKeySecretName: ~ # The name of a secret that holds the private key. This secret is not maintained by this chart. TODO: replace this URL with the master branch location https://github.com/astronomer/airflow-chart/blob/3708-git-sync/docs/git-sync-relay.md#configuration
+    sshPrivateKeySecretName: ~ # The name of a secret that holds the private key. This secret is not maintained by this chart.
     gitSyncTimeout: 300 # How long to wait for the clone or fetch to take before aborting
     # knownHosts can be generated with: ssh-keyscan -t ed25519 github.com 2>/dev/null
     knownHosts: |
