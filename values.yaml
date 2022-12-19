@@ -432,6 +432,14 @@ astronomer:
       repository: quay.io/astronomer/ap-certgenerator
       tag: 0.1.2
 
+cleanupTaskDataCronjob:
+  enabled: true
+  schedule: "* * * * *"
+  cleanBeforeTimestamp: ""
+  args: ["bash", "-c", "exec airflow db clean -clean-before-timestamp {{ .Values.cleanupTaskDataCronjob.cleanBeforeTimestamp}}"]
+  resources: {}
+  serviceAccount: true
+
 gitSyncRelay:
   enabled: ~
   uid: ~
