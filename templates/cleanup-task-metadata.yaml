@@ -43,13 +43,13 @@ spec:
               args: {{ tpl (toYaml .Values.cleanupTaskDataCronjob.args) . | nindent 16 }}
               volumeMounts:
                 - name: config
-                  mountPath: {{ template "custom_airflow_config_path" . }}
+                  mountPath: {{ template "cleanup_task_metadata_airflow_config_path" . }}
                   subPath: airflow.cfg
                   readOnly: true
               resources:
 {{ toYaml .Values.cleanupTaskDataCronjob.resources | indent 16 }}
           env:
-            {{- include "custom_standard_airflow_environment" . | indent 12 }}
+            {{- include "cleanup_task_metadata_standard_airflow_environment" . | indent 12 }}
           volumes:
             - name: config
               configMap:

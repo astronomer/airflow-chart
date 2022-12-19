@@ -278,17 +278,17 @@ Create the name of the cleanup service account to use
 {{- end -}}
 
 
-{{ define "custom_airflow_config_path" -}}
+{{ define "cleanup_task_metadata_airflow_config_path" -}}
 {{ (printf "%s/airflow.cfg" .Values.airflow.airflowHome) | quote }}
 {{- end }}
 
 
-{{ define "custom_airflow_metadata_secret" -}}
+{{ define "cleanup_task_metadata_airflow_metadata_secret" -}}
 {{ default (printf "%s-airflow-metadata" .Release.Name) .Values.airflow.data.metadataSecretName }}
 {{- end }}
 
 {{/* Standard Airflow environment variables */}}
-{{- define "custom_standard_airflow_environment" }}
+{{- define "cleanup_task_metadata_standard_airflow_environment" }}
   # Hard Coded Airflow Envs
   - name: ASTRONOMER__AIRFLOW__WORKER_LOG_RETENTION_DAYS
     value: "3"
@@ -311,21 +311,21 @@ Create the name of the cleanup service account to use
   - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
     valueFrom:
       secretKeyRef:
-        name: {{ template "custom_airflow_metadata_secret" . }}
+        name: {{ template "cleanup_task_metadata_airflow_metadata_secret" . }}
         key: connection
   {{- end }}
   {{- if .Values.airflow.enableBuiltInSecretEnvVars.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN }}
   - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
     valueFrom:
       secretKeyRef:
-        name: {{ template "custom_airflow_metadata_secret" . }}
+        name: {{ template "cleanup_task_metadata_airflow_metadata_secret" . }}
         key: connection
   {{- end }}
   {{- if .Values.airflow.enableBuiltInSecretEnvVars.AIRFLOW_CONN_AIRFLOW_DB }}
   - name: AIRFLOW_CONN_AIRFLOW_DB
     valueFrom:
       secretKeyRef:
-        name: {{ template "custom_airflow_metadata_secret" . }}
+        name: {{ template "cleanup_task_metadata_airflow_metadata_secret" . }}
         key: connection
   {{- end }}
   {{- if .Values.airflow.enableBuiltInSecretEnvVars.AIRFLOW__WEBSERVER__SECRET_KEY }}
