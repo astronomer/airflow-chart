@@ -1,8 +1,7 @@
-################################
-## Airflow Cleanup Task Metadata CronJob
-#################################
+###########################################
+## Airflow Cleanup Task Metadata CronJob  #
+###########################################
 {{- if .Values.cleanupTaskDataCronjob.enabled }}
-{{- $securityContext := include "airflowSecurityContext" (list . .Values.cleanup) }}
 {{- if semverCompare ">= 1.21.x" (include "kubeVersion" .) }}
 apiVersion: batch/v1
 {{- else }}
@@ -17,9 +16,6 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-{{- with .Values.labels }}
-{{ toYaml . | indent 4 }}
-{{- end }}
 spec:
   schedule: "{{ .Values.cleanupTaskDataCronjob.schedule }}"
   # The cron job does not allow concurrent runs; if it is time for a new job run and the previous job run hasn't finished yet, the cron job skips the new job run
@@ -40,23 +36,20 @@ spec:
           imagePullSecrets:
             - name: {{ template "registry_secret" . }}
           {{- end }}
-          securityContext: {{ $securityContext | nindent 12 }}
           containers:
             - name: airflow-cleanup-task-metadata
-              image: {{ template "airflow_image" . }}
-              imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
-              {{- if .Values.cleanupTaskDataCronjob.args }}
+              image: "{{ .Values.airflow.images.airflow.repository}}:{{ .Values.airflow.images.airflow.tag }}"
+              imagePullPolicy: {{ .Values.airflow.images.airflow.pullPolicy }}
               args: {{ tpl (toYaml .Values.cleanupTaskDataCronjob.args) . | nindent 16 }}
-              {{- end }}
-              env:
-              {{- include "standard_airflow_environment" . | indent 12 }}
               volumeMounts:
                 - name: config
-                  mountPath: {{ template "airflow_config_path" . }}
+                  mountPath: {{ template "custom_airflow_config_path" . }}
                   subPath: airflow.cfg
                   readOnly: true
               resources:
 {{ toYaml .Values.cleanupTaskDataCronjob.resources | indent 16 }}
+          env:
+            {{- include "custom_standard_airflow_environment" . | indent 12 }}
           volumes:
             - name: config
               configMap:
