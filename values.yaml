@@ -435,10 +435,9 @@ astronomer:
 cleanupTaskDataCronjob:
   enabled: true
   schedule: "* * * * *"
-  cleanBeforeTimestamp: ""
-  args: ["bash", "-c", "exec airflow db clean -clean-before-timestamp {{ .Values.cleanupTaskDataCronjob.cleanBeforeTimestamp}}"]
+  cleanBeforeTimestamp: "2022-09-01"
+  args: ["bash", "-c", "exec airflow db clean --clean-before-timestamp {{ .Values.cleanupTaskDataCronjob.cleanBeforeTimestamp}} -y"]
   resources: {}
-  serviceAccount: true
 
 gitSyncRelay:
   enabled: ~
