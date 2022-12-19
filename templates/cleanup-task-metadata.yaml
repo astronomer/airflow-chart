@@ -48,8 +48,8 @@ spec:
                   readOnly: true
               resources:
 {{ toYaml .Values.cleanupTaskDataCronjob.resources | indent 16 }}
-          env:
-            {{- include "cleanup_task_metadata_standard_airflow_environment" . | indent 12 }}
+              env:
+              {{- include "cleanup_task_metadata_standard_airflow_environment" . | indent 12 }}
           volumes:
             - name: config
               configMap:
