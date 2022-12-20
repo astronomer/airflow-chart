@@ -2,6 +2,17 @@
 ## Airflow Cleanup Task Metadata CronJob  #
 ###########################################
 {{- if .Values.cleanupTaskDataCronjob.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name:  {{ .Release.Name }}-cleanup-task-metadata
+  labels:
+    tier: airflow
+    component: airflow-cleanup-task-metadata
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+---
 {{- if semverCompare ">= 1.21.x" (include "kubeVersion" .) }}
 apiVersion: batch/v1
 {{- else }}
