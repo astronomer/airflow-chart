@@ -56,7 +56,7 @@ airflow:
 
 ### Install airflow
 
-You must also follow the git-sync configuration setup that you would normally follow to install the apache airflow chart. The one customization you must make is to use the git repo served by the git-sync-relay's git-daemon pod as your git remote. That URL is `git://airflow-git-sync-relay.${NAMESPACE}.svc.cluster.local./git` where `${NAMESPACE}` is the airflow installation namespace. Once you have those values set up in your values.yaml file, you can install the astronomer airflow-chart:
+Once you have those values set up in your values.yaml file, you can install the astronomer airflow-chart using this repo as your source:
 
 ```sh
 helm install airflow . -n aftest -f values.yaml  # where `.` is the root of this repository checked out to your filesystem
