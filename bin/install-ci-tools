@@ -23,7 +23,7 @@ echo "Installing Kubernetes in Docker (kind) version ${KIND_VERSION}..."
 if [[ -f /tmp/bin/kind ]]; then
   echo "Already installed in /tmp/bin. Skipping!"
 else
-  curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-"${OS}"-amd64 > /dev/null 2>&1
+  curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-${OS}-amd64" > /dev/null 2>&1
   chmod +x ./kind
   mv ./kind /tmp/bin/
 fi
