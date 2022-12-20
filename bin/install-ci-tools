@@ -6,7 +6,7 @@ if [[ -z "${KIND_VERSION}" ]]; then
 fi
 
 if [[ -z "${HELM_VERSION}" ]]; then
-  export HELM_VERSION="3.10.1"
+  export HELM_VERSION="3.10.3"
 fi
 
 # Determine the platform we are running on
