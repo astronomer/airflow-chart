@@ -38,20 +38,20 @@ spec:
           {{- end }}
           containers:
             - name: airflow-cleanup-task-metadata
-              image: "{{ .Values.airflow.images.airflow.repository}}:{{ .Values.airflow.images.airflow.tag }}"
+              image:  {{ template "airflow_image" .Subcharts.airflow }}
               imagePullPolicy: {{ .Values.airflow.images.airflow.pullPolicy }}
               args: {{ tpl (toYaml .Values.cleanupTaskDataCronjob.args) . | nindent 16 }}
               volumeMounts:
                 - name: config
-                  mountPath: {{ template "cleanup_task_metadata_airflow_config_path" . }}
+                  mountPath: {{ template "airflow_config_path" .Subcharts.airflow }}
                   subPath: airflow.cfg
                   readOnly: true
               resources:
 {{ toYaml .Values.cleanupTaskDataCronjob.resources | indent 16 }}
               env:
-              {{- include "cleanup_task_metadata_standard_airflow_environment" . | indent 12 }}
+              {{- include "standard_airflow_environment" .Subcharts.airflow | indent 12 }}
           volumes:
             - name: config
               configMap:
-                name: {{ template "airflow_config" . }}
+                name: {{ template "airflow_config" .Subcharts.airflow  }}
 {{- end }}
