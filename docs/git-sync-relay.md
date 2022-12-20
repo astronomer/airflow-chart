@@ -42,6 +42,16 @@ gitSyncRelay:
     wait: 60 # seconds between synchronizations with upstream git repo
     subPath: dags # if your dags dir is not the repo root, specify the path relative to the repo root
     sshPrivateKeySecretName: git-ssh-private-key # This is the secret we created earlier. This is not requred with https git remotes.
+
+airflow:
+  dags:
+    gitSync:
+      enabled: True
+      repo: git://airflow-git-sync-relay.${NAMESPACE}.svc.cluster.local./git
+      branch: main
+  dagDeployment:
+    repositoryUrl: https://github.com/astronomer/2-4-example-dags
+    type: git_sync
 ```
 
 ### Install airflow
