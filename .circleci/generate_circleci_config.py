@@ -15,7 +15,7 @@ kube_versions = ["1.21.14", "1.22.15", "1.23.13", "1.24.7"]
 remote_docker_version = "20.10.18"
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
-ci_runner_version = "2022-11"
+ci_runner_version = "2022-12"
 
 
 def main():
