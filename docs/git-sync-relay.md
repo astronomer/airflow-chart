@@ -49,9 +49,6 @@ airflow:
       enabled: True
       repo: git://airflow-git-sync-relay.${NAMESPACE}.svc.cluster.local./git
       branch: main
-  dagDeployment:
-    repositoryUrl: https://github.com/astronomer/2-4-example-dags
-    type: git_sync
 ```
 
 ### Install airflow
