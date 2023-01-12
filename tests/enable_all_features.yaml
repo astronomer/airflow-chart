@@ -1,0 +1,16 @@
+airflow:
+  workers:
+    persistence:
+      enabled: true
+authSidecar:
+  enabled: true
+gitSyncRelay:
+  enabled: true
+ingress:
+  enabled: true
+loggingSidecar:
+  enabled: true
+sccEnabled: true
+workers:
+  autoscaling:
+    enabled: true
