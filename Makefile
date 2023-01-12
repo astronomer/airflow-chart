@@ -25,3 +25,9 @@ clean: ## Clean build and test artifacts
 update-requirements: ## Update all requirements.txt files
 	for FILE in tests/chart_tests/requirements.in tests/functional-tests/requirements.in ; do pip-compile --generate-hashes --quiet --allow-unsafe --upgrade $${FILE} ; done ;
 	-pre-commit run requirements-txt-fixer --all-files --show-diff-on-failure
+
+.PHONY: show-docker-images
+show-docker-images: ## Show all docker images and versions used in the helm chart
+	@helm template . 2>/dev/null \
+		-f tests/enable_all_features.yaml \
+		| gawk '/image: / {match($$2, /(([^"]*):[^"]*)/, a) ; printf "https://%s %s\n", a[2], a[1] ;}' | sort -u | column -t
