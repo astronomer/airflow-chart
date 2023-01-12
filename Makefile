@@ -13,8 +13,8 @@ charts: ## Update dependent charts
 
 .PHONY: unittest-chart
 unittest-chart: charts venv ## Unittest the helm chart
-	# Protip: you can modify pytest behavior like: PYTEST_ADDOPTS='-v --maxfail=1 --pdb -k 1.20' make unittest-chart
-	venv/bin/python -m pytest tests/chart_tests
+	# Protip: you can modify pytest behavior like: make unittest-chart PYTEST_ADDOPTS='-v --maxfail=1 --pdb -k 1.20'
+	venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml tests/chart_tests
 
 .PHONY: clean
 clean: ## Clean build and test artifacts
@@ -24,4 +24,10 @@ clean: ## Clean build and test artifacts
 .PHONY: update-requirements
 update-requirements: ## Update all requirements.txt files
 	for FILE in tests/chart_tests/requirements.in tests/functional-tests/requirements.in ; do pip-compile --generate-hashes --quiet --allow-unsafe --upgrade $${FILE} ; done ;
-	pre-commit run requirements-txt-fixer --all-files --show-diff-on-failure
+	-pre-commit run requirements-txt-fixer --all-files --show-diff-on-failure
+
+.PHONY: show-docker-images
+show-docker-images: ## Show all docker images and versions used in the helm chart
+	@helm template . 2>/dev/null \
+		-f tests/enable_all_features.yaml \
+		| gawk '/image: / {match($$2, /(([^"]*):[^"]*)/, a) ; printf "https://%s %s\n", a[2], a[1] ;}' | sort -u | column -t
