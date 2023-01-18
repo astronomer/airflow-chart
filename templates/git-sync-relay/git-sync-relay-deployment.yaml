@@ -85,7 +85,7 @@ spec:
             {{- end }}
             {{- end }}
           resources:
-            {{- toYaml .Values.gitSyncRelay.resources| nindent 12 }}
+            {{- toYaml .Values.gitSyncRelay.resources | nindent 12 }}
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
           volumeMounts:
