@@ -440,7 +440,7 @@ gitSyncRelay:
   enabled: ~
   gitSyncResources: {}
   gitDaemonResources: {}
-  uid: ~
+  securityContext: {}
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"

@@ -29,7 +29,7 @@ spec:
         heritage: {{ .Release.Service }}
     spec:
       securityContext:
-        fsGroup: {{ .Values.gitSyncRelay.uid }}
+{{ toYaml .Values.gitSyncRelay.securityContext | indent 8 }}
       volumes:
         - name: git-repo-contents
           emptyDir: {}
