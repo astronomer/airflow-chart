@@ -185,8 +185,8 @@ class TestGitSyncRelayDeployment:
     def test_gsr_deployment_with_resource_overrides(self, kube_version):
         """Test that gitsync relay deployment are configurable with custom resource limits."""
         resources = {
-            "requests": {"cpu": 0.1, "memory": "512Mi"},
-            "limits": {"cpu": 0.1, "memory": "512Mi"},
+            "requests": {"cpu": 99.5, "memory": "777Mi"},
+            "limits": {"cpu": 99.6, "memory": "888Mi"},
         }
         values = {
             "gitSyncRelay": {
