@@ -181,3 +181,53 @@ class TestGitSyncRelayDeployment:
             "--root=/git",
         ]
         assert c_by_name["git-daemon"]["livenessProbe"]
+
+    def test_gsr_deployment_with_resource_overrides(self, kube_version):
+        """Test that gitsync  deployment are configurable with custom resource limits."""
+        resources = {
+            "requests": {"cpu": 0.1, "memory": "512Mi"},
+            "limits": {"cpu": 0.1, "memory": "512Mi"},
+        }
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "gitSyncResources": resources,
+                "gitDaemonResources": resources,
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        c_by_name = {
+            c["name"]: c for c in doc["spec"]["template"]["spec"]["containers"]
+        }
+        assert c_by_name["git-sync"]["resources"] == resources
+        assert c_by_name["git-daemon"]["resources"] == resources
+
+    def test_gsr_deployment_with_securitycontext_overrides(self, kube_version):
+        """Test that gitsync  deployment are configurable with custom securitycontext."""
+        gsrsecuritycontext = {"runAsUser": 65533, "privileged": True}
+        values = {
+            "gitSyncRelay": {"enabled": True, "securityContext": gsrsecuritycontext}
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        print(doc["spec"]["template"]["spec"]["securityContext"])
+        assert gsrsecuritycontext == doc["spec"]["template"]["spec"]["securityContext"]
