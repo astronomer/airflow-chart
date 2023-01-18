@@ -214,7 +214,7 @@ class TestGitSyncRelayDeployment:
 
     def test_gsr_deployment_with_securitycontext_overrides(self, kube_version):
         """Test that gitsync  deployment are configurable with custom securitycontext."""
-        gsrsecuritycontext = {"runAsUser": 65533, "privileged": True}
+        gsrsecuritycontext = {"runAsUser": 12345, "privileged": True}
         values = {
             "gitSyncRelay": {"enabled": True, "securityContext": gsrsecuritycontext}
         }
