@@ -183,7 +183,7 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-daemon"]["livenessProbe"]
 
     def test_gsr_deployment_with_resource_overrides(self, kube_version):
-        """Test that gitsync  deployment are configurable with custom resource limits."""
+        """Test that gitsync relay deployment are configurable with custom resource limits."""
         resources = {
             "requests": {"cpu": 0.1, "memory": "512Mi"},
             "limits": {"cpu": 0.1, "memory": "512Mi"},
