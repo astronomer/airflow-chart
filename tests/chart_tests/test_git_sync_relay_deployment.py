@@ -229,5 +229,4 @@ class TestGitSyncRelayDeployment:
         assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
-        print(doc["spec"]["template"]["spec"]["securityContext"])
         assert gsrsecuritycontext == doc["spec"]["template"]["spec"]["securityContext"]
