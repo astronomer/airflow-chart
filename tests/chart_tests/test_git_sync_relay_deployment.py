@@ -3,6 +3,7 @@ import pytest
 from tests.chart_tests.helm_template_generator import render_chart
 
 from .. import supported_k8s_versions
+from . import get_containers_by_name
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
@@ -29,9 +30,7 @@ class TestGitSyncRelayDeployment:
         assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
-        c_by_name = {
-            c["name"]: c for c in doc["spec"]["template"]["spec"]["containers"]
-        }
+        c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert c_by_name["git-sync"]["image"].startswith(
             "quay.io/astronomer/ap-git-sync:"
@@ -68,10 +67,7 @@ class TestGitSyncRelayDeployment:
         assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
-        c_by_name = {
-            c["name"]: c for c in doc["spec"]["template"]["spec"]["containers"]
-        }
-
+        c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert doc["spec"]["template"]["spec"]["volumes"] == [
             {"name": "git-repo-contents", "emptyDir": {}},
@@ -149,10 +145,7 @@ class TestGitSyncRelayDeployment:
         assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
-        c_by_name = {
-            c["name"]: c for c in doc["spec"]["template"]["spec"]["containers"]
-        }
-
+        c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert doc["spec"]["template"]["spec"]["volumes"] == [
             {"name": "git-repo-contents", "emptyDir": {}},
@@ -181,3 +174,50 @@ class TestGitSyncRelayDeployment:
             "--root=/git",
         ]
         assert c_by_name["git-daemon"]["livenessProbe"]
+
+    def test_gsr_deployment_with_resource_overrides(self, kube_version):
+        """Test that gitsync relay deployment are configurable with custom resource limits."""
+        resources = {
+            "requests": {"cpu": 99.5, "memory": "777Mi"},
+            "limits": {"cpu": 99.6, "memory": "888Mi"},
+        }
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "gitSyncResources": resources,
+                "gitDaemonResources": resources,
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        c_by_name = get_containers_by_name(doc)
+        assert c_by_name["git-sync"]["resources"] == resources
+        assert c_by_name["git-daemon"]["resources"] == resources
+
+    def test_gsr_deployment_with_securitycontext_overrides(self, kube_version):
+        """Test that gitsync  deployment are configurable with custom securitycontext."""
+        gsrsecuritycontext = {"runAsUser": 12345, "privileged": True}
+        values = {
+            "gitSyncRelay": {"enabled": True, "securityContext": gsrsecuritycontext}
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        assert gsrsecuritycontext == doc["spec"]["template"]["spec"]["securityContext"]
