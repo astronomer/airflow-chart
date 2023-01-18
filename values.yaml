@@ -438,7 +438,9 @@ astronomer:
 
 gitSyncRelay:
   enabled: ~
-  uid: ~
+  gitSyncResources: {}
+  gitDaemonResources: {}
+  securityContext: {}
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
@@ -446,7 +448,6 @@ gitSyncRelay:
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync"
       tag: "3.6.2"
-
   repo:
     url: ~
     branch: main
