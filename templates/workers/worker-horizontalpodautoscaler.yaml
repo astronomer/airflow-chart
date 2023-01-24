@@ -30,9 +30,21 @@ spec:
     - type: Resource
       resource:
         name: cpu
+        { { - if semverCompare "<1.25-0" .Capabilities.KubeVersion.Version } }
         targetAverageUtilization: {{ .Values.workers.autoscaling.targetCPUUtilization }}
+        { { - else } }
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.workers.autoscaling.targetCPUUtilization }}
+        { { - end } }
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.workers.autoscaling.targetMemoryUtilization }}
+        { { - if semverCompare "<1.25-0" .Capabilities.KubeVersion.Version } }
+        targetAverageUtilization: { { .Values.workers.autoscaling.targetMemoryUtilization } }
+        { { - else } }
+        target:
+          type: Utilization
+          averageUtilization: { { .Values.workers.autoscaling.targetMemoryUtilization } }
+        { { - end } }
 {{- end }}
