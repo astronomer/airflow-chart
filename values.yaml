@@ -363,18 +363,6 @@ airflow:
   # Should the Astronomer Security Manager be used for the webserver
   useAstroSecurityManager: False
 
-# Airflow Worker Config
-# TODO: should this be under airflow.workers just for consistency?
-# TODO: does the platform actually enable this in some cases?
-workers:
-  # Apply a HorizontalPodAutoscaler
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 10
-    targetCPUUtilization: 80
-    targetMemoryUtilization: 80
-
 # Enable security context constraints required for OpenShift
 sccEnabled: false
 

@@ -11,6 +11,3 @@ ingress:
 loggingSidecar:
   enabled: true
 sccEnabled: true
-workers:
-  autoscaling:
-    enabled: true

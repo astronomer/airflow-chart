@@ -13,30 +13,6 @@ helm repo add astronomer https://helm.astronomer.io
 helm install airflow --namespace airflow astronomer/airflow
 ```
 
-To install airflow with the KEDA autoscaler
-
-```sh
-helm repo add kedacore https://kedacore.github.io/charts
-helm repo add astronomer https://helm.astronomer.io
-
-helm repo update
-
-kubectl create namespace keda
-helm install keda \
-    --namespace keda kedacore/keda \
-    --version "v1.5.0"
-
-kubectl create namespace airflow
-
-helm install airflow \
-    --set executor=CeleryExecutor \
-    --set workers.keda.enabled=true \
-    --set workers.persistence.enabled=false \
-    --namespace airflow \
-    astronomer/airflow
-
-```
-
 To install this repository from source
 
 ```sh
@@ -107,33 +83,28 @@ The complete list of parameters supported by the community chart can be found on
 
 The following tables lists the configurable parameters of the Astronomer chart and their default values.
 
-| Parameter                                     | Description                                                                                               | Default                       |
-| :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------- | :---------------------------- |
-| `ingress.enabled`                             | Enable Kubernetes Ingress support                                                                         | `false`                       |
-| `ingress.acme`                                | Add acme annotations to Ingress object                                                                    | `false`                       |
-| `ingress.tlsSecretName`                       | Name of secret that contains a TLS secret                                                                 | `~`                           |
-| `ingress.webserverAnnotations`                | Annotations added to Webserver Ingress object                                                             | `{}`                          |
-| `ingress.flowerAnnotations`                   | Annotations added to Flower Ingress object                                                                | `{}`                          |
-| `ingress.baseDomain`                          | Base domain for VHOSTs                                                                                    | `~`                           |
-| `ingress.auth.enabled`                        | Enable auth with Astronomer Platform                                                                      | `true`                        |
-| `workers.autoscaling.enabled`                 | Traditional HorizontalPodAutoscaler                                                                       | `false`                       |
-| `workers.autoscaling.minReplicas`             | Minimum amount of workers                                                                                 | `1`                           |
-| `workers.autoscaling.maxReplicas`             | Maximum amount of workers                                                                                 | `10`                          |
-| `workers.autoscaling.targetCPUUtilization`    | Target CPU Utilization of workers                                                                         | `80`                          |
-| `workers.autoscaling.targetMemoryUtilization` | Target Memory Utilization of workers                                                                      | `80`                          |
-| `extraObjects`                                | Extra K8s Objects to deploy (these are passed through `tpl`). More about [Extra Objects](#extra-objects). | `[]`                          |
-| `sccEnabled`                                  | Enable security context constraints required for OpenShift                                                | `false`                       |
-| `authSidecar.enabled`                         | Enable authSidecar                                                                                        | `false`                       |
-| `authSidecar.repository`                      | The image for the auth sidecar proxy                                                                      | `nginxinc/nginx-unprivileged` |
-| `authSidecar.tag`                             | The image tag for the auth sidecar proxy                                                                  | `stable`                      |
-| `authSidecar.pullPolicy`                      | The K8s pullPolicy for the the auth sidecar proxy image                                                   | `IfNotPresent`                |
-| `authSidecar.port`                            | The port the auth sidecar exposes                                                                         | `8084`                        |
-| `gitSyncRelay.enabled`                        | Enables [git sync relay](docs/git-sync-relay.md) feature.                                                 | `False`                       |
-| `gitSyncRelay.repo.url`                       | Upstream URL to the git repo to clone.                                                                    | `~`                           |
-| `gitSyncRelay.repo.branch`                    | Branch of the upstream git repo to checkout.                                                              | `main`                        |
-| `gitSyncRelay.repo.depth`                     | How many revisions to check out. Leave as default `1` except in dev where history is needed.              | `1`                           |
-| `gitSyncRelay.repo.wait`                      | Seconds to wait before pulling from the upstream remote.                                                  | `60`                          |
-| `gitSyncRelay.repo.subPath`                   | Path to the dags directory within the git repository.                                                     | `~`                           |
+| Parameter                      | Description                                                                                               | Default                       |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------- | :---------------------------- |
+| `ingress.enabled`              | Enable Kubernetes Ingress support                                                                         | `false`                       |
+| `ingress.acme`                 | Add acme annotations to Ingress object                                                                    | `false`                       |
+| `ingress.tlsSecretName`        | Name of secret that contains a TLS secret                                                                 | `~`                           |
+| `ingress.webserverAnnotations` | Annotations added to Webserver Ingress object                                                             | `{}`                          |
+| `ingress.flowerAnnotations`    | Annotations added to Flower Ingress object                                                                | `{}`                          |
+| `ingress.baseDomain`           | Base domain for VHOSTs                                                                                    | `~`                           |
+| `ingress.auth.enabled`         | Enable auth with Astronomer Platform                                                                      | `true`                        |
+| `extraObjects`                 | Extra K8s Objects to deploy (these are passed through `tpl`). More about [Extra Objects](#extra-objects). | `[]`                          |
+| `sccEnabled`                   | Enable security context constraints required for OpenShift                                                | `false`                       |
+| `authSidecar.enabled`          | Enable authSidecar                                                                                        | `false`                       |
+| `authSidecar.repository`       | The image for the auth sidecar proxy                                                                      | `nginxinc/nginx-unprivileged` |
+| `authSidecar.tag`              | The image tag for the auth sidecar proxy                                                                  | `stable`                      |
+| `authSidecar.pullPolicy`       | The K8s pullPolicy for the the auth sidecar proxy image                                                   | `IfNotPresent`                |
+| `authSidecar.port`             | The port the auth sidecar exposes                                                                         | `8084`                        |
+| `gitSyncRelay.enabled`         | Enables [git sync relay](docs/git-sync-relay.md) feature.                                                 | `False`                       |
+| `gitSyncRelay.repo.url`        | Upstream URL to the git repo to clone.                                                                    | `~`                           |
+| `gitSyncRelay.repo.branch`     | Branch of the upstream git repo to checkout.                                                              | `main`                        |
+| `gitSyncRelay.repo.depth`      | How many revisions to check out. Leave as default `1` except in dev where history is needed.              | `1`                           |
+| `gitSyncRelay.repo.wait`       | Seconds to wait before pulling from the upstream remote.                                                  | `60`                          |
+| `gitSyncRelay.repo.subPath`    | Path to the dags directory within the git repository.                                                     | `~`                           |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
@@ -141,42 +112,6 @@ Specify each parameter using the `--set key=value[,key=value]` argument to `helm
 helm install --name my-release \
   --set executor=CeleryExecutor \
   --set enablePodLaunching=false .
-```
-
-## Autoscaling with KEDA
-
-KEDA stands for Kubernetes Event Driven Autoscaling. [KEDA](https://github.com/kedacore/keda) is a custom controller that allows users to create custom bindings
-to the Kubernetes [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
-We've built an experimental scaler that allows users to create scalers based on postgreSQL queries. For the moment this exists
-on a separate branch, but will be merged upstream soon. To install our custom version of KEDA on your cluster, please run
-
-```sh
-helm repo add kedacore https://kedacore.github.io/charts
-
-helm repo update
-
-helm install \
-    --set image.keda=docker.io/kedacore/keda:1.2.0 \
-    --set image.metricsAdapter=docker.io/kedacore/keda-metrics-adapter:1.2.0 \
-    --namespace keda --name keda kedacore/keda
-```
-
-Once KEDA is installed (which should be pretty quick since there is only one pod). You can try out KEDA autoscaling
-on this chart by setting `workers.keda.enabled=true` your helm command or in the `values.yaml`.
-(Note: KEDA does not support StatefulSets so you need to set `worker.persistence.enabled` to `false`)
-
-```sh
-helm repo add astronomer https://helm.astronomer.io
-helm repo update
-
-kubectl create namespace airflow
-
-helm install airflow \
-    --set executor=CeleryExecutor \
-    --set workers.keda.enabled=true \
-    --set workers.persistence.enabled=false \
-    --namespace airflow \
-    astronomer/airflow
 ```
 
 ## Walkthrough using kind
