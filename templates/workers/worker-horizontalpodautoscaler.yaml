@@ -2,7 +2,11 @@
 ## Airflow Worker HorizontalPodAutoscaler
 #################################
 {{- if (and .Values.workers.autoscaling.enabled (eq .Values.airflow.executor "CeleryExecutor")) }}
+{{- if semverCompare "<1.25-0" .Capabilities.KubeVersion.Version }}
 apiVersion: autoscaling/v2beta1
+{{- else }}
+apiVersion: autoscaling/v2
+{{- end}}
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ .Release.Name }}-worker
