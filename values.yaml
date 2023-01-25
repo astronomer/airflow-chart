@@ -35,13 +35,13 @@ airflow:
       tag: 6.2.6
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
-      tag: 1.17.0-5
+      tag: 1.17.0-8
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.13.0-6
+      tag: 0.13.0-9
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
-      tag: 3.6.1
+      tag: 3.6.2
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
@@ -416,4 +416,4 @@ astronomer:
   images:
     certgenerator:
       repository: quay.io/astronomer/ap-certgenerator
-      tag: 0.1.2
+      tag: 0.1.4
