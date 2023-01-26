@@ -3,6 +3,10 @@
 This file documents any backwards-incompatible changes in the Astronomer Airflow Helm chart and
 assists users migrating to a new version.
 
+## 1.8.0
+
+We have removed an unsupported HPA feature in version 1.8.0. If users need HPA, they should migrate to using `extraObjects` to define their HPA components.
+
 ## 1.0.0
 
 `1.0.0` takes a new approach by building on top of the official community Helm chart. This changes requires some renaming and adjusting in your values, documented below.
