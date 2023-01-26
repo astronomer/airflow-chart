@@ -2,7 +2,7 @@
 ## Airflow Worker HorizontalPodAutoscaler
 #################################
 {{- if (and .Values.workers.autoscaling.enabled (eq .Values.airflow.executor "CeleryExecutor")) }}
-apiVersion: autoscaling/v2beta1
+apiVersion: {{ template "apiVersion.HorizontalPodAutoscaler" . }}
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ .Release.Name }}-worker
@@ -22,6 +22,7 @@ spec:
     name: {{ .Release.Name }}-worker
   minReplicas: {{ .Values.workers.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.workers.autoscaling.maxReplicas }}
+  {{- if semverCompare "<1.25-0" .Capabilities.KubeVersion.Version}}
   metrics:
     - type: Resource
       resource:
@@ -31,4 +32,19 @@ spec:
       resource:
         name: memory
         targetAverageUtilization: {{ .Values.workers.autoscaling.targetMemoryUtilization }}
+  {{- else}}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.workers.autoscaling.targetCPUUtilization }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.workers.autoscaling.targetMemoryUtilization }}
+  {{- end }}
 {{- end }}
