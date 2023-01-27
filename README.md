@@ -2,6 +2,8 @@
 
 This chart will bootstrap an [Airflow](https://github.com/astronomer/ap-airflow) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
+The version of this chart does not correlate to any other component. If it happens to align with OSS airflow that is just a coincidence. Users should not expect feature parity between OSS airflow chart and the Astronomer airflow-chart for identical version numbers.
+
 ## Quickstart
 
 To install this helm chart remotely (using helm 3)
