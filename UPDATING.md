@@ -5,7 +5,7 @@ assists users migrating to a new version.
 
 ## 1.8.0
 
-We have removed an unsupported HPA feature in version 1.8.0. If users need HPA, they should migrate to using `extraObjects` to define their HPA components.
+We have removed an unsupported HPA feature in version 1.8.0. If users need HPA, they should use `extraObjects` to define their HPA components.
 
 ## 1.0.0
 
