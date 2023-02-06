@@ -381,7 +381,7 @@ loggingSidecar:
   enabled: false
   name: sidecar-logging-consumer
   customConfig: false
-
+  indexPattern: ~
 # Ingress configuration
 ingress:
   # Enable ingress resource
