@@ -3,4 +3,5 @@ kubernetes
 pdbpp
 pre-commit
 pytest
+pytest-pretty
 pytest-testinfra
