@@ -104,4 +104,7 @@ spec:
             periodSeconds: 15
           resources:
             {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
+{{- if .Values.gitSyncRelay.extraContainers }}
+{{- toYaml .Values.gitSyncRelay.extraContainers | nindent 8 }}
+{{- end }}
 {{- end -}}
