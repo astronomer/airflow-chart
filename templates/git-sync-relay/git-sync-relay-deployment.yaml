@@ -47,10 +47,10 @@ spec:
           args:
           # https://github.com/kubernetes/git-sync#parameters
             {{- if .Values.loggingSidecar.enabled }}
-            [   
+            [
                 "sh",
                 "-c",
-                "/git-sync", 
+                "/git-sync",
                 "--repo={{ .Values.gitSyncRelay.repo.url }}",
                 "--branch={{ .Values.gitSyncRelay.repo.branch }}",
                 "--depth={{ .Values.gitSyncRelay.repo.depth }}",
@@ -65,7 +65,7 @@ spec:
             - "--wait={{ .Values.gitSyncRelay.repo.wait }}"
             - "--root=/git"
             {{- end }}
-            
+
           volumeMounts:
             {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: git-secret
