@@ -81,7 +81,6 @@ class TestLoggingSidecar:
         )
         assert len(docs) == 1
         assert (vc := yaml.safe_load(docs[0]["data"]["vector-config.yaml"]))
-        print(vc)
         assert vc["sinks"]["out"]["bulk"] == {
             "index": "vector.${RELEASE:--}.%Y.%m",
             "action": "create",
