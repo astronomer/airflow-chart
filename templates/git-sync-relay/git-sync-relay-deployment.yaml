@@ -44,27 +44,24 @@ spec:
       containers:
         - name: "git-sync"
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
-          args:
+          {{- if .Values.loggingSidecar.enabled }}
           # https://github.com/kubernetes/git-sync#parameters
-            {{- if .Values.loggingSidecar.enabled }}
-            [
-                "sh",
-                "-c",
-                "/git-sync",
-                "--repo={{ .Values.gitSyncRelay.repo.url }}",
-                "--branch={{ .Values.gitSyncRelay.repo.branch }}",
-                "--depth={{ .Values.gitSyncRelay.repo.depth }}",
-                "--wait={{ .Values.gitSyncRelay.repo.wait }}",
-                "--root=/git",
-                "1> >( tee -a /var/log/git-sync/out.log ) 2> >( tee -a /var/log/git-sync/err.log >&2 )"
-            ]
-            {{- else }}
+          command: ["bash"]
+          args:
+            - -c
+            - |-
+              if [[ ! -d /tmp/git-sync ]]; then
+                mkdir -p /tmp/git-sync
+              fi
+              /git-sync --repo={{ .Values.gitSyncRelay.repo.url }} --branch={{ .Values.gitSyncRelay.repo.branch }} --depth={{ .Values.gitSyncRelay.repo.depth }} --wait={{ .Values.gitSyncRelay.repo.wait }} --root=/git 1> >( tee -a /var/log/git-sync/out.log ) 2> >( tee -a /var/log/git-sync/err.log >&2 )
+          {{- else }}
+          args:
             - "--repo={{ .Values.gitSyncRelay.repo.url }}"
             - "--branch={{ .Values.gitSyncRelay.repo.branch }}"
             - "--depth={{ .Values.gitSyncRelay.repo.depth }}"
             - "--wait={{ .Values.gitSyncRelay.repo.wait }}"
             - "--root=/git"
-            {{- end }}
+          {{- end }}
 
           volumeMounts:
             {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
