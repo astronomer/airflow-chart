@@ -44,8 +44,10 @@ spec:
         - name: {{ .Release.Name }}-git-sync-config
           configMap:
             name: {{ .Release.Name }}-git-sync-config
+        {{- if .Values.loggingSidecar.enabled }}
         - emptyDir: {}
           name: sidecar-logging-consumer
+        {{- end }}
       containers:
         - name: "git-sync"
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
@@ -83,8 +85,10 @@ spec:
             {{- end }}
             - name: git-repo-contents
               mountPath: /git
+            {{- if .Values.loggingSidecar.enabled }}
             - mountPath: /var/log/sidecar-logging-consumer
               name: sidecar-logging-consumer
+            {{- end }}
           env:
             - name: GIT_ROOT
               value: "/git"
@@ -123,7 +127,9 @@ spec:
             periodSeconds: 15
           resources:
             {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
+        {{- if .Values.loggingSidecar.enabled }}
         - name: vector
+          image: "{{ .Values.loggingSidecar.image }}:{{ .Values.loggingSidecar.tag }}"
           env:
           - name: VECTOR_CONFIG
             value: /etc/sidecar-logging/vector-config.yaml
@@ -144,13 +150,13 @@ spec:
               fieldRef:
                 apiVersion: v1
                 fieldPath: metadata.labels['workspace']
-          image: quay.io/astronomer/ap-vector:0.26.0
           volumeMounts:
           - mountPath: /etc/sidecar-logging
             name: config-volume
           - name: sidecar-logging-consumer
             mountPath: /var/log/sidecar-logging-consumer
             readOnly: False
+          {{- end }}
 
 {{- if .Values.gitSyncRelay.extraContainers }}
 {{- toYaml .Values.gitSyncRelay.extraContainers | nindent 8 }}
