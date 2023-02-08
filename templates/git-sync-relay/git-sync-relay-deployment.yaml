@@ -38,13 +38,13 @@ spec:
           secret:
             secretName: {{ .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
         {{- end }}
-        - name: config-volume
-          configMap:
-            name: {{ .Release.Name }}-sidecar-config
         - name: {{ .Release.Name }}-git-sync-config
           configMap:
             name: {{ .Release.Name }}-git-sync-config
         {{- if .Values.loggingSidecar.enabled }}
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-sidecar-config
         - emptyDir: {}
           name: sidecar-logging-consumer
         {{- end }}
