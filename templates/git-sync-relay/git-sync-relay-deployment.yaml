@@ -50,10 +50,10 @@ spec:
           args:
             - -c
             - |-
-              if [[ ! -d /tmp/git-sync ]]; then
-                mkdir -p /tmp/git-sync
+              if [[ ! -d /git/git-sync ]]; then
+                mkdir -p /git/git-sync
               fi
-              /git-sync --repo={{ .Values.gitSyncRelay.repo.url }} --branch={{ .Values.gitSyncRelay.repo.branch }} --depth={{ .Values.gitSyncRelay.repo.depth }} --wait={{ .Values.gitSyncRelay.repo.wait }} --root=/git 1> >( tee -a /tmp/git-sync/out.log ) 2> >( tee -a /tmp/git-sync/err.log >&2 )
+              /git-sync --repo={{ .Values.gitSyncRelay.repo.url }} --branch={{ .Values.gitSyncRelay.repo.branch }} --depth={{ .Values.gitSyncRelay.repo.depth }} --wait={{ .Values.gitSyncRelay.repo.wait }} --root=/git 1> >( tee -a /git/git-sync/out.log ) 2> >( tee -a /git/git-sync/err.log >&2 )
           {{- else }}
           args:
             - "--repo={{ .Values.gitSyncRelay.repo.url }}"
