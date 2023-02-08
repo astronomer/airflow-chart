@@ -38,9 +38,14 @@ spec:
           secret:
             secretName: {{ .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
         {{- end }}
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-sidecar-config
         - name: {{ .Release.Name }}-git-sync-config
           configMap:
             name: {{ .Release.Name }}-git-sync-config
+        - emptyDir: {}
+          name: sidecar-logging-consumer
       containers:
         - name: "git-sync"
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
@@ -50,10 +55,10 @@ spec:
           args:
             - -c
             - |-
-              if [[ ! -d /git/git-sync ]]; then
-                mkdir -p /git/git-sync
+              if [[ ! -d /var/log/sidecar-logging-consumer ]]; then
+                mkdir -p /var/log/sidecar-logging-consumer
               fi
-              /git-sync --repo={{ .Values.gitSyncRelay.repo.url }} --branch={{ .Values.gitSyncRelay.repo.branch }} --depth={{ .Values.gitSyncRelay.repo.depth }} --wait={{ .Values.gitSyncRelay.repo.wait }} --root=/git 1> >( tee -a /git/git-sync/out.log ) 2> >( tee -a /git/git-sync/err.log >&2 )
+              /git-sync --repo={{ .Values.gitSyncRelay.repo.url }} --branch={{ .Values.gitSyncRelay.repo.branch }} --depth={{ .Values.gitSyncRelay.repo.depth }} --wait={{ .Values.gitSyncRelay.repo.wait }} --root=/git 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )
           {{- else }}
           args:
             - "--repo={{ .Values.gitSyncRelay.repo.url }}"
@@ -78,6 +83,8 @@ spec:
             {{- end }}
             - name: git-repo-contents
               mountPath: /git
+            - mountPath: /var/log/sidecar-logging-consumer
+              name: sidecar-logging-consumer
           env:
             - name: GIT_ROOT
               value: "/git"
@@ -116,6 +123,35 @@ spec:
             periodSeconds: 15
           resources:
             {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
+        - name: vector
+          env:
+          - name: VECTOR_CONFIG
+            value: /etc/sidecar-logging/vector-config.yaml
+          - name: SIDECAR_LOGS
+            value: /var/log/sidecar-logging-consumer
+          - name: COMPONENT
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.labels['component']
+          - name: RELEASE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.labels['release']
+          - name: WORKSPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.labels['workspace']
+          image: quay.io/astronomer/ap-vector:0.26.0
+          volumeMounts:
+          - mountPath: /etc/sidecar-logging
+            name: config-volume
+          - name: sidecar-logging-consumer
+            mountPath: /var/log/sidecar-logging-consumer
+            readOnly: False
+
 {{- if .Values.gitSyncRelay.extraContainers }}
 {{- toYaml .Values.gitSyncRelay.extraContainers | nindent 8 }}
 {{- end }}
