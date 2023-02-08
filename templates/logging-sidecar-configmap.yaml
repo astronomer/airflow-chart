@@ -58,6 +58,14 @@ data:
           type: "vrl"
           source: 'includes(["worker"], .component)'
 
+      filter_gitsyncrelay_logs:
+        type: filter
+        inputs:
+          - transform_syslog
+        condition:
+          type: "vrl"
+          source: 'includes(["git-sync-relay"], .component)'
+
       transform_task_log:
         type: remap
         inputs:
@@ -88,6 +96,7 @@ data:
         inputs:
           - final_task_log
           - filter_common_logs
+          - filter_gitsyncrelay_logs
         source: |
           del(.host)
           del(.file)
