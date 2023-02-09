@@ -129,7 +129,7 @@ spec:
             {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
         {{- if .Values.loggingSidecar.enabled }}
         - name: vector
-          image: "{{ .Values.loggingSidecar.image }}:{{ .Values.loggingSidecar.tag }}"
+          image: "{{ .Values.loggingSidecar.image }}"
           env:
           - name: VECTOR_CONFIG
             value: /etc/sidecar-logging/vector-config.yaml

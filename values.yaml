@@ -41,7 +41,7 @@ airflow:
       tag: 0.13.0-9
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
-      tag: 3.6.2
+      tag: 3.6.4-2
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
@@ -382,6 +382,7 @@ loggingSidecar:
   name: sidecar-logging-consumer
   customConfig: false
   indexPattern: "%Y.%m.%d"
+  image: quay.io/astronomer/ap-vector:0.26.0
 # Ingress configuration
 ingress:
   # Enable ingress resource
@@ -435,7 +436,7 @@ gitSyncRelay:
       tag: "3.16.3"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync"
-      tag: "3.6.2"
+      tag: "3.6.4-2"
   repo:
     url: ~
     branch: main
