@@ -41,16 +41,35 @@ spec:
         - name: {{ .Release.Name }}-git-sync-config
           configMap:
             name: {{ .Release.Name }}-git-sync-config
+        {{- if .Values.loggingSidecar.enabled }}
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-sidecar-config
+        - emptyDir: {}
+          name: sidecar-logging-consumer
+        {{- end }}
       containers:
         - name: "git-sync"
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+          {{- if .Values.loggingSidecar.enabled }}
+          # https://github.com/kubernetes/git-sync#parameters
+          command: ["bash"]
           args:
-            # https://github.com/kubernetes/git-sync#parameters
+            - -c
+            - |-
+              if [[ ! -d /var/log/sidecar-logging-consumer ]]; then
+                mkdir -p /var/log/sidecar-logging-consumer
+              fi
+              /git-sync --repo={{ .Values.gitSyncRelay.repo.url }} --branch={{ .Values.gitSyncRelay.repo.branch }} --depth={{ .Values.gitSyncRelay.repo.depth }} --wait={{ .Values.gitSyncRelay.repo.wait }} --root=/git 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )
+          {{- else }}
+          args:
             - "--repo={{ .Values.gitSyncRelay.repo.url }}"
             - "--branch={{ .Values.gitSyncRelay.repo.branch }}"
             - "--depth={{ .Values.gitSyncRelay.repo.depth }}"
             - "--wait={{ .Values.gitSyncRelay.repo.wait }}"
             - "--root=/git"
+          {{- end }}
+
           volumeMounts:
             {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: git-secret
@@ -66,6 +85,10 @@ spec:
             {{- end }}
             - name: git-repo-contents
               mountPath: /git
+            {{- if .Values.loggingSidecar.enabled }}
+            - mountPath: /var/log/sidecar-logging-consumer
+              name: sidecar-logging-consumer
+            {{- end }}
           env:
             - name: GIT_ROOT
               value: "/git"
@@ -104,4 +127,38 @@ spec:
             periodSeconds: 15
           resources:
             {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
+        {{- if .Values.loggingSidecar.enabled }}
+        - name: vector
+          image: "{{ .Values.loggingSidecar.image }}"
+          env:
+          - name: VECTOR_CONFIG
+            value: /etc/sidecar-logging/vector-config.yaml
+          - name: SIDECAR_LOGS
+            value: /var/log/sidecar-logging-consumer
+          - name: COMPONENT
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.labels['component']
+          - name: RELEASE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.labels['release']
+          - name: WORKSPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.labels['workspace']
+          volumeMounts:
+          - mountPath: /etc/sidecar-logging
+            name: config-volume
+          - name: sidecar-logging-consumer
+            mountPath: /var/log/sidecar-logging-consumer
+            readOnly: False
+          {{- end }}
+
+{{- if .Values.gitSyncRelay.extraContainers }}
+{{- toYaml .Values.gitSyncRelay.extraContainers | nindent 8 }}
+{{- end }}
 {{- end -}}
