@@ -32,7 +32,7 @@ api_client = ApiClient()
 BASE_URL_SPEC = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master"
 
 
-def get_schema_k8s(api_version, kind, kube_version="1.21.0"):
+def get_schema_k8s(api_version, kind, kube_version="1.24.0"):
     """Return a k8s schema for use in validation."""
     api_version = api_version.lower()
     kind = kind.lower()
@@ -49,14 +49,14 @@ def get_schema_k8s(api_version, kind, kube_version="1.21.0"):
 
 
 @lru_cache(maxsize=None)
-def create_validator(api_version, kind, kube_version="1.21.0"):
+def create_validator(api_version, kind, kube_version="1.24.0"):
     """Create a k8s validator for the given inputs."""
     schema = get_schema_k8s(api_version, kind, kube_version=kube_version)
     jsonschema.Draft7Validator.check_schema(schema)
     return jsonschema.Draft7Validator(schema)
 
 
-def validate_k8s_object(instance, kube_version="1.21.0"):
+def validate_k8s_object(instance, kube_version="1.24.0"):
     """Validate the k8s object."""
     # Skip PostgreSQL chart because it doesn't pass kubernetes json schema validation with all-numeric namespace
     labels = jmespath.search("metadata.labels", instance) or {}
@@ -78,7 +78,7 @@ def render_chart(
     values: Optional[dict] = None,
     show_only: Optional[list] = None,
     chart_dir: Optional[str] = None,
-    kube_version: str = "1.21.0",
+    kube_version: str = "1.24.0",
     namespace: Optional[str] = None,
 ):
     """

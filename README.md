@@ -183,10 +183,10 @@ helm install airflow \
 
 ### Install kind, and create a cluster
 
-We recommend testing with Kubernetes 1.21+, example:
+We recommend testing with Kubernetes 1.22+, example:
 
 ```sh
-kind create cluster --image kindest/node:v1.21.14
+kind create cluster --image kindest/node:v1.24.7
 ```
 
 Confirm it's up:
