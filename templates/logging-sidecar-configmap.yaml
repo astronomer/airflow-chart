@@ -24,7 +24,7 @@ data:
           - "${SIDECAR_LOGS}/*.log"
         read_from: beginning
     transforms:
-      transform_syslog:
+      transform_airflow_logs:
         type: remap
         inputs:
           - airflow_log_files
@@ -37,7 +37,7 @@ data:
       filter_common_logs:
         type: filter
         inputs:
-          - transform_syslog
+          - transform_airflow_logs
         condition:
           type: "vrl"
           source: '!includes(["worker","scheduler"], .component)'
@@ -45,7 +45,7 @@ data:
       filter_scheduler_logs:
         type: filter
         inputs:
-          - transform_syslog
+          - transform_airflow_logs
         condition:
           type: "vrl"
           source: 'includes(["scheduler"], .component)'
@@ -53,7 +53,7 @@ data:
       filter_worker_logs:
         type: filter
         inputs:
-          - transform_syslog
+          - transform_airflow_logs
         condition:
           type: "vrl"
           source: 'includes(["worker"], .component)'
@@ -61,7 +61,7 @@ data:
       filter_gitsyncrelay_logs:
         type: filter
         inputs:
-          - transform_syslog
+          - transform_airflow_logs
         condition:
           type: "vrl"
           source: 'includes(["git-sync-relay"], .component)'
