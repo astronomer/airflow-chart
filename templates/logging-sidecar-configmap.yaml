@@ -32,7 +32,7 @@ data:
           .component = "${COMPONENT:--}"
           .workspace = "${WORKSPACE:--}"
           .release = "${RELEASE:--}"
-          .date_nano = parse_timestamp!(.@timestamp, format: "%Y-%m-%dT%H:%M:%S.%f%Z") ?? now()
+          .date_nano = parse_timestamp!(.@timestamp, format: "%Y-%m-%dT%H:%M:%S.%f%Z")
 
       filter_common_logs:
         type: filter
