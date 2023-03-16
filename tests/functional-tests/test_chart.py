@@ -202,8 +202,7 @@ def test_statsd(statsd):
 @pytest.fixture(scope="session")
 def statsd():
     """statsd pod fixture"""
-    namespace = os.environ.get("NAMESPACE")
-    if not namespace:
+    if not (namespace := os.environ.get("NAMESPACE")):
         print("NAMESPACE env var is not present, using 'airflow' namespace")
         namespace = "airflow"
     kube = create_kube_client()
@@ -220,8 +219,7 @@ def statsd():
 @pytest.fixture(scope="session")
 def webserver():
     """webserver pod fixture"""
-    namespace = os.environ.get("NAMESPACE")
-    if not namespace:
+    if not (namespace := os.environ.get("NAMESPACE")):
         print("NAMESPACE env var is not present, using 'airflow' namespace")
         namespace = "airflow"
     kube = create_kube_client()
@@ -238,8 +236,7 @@ def webserver():
 @pytest.fixture(scope="session")
 def scheduler():
     """scheduler pod fixture."""
-    namespace = os.environ.get("NAMESPACE")
-    if not namespace:
+    if not (namespace := os.environ.get("NAMESPACE")):
         print("NAMESPACE env var is not present, using 'airflow' namespace")
         namespace = "airflow"
     kube = create_kube_client()
