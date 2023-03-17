@@ -19,9 +19,6 @@ import testinfra
 from kubernetes import client, config
 from packaging.version import parse as semantic_version
 
-airflow_version = semantic_version(os.environ.get("AIRFLOW_VERSION"))
-airflow_2 = airflow_version >= semantic_version("2.0.0")
-
 
 def create_kube_client(in_cluster=False):
     """
@@ -67,19 +64,6 @@ def test_elasticsearch_version(webserver):
     ), "elasticsearch module must be version 5.5.3 or greater"
 
 
-@pytest.mark.skipif(airflow_2, reason="Not needed for Airflow>=2")
-def test_werkzeug_version(webserver):
-    """Werkzeug pip module version >= 1.0.0 has an issue"""
-    try:
-        werkzeug_module = webserver.pip_package.get_packages()["Werkzeug"]
-    except KeyError:
-        raise Exception("Werkzeug pip module is not installed")
-    version = werkzeug_module["version"]
-    assert semantic_version(version) < semantic_version(
-        "1.0.0"
-    ), "Werkzeug pip module version must be less than 1.0.0"
-
-
 def test_redis_version(webserver):
     """Redis pip module version 3.4.0 has an issue in the Astronomer platform"""
     try:
@@ -112,82 +96,39 @@ def test_airflow_connections(scheduler):
     test_conn_uri = "postgresql://postgres_user:postgres_test@1.1.1.1:5432"
     test_conn_id = "test"
 
-    if airflow_2:
-        # Assert Connection can be added
-        assert (
-            f"Successfully added `conn_id`={test_conn_id} : {test_conn_uri}"
-            in scheduler.check_output(
-                "airflow connections add --conn-uri %s %s", test_conn_uri, test_conn_id
-            )
+    # Assert Connection can be added
+    assert (
+        f"Successfully added `conn_id`={test_conn_id} : {test_conn_uri}"
+        in scheduler.check_output(
+            "airflow connections add --conn-uri %s %s", test_conn_uri, test_conn_id
         )
+    )
 
-        # Assert Connection can be removed
-        assert (
-            f"Successfully deleted connection with `conn_id`={test_conn_id}"
-            in scheduler.check_output("airflow connections delete %s", test_conn_id)
-        )
-    else:
-        # Assert Connection can be added
-        assert (
-            f"Successfully added `conn_id`={test_conn_id} : {test_conn_uri}"
-            in scheduler.check_output(
-                "airflow connections -a --conn_uri %s --conn_id %s",
-                test_conn_uri,
-                test_conn_id,
-            )
-        )
-
-        # Assert Connection can be removed
-        assert (
-            f"Successfully deleted `conn_id`={test_conn_id}"
-            in scheduler.check_output(
-                "airflow connections -d --conn_id %s", test_conn_id
-            )
-        )
+    # Assert Connection can be removed
+    assert (
+        f"Successfully deleted connection with `conn_id`={test_conn_id}"
+        in scheduler.check_output("airflow connections delete %s", test_conn_id)
+    )
 
 
 def test_airflow_variables(scheduler):
     """Test Variables can be added, retrieved and deleted"""
-    if airflow_2:
-        # Assert Variables can be added
-        assert "" in scheduler.check_output("airflow variables set test_key test_value")
+    # Assert Variables can be added
+    assert "" in scheduler.check_output("airflow variables set test_key test_value")
 
-        # Assert Variables can be retrieved
-        assert "test_value" in scheduler.check_output("airflow variables get test_key")
+    # Assert Variables can be retrieved
+    assert "test_value" in scheduler.check_output("airflow variables get test_key")
 
-        # Assert Variables can be deleted
-        assert "" in scheduler.check_output("airflow variables delete test_key")
-    else:
-        # Assert Variables can be added
-        assert "" in scheduler.check_output(
-            "airflow variables --set test_key test_value"
-        )
-
-        # Assert Variables can be retrieved
-        assert "test_value" in scheduler.check_output(
-            "airflow variables --get test_key"
-        )
-
-        # Assert Variables can be deleted
-        assert "" in scheduler.check_output("airflow variables --delete test_key")
+    # Assert Variables can be deleted
+    assert "" in scheduler.check_output("airflow variables delete test_key")
 
 
 def test_airflow_trigger_dags(scheduler):
     """Test Triggering of DAGs & Pausing & Unpausing Dags"""
-    if airflow_2:
-        pause_dag_command = "airflow dags pause example_dag"
-        trigger_dag_command = (
-            "airflow dags trigger -r test_run -e 2020-05-01 example_dag"
-        )
-        unpause_dag_command = "airflow dags unpause example_dag"
-        dag_state_command = "airflow dags state example_dag 2020-05-01"
-    else:
-        pause_dag_command = "airflow pause example_dag"
-        trigger_dag_command = (
-            "airflow trigger_dag -r test_run -e 2020-05-01 example_dag"
-        )
-        unpause_dag_command = "airflow unpause example_dag"
-        dag_state_command = "airflow dag_state example_dag 2020-05-01"
+    pause_dag_command = "airflow dags pause example_dag"
+    trigger_dag_command = "airflow dags trigger -r test_run -e 2020-05-01 example_dag"
+    unpause_dag_command = "airflow dags unpause example_dag"
+    dag_state_command = "airflow dags state example_dag 2020-05-01"
 
     assert "Dag: example_dag, paused: True" in scheduler.check_output(pause_dag_command)
     assert (
@@ -248,52 +189,69 @@ def test_airflow_trigger_dags(scheduler):
     assert "success" in scheduler.check_output(dag_state_command)
 
 
+def test_statsd(statsd):
+    """Check statsd pod for all requirements."""
+
+    # Ensure we're using the Astronomer statsd config
+    statsd_config = statsd.check_output("cat /etc/statsd-exporter/mappings.yml")
+    assert "Licensed to the Apache Software Foundation" not in statsd_config
+    assert "action: drop" in statsd_config
+    assert statsd_config.strip().endswith("name: dropped")
+
+
 @pytest.fixture(scope="session")
-def webserver(request):
-    """This is the host fixture for testinfra. To read more, please see
-    the testinfra documentation:
-    https://testinfra.readthedocs.io/en/latest/examples.html#test-docker-images
-    """
-    namespace = os.environ.get("NAMESPACE")
-    if not namespace:
+def statsd():
+    """statsd pod fixture"""
+    if not (namespace := os.environ.get("NAMESPACE")):
+        print("NAMESPACE env var is not present, using 'airflow' namespace")
+        namespace = "airflow"
+    kube = create_kube_client()
+    pods = kube.list_namespaced_pod(namespace, label_selector="component=statsd")
+    assert (
+        len(pods.items) > 0
+    ), "Expected to find at least one pod with label 'component: statsd'"
+    pod = pods.items[0]
+    yield testinfra.get_host(
+        f"kubectl://{pod.metadata.name}?container=statsd&namespace={namespace}"
+    )
+
+
+@pytest.fixture(scope="session")
+def webserver():
+    """webserver pod fixture"""
+    if not (namespace := os.environ.get("NAMESPACE")):
         print("NAMESPACE env var is not present, using 'airflow' namespace")
         namespace = "airflow"
     kube = create_kube_client()
     pods = kube.list_namespaced_pod(namespace, label_selector="component=webserver")
-    pods = pods.items
     assert (
-        len(pods) > 0
+        len(pods.items) > 0
     ), "Expected to find at least one pod with label 'component: webserver'"
-    pod = pods[0]
+    pod = pods.items[0]
     yield testinfra.get_host(
         f"kubectl://{pod.metadata.name}?container=webserver&namespace={namespace}"
     )
 
 
 @pytest.fixture(scope="session")
-def scheduler(request):
-    """This is the host fixture for testinfra. To read more, please see
-    the testinfra documentation:
-    https://testinfra.readthedocs.io/en/latest/examples.html#test-docker-images
-    """
-    namespace = os.environ.get("NAMESPACE")
-    if not namespace:
+def scheduler():
+    """scheduler pod fixture."""
+    if not (namespace := os.environ.get("NAMESPACE")):
         print("NAMESPACE env var is not present, using 'airflow' namespace")
         namespace = "airflow"
     kube = create_kube_client()
     pods = kube.list_namespaced_pod(namespace, label_selector="component=scheduler")
-    pods = pods.items
     assert (
-        len(pods) > 0
+        len(pods.items) > 0
     ), "Expected to find at least one pod with label 'component: scheduler'"
-    pod = pods[0]
+    pod = pods.items[0]
     yield testinfra.get_host(
         f"kubectl://{pod.metadata.name}?container=scheduler&namespace={namespace}"
     )
 
 
 @pytest.fixture(scope="session")
-def docker_client(request):
+def docker_client():
     """This is a text fixture for the docker client,
     should it be needed in a test
     """

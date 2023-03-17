@@ -7,7 +7,6 @@ from tests.chart_tests.helm_template_generator import render_chart
 
 
 def list_docker_images():
-
     charts = render_chart()
     search_string = "spec.template.spec.containers[*].image"
 
