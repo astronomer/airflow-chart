@@ -196,7 +196,7 @@ def test_statsd(statsd):
     statsd_config = statsd.check_output("cat /etc/statsd-exporter/mappings.yml")
     assert "Licensed to the Apache Software Foundation" not in statsd_config
     assert "action: drop" in statsd_config
-    assert statsd_config.strip().endswith('name: "dropped"')
+    assert statsd_config.strip().endswith("name: dropped")
 
 
 @pytest.fixture(scope="session")
