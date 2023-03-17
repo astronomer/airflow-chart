@@ -26,31 +26,18 @@ class TestGitSyncRelayConfigmap:
         assert len(docs) == 1
         doc = docs[0]
 
-        expected_result = {
-            "apiVersion": "v1",
-            "data": {
-                "known_hosts": "github.com ssh-ed25519 "
-                "AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl\n"
-                "gitlab.com ssh-ed25519 "
-                "AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf\n"
-            },
-            "kind": "ConfigMap",
-            "metadata": {
-                "labels": {
-                    "chart": "release-name-1.1.0-rc1",
-                    "component": "release-name-git-sync-relay",
-                    "heritage": "Helm",
-                    "release": "release-name",
-                    "tier": "airflow",
-                },
-                "name": "release-name-git-sync-config",
-            },
-        }
-
-        expected_result["metadata"]["labels"].pop("chart")
-        doc["metadata"]["labels"].pop("chart")
-
-        assert doc == expected_result
+        assert doc["kind"] == "ConfigMap"
+        assert len(doc["data"]) == 1
+        # ed25519 keys, and substrings of other key types
+        key_lines = [
+            "github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTt",
+            "github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENj",
+            "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl",
+            "gitlab.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsj2bNKTBSpIYDEGk9KxsGh3mySTRgMtXL583qmBpz",
+            "gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJe",
+            "gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf",
+        ]
+        assert all(x in doc["data"]["known_hosts"] for x in key_lines)
 
     def test_gsr_configmap_gsr_enabled_with_custom_known_hosts(self, kube_version):
         """Test that valid configmaps are rendered when git-sync-relay is enabled and has custom knownHosts."""
