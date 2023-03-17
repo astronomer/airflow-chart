@@ -363,6 +363,98 @@ airflow:
   # Should the Astronomer Security Manager be used for the webserver
   useAstroSecurityManager: False
 
+  statsd:
+    overrideMappings:
+      # Map dot separated stats to labels
+      - match: airflow.operator_successes_(.*)
+        match_type: regex
+        name: "airflow_operator_successes"
+        labels:
+          # This is here to make the Astro UI work
+          # because it's expecting an operator label
+          operator: "Value"
+
+      - match: airflow.operator_failures_(.*)
+        match_type: regex
+        name: "airflow_operator_failures"
+        labels:
+          operator: "Value"
+
+      - match: airflow.scheduler_heartbeat
+        match_type: regex
+        name: "airflow_scheduler_heartbeat"
+        labels:
+          type: counter
+
+      - match: airflow.dag.*.*.duration
+        name: "airflow_task_duration"
+        labels: {}
+
+      - match: airflow.dagrun.duration.success.*
+        name: "airflow_dagrun_duration"
+        labels: {}
+
+      - match: airflow.dagrun.duration.failed.*
+        name: "airflow_dagrun_failed"
+        labels: {}
+
+      - match: airflow.dagrun.schedule_delay.*
+        name: "airflow_dagrun_schedule_delay"
+        labels: {}
+
+      - match: airflow.dag_processing.last_runtime.*
+        name: "airflow_dag_processing_last_runtime"
+        labels: {}
+
+      - match: airflow.dag_processing.last_run.seconds_ago.*
+        name: "airflow_dag_processing_last_run_seconds_ago"
+        labels: {}
+
+      - match: airflow.pool.open_slots.*
+        name: "airflow_pool_open_slots"
+        labels:
+          pool: "$1"
+
+      - match: airflow.pool.used_slots.*
+        name: "airflow_pool_used_slots"
+        labels:
+          pool: "$1"
+
+      - match: airflow.pool.starving_tasks.*
+        name: "airflow_pool_starving_tasks"
+        labels:
+          pool: "$1"
+
+      - match: airflow.zombies_killed
+        name: "airflow_zombies_killed"
+        labels: {}
+
+      - match: airflow.executor.running_tasks
+        name: "airflow_executor_running_tasks"
+        labels: {}
+
+      - match: airflow.executor.queued_tasks
+        name: "airflow_executor_queued_tasks"
+        labels: {}
+
+      - match: airflow.ti_failures
+        name: "airflow_ti_failures"
+        labels: {}
+
+      - match: airflow.ti_successes
+        name: "airflow_ti_successes"
+        labels: {}
+
+      - match: airflow.dagbag_size
+        name: "airflow_dagbag_size"
+        labels: {}
+
+      # drop any metric not matched
+      - match: "."
+        match_type: regex
+        action: drop
+        name: "dropped"
+
 # Airflow Worker Config
 # TODO: should this be under airflow.workers just for consistency?
 # TODO: does the platform actually enable this in some cases?
@@ -374,7 +466,6 @@ workers:
     maxReplicas: 10
     targetCPUUtilization: 80
     targetMemoryUtilization: 80
-
 # Enable security context constraints required for OpenShift
 sccEnabled: false
 
