@@ -35,10 +35,6 @@ BASE_URL_SPEC = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/
 GIT_ROOT = Path(__file__).parent.parent.parent
 
 
-def cache_schema_file(api_version, kind, kube_version):
-    """Locally cache a k8s schema file for the given api_version, kind, and kube_veresion."""
-
-
 def get_schema_k8s(api_version, kind, kube_version="1.24.0"):
     """Return a standalone k8s schema for use in validation."""
     api_version = api_version.lower()
