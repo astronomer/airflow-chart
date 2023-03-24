@@ -2,14 +2,40 @@ import pytest
 
 from tests.chart_tests.helm_template_generator import render_chart
 
+from .. import supported_k8s_versions
+from functools import lru_cache
 
-def test_default_chart_with_basedomain():
-    """Test that each template used with just baseDomain set renders."""
-    docs = render_chart()
-    assert len(docs) == 29
+
+@lru_cache
+def get_cached_chart(kube_version):
+    """Cache the `helm template` output for the default chart with the given kube version."""
+    return render_chart(kube_version=kube_version)
 
 
 @pytest.mark.parametrize("namespace", ["abc", "123", "123abc", "123-abc"])
 def test_namespace_names(namespace):
     """Test various namespace names to make sure they render correctly in templates"""
     render_chart(namespace=namespace)
+
+
+@pytest.mark.parametrize("kube_version", supported_k8s_versions)
+class TestExtraObjects:
+    def test_default_chart_with_basedomain(self, kube_version):
+        """Test that each template used with just baseDomain set renders."""
+        docs = get_cached_chart(kube_version=kube_version)
+        assert len(docs) == 29
+
+    def test_default_labels(self, kube_version):
+        """Test that extra-objects works as default."""
+        docs = get_cached_chart(kube_version=kube_version)
+        exclusions = ["release-name-postgresql", "release-name-postgresql-hl"]
+
+        for doc in docs:
+            if doc["metadata"]["name"] in exclusions:
+                continue
+            assert doc["metadata"]["labels"]["chart"].startswith("airflow")
+            assert doc["metadata"]["labels"]["release"] == "release-name"
+            assert doc["metadata"]["labels"]["tier"] == "airflow"
+            assert doc["metadata"]["labels"]["heritage"] == "Helm"
+
+        assert all(bool(x) for x in doc["metadata"]["labels"].values())
