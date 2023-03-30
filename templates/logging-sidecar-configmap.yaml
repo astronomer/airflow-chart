@@ -24,7 +24,7 @@ data:
           - "${SIDECAR_LOGS}/*.log"
         read_from: beginning
     transforms:
-      transform_syslog:
+      transform_airflow_logs:
         type: remap
         inputs:
           - airflow_log_files
@@ -37,7 +37,7 @@ data:
       filter_common_logs:
         type: filter
         inputs:
-          - transform_syslog
+          - transform_airflow_logs
         condition:
           type: "vrl"
           source: '!includes(["worker","scheduler"], .component)'
@@ -45,7 +45,7 @@ data:
       filter_scheduler_logs:
         type: filter
         inputs:
-          - transform_syslog
+          - transform_airflow_logs
         condition:
           type: "vrl"
           source: 'includes(["scheduler"], .component)'
@@ -53,7 +53,7 @@ data:
       filter_worker_logs:
         type: filter
         inputs:
-          - transform_syslog
+          - transform_airflow_logs
         condition:
           type: "vrl"
           source: 'includes(["worker"], .component)'
@@ -61,7 +61,7 @@ data:
       filter_gitsyncrelay_logs:
         type: filter
         inputs:
-          - transform_syslog
+          - transform_airflow_logs
         condition:
           type: "vrl"
           source: 'includes(["git-sync-relay"], .component)'
@@ -72,12 +72,11 @@ data:
           - filter_worker_logs
           - filter_scheduler_logs
         source: |-
-          # Parse Syslog input. The "!" means that the script should abort on error.
-          . = parse_json!(.message)
+          . = parse_json(.message) ?? .message
           .@timestamp = parse_timestamp(.timestamp, "%Y-%m-%dT%H:%M:%S%Z") ?? now()
           .check_log_id = exists(.log_id)
           if .check_log_id != true {
-          .log_id = join!([.dag_id, .task_id, .execution_date, .try_number], "_")
+          .log_id = join!([to_string!(.dag_id), to_string!(.task_id), to_string!(.execution_date), to_string!(.try_number)], "_")
           }
           .offset = to_int(now()) * 1000000000 + to_unix_timestamp(now()) * 1000000
 
