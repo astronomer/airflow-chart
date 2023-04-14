@@ -84,7 +84,7 @@ jobs:
 
   lint:
     docker:
-      - image: alpine/helm:3.7.1
+      - image: alpine/helm:3.11.2
     steps:
       - checkout
       - run:
@@ -123,7 +123,7 @@ jobs:
   airflow-test:
     machine:
       # https://circleci.com/developer/machine/image/ubuntu-2204
-      image: ubuntu-2204:2022.10.2
+      image: ubuntu-2204:2023.02.1
       resource_class: large
     parameters:
       executor:
