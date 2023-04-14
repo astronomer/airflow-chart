@@ -33,7 +33,7 @@ class TestGitSyncRelayDeployment:
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert c_by_name["git-sync"]["image"].startswith(
-            "quay.io/astronomer/ap-git-sync:"
+            "quay.io/astronomer/ap-git-sync-relay:"
         )
         assert c_by_name["git-daemon"]["image"].startswith(
             "quay.io/astronomer/ap-git-daemon:"
@@ -81,7 +81,7 @@ class TestGitSyncRelayDeployment:
             },
         ]
         assert c_by_name["git-sync"]["image"].startswith(
-            "quay.io/astronomer/ap-git-sync:"
+            "quay.io/astronomer/ap-git-sync-relay:"
         )
         assert c_by_name["git-daemon"]["image"].startswith(
             "quay.io/astronomer/ap-git-daemon:"
@@ -152,7 +152,7 @@ class TestGitSyncRelayDeployment:
             },
         ]
         assert c_by_name["git-sync"]["image"].startswith(
-            "quay.io/astronomer/ap-git-sync:"
+            "quay.io/astronomer/ap-git-sync-relay:"
         )
         assert c_by_name["git-daemon"]["image"].startswith(
             "quay.io/astronomer/ap-git-daemon:"
