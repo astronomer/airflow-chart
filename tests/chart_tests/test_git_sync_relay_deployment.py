@@ -106,7 +106,7 @@ class TestGitSyncRelayDeployment:
             {"name": "GIT_SYNC_REPO", "value": "not-the-default-url"},
             {"name": "GIT_SYNC_BRANCH", "value": "not-the-default-branch"},
             {"name": "GIT_SYNC_DEPTH", "value": "22"},
-            {"name": "GIT_SYNC_WAIT", "value": "33"},
+            {"name": "GIT_SYNC_WAIT", "value": "333"},
             {"name": "GIT_SYNC_SSH", "value": "true"},
             {"name": "GIT_SSH_KEY_FILE", "value": "/etc/git-secret/ssh"},
             {"name": "GIT_KNOWN_HOSTS", "value": "true"},
@@ -165,7 +165,7 @@ class TestGitSyncRelayDeployment:
             {"name": "GIT_SYNC_REPO", "value": "not-the-default-url"},
             {"name": "GIT_SYNC_BRANCH", "value": "not-the-default-branch"},
             {"name": "GIT_SYNC_DEPTH", "value": "22"},
-            {"name": "GIT_SYNC_WAIT", "value": "33"},
+            {"name": "GIT_SYNC_WAIT", "value": "333"},
         ]
         assert c_by_name["git-daemon"]["livenessProbe"]
 
