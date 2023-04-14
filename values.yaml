@@ -527,8 +527,8 @@ gitSyncRelay:
       repository: "quay.io/astronomer/ap-git-daemon"
       tag: "3.16.3"
     gitSync:
-      repository: "quay.io/astronomer/ap-git-sync"
-      tag: "3.6.4-2"
+      repository: "quay.io/astronomer/ap-git-sync-relay"
+      tag: "0.0.1"
   repo:
     url: ~
     branch: main

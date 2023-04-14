@@ -33,7 +33,7 @@ class TestGitSyncRelayDeployment:
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert c_by_name["git-sync"]["image"].startswith(
-            "quay.io/astronomer/ap-git-sync:"
+            "quay.io/astronomer/ap-git-sync-relay:"
         )
         assert c_by_name["git-daemon"]["image"].startswith(
             "quay.io/astronomer/ap-git-daemon:"
@@ -81,7 +81,7 @@ class TestGitSyncRelayDeployment:
             },
         ]
         assert c_by_name["git-sync"]["image"].startswith(
-            "quay.io/astronomer/ap-git-sync:"
+            "quay.io/astronomer/ap-git-sync-relay:"
         )
         assert c_by_name["git-daemon"]["image"].startswith(
             "quay.io/astronomer/ap-git-daemon:"
@@ -102,7 +102,11 @@ class TestGitSyncRelayDeployment:
             {"name": "git-repo-contents", "mountPath": "/git"},
         ]
         assert c_by_name["git-sync"]["env"] == [
-            {"name": "GIT_ROOT", "value": "/git"},
+            {"name": "GIT_SYNC_ROOT", "value": "/git"},
+            {"name": "GIT_SYNC_REPO", "value": "not-the-default-url"},
+            {"name": "GIT_SYNC_BRANCH", "value": "not-the-default-branch"},
+            {"name": "GIT_SYNC_DEPTH", "value": "22"},
+            {"name": "GIT_SYNC_WAIT", "value": "333"},
             {"name": "GIT_SYNC_SSH", "value": "true"},
             {"name": "GIT_SSH_KEY_FILE", "value": "/etc/git-secret/ssh"},
             {"name": "GIT_KNOWN_HOSTS", "value": "true"},
@@ -110,13 +114,6 @@ class TestGitSyncRelayDeployment:
                 "name": "GIT_SSH_KNOWN_HOSTS_FILE",
                 "value": "/etc/git-secret/known_hosts",
             },
-        ]
-        assert c_by_name["git-sync"]["args"] == [
-            "--repo=not-the-default-url",
-            "--branch=not-the-default-branch",
-            "--depth=22",
-            "--wait=333",
-            "--root=/git",
         ]
         assert c_by_name["git-daemon"]["livenessProbe"]
 
@@ -155,7 +152,7 @@ class TestGitSyncRelayDeployment:
             },
         ]
         assert c_by_name["git-sync"]["image"].startswith(
-            "quay.io/astronomer/ap-git-sync:"
+            "quay.io/astronomer/ap-git-sync-relay:"
         )
         assert c_by_name["git-daemon"]["image"].startswith(
             "quay.io/astronomer/ap-git-daemon:"
@@ -164,14 +161,11 @@ class TestGitSyncRelayDeployment:
             {"name": "git-repo-contents", "mountPath": "/git"},
         ]
         assert c_by_name["git-sync"]["env"] == [
-            {"name": "GIT_ROOT", "value": "/git"},
-        ]
-        assert c_by_name["git-sync"]["args"] == [
-            "--repo=not-the-default-url",
-            "--branch=not-the-default-branch",
-            "--depth=22",
-            "--wait=333",
-            "--root=/git",
+            {"name": "GIT_SYNC_ROOT", "value": "/git"},
+            {"name": "GIT_SYNC_REPO", "value": "not-the-default-url"},
+            {"name": "GIT_SYNC_BRANCH", "value": "not-the-default-branch"},
+            {"name": "GIT_SYNC_DEPTH", "value": "22"},
+            {"name": "GIT_SYNC_WAIT", "value": "333"},
         ]
         assert c_by_name["git-daemon"]["livenessProbe"]
 
