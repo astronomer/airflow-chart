@@ -80,7 +80,7 @@ spec:
             - name: GIT_SYNC_ROOT
               value: "/git"
             - name: GIT_SYNC_REPO
-              value: "{{ .Values.gitSyncRelay.repo.repo }}"
+              value: "{{ .Values.gitSyncRelay.repo.url }}"
             - name: GIT_SYNC_BRANCH
               value: "{{ .Values.gitSyncRelay.repo.branch }}"
             - name: GIT_SYNC_DEPTH
