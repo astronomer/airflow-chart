@@ -15,7 +15,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      tier: astronomer
+      tier: airflow
       component: git-sync-relay
       release: {{ .Release.Name }}
   policyTypes:
