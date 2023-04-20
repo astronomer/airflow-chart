@@ -38,7 +38,7 @@ airflow:
       tag: 1.18.0-2
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.13.0-9
+      tag: 0.13.0-13
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
       tag: 3.6.5
