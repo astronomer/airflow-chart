@@ -29,7 +29,7 @@ airflow:
       tag: ~
     statsd:
       repository: quay.io/astronomer/ap-statsd-exporter
-      tag: 0.22.7
+      tag: 0.23.1
     redis:
       repository: quay.io/astronomer/ap-redis
       tag: 6.2.7
