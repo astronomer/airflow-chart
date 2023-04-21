@@ -28,6 +28,10 @@ spec:
         chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
         heritage: {{ .Release.Service }}
     spec:
+      {{- if .Values.gitSyncRelay.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.gitSyncRelay.imagePullSecrets | indent 8 }}
+      {{- end }}
       securityContext:
 {{ toYaml .Values.gitSyncRelay.securityContext | indent 8 }}
       volumes:

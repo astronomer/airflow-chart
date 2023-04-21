@@ -522,6 +522,7 @@ gitSyncRelay:
   gitSyncResources: {}
   gitDaemonResources: {}
   securityContext: {}
+  imagePullSecrets: []
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
