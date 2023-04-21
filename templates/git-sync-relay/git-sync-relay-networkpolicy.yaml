@@ -22,10 +22,7 @@ spec:
   - Ingress
   ingress:
   - from:
-    - namespaceSelector:
-        matchLabels:
-          name: {{ .Release.Namespace }}
-      podSelector:
+    - podSelector:
         matchLabels:
           release: {{ .Release.Name }}
           tier: airflow
