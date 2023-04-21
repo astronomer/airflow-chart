@@ -72,7 +72,7 @@ data:
           - filter_worker_logs
           - filter_scheduler_logs
         source: |-
-          . = parse_json(.message) ?? .message
+          . = parse_json(.message) ?? .
           .@timestamp = parse_timestamp(.timestamp, "%Y-%m-%dT%H:%M:%S%Z") ?? now()
           .check_log_id = exists(.log_id)
           if .check_log_id != true {
