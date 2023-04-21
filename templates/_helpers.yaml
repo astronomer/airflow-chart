@@ -276,3 +276,7 @@ Create the name of the cleanup service account to use
     {{ default "default" .Values.airflow.cleanup.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{- define "astro.registry_secret" -}}
+  {{- default (printf "%s-registry" .Release.Name) .Values.airflow.registry.secretName }}
+{{- end }}

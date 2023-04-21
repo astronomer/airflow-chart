@@ -28,9 +28,9 @@ spec:
         chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
         heritage: {{ .Release.Service }}
     spec:
-      {{- if .Values.gitSyncRelay.imagePullSecrets }}
+      {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
       imagePullSecrets:
-{{ toYaml .Values.gitSyncRelay.imagePullSecrets | indent 8 }}
+        - name: {{ template "astro.registry_secret" . }}
       {{- end }}
       securityContext:
 {{ toYaml .Values.gitSyncRelay.securityContext | indent 8 }}
