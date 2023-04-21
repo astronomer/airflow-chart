@@ -215,3 +215,22 @@ class TestGitSyncRelayDeployment:
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
         assert gsrsecuritycontext == doc["spec"]["template"]["spec"]["securityContext"]
+
+    def test_gsr_deployment_with_custom_registry_secret(self, kube_version):
+        """Test that gitsync  deployment with pre-defined registry secret."""
+        values = {
+            "airflow": {"registry": {"secretName": "gscsecret" }},
+            "gitSyncRelay": {"enabled": True}
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        assert [{'name': 'gscsecret'}] == doc["spec"]["template"]["spec"]["imagePullSecrets"]
