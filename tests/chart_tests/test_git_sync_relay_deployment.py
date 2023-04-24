@@ -217,7 +217,7 @@ class TestGitSyncRelayDeployment:
         assert gsrsecuritycontext == doc["spec"]["template"]["spec"]["securityContext"]
 
     def test_gsr_deployment_with_custom_registry_secret(self, kube_version):
-        """Test that gitsync  deployment with pre-defined registry secret."""
+        """Test git-sync-relay deployment with custom registry secret."""
         values = {
             "airflow": {"registry": {"secretName": "gscsecret"}},
             "gitSyncRelay": {"enabled": True},
