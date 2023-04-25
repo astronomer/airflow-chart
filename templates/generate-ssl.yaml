@@ -67,6 +67,10 @@ spec:
         component: pgbouncer
         release: {{ .Release.Name }}
     spec:
+      {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
+      imagePullSecrets:
+        - name: {{ template "astro.registry_secret" . }}
+      {{- end }}
       restartPolicy: Never
       serviceAccountName: {{ .Release.Name }}-pgbouncer-ssl
       containers:
