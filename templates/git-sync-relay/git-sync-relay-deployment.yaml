@@ -28,6 +28,10 @@ spec:
         chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
         heritage: {{ .Release.Service }}
     spec:
+      {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
+      imagePullSecrets:
+        - name: {{ template "astro.registry_secret" . }}
+      {{- end }}
       securityContext:
 {{ toYaml .Values.gitSyncRelay.securityContext | indent 8 }}
       volumes:
