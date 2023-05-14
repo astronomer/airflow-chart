@@ -52,3 +52,25 @@ class TestPgbouncersslFeature:
         assert [{"name": "gscsecret"}] == docs[3]["spec"]["template"]["spec"][
             "imagePullSecrets"
         ]
+
+    def test_pgbouncer_certgenerator_pgbouncerssl_extraannotations(self, kube_version):
+        """Test that pgbouncerssl extraAnnotations correctly inserts the annotations."""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "airflow": {
+                    "pgbouncer": {
+                        "enabled": True,
+                        "sslmode": "require",
+                    }
+                },
+                "certgenerator": {
+                    "extraAnnotations": {"test": "test"},
+                },
+            },
+            show_only="templates/generate-ssl.yaml",
+        )
+        assert len(docs) == 4
+        assert docs[3]["spec"]["template"]["metadata"]["annotations"] == {
+            "test": "test"
+        }
