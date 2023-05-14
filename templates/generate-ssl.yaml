@@ -62,6 +62,7 @@ metadata:
 spec:
   template:
     metadata:
+      annotations: {{- toYaml .Values.certgenerator.extraAnnotations | nindent 8 }}
       labels:
         tier: airflow
         component: pgbouncer
