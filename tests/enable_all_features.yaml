@@ -4,8 +4,6 @@ airflow:
       enabled: true
 authSidecar:
   enabled: true
-gitSyncRelay:
-  enabled: true
 ingress:
   enabled: true
 loggingSidecar:

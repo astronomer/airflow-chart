@@ -58,14 +58,6 @@ data:
           type: "vrl"
           source: 'includes(["worker"], .component)'
 
-      filter_gitsyncrelay_logs:
-        type: filter
-        inputs:
-          - transform_airflow_logs
-        condition:
-          type: "vrl"
-          source: 'includes(["git-sync-relay"], .component)'
-
       transform_task_log:
         type: remap
         inputs:
