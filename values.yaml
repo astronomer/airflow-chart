@@ -527,3 +527,6 @@ astronomer:
     certgenerator:
       repository: quay.io/astronomer/ap-certgenerator
       tag: 0.1.5
+
+certgenerator:
+  extraAnnotations: {}
