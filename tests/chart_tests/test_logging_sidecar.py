@@ -62,3 +62,26 @@ class TestLoggingSidecar:
             show_only="templates/logging-sidecar-configmap.yaml",
         )
         assert len(docs) == 0
+
+    def test_logging_sidecar_index_format_overrides(self, kube_version):
+        """Test logging sidecar config with custom timestamp format"""
+        test_custom_sidecar_config = textwrap.dedent(
+            """
+        loggingSidecar:
+          enabled: true
+          name: sidecar-logging-consumer
+          indexPattern: "%Y.%m"
+            """
+        )
+        values = yaml.safe_load(test_custom_sidecar_config)
+        docs = render_chart(
+            kube_version=kube_version,
+            values=values,
+            show_only="templates/logging-sidecar-configmap.yaml",
+        )
+        assert len(docs) == 1
+        assert (vc := yaml.safe_load(docs[0]["data"]["vector-config.yaml"]))
+        assert vc["sinks"]["out"]["bulk"] == {
+            "index": "vector.${RELEASE:--}.%Y.%m",
+            "action": "create",
+        }
