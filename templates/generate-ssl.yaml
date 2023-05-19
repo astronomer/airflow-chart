@@ -68,6 +68,7 @@ spec:
         component: pgbouncer
         release: {{ .Release.Name }}
     spec:
+      affinity: {{- toYaml .Values.certgenerator.affinity | nindent 10 }}
       {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
       imagePullSecrets:
         - name: {{ template "astro.registry_secret" . }}
