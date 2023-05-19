@@ -530,3 +530,4 @@ astronomer:
 
 certgenerator:
   extraAnnotations: {}
+  affinity: {}
