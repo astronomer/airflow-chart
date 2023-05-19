@@ -551,3 +551,4 @@ gitSyncRelay:
 
 certgenerator:
   extraAnnotations: {}
+  affinity: {}
