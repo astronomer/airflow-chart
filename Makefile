@@ -20,6 +20,10 @@ unittest-chart: charts venv ## Unittest the helm chart
 clean: ## Clean build and test artifacts
 	rm -rf venv
 	rm -rf charts
+	rm -rf .ruff_cache
+	rm -rf .pytest_cache
+	rm -rf test-results
+	find . -name __pycache__ -exec rm -rf {} \+
 
 .PHONY: update-requirements
 update-requirements: ## Update all requirements.txt files
