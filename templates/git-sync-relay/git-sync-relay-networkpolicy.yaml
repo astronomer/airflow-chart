@@ -15,17 +15,14 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      tier: astronomer
+      tier: airflow
       component: git-sync-relay
       release: {{ .Release.Name }}
   policyTypes:
   - Ingress
   ingress:
   - from:
-    - namespaceSelector:
-        matchLabels:
-          name: {{ .Release.Namespace }}
-      podSelector:
+    - podSelector:
         matchLabels:
           release: {{ .Release.Name }}
           tier: airflow

@@ -20,32 +20,42 @@ import sys
 from functools import lru_cache
 from tempfile import NamedTemporaryFile
 from typing import Any, Dict, Optional, Tuple
+from pathlib import Path
 
 import jmespath
 import jsonschema
 import requests
 import yaml
+import json
 from kubernetes.client.api_client import ApiClient
 
 api_client = ApiClient()
 
 BASE_URL_SPEC = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master"
+GIT_ROOT = Path(__file__).parent.parent.parent
 
 
 def get_schema_k8s(api_version, kind, kube_version="1.24.0"):
-    """Return a k8s schema for use in validation."""
+    """Return a standalone k8s schema for use in validation."""
     api_version = api_version.lower()
     kind = kind.lower()
 
     if "/" in api_version:
         ext, _, api_version = api_version.partition("/")
         ext = ext.split(".")[0]
-        url = f"{BASE_URL_SPEC}/v{kube_version}-standalone/{kind}-{ext}-{api_version}.json"
+        schema_path = f"v{kube_version}-standalone/{kind}-{ext}-{api_version}.json"
     else:
-        url = f"{BASE_URL_SPEC}/v{kube_version}-standalone/{kind}-{api_version}.json"
-    request = requests.get(url)
-    request.raise_for_status()
-    return request.json()
+        schema_path = f"v{kube_version}-standalone/{kind}-{api_version}.json"
+
+    local_sp = Path(f"{GIT_ROOT}/tests/k8s_schema/{schema_path}")
+    if not local_sp.exists():
+        if not local_sp.parent.is_dir():
+            local_sp.parent.mkdir()
+        request = requests.get(f"{BASE_URL_SPEC}/{schema_path}")
+        request.raise_for_status()
+        local_sp.write_text(request.text)
+
+    return json.loads(local_sp.read_text())
 
 
 @lru_cache(maxsize=None)
