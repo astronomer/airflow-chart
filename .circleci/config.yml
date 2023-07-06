@@ -65,48 +65,48 @@ workflows:
 
             - approve-test-all
       - airflow-test:
-          name: test-1-24-13-CeleryExecutor
-          kube_version: 1.24.13
+          name: test-1-24-15-CeleryExecutor
+          kube_version: 1.24.15
           executor: CeleryExecutor
           requires:
             - build-and-release-internal
 
             - approve-test-all
       - airflow-test:
-          name: test-1-24-13-LocalExecutor
-          kube_version: 1.24.13
+          name: test-1-24-15-LocalExecutor
+          kube_version: 1.24.15
           executor: LocalExecutor
           requires:
             - build-and-release-internal
 
             - approve-test-all
       - airflow-test:
-          name: test-1-24-13-KubernetesExecutor
-          kube_version: 1.24.13
+          name: test-1-24-15-KubernetesExecutor
+          kube_version: 1.24.15
           executor: KubernetesExecutor
           requires:
             - build-and-release-internal
 
             - approve-test-all
       - airflow-test:
-          name: test-1-25-9-CeleryExecutor
-          kube_version: 1.25.9
+          name: test-1-25-11-CeleryExecutor
+          kube_version: 1.25.11
           executor: CeleryExecutor
           requires:
             - build-and-release-internal
 
             - approve-test-all
       - airflow-test:
-          name: test-1-25-9-LocalExecutor
-          kube_version: 1.25.9
+          name: test-1-25-11-LocalExecutor
+          kube_version: 1.25.11
           executor: LocalExecutor
           requires:
             - build-and-release-internal
 
             - approve-test-all
       - airflow-test:
-          name: test-1-25-9-KubernetesExecutor
-          kube_version: 1.25.9
+          name: test-1-25-11-KubernetesExecutor
+          kube_version: 1.25.11
           executor: KubernetesExecutor
           requires:
             - build-and-release-internal
@@ -119,6 +119,7 @@ workflows:
           requires:
             - build-and-release-internal
 
+            - approve-test-all
       - airflow-test:
           name: test-1-26-4-LocalExecutor
           kube_version: 1.26.4
@@ -126,9 +127,32 @@ workflows:
           requires:
             - build-and-release-internal
 
+            - approve-test-all
       - airflow-test:
           name: test-1-26-4-KubernetesExecutor
           kube_version: 1.26.4
+          executor: KubernetesExecutor
+          requires:
+            - build-and-release-internal
+
+            - approve-test-all
+      - airflow-test:
+          name: test-1-27-3-CeleryExecutor
+          kube_version: 1.27.3
+          executor: CeleryExecutor
+          requires:
+            - build-and-release-internal
+
+      - airflow-test:
+          name: test-1-27-3-LocalExecutor
+          kube_version: 1.27.3
+          executor: LocalExecutor
+          requires:
+            - build-and-release-internal
+
+      - airflow-test:
+          name: test-1-27-3-KubernetesExecutor
+          kube_version: 1.27.3
           executor: KubernetesExecutor
           requires:
             - build-and-release-internal
@@ -142,15 +166,18 @@ workflows:
             - "test-1-23-17-CeleryExecutor"
             - "test-1-23-17-LocalExecutor"
             - "test-1-23-17-KubernetesExecutor"
-            - "test-1-24-13-CeleryExecutor"
-            - "test-1-24-13-LocalExecutor"
-            - "test-1-24-13-KubernetesExecutor"
-            - "test-1-25-9-CeleryExecutor"
-            - "test-1-25-9-LocalExecutor"
-            - "test-1-25-9-KubernetesExecutor"
+            - "test-1-24-15-CeleryExecutor"
+            - "test-1-24-15-LocalExecutor"
+            - "test-1-24-15-KubernetesExecutor"
+            - "test-1-25-11-CeleryExecutor"
+            - "test-1-25-11-LocalExecutor"
+            - "test-1-25-11-KubernetesExecutor"
             - "test-1-26-4-CeleryExecutor"
             - "test-1-26-4-LocalExecutor"
             - "test-1-26-4-KubernetesExecutor"
+            - "test-1-27-3-CeleryExecutor"
+            - "test-1-27-3-LocalExecutor"
+            - "test-1-27-3-KubernetesExecutor"
           filters:
             branches:
               only:
