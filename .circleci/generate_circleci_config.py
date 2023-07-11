@@ -9,13 +9,19 @@ from jinja2 import Template
 # When adding a new version, look up the most recent patch version on Dockerhub
 # https://hub.docker.com/r/kindest/node/tags
 # This should match what is in tests/__init__.py
-kube_versions = ["1.22.17", "1.23.17", "1.24.15", "1.25.11", "1.26.6", "1.27.3"]
+kube_versions = [
+    "1.23.17",
+    "1.24.13",
+    "1.25.9",
+    "1.26.4",
+    "1.27.3",
+]
 
 # https://circleci.com/docs/2.0/building-docker-images/#docker-version
 remote_docker_version = "20.10.18"
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
-ci_runner_version = "2023-05"
+ci_runner_version = "2023-07"
 
 
 def main():

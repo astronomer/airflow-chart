@@ -120,10 +120,10 @@ helm install --name my-release \
 
 ### Install kind, and create a cluster
 
-We recommend testing with Kubernetes 1.22+, example:
+We recommend testing with Kubernetes 1.25+, example:
 
 ```sh
-kind create cluster --image kindest/node:v1.24.7
+kind create cluster --image kindest/node:v1.25.11
 ```
 
 Confirm it's up:
