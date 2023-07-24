@@ -63,6 +63,13 @@ airflow:
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
 
+
+  triggerer:
+    persistence:
+      enabled: false
+    logGroomerSidecar:
+      args: ["/usr/local/bin/clean-airflow-logs"]
+
   # Airflow webserver settings
   webserver:
     allowPodLogReading: false
