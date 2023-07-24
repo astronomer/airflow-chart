@@ -63,7 +63,6 @@ airflow:
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
 
-
   triggerer:
     persistence:
       enabled: false
