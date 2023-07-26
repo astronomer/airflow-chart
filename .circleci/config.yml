@@ -209,7 +209,7 @@ jobs:
       - image: quay.io/astronomer/ci-helm-release:2023-07
     steps:
       - setup_remote_docker:
-          version: 20.10.18
+          version: 20.10.24
           docker_layer_caching: true
       - checkout
       - run:
@@ -236,7 +236,7 @@ jobs:
   airflow-test:
     machine:
       # https://circleci.com/developer/machine/image/ubuntu-2204
-      image: ubuntu-2204:2023.02.1
+      image: ubuntu-2204:2023.07.2
       resource_class: large
     parameters:
       executor:
