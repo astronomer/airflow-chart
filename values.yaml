@@ -69,6 +69,10 @@ airflow:
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
 
+  dagProcessor:
+    logGroomerSidecar:
+      args: ["/usr/local/bin/clean-airflow-logs"]
+
   # Airflow webserver settings
   webserver:
     allowPodLogReading: false
