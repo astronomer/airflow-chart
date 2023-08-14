@@ -11,17 +11,17 @@ from jinja2 import Template
 # This should match what is in tests/__init__.py
 kube_versions = [
     "1.23.17",
-    "1.24.13",
-    "1.25.9",
-    "1.26.4",
+    "1.24.15",
+    "1.25.11",
+    "1.26.6",
     "1.27.3",
 ]
 
 # https://circleci.com/docs/2.0/building-docker-images/#docker-version
-remote_docker_version = "20.10.18"
+remote_docker_version = "20.10.24"
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
-ci_runner_version = "2023-07"
+ci_runner_version = "2023-08"
 
 
 def main():
