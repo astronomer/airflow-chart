@@ -1,6 +1,5 @@
 docker
 kubernetes
-pdbpp
 pre-commit
 pytest
 pytest-pretty
