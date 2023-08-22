@@ -38,10 +38,10 @@ airflow:
       tag: 1.17.0-10
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.13.0-13
+      tag: 0.14.0-1
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
-      tag: 3.6.5
+      tag: 3.6.8
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
@@ -60,6 +60,12 @@ airflow:
                     values:
                       - scheduler
               topologyKey: "kubernetes.io/hostname"
+    logGroomerSidecar:
+      args: ["/usr/local/bin/clean-airflow-logs"]
+
+  triggerer:
+    persistence:
+      enabled: false
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
 
