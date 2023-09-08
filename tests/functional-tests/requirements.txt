@@ -177,9 +177,9 @@ pygments==2.16.1 \
     --hash=sha256:13fc09fa63bc8d8671a6d247e1eb303c4b343eaee81d861f3404db2935653692 \
     --hash=sha256:1daff0494820c69bc8941e407aa20f577374ee88364ee10a98fdbe0aece96e29
     # via rich
-pytest==7.4.1 \
-    --hash=sha256:2f2301e797521b23e4d2585a0a3d7b5e50fdddaaf7e7d6773ea26ddb17c213ab \
-    --hash=sha256:460c9a59b14e27c602eb5ece2e47bec99dc5fc5f6513cf924a7d03a578991b1f
+pytest==7.4.2 \
+    --hash=sha256:1d881c6124e08ff0a1bb75ba3ec0bfd8b5354a01c194ddd5a0a870a48d99b002 \
+    --hash=sha256:a766259cfab564a2ad52cb1aae1b881a75c3eb7e34ca3779697c23ed47c47069
     # via
     #   -r tests/functional-tests/requirements.in
     #   pytest-pretty
@@ -188,9 +188,9 @@ pytest-pretty==1.2.0 \
     --hash=sha256:105a355f128e392860ad2c478ae173ff96d2f03044692f9818ff3d49205d3a60 \
     --hash=sha256:6f79122bf53864ae2951b6c9e94d7a06a87ef753476acd4588aeac018f062036
     # via -r tests/functional-tests/requirements.in
-pytest-testinfra==9.0.0 \
-    --hash=sha256:2cb0fab78c17ed68edc3c812ef68905e19665060f94ce0f1601f5cd0ea4d258c \
-    --hash=sha256:5311b369e0546920fce464c3bf945b55ebe75a127568f6d615e94b8891340149
+pytest-testinfra==8.1.0 \
+    --hash=sha256:9b40828b58fb7ac2bff29cc1465934adf434f10dd5a108f60535dee52660a63d \
+    --hash=sha256:bf7df6306244da6a832f977766e75408317315aa1452c41c30e2541ef7978007
     # via -r tests/functional-tests/requirements.in
 python-dateutil==2.8.2 \
     --hash=sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86 \
@@ -273,9 +273,9 @@ rsa==4.9 \
     #   kubernetes
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==68.1.2 \
-    --hash=sha256:3d4dfa6d95f1b101d695a6160a7626e15583af71a5f52176efa5d39a054d475d \
-    --hash=sha256:3d8083eed2d13afc9426f227b24fd1659489ec107c0e86cec2ffdde5c92e790b
+setuptools==68.2.0 \
+    --hash=sha256:00478ca80aeebeecb2f288d3206b0de568df5cd2b8fada1209843cc9a8d88a48 \
+    --hash=sha256:af3d5949030c3f493f550876b2fd1dd5ec66689c4ee5d5344f009746f71fd5a8
     # via google-auth
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
@@ -292,9 +292,9 @@ urllib3==1.26.16 \
     #   google-auth
     #   kubernetes
     #   requests
-virtualenv==20.24.4 \
-    --hash=sha256:29c70bb9b88510f6414ac3e55c8b413a1f96239b6b789ca123437d5e892190cb \
-    --hash=sha256:772b05bfda7ed3b8ecd16021ca9716273ad9f4467c801f27e83ac73430246dca
+virtualenv==20.24.5 \
+    --hash=sha256:b80039f280f4919c77b30f1c23294ae357c4c8701042086e3fc005963e4e537b \
+    --hash=sha256:e8361967f6da6fbdf1426483bfe9fca8287c242ac0bc30429905721cefbff752
     # via pre-commit
 websocket-client==1.6.2 \
     --hash=sha256:53e95c826bf800c4c465f50093a8c4ff091c7327023b10bfaff40cf1ef170eaa \
