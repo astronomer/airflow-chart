@@ -29,19 +29,19 @@ airflow:
       tag: ~
     statsd:
       repository: quay.io/astronomer/ap-statsd-exporter
-      tag: 0.23.1
+      tag: 0.24.0
     redis:
       repository: quay.io/astronomer/ap-redis
-      tag: 6.2.7
+      tag: 6.2.13
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
-      tag: 1.17.0-10
+      tag: 1.20.1
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.14.0-1
+      tag: 0.15.0-2
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
-      tag: 3.6.8
+      tag: 3.6.9
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
