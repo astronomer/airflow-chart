@@ -474,8 +474,8 @@ extraObjects: []
 # Enable nginx auth sidecar
 authSidecar:
   enabled: false
-  repository: nginxinc/nginx-unprivileged
-  tag: stable
+  repository: quay.io/astronomer/ap-auth-sidecar
+  tag: 1.25.2
   pullPolicy: IfNotPresent
   port: 8084
 
@@ -484,7 +484,7 @@ loggingSidecar:
   name: sidecar-logging-consumer
   customConfig: false
   indexPattern: "%Y.%m.%d"
-  image: quay.io/astronomer/ap-vector:0.28.2-1
+  image: quay.io/astronomer/ap-vector:0.32.2
 # Ingress configuration
 ingress:
   # Enable ingress resource
@@ -535,7 +535,7 @@ gitSyncRelay:
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
-      tag: "3.16.5"
+      tag: "3.18.3"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync-relay"
       tag: "0.0.2"
