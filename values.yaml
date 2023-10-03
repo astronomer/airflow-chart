@@ -525,7 +525,7 @@ astronomer:
   images:
     certgenerator:
       repository: quay.io/astronomer/ap-certgenerator
-      tag: 0.1.5
+      tag: 0.1.6
 
 gitSyncRelay:
   enabled: ~
