@@ -464,6 +464,7 @@ airflow:
         match_type: regex
         action: drop
         name: "dropped"
+  useStandardNaming: true
 
 # Enable security context constraints required for OpenShift
 sccEnabled: false
