@@ -29,19 +29,19 @@ airflow:
       tag: ~
     statsd:
       repository: quay.io/astronomer/ap-statsd-exporter
-      tag: 0.23.1
+      tag: 0.24.0
     redis:
       repository: quay.io/astronomer/ap-redis
-      tag: 6.2.7
+      tag: 6.2.13
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
-      tag: 1.17.0-10
+      tag: 1.20.1
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.14.0-1
+      tag: 0.15.0-2
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
-      tag: 3.6.8
+      tag: 3.6.9
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
@@ -474,8 +474,8 @@ extraObjects: []
 # Enable nginx auth sidecar
 authSidecar:
   enabled: false
-  repository: nginxinc/nginx-unprivileged
-  tag: stable
+  repository: quay.io/astronomer/ap-auth-sidecar
+  tag: 1.25.2
   pullPolicy: IfNotPresent
   port: 8084
 
@@ -484,7 +484,7 @@ loggingSidecar:
   name: sidecar-logging-consumer
   customConfig: false
   indexPattern: "%Y.%m.%d"
-  image: quay.io/astronomer/ap-vector:0.28.2-1
+  image: quay.io/astronomer/ap-vector:0.32.2
 # Ingress configuration
 ingress:
   # Enable ingress resource
@@ -525,7 +525,7 @@ astronomer:
   images:
     certgenerator:
       repository: quay.io/astronomer/ap-certgenerator
-      tag: 0.1.5
+      tag: 0.1.6
 
 gitSyncRelay:
   enabled: ~
@@ -535,7 +535,7 @@ gitSyncRelay:
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
-      tag: "3.16.5"
+      tag: "3.18.3"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync-relay"
       tag: "0.0.2"
