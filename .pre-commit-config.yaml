@@ -1,13 +1,8 @@
 ---
 exclude: '^(venv|\.vscode|tests/k8s_schema)' # regex
 repos:
-  - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.4
-    hooks:
-      - id: remove-tabs
-        exclude_types: [makefile, binary]
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.0.287"
+    rev: "v0.0.291"
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --ignore, E501]
@@ -53,7 +48,7 @@ repos:
     hooks:
       - id: shellcheck
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.4
+    rev: v1.4.2
     hooks:
       - id: remove-tabs
         exclude_types: [makefile, binary]
