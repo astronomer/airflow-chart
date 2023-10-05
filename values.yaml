@@ -464,6 +464,8 @@ airflow:
         match_type: regex
         action: drop
         name: "dropped"
+  # Note:fernet-key,redis-password and broker-url secrets don't use this logic yet,
+  # as this may break existing installations due to how they get installed via pre-install hook.
   useStandardNaming: true
 
 # Enable security context constraints required for OpenShift
