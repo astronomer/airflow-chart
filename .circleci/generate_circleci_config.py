@@ -18,10 +18,10 @@ kube_versions = [
 ]
 
 # https://circleci.com/docs/2.0/building-docker-images/#docker-version
-remote_docker_version = "20.10.24"
+remote_docker_version = "24.0.6"
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
-ci_runner_version = "2023-09"
+ci_runner_version = "2023-11"
 
 
 def main():
