@@ -209,7 +209,7 @@ jobs:
       - image: quay.io/astronomer/ci-helm-release:2023-11
     steps:
       - setup_remote_docker:
-          version: 24.0.6
+          version: 20.10.24
           docker_layer_caching: true
       - checkout
       - run:
