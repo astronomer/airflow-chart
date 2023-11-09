@@ -10,7 +10,6 @@ from jinja2 import Template
 # https://hub.docker.com/r/kindest/node/tags
 # This should match what is in tests/__init__.py
 kube_versions = [
-    "1.23.17",
     "1.24.15",
     "1.25.11",
     "1.26.6",
