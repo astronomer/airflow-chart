@@ -480,7 +480,8 @@ loggingSidecar:
   name: sidecar-logging-consumer
   customConfig: false
   indexPattern: "%Y.%m.%d"
-  image: quay.io/astronomer/ap-vector:0.28.2-1
+  indexNamePrefix: vector
+  image: quay.io/astronomer/ap-vector:0.32.2
 # Ingress configuration
 ingress:
   # Enable ingress resource
