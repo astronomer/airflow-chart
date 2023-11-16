@@ -35,6 +35,7 @@ class TestLoggingSidecar:
             "user": "testuser",
             "password": "testpass",
         }
+        assert vc["sinks"]["out"]["bulk"]["index"] == "vector.${RELEASE:--}.%Y.%m.%d"
 
     def test_logging_sidecar_config_disabled(self, kube_version):
         """Test logging sidecar config with flag disabled"""
@@ -83,5 +84,28 @@ class TestLoggingSidecar:
         assert (vc := yaml.safe_load(docs[0]["data"]["vector-config.yaml"]))
         assert vc["sinks"]["out"]["bulk"] == {
             "index": "vector.${RELEASE:--}.%Y.%m",
+            "action": "create",
+        }
+
+    def test_logging_sidecar_index_prefix_overrides(self, kube_version):
+        """Test logging sidecar config with custom index prefix"""
+        test_custom_sidecar_config = textwrap.dedent(
+            """
+        loggingSidecar:
+          enabled: true
+          name: sidecar-logging-consumer
+          indexNamePrefix: "fluentd"
+            """
+        )
+        values = yaml.safe_load(test_custom_sidecar_config)
+        docs = render_chart(
+            kube_version=kube_version,
+            values=values,
+            show_only="templates/logging-sidecar-configmap.yaml",
+        )
+        assert len(docs) == 1
+        assert (vc := yaml.safe_load(docs[0]["data"]["vector-config.yaml"]))
+        assert vc["sinks"]["out"]["bulk"] == {
+            "index": "fluentd.${RELEASE:--}.%Y.%m.%d",
             "action": "create",
         }
