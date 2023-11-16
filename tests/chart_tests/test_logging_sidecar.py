@@ -106,6 +106,6 @@ class TestLoggingSidecar:
         assert len(docs) == 1
         assert (vc := yaml.safe_load(docs[0]["data"]["vector-config.yaml"]))
         assert vc["sinks"]["out"]["bulk"] == {
-            "index": "fluentd.${RELEASE:--}.%Y.%m",
+            "index": "fluentd.${RELEASE:--}.%Y.%m.%d",
             "action": "create",
         }
