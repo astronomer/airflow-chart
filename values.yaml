@@ -32,7 +32,7 @@ airflow:
       tag: 0.25.0
     redis:
       repository: quay.io/astronomer/ap-redis
-      tag: 6.2.13
+      tag: 6.2.14
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
       tag: 1.20.1-2
