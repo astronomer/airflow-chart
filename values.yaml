@@ -35,10 +35,10 @@ airflow:
       tag: 6.2.7
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
-      tag: 1.17.0-10
+      tag: 1.20.1-2
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.14.0-1
+      tag: 0.15.0-4
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
       tag: 3.6.8
@@ -470,8 +470,8 @@ extraObjects: []
 # Enable nginx auth sidecar
 authSidecar:
   enabled: false
-  repository: nginxinc/nginx-unprivileged
-  tag: stable
+  repository: quay.io/astronomer/ap-auth-sidecar
+  tag: 1.25.2-2
   pullPolicy: IfNotPresent
   port: 8084
 
@@ -481,7 +481,7 @@ loggingSidecar:
   customConfig: false
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
-  image: quay.io/astronomer/ap-vector:0.32.2
+  image: quay.io/astronomer/ap-vector:0.32.2-2
 # Ingress configuration
 ingress:
   # Enable ingress resource
