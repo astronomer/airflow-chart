@@ -10,18 +10,18 @@ from jinja2 import Template
 # https://hub.docker.com/r/kindest/node/tags
 # This should match what is in tests/__init__.py
 kube_versions = [
-    "1.23.17",
     "1.24.15",
     "1.25.11",
     "1.26.6",
     "1.27.3",
+    "1.28.0",
 ]
 
 # https://circleci.com/docs/2.0/building-docker-images/#docker-version
 remote_docker_version = "20.10.24"
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
-ci_runner_version = "2023-08"
+ci_runner_version = "2023-11"
 
 
 def main():

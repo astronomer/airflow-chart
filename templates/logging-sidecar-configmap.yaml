@@ -115,6 +115,6 @@ data:
           password : {{ .Values.airflow.elasticsearch.connection.pass }}
       {{- end }}
         bulk:
-          index: "vector.${RELEASE:--}.{{ .Values.loggingSidecar.indexPattern }}"
+          index: "{{ .Values.loggingSidecar.indexNamePrefix }}.${RELEASE:--}.{{ .Values.loggingSidecar.indexPattern }}"
           action: create
 {{- end }}

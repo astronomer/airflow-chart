@@ -12,4 +12,10 @@ with open(f"{git_root_dir}/.circleci/config.yml") as f:
 
 # This should match the major.minor version list in .circleci/generate_circleci_config.py
 # Patch version should always be 0
-supported_k8s_versions = ["1.23.0", "1.24.0", "1.25.0", "1.26.0", "1.27.0"]
+supported_k8s_versions = [
+    "1.24.0",
+    "1.25.0",
+    "1.26.0",
+    "1.27.0",
+    "1.28.0",
+]
