@@ -27,6 +27,9 @@ airflow:
     airflow:
       repository: quay.io/astronomer/ap-airflow
       tag: ~
+    dagServer:
+      repository: quay.io/astronomer/ap-dag-server
+      tag: 0.0.1
     statsd:
       repository: quay.io/astronomer/ap-statsd-exporter
       tag: 0.25.0
