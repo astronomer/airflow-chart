@@ -27,9 +27,6 @@ airflow:
     airflow:
       repository: quay.io/astronomer/ap-airflow
       tag: ~
-    dagServer:
-      repository: quay.io/astronomer/ap-dag-server
-      tag: 0.0.1
     statsd:
       repository: quay.io/astronomer/ap-statsd-exporter
       tag: 0.25.0
@@ -489,6 +486,7 @@ loggingSidecar:
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
   image: quay.io/astronomer/ap-vector:0.32.2-2
+
 # Ingress configuration
 ingress:
   # Enable ingress resource
@@ -527,9 +525,57 @@ platform:
 
 astronomer:
   images:
-    certgenerator:
-      repository: quay.io/astronomer/ap-certgenerator
-      tag: 0.1.6
+    repository: quay.io/astronomer/ap-certgenerator
+    tag: 0.1.6
+
+dagServer:
+  image:
+    repository: quay.io/astronomer/ap-dag-server
+    tag: 0.0.1
+  enabled: false
+  terminationGracePeriodSeconds: 30
+  podAnnotations: {}
+  extraInitContainers: []
+  # extraContainers: []
+  # extraVolumes: []
+  # extraVolumeMounts: []
+  livenessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 30
+  strategy:
+    type: Recreate
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClassName: ~
+    annotations: {}
+
+  # Configuration for empty dir volume (if dagServer.persistence.enabled == false)
+  # emptyDirConfig:
+  #   sizeLimit: 1Gi
+  #   medium: Memory
+
+  resources: {}
+  #  limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  # This setting tells kubernetes that its ok to evict
+  # when it wants to scale a node down.
+  safeToEvict: true
+
+  # Select certain nodes for http-server pods.
+  affinity: {}
+  tolerations: []
+  topologySpreadConstraints: []
+  priorityClassName: ~
+
+  securityContext: {}
+  #  runAsUser: 999
+  #  runAsGroup: 0
 
 gitSyncRelay:
   enabled: ~

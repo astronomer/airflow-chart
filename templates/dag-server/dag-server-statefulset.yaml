@@ -1,0 +1,97 @@
+############################
+## dag-server StatefulSet ##
+############################
+{{- if .Values.dagServer.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-dag-server
+  labels:
+    component: dag-server
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+    {{- with .Values.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  serviceName: {{ include "airflow.fullname" . }}-dagServer
+  selector:
+    matchLabels:
+      component: dag-server
+      tier: airflow
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        component: dag-server
+        tier: airflow
+        release: {{ .Release.Name }}
+        chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+        heritage: {{ .Release.Service }}
+        {{- with .Values.labels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if or .Values.dagServer.safeToEvict .Values.dagServer.podAnnotations }}
+      annotations:
+        {{- if .Values.dagServer.podAnnotations }}
+          {{- toYaml .Values.dagServer.podAnnotations | nindent 8 }}
+        {{- end }}
+        {{- if .Values.dagServer.safeToEvict }}
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        {{- end }}
+      {{- end }}
+    spec:
+      {{- if .Values.dagServer.priorityClassName }}
+      priorityClassName: {{ .Values.dagServer.priorityClassName }}
+      {{- end }}
+      affinity: {{- toYaml $affinity | nindent 8 }}
+      tolerations: {{- toYaml $tolerations | nindent 8 }}
+      topologySpreadConstraints: {{- toYaml $topologySpreadConstraints | nindent 8 }}
+      serviceAccountName: {{ include "dagServer.serviceAccountName" . }}
+      {{- if .Values.schedulerName }}
+      schedulerName: {{ .Values.schedulerName }}
+      {{- end }}
+      {{- if or .Values.registry.secretName .Values.registry.connection }}
+      imagePullSecrets:
+        - name: {{ template "registry_secret" . }}
+      {{- end }}
+      securityContext: {{ $securityContext | nindent 8 }}
+      containers:
+        - name: dagServer
+          image: "{{ .Values.dagServer.images.repository }}:{{ .Values.dagServer.images.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          securityContext: {{ $containerSecurityContext | nindent 12 }}
+          {{- if $containerLifecycleHooks }}
+          lifecycle: {{- tpl (toYaml $containerLifecycleHooks) . | nindent 12 }}
+          {{- end }}
+          command: ["/bin/sh"]
+          resources: {{- toYaml .Values.dagServer.resources | nindent 12 }}
+          ports:
+            - name: dag-server-http
+              containerPort: {{ .Values.ports.dagServerHttp }}
+          volumeMounts:
+            - name: dag-server-data
+              mountPath: /data
+  {{- if not .Values.dagServer.persistence.enabled }}
+      volumes:
+        - name: dag-server-data
+          emptyDir: {{- toYaml (default (dict) .Values.dagServer.emptyDirConfig) | nindent 12 }}
+  {{- else }}
+  volumeClaimTemplates:
+    - metadata:
+        name: dag-server-data
+        {{- if .Values.dagServer.persistence.annotations }}
+        annotations: {{- toYaml .Values.dagServer.persistence.annotations | nindent 10 }}
+        {{- end }}
+      spec:
+        {{- if .Values.dagServer.persistence.storageClassName }}
+        storageClassName: {{ tpl .Values.dagServer.persistence.storageClassName . | quote }}
+        {{- end }}
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.dagServer.persistence.size }}
+  {{- end }}
+{{- end }}
