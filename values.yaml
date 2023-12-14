@@ -529,31 +529,24 @@ astronomer:
     tag: 0.1.6
 
 dagServer:
-  image:
-    repository: quay.io/astronomer/ap-dag-server
-    tag: 0.0.1
   enabled: false
-  terminationGracePeriodSeconds: 30
-  podAnnotations: {}
-  extraInitContainers: []
-  # extraContainers: []
-  # extraVolumes: []
-  # extraVolumeMounts: []
+  images:
+    dagServer:
+      repository: quay.io/astronomer/ap-dag-server
+      tag: 0.0.1
+      imagePullPolicy: IfNotPresent
   livenessProbe:
     initialDelaySeconds: 30
     timeoutSeconds: 30
-  strategy:
-    type: Recreate
+  terminationGracePeriodSeconds: 30
+  podAnnotations: {}
   persistence:
     enabled: true
-    size: 1Gi
+    size: 250Mi
     storageClassName: ~
     annotations: {}
-
-  # Configuration for empty dir volume (if dagServer.persistence.enabled == false)
-  # emptyDirConfig:
-  #   sizeLimit: 1Gi
-  #   medium: Memory
+  ports:
+    dagServerHttp: 80
 
   resources: {}
   #  limits:
@@ -566,12 +559,6 @@ dagServer:
   # This setting tells kubernetes that its ok to evict
   # when it wants to scale a node down.
   safeToEvict: true
-
-  # Select certain nodes for http-server pods.
-  affinity: {}
-  tolerations: []
-  topologySpreadConstraints: []
-  priorityClassName: ~
 
   securityContext: {}
   #  runAsUser: 999

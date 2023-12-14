@@ -1,13 +1,13 @@
 import pytest
 
-from tests.chart_tests.helm_template_generator import render_chart
+from testatefulset.chart_testatefulset.helm_template_generator import render_chart
 
 from .. import supported_k8s_versions
 from . import get_containers_by_name
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
-class TestDagServerStatefulSet:
+class TestDagServerDeployment:
     def test_dag_server_statefulset_default(self, kube_version):
         """Test that no dag-server templates are rendered by default."""
         docs = render_chart(
@@ -27,26 +27,30 @@ class TestDagServerStatefulSet:
         )
         assert len(docs) == 1
         doc = docs[0]
-        assert doc["kind"] == "StatefulSet"
+        assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-dag-server"
         c_by_name = get_containers_by_name(doc)
-        assert len(c_by_name) == 1
-        assert c_by_name["dagServer"]["image"].startswith(
+        assert len(c_by_name) == 2
+        assert c_by_name["dag-server"]["image"].startswith(
             "quay.io/astronomer/ap-dag-server:"
         )
-        assert c_by_name["dagServer"]["livenessProbe"]
+        assert c_by_name["dag-server"]["image"].startswith(
+            "quay.io/astronomer/ap-dag-server:"
+        )
+        assert c_by_name["dag-server"]["livenessProbe"]
 
     def test_dag_server_statefulset_with_resource_overrides(self, kube_version):
         """Test that Dag Server statefulset are configurable with custom resource limits."""
         resources = {
-            "requests": {"cpu": 88.8, "memory": "777Mi"},
-            "limits": {"cpu": 99.9, "memory": "888Mi"},
+            "requestatefulset": {"cpu": 99.5, "memory": "777Mi"},
+            "limits": {"cpu": 99.6, "memory": "888Mi"},
         }
         values = {
             "dagServer": {
                 "enabled": True,
-                "resources": resources,
+                "gitSyncResources": resources,
+                "gitDaemonResources": resources,
             }
         }
 
@@ -57,15 +61,15 @@ class TestDagServerStatefulSet:
         )
         assert len(docs) == 1
         doc = docs[0]
-        assert doc["kind"] == "StatefulSet"
+        assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-dag-server"
         c_by_name = get_containers_by_name(doc)
-        assert c_by_name["dagServer"]["resources"] == resources
-        assert c_by_name["dagServer"]["resources"] == resources
+        assert c_by_name["dag-server"]["resources"] == resources
+        assert c_by_name["dag-server"]["resources"] == resources
 
     def test_dag_server_statefulset_with_securitycontext_overrides(self, kube_version):
-        """Test that dagServer statefulset are configurable with custom securitycontext."""
+        """Test that gitsync  statefulset are configurable with custom securitycontext."""
         dag_serversecuritycontext = {"runAsUser": 12345, "privileged": True}
         values = {
             "dagServer": {"enabled": True, "securityContext": dag_serversecuritycontext}
@@ -78,7 +82,7 @@ class TestDagServerStatefulSet:
         )
         assert len(docs) == 1
         doc = docs[0]
-        assert doc["kind"] == "StatefulSet"
+        assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-dag-server"
         assert (
@@ -100,7 +104,7 @@ class TestDagServerStatefulSet:
         )
         assert len(docs) == 1
         doc = docs[0]
-        assert doc["kind"] == "StatefulSet"
+        assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-dag-server"
         assert [{"name": "gscsecret"}] == doc["spec"]["template"]["spec"][

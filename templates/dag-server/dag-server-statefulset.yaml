@@ -43,42 +43,26 @@ spec:
         {{- end }}
       {{- end }}
     spec:
-      {{- if .Values.dagServer.priorityClassName }}
-      priorityClassName: {{ .Values.dagServer.priorityClassName }}
-      {{- end }}
-      affinity: {{- toYaml $affinity | nindent 8 }}
-      tolerations: {{- toYaml $tolerations | nindent 8 }}
-      topologySpreadConstraints: {{- toYaml $topologySpreadConstraints | nindent 8 }}
-      serviceAccountName: {{ include "dagServer.serviceAccountName" . }}
       {{- if .Values.schedulerName }}
       schedulerName: {{ .Values.schedulerName }}
       {{- end }}
-      {{- if or .Values.registry.secretName .Values.registry.connection }}
+      {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
       imagePullSecrets:
-        - name: {{ template "registry_secret" . }}
+        - name: {{ template "astro.registry_secret" . }}
       {{- end }}
-      securityContext: {{ $securityContext | nindent 8 }}
+      securityContext: {{ toYaml .Values.dagServer.securityContext | nindent 8 }}
       containers:
         - name: dagServer
-          image: "{{ .Values.dagServer.images.repository }}:{{ .Values.dagServer.images.tag }}"
-          imagePullPolicy: {{ .Values.images.pullPolicy }}
-          securityContext: {{ $containerSecurityContext | nindent 12 }}
-          {{- if $containerLifecycleHooks }}
-          lifecycle: {{- tpl (toYaml $containerLifecycleHooks) . | nindent 12 }}
-          {{- end }}
+          image: "{{ .Values.dagServer.images.dagServer.repository }}:{{ .Values.dagServer.images.dagServer.tag }}"
+          imagePullPolicy: {{ .Values.dagServer.images.dagServer.pullPolicy }}
           command: ["/bin/sh"]
           resources: {{- toYaml .Values.dagServer.resources | nindent 12 }}
           ports:
             - name: dag-server-http
-              containerPort: {{ .Values.ports.dagServerHttp }}
+              containerPort: {{ .Values.dagServer.ports.dagServerHttp }}
           volumeMounts:
             - name: dag-server-data
               mountPath: /data
-  {{- if not .Values.dagServer.persistence.enabled }}
-      volumes:
-        - name: dag-server-data
-          emptyDir: {{- toYaml (default (dict) .Values.dagServer.emptyDirConfig) | nindent 12 }}
-  {{- else }}
   volumeClaimTemplates:
     - metadata:
         name: dag-server-data
@@ -93,5 +77,4 @@ spec:
         resources:
           requests:
             storage: {{ .Values.dagServer.persistence.size }}
-  {{- end }}
 {{- end }}
