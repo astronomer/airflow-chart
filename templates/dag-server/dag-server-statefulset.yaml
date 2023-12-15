@@ -56,6 +56,12 @@ spec:
           image: "{{ .Values.dagServer.images.dagServer.repository }}:{{ .Values.dagServer.images.dagServer.tag }}"
           imagePullPolicy: {{ .Values.dagServer.images.dagServer.pullPolicy }}
           command: ["/bin/sh"]
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - -f
+                - "http://localhost:{{ .Values.dagServer.ports.dagServerHttp }}/health"
           resources: {{- toYaml .Values.dagServer.resources | nindent 12 }}
           ports:
             - name: dag-server-http
