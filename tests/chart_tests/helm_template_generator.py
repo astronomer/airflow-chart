@@ -37,7 +37,7 @@ GIT_ROOT = Path(__file__).parent.parent.parent
 DEBUG = os.getenv("DEBUG", "").lower() in ["yes", "true", "1"]
 
 
-def get_schema_k8s(api_version, kind, kube_version="1.24.0"):
+def get_schema_k8s(api_version, kind, kube_version="1.27.0"):
     """Return a standalone k8s schema for use in validation."""
     api_version = api_version.lower()
     kind = kind.lower()
@@ -61,14 +61,14 @@ def get_schema_k8s(api_version, kind, kube_version="1.24.0"):
 
 
 @cache
-def create_validator(api_version, kind, kube_version="1.24.0"):
+def create_validator(api_version, kind, kube_version="1.27.0"):
     """Create a k8s validator for the given inputs."""
     schema = get_schema_k8s(api_version, kind, kube_version=kube_version)
     jsonschema.Draft7Validator.check_schema(schema)
     return jsonschema.Draft7Validator(schema)
 
 
-def validate_k8s_object(instance, kube_version="1.24.0"):
+def validate_k8s_object(instance, kube_version):
     """Validate the k8s object."""
     # Skip PostgreSQL chart because it doesn't pass kubernetes json schema validation with all-numeric namespace
     labels = jmespath.search("metadata.labels", instance) or {}
