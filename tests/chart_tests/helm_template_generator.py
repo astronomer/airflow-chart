@@ -37,7 +37,7 @@ GIT_ROOT = Path(__file__).parent.parent.parent
 DEBUG = os.getenv("DEBUG", "").lower() in ["yes", "true", "1"]
 
 
-def get_schema_k8s(api_version, kind, kube_version="1.27.0"):
+def get_schema_k8s(api_version, kind, kube_version):
     """Return a standalone k8s schema for use in validation."""
     api_version = api_version.lower()
     kind = kind.lower()
@@ -61,7 +61,7 @@ def get_schema_k8s(api_version, kind, kube_version="1.27.0"):
 
 
 @cache
-def create_validator(api_version, kind, kube_version="1.27.0"):
+def create_validator(api_version, kind, kube_version):
     """Create a k8s validator for the given inputs."""
     schema = get_schema_k8s(api_version, kind, kube_version=kube_version)
     jsonschema.Draft7Validator.check_schema(schema)
