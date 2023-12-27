@@ -35,7 +35,9 @@ spec:
       containers:
         - name: dag-server
           image: "{{ .Values.dagServer.images.dagServer.repository }}:{{ .Values.dagServer.images.dagServer.tag }}"
-          containerPort: {{ .Values.dagServer.ports }}
+          ports:
+          - name: server
+            containerPort: {{ .Values.dagServer.ports }}
           resources:
             {{- toYaml .Values.dagServer.resources | nindent 12 }}
           env:
@@ -59,8 +61,8 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
           volumeMounts:
-          - name: dag-server
-            mountPath: /opt/airflow/dags
+          - name: data
+            mountPath: /opt/data
             readOnly: true
   volumeClaimTemplates:
   - metadata:
