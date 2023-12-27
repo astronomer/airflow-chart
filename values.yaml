@@ -503,6 +503,9 @@ ingress:
   # Annotations always injected when configuring Flower Ingress object
   flowerAnnotations: {}
 
+  # Annotations always injected when configuring Dag Server Ingress object
+  dagServerAnnotations: {}
+
   # Base domain for ingress vhosts
   baseDomain: ~
 
@@ -574,6 +577,7 @@ dagServer:
   persistence:
     annotations: {}
     size: 10Gi
+  ports: 8000
 
 certgenerator:
   extraAnnotations: {}
