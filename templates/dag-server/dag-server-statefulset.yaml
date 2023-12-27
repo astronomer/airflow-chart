@@ -76,4 +76,8 @@ spec:
       resources:
         requests:
           storage: {{ .Values.dagServer.persistence.size }}
+      {{- if .Values.dagServer.persistence.storageClass }}
+      storageClassName: {{ .Values.dagServer.persistence.storageClass }}
+      {{- end }}
+
 {{- end }}
