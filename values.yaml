@@ -560,6 +560,21 @@ gitSyncRelay:
       gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
   extraContainers: []
 
+dagServer:
+  enabled: false
+  images:
+    dagServer:
+      repository: "quay.io/astronomer/ap-dag-server"
+      tag: "latest"
+  resources: {}
+  securityContext: {}
+  extraEnv: []
+  serviceAccount:
+    annotations: {}
+  persistence:
+    annotations: {}
+    size: 10Gi
+
 certgenerator:
   extraAnnotations: {}
   affinity: {}
