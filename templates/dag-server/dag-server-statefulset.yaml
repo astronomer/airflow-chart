@@ -35,26 +35,41 @@ spec:
       containers:
         - name: dag-server
           image: "{{ .Values.dagServer.images.dagServer.repository }}:{{ .Values.dagServer.images.dagServer.tag }}"
+          containerPort: {{ .Values.dagServer.ports }}
           resources:
             {{- toYaml .Values.dagServer.resources | nindent 12 }}
           env:
 {{- if .Values.dagServer.extraEnv }}
 {{ toYaml .Values.dagServer.extraEnv | indent 10 }}
 {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.dagServer.ports }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.dagServer.ports }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
           volumeMounts:
           - name: dag-server
             mountPath: /opt/airflow/dags
             readOnly: true
-      volumeClaimTemplates:
-      - metadata:
-          name: data
-          {{- if .Values.dagServer.persistence.annotations }}
-          annotations:
-            {{- toYaml .Values.dagServer.persistence.annotations | nindent 10 }}
-          {{- end }}
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: {{ .Values.dagServer.persistence.size }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      {{- if .Values.dagServer.persistence.annotations }}
+      annotations:
+        {{- toYaml .Values.dagServer.persistence.annotations | nindent 10 }}
+      {{- end }}
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.dagServer.persistence.size }}
 {{- end }}
