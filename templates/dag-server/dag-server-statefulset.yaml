@@ -1,0 +1,60 @@
+###############################
+##   dag-server Statefulset   ##
+###############################
+{{- if .Values.dagServer.enabled }}
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-dag-server
+  labels:
+    component: dag-server
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: dag-server
+      tier: airflow
+  serviceName: {{ .Release.Name }}-dag-server
+  template:
+    metadata:
+      labels:
+        component: dag-server
+        tier: airflow
+        release: {{ .Release.Name }}
+        chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+        heritage: {{ .Release.Service }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-dag-server
+      securityContext:
+{{ toYaml .Values.dagServer.securityContext | indent 8 }}
+      containers:
+        - name: dag-server
+          image: "{{ .Values.dagServer.images.dagServer.repository }}:{{ .Values.dagServer.images.dagServer.tag }}"
+          resources:
+            {{- toYaml .Values.dagServer.resources | nindent 12 }}
+          env:
+{{- if .Values.dagServer.extraEnv }}
+{{ toYaml .Values.dagServer.extraEnv | indent 10 }}
+{{- end }}
+          volumeMounts:
+          - name: dag-server
+            mountPath: /opt/airflow/dags
+            readOnly: true
+      volumeClaimTemplates:
+      - metadata:
+          name: data
+          {{- if .Values.dagServer.persistence.annotations }}
+          annotations:
+            {{- toYaml .Values.dagServer.persistence.annotations | nindent 10 }}
+          {{- end }}
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: {{ .Values.dagServer.persistence.size }}
+{{- end }}
