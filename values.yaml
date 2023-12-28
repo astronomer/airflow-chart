@@ -546,7 +546,7 @@ dagServer:
     storageClassName: ~
     annotations: {}
   ports:
-    dagServerHttp: 80
+    dagServerHttp: 8000
 
   resources: {}
   #  limits:

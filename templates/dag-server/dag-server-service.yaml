@@ -17,7 +17,7 @@ spec:
     - name: http
       port: 80
       protocol: TCP
-      targetPort: 80
+      targetPort: 8000
   selector:
     component: dag-server
     tier: airflow

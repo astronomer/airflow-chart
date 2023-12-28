@@ -16,7 +16,7 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  serviceName: {{ include "airflow.fullname" . }}-dagServer
+  serviceName: {{ include "airflow.fullname" . }}-dag-server
   selector:
     matchLabels:
       component: dag-server
@@ -52,20 +52,16 @@ spec:
       {{- end }}
       securityContext: {{ toYaml .Values.dagServer.securityContext | nindent 8 }}
       containers:
-        - name: dagServer
+        - name: dag-server
           image: "{{ .Values.dagServer.images.dagServer.repository }}:{{ .Values.dagServer.images.dagServer.tag }}"
           imagePullPolicy: {{ .Values.dagServer.images.dagServer.pullPolicy }}
-          command: ["/bin/sh"]
           livenessProbe:
             exec:
               command:
                 - curl
                 - -f
-                - "http://localhost:{{ .Values.dagServer.ports.dagServerHttp }}/health"
+                - "http://localhost:8000/health"
           resources: {{- toYaml .Values.dagServer.resources | nindent 12 }}
-          ports:
-            - name: dag-server-http
-              containerPort: {{ .Values.dagServer.ports.dagServerHttp }}
           volumeMounts:
             - name: dag-server-data
               mountPath: /data
