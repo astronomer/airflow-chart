@@ -533,7 +533,7 @@ dagServer:
   images:
     dagServer:
       repository: quay.io/astronomer/ap-dag-server
-      tag: 0.0.1
+      tag: 0.1.0
       imagePullPolicy: IfNotPresent
   livenessProbe:
     initialDelaySeconds: 30
