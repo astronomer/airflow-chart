@@ -58,9 +58,7 @@ spec:
           livenessProbe:
             exec:
               command:
-                - curl
-                - -f
-                - "http://localhost:8000/health"
+                - healthcheck
           resources: {{- toYaml .Values.dagServer.resources | nindent 12 }}
           volumeMounts:
             - name: dag-server-data
