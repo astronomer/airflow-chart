@@ -147,3 +147,58 @@ spec:
                   name: flower-ui
                   {{- end }}
 {{- end }}
+{{- if and .Values.dagServer.enabled  }}
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-dag-server-ingress
+  labels:
+    tier: airflow
+    component: dag-server-ingress
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+{{- with .Values.airflow.labels }}
+{{ toYaml . | indent 4 }}
+{{- end }}
+  {{- if .Values.ingress.dagServerAnnotations }}
+  {{ $ctx := . }}
+  annotations:
+  {{- if .Values.authSidecar.enabled  }}
+{{- toYaml .Values.authSidecar.annotations | nindent 4 }}
+  {{- else }}
+    {{- range $k, $v := .Values.ingress.flowerAnnotations }}
+      {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
+spec:
+  tls:
+          {{- if .Values.ingress.acme }}
+    - secretName: {{ .Release.Name }}-airflow-tls
+          {{- else if .Values.ingress.tlsSecretName }}
+    - secretName: {{ .Values.ingress.tlsSecretName }}
+          {{- else if .Values.authSidecar.enabled  }}
+    - secretName: astronomer-tls
+          {{ else }}
+    - secretName: ~
+            {{- end }}
+      hosts:
+        - {{- include "deployments_subdomain" . | indent 1 }}
+  rules:
+    - host: {{- include "deployments_subdomain" . | indent 1 }}
+      http:
+        paths:
+          - path: /{{ .Release.Name }}/upload
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-dag-server
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: http
+                  {{- end }}
+{{- end }}

@@ -504,6 +504,9 @@ ingress:
   # Annotations always injected when configuring Flower Ingress object
   flowerAnnotations: {}
 
+  # Annotations always injected when configuring Dag Server Ingress object
+  dagServerAnnotations: {}
+
   # Base domain for ingress vhosts
   baseDomain: ~
 
@@ -538,15 +541,22 @@ dagServer:
   livenessProbe:
     initialDelaySeconds: 30
     timeoutSeconds: 30
+
   terminationGracePeriodSeconds: 30
   podAnnotations: {}
+  extraEnv: []
+
   persistence:
     enabled: true
-    size: 250Mi
+    size: 10Gi
     storageClassName: ~
     annotations: {}
+
   ports:
     dagServerHttp: 8000
+
+  serviceAccount:
+    annotations: {}
 
   resources: {}
   #  limits:

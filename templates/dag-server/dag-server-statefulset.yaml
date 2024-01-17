@@ -17,11 +17,13 @@ metadata:
     {{- end }}
 spec:
   serviceName: {{ include "airflow.fullname" . }}-dag-server
+  replicas: 1
   selector:
     matchLabels:
       component: dag-server
       tier: airflow
       release: {{ .Release.Name }}
+  serviceName: {{ .Release.Name }}-dag-server
   template:
     metadata:
       labels:
@@ -33,48 +35,55 @@ spec:
         {{- with .Values.labels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- if or .Values.dagServer.safeToEvict .Values.dagServer.podAnnotations }}
-      annotations:
-        {{- if .Values.dagServer.podAnnotations }}
-          {{- toYaml .Values.dagServer.podAnnotations | nindent 8 }}
-        {{- end }}
-        {{- if .Values.dagServer.safeToEvict }}
-        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
-        {{- end }}
-      {{- end }}
     spec:
-      {{- if .Values.schedulerName }}
-      schedulerName: {{ .Values.schedulerName }}
-      {{- end }}
-      {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
-      imagePullSecrets:
-        - name: {{ template "astro.registry_secret" . }}
-      {{- end }}
+      serviceAccountName: {{ .Release.Name }}-dag-server
       securityContext: {{ toYaml .Values.dagServer.securityContext | nindent 8 }}
       containers:
         - name: dag-server
           image: "{{ .Values.dagServer.images.dagServer.repository }}:{{ .Values.dagServer.images.dagServer.tag }}"
           imagePullPolicy: {{ .Values.dagServer.images.dagServer.pullPolicy }}
+          ports:
+          - name: server
+            containerPort: {{ .Values.dagServer.ports }}
+          resources:
+            {{- toYaml .Values.dagServer.resources | nindent 12 }}
+          env:
+{{- if .Values.dagServer.extraEnv }}
+{{ toYaml .Values.dagServer.extraEnv | indent 10 }}
+{{- end }}
           livenessProbe:
-            exec:
-              command:
-                - healthcheck
-          resources: {{- toYaml .Values.dagServer.resources | nindent 12 }}
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: {{ .Values.dagServer.ports }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.dagServer.ports }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
           volumeMounts:
-            - name: dag-server-data
-              mountPath: /data
+          - name: data
+            mountPath: /data
+            readOnly: true
   volumeClaimTemplates:
-    - metadata:
-        name: dag-server-data
-        {{- if .Values.dagServer.persistence.annotations }}
-        annotations: {{- toYaml .Values.dagServer.persistence.annotations | nindent 10 }}
-        {{- end }}
-      spec:
-        {{- if .Values.dagServer.persistence.storageClassName }}
-        storageClassName: {{ tpl .Values.dagServer.persistence.storageClassName . | quote }}
-        {{- end }}
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: {{ .Values.dagServer.persistence.size }}
+  - metadata:
+      name: data
+      {{- if .Values.dagServer.persistence.annotations }}
+      annotations:
+        {{- toYaml .Values.dagServer.persistence.annotations | nindent 10 }}
+      {{- end }}
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.dagServer.persistence.size }}
+      {{- if .Values.dagServer.persistence.storageClass }}
+      storageClassName: {{ .Values.dagServer.persistence.storageClass }}
+      {{- end }}
 {{- end }}
