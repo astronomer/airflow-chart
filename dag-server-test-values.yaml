@@ -1,0 +1,8 @@
+# !!!!!!!!!!!!!!!!!
+#
+# TEMP FILE FOR TESTING. DELETE BEFORE MERGING TO MASTER
+#
+# !!!!!!!!!!!!!!!!!
+
+airflow:
+  executor: CeleryExecutor
