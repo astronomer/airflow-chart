@@ -15,9 +15,9 @@ metadata:
 spec:
   ports:
     - name: http
-      port: {{ .Values.dagServer.ports }}
+      port: {{ .Values.dagServer.ports.dagServerHttp }}
       protocol: TCP
-      targetPort: {{ .Values.dagServer.ports }}
+      targetPort: 8000
   selector:
     component: dag-server
     tier: airflow

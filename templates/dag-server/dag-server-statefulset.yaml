@@ -36,6 +36,10 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
+      imagePullSecrets:
+        - name: {{ template "astro.registry_secret" . }}
+      {{- end }}
       serviceAccountName: {{ .Release.Name }}-dag-server
       securityContext: {{ toYaml .Values.dagServer.securityContext | nindent 8 }}
       containers:
@@ -44,7 +48,7 @@ spec:
           imagePullPolicy: {{ .Values.dagServer.images.dagServer.pullPolicy }}
           ports:
           - name: server
-            containerPort: {{ .Values.dagServer.ports }}
+            containerPort: {{ .Values.dagServer.ports.dagServerHttp }}
           resources:
             {{- toYaml .Values.dagServer.resources | nindent 12 }}
           env:
@@ -55,7 +59,7 @@ spec:
             failureThreshold: 5
             httpGet:
               path: /healthz
-              port: {{ .Values.dagServer.ports }}
+              port: {{ .Values.dagServer.ports.dagServerHttp }}
               scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -64,7 +68,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /healthz
-              port: {{ .Values.dagServer.ports }}
+              port: {{ .Values.dagServer.ports.dagServerHttp }}
             initialDelaySeconds: 10
             periodSeconds: 10
           volumeMounts:
