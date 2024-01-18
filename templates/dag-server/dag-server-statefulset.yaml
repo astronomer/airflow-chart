@@ -74,7 +74,7 @@ spec:
           volumeMounts:
           - name: data
             mountPath: /data
-            readOnly: true
+            readOnly: false
   volumeClaimTemplates:
   - metadata:
       name: data
