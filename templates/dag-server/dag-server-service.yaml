@@ -15,7 +15,7 @@ metadata:
 spec:
   ports:
     - name: http
-      port: 80
+      port: {{ .Values.dagServer.ports.dagServerHttp }}
       protocol: TCP
       targetPort: 8000
   selector:

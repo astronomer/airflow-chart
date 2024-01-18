@@ -32,10 +32,10 @@ class TestDagServerStatefulSet:
         assert doc["metadata"]["name"] == "release-name-dag-server"
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 1
-        assert c_by_name["dagServer"]["image"].startswith(
+        assert c_by_name["dag-server"]["image"].startswith(
             "quay.io/astronomer/ap-dag-server:"
         )
-        assert c_by_name["dagServer"]["livenessProbe"]
+        assert c_by_name["dag-server"]["livenessProbe"]
 
     def test_dag_server_statefulset_with_resource_overrides(self, kube_version):
         """Test that Dag Server statefulset are configurable with custom resource limits."""
@@ -61,8 +61,7 @@ class TestDagServerStatefulSet:
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-dag-server"
         c_by_name = get_containers_by_name(doc)
-        assert c_by_name["dagServer"]["resources"] == resources
-        assert c_by_name["dagServer"]["resources"] == resources
+        assert c_by_name["dag-server"]["resources"] == resources
 
     def test_dag_server_statefulset_with_securitycontext_overrides(self, kube_version):
         """Test that dagServer statefulset are configurable with custom securitycontext."""

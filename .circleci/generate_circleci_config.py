@@ -17,11 +17,8 @@ kube_versions = [
     "1.28.0",
 ]
 
-# https://circleci.com/docs/2.0/building-docker-images/#docker-version
-remote_docker_version = "20.10.24"
-
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
-ci_runner_version = "2023-11"
+ci_runner_version = "2024-01"
 
 
 def main():
@@ -36,7 +33,6 @@ def main():
         kube_versions=kube_versions,
         executors=executors,
         ci_runner_version=ci_runner_version,
-        remote_docker_version=remote_docker_version,
     )
     with open(config_path, "w") as circle_ci_config_file:
         warning_header = (
