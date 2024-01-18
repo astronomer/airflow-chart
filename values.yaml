@@ -528,8 +528,9 @@ platform:
 
 astronomer:
   images:
-    repository: quay.io/astronomer/ap-certgenerator
-    tag: 0.1.6
+    certgenerator:
+      repository: quay.io/astronomer/ap-certgenerator
+      tag: 0.1.6
 
 dagServer:
   enabled: false
