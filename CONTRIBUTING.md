@@ -20,7 +20,7 @@ To delete an existing kind cluster and reinstall the helm chart from scratch
 
 ```sh
 # Optionally, you can specify a kubernetes version available from https://hub.docker.com/r/kindest/node/tags
-KUBE_VERSION=1.24.13
+KUBE_VERSION=1.28.0
 
 bin/reset-local-dev
 ```

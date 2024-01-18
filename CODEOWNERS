@@ -1,1 +1,2 @@
-* @astronomer/maintainers-airflow-chart
+*            @astronomer/maintainers-astronomer
+*.md         @astronomer/maintainers-astronomer @astronomer/docs
