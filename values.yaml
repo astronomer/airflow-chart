@@ -542,11 +542,10 @@ dagServer:
   livenessProbe:
     initialDelaySeconds: 30
     timeoutSeconds: 30
-
   terminationGracePeriodSeconds: 30
   podAnnotations: {}
   extraEnv: []
-
+  extraContainers: []
   persistence:
     enabled: true
     size: 10Gi

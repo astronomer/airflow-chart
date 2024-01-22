@@ -75,6 +75,9 @@ spec:
           - name: data
             mountPath: /data
             readOnly: false
+{{- if .Values.dagServer.extraContainers }}
+{{- toYaml .Values.dagServer.extraContainers | nindent 8 }}
+{{- end }}
   volumeClaimTemplates:
   - metadata:
       name: data
