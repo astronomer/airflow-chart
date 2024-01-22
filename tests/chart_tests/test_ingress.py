@@ -65,5 +65,5 @@ class TestIngress:
         assert len(docs) == 1
         assert docs[0]["metadata"]["name"] == "release-name-dag-server-ingress"
         rule_0 = docs[0]["spec"]["rules"][0]
-        assert rule_0["http"]["paths"][0]["path"] == "/release-name/upload"
+        assert rule_0["http"]["paths"][0]["path"] == "/release-name/upload/?(.*)"
         assert rule_0["host"] == "deployments.example.com"
