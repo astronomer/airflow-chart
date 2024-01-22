@@ -168,7 +168,7 @@ metadata:
   {{- if .Values.authSidecar.enabled  }}
 {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
   {{- else }}
-    {{- range $k, $v := .Values.ingress.flowerAnnotations }}
+    {{- range $k, $v := .Values.ingress.dagServerAnnotations }}
       {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
     {{- end }}
   {{- end }}
@@ -190,7 +190,7 @@ spec:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
         paths:
-          - path: /{{ .Release.Name }}/upload
+          - path: /{{ .Release.Name }}/upload/?(.*)
             pathType: Prefix
             backend:
               service:
