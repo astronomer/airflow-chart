@@ -536,7 +536,7 @@ dagServer:
   enabled: false
   images:
     dagServer:
-      repository: quay.io/astronomer/ap-dag-server
+      repository: quay.io/astronomer/ap-dag-deploy
       tag: 0.2.2
       imagePullPolicy: IfNotPresent
   livenessProbe:

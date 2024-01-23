@@ -7,7 +7,7 @@ from . import get_containers_by_name
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
-class TestDagServerDeployment:
+class TestDagServerStatefulSet:
     def test_dag_server_statefulset_default(self, kube_version):
         """Test that no dag-server templates are rendered by default."""
         docs = render_chart(
@@ -39,18 +39,18 @@ class TestDagServerDeployment:
             "0.0.0.0",
         ]
         assert c_by_name["dag-server"]["image"].startswith(
-            "quay.io/astronomer/ap-dag-server:"
+            "quay.io/astronomer/ap-dag-deploy:"
         )
         assert c_by_name["dag-server"]["image"].startswith(
-            "quay.io/astronomer/ap-dag-server:"
+            "quay.io/astronomer/ap-dag-deploy:"
         )
         assert c_by_name["dag-server"]["livenessProbe"]
 
     def test_dag_server_statefulset_with_resource_overrides(self, kube_version):
         """Test that Dag Server statefulset are configurable with custom resource limits."""
         resources = {
-            "requests": {"cpu": 99.5, "memory": "777Mi"},
-            "limits": {"cpu": 99.6, "memory": "888Mi"},
+            "requests": {"cpu": 99.9, "memory": "777Mi"},
+            "limits": {"cpu": 66.6, "memory": "888Mi"},
         }
         values = {
             "dagServer": {
@@ -70,7 +70,6 @@ class TestDagServerDeployment:
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-dag-server"
         c_by_name = get_containers_by_name(doc)
-        assert c_by_name["dag-server"]["resources"] == resources
         assert c_by_name["dag-server"]["resources"] == resources
 
     def test_dag_server_statefulset_with_securitycontext_overrides(self, kube_version):
