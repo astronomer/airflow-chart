@@ -190,7 +190,7 @@ spec:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
         paths:
-          - path: /{{ .Release.Name }}/upload/?(.*)
+          - path: /{{ .Release.Name }}/dags/(upload|download)(/.*)?
             pathType: Prefix
             backend:
               service:
