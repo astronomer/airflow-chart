@@ -7,7 +7,7 @@ from .. import supported_k8s_versions
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
 class TestDagServerRoleBinding:
-    def test_dag_server_rolebinding_default(self, kube_version):
+    def test_dag_deploy_rolebinding_default(self, kube_version):
         """Test that no dag-server RoleBinding templates are rendered by default."""
         docs = render_chart(
             kube_version=kube_version,
@@ -15,7 +15,7 @@ class TestDagServerRoleBinding:
         )
         assert len(docs) == 0
 
-    def test_dag_server_rolebinding_dag_server_enabled(self, kube_version):
+    def test_dag_deploy_rolebinding_dag_server_enabled(self, kube_version):
         """Test that a valid RoleBinding is rendered when dag-server is enabled."""
         values = {"dagServer": {"enabled": True}}
         docs = render_chart(
