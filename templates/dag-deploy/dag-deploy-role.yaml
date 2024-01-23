@@ -1,14 +1,14 @@
 #################################
-# dag-server-role
+# dag-deploy-role
 #################################
 {{- if .Values.dagServer.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: "{{ .Release.Namespace }}"
-  name: {{ .Release.Name }}-dag-server-role
+  name: {{ .Release.Name }}-dag-deploy-role
 rules:
 - apiGroups: [""]
   resources: ["events"]
-  verbs: ["create"]
+  verbs: ["create", "watch", "list"]
 {{- end -}}

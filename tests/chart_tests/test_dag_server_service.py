@@ -11,7 +11,7 @@ class TestDagServerService:
         """Test that no dag-server service templates are rendered by default."""
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-server/dag-server-service.yaml",
+            show_only="templates/dag-deploy/dag-server-service.yaml",
         )
         assert len(docs) == 0
 
@@ -20,7 +20,7 @@ class TestDagServerService:
         values = {"dagServer": {"enabled": True}}
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-server/dag-server-service.yaml",
+            show_only="templates/dag-deploy/dag-server-service.yaml",
             values=values,
         )
         assert len(docs) == 1

@@ -1,18 +1,18 @@
 #################################
-# dag-server-role-binding
+# dag-deploy-role-binding
 #################################
 {{- if .Values.dagServer.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   namespace: "{{ .Release.Namespace }}"
-  name: {{ .Release.Name }}-dag-server-role-binding
+  name: {{ .Release.Name }}-dag-deploy-role-binding
 subjects:
 - kind: ServiceAccount
-  name: {{ .Release.Name }}-dag-server
+  name: {{ .Release.Name }}-dag-deploy
   namespace: "{{ .Release.Namespace }}"
 roleRef:
   kind: Role
-  name: {{ .Release.Name }}-dag-server-role
+  name: {{ .Release.Name }}-dag-deploy-role
   apiGroup: rbac.authorization.k8s.io
 {{- end -}}

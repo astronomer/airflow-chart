@@ -11,7 +11,7 @@ class TestDagServerRole:
         """Test that no dag-server Role templates are rendered by default."""
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-server/dag-server-role.yaml",
+            show_only="templates/dag-deploy/dag-deploy-role.yaml",
         )
         assert len(docs) == 0
 
@@ -20,11 +20,11 @@ class TestDagServerRole:
         values = {"dagServer": {"enabled": True}}
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-server/dag-server-role.yaml",
+            show_only="templates/dag-deploy/dag-deploy-role.yaml",
             values=values,
         )
         assert len(docs) == 1
         doc = docs[0]
         assert doc["kind"] == "Role"
         assert doc["apiVersion"] == "rbac.authorization.k8s.io/v1"
-        assert doc["metadata"]["name"] == "release-name-dag-server-role"
+        assert doc["metadata"]["name"] == "release-name-dag-deploy-role"

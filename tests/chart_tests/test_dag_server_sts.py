@@ -12,7 +12,7 @@ class TestDagServerStatefulSet:
         """Test that no dag-server templates are rendered by default."""
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-server/dag-server-statefulset.yaml",
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
         )
         assert len(docs) == 0
 
@@ -22,7 +22,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-server/dag-server-statefulset.yaml",
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
             values=values,
         )
         assert len(docs) == 1
@@ -52,7 +52,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-server/dag-server-statefulset.yaml",
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
             values=values,
         )
         assert len(docs) == 1
@@ -72,7 +72,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-server/dag-server-statefulset.yaml",
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
             values=values,
         )
         assert len(docs) == 1
@@ -94,7 +94,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-server/dag-server-statefulset.yaml",
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
             values=values,
         )
         assert len(docs) == 1
