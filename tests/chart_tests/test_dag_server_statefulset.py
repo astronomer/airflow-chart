@@ -32,6 +32,12 @@ class TestDagServerDeployment:
         assert doc["metadata"]["name"] == "release-name-dag-server"
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 1
+        assert c_by_name["dag-server"]["command"] == [
+            "sanic",
+            "dag_deploy.server.app",
+            "-H",
+            "0.0.0.0",
+        ]
         assert c_by_name["dag-server"]["image"].startswith(
             "quay.io/astronomer/ap-dag-server:"
         )

@@ -46,6 +46,7 @@ spec:
         - name: dag-server
           image: "{{ .Values.dagServer.images.dagServer.repository }}:{{ .Values.dagServer.images.dagServer.tag }}"
           imagePullPolicy: {{ .Values.dagServer.images.dagServer.pullPolicy }}
+          command: ["sanic", "dag_deploy.server.app", "-H", "0.0.0.0"]
           ports:
           - name: server
             containerPort: {{ .Values.dagServer.ports.dagServerHttp }}
