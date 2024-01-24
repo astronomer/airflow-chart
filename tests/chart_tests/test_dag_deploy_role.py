@@ -23,7 +23,7 @@ class TestDagServerRole:
             show_only="templates/dag-deploy/dag-deploy-role.yaml",
             values=values,
         )
-        assert len(docs) == 1
+        assert len(docs) == 2
         doc = docs[0]
         assert doc["kind"] == "Role"
         assert doc["apiVersion"] == "rbac.authorization.k8s.io/v1"
