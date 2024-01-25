@@ -6,14 +6,14 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   namespace: "{{ .Release.Namespace }}"
-  name: {{ .Release.Name }}-dag-deploy-role-binding
+  name: {{ .Release.Name }}-dag-server-role-binding
 subjects:
 - kind: ServiceAccount
-  name: {{ .Release.Name }}-dag-deploy
+  name: {{ .Release.Name }}-dag-server
   namespace: "{{ .Release.Namespace }}"
 roleRef:
   kind: Role
-  name: {{ .Release.Name }}-dag-deploy-role
+  name: {{ .Release.Name }}-dag-server-role
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1

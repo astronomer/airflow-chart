@@ -6,7 +6,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: "{{ .Release.Namespace }}"
-  name: {{ .Release.Name }}-dag-deploy-role
+  name: {{ .Release.Name }}-dag-server-role
 rules:
 - apiGroups: [""]
   resources: ["events"]
