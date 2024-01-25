@@ -27,4 +27,4 @@ class TestDagServerRole:
         doc = docs[0]
         assert doc["kind"] == "Role"
         assert doc["apiVersion"] == "rbac.authorization.k8s.io/v1"
-        assert doc["metadata"]["name"] == "release-name-dag-deploy-role"
+        assert doc["metadata"]["name"] == "release-name-dag-server-role"
