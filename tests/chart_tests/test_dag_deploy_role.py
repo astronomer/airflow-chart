@@ -17,7 +17,7 @@ class TestDagServerRole:
 
     def test_dag_server_role_dag_server_enabled(self, kube_version):
         """Test that a valid Role is rendered when dag-server is enabled."""
-        values = {"dagServer": {"enabled": True}}
+        values = {"dagDeploy": {"enabled": True}}
         docs = render_chart(
             kube_version=kube_version,
             show_only="templates/dag-deploy/dag-deploy-role.yaml",

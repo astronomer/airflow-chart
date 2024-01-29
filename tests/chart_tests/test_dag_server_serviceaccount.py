@@ -17,7 +17,7 @@ class TestDagServerServiceAccount:
 
     def test_dag_server_service_dag_server_enabled(self, kube_version):
         """Test that a valid serviceAccount is rendered when dag-server is enabled."""
-        values = {"dagServer": {"enabled": True}}
+        values = {"dagDeploy": {"enabled": True}}
         docs = render_chart(
             kube_version=kube_version,
             show_only="templates/dag-deploy/dag-server-serviceaccount.yaml",
@@ -34,7 +34,7 @@ class TestDagServerServiceAccount:
         when dag-server is enabled and annotations are provided."""
         annotations = {"foo-key": "foo-value", "bar-key": "bar-value"}
         values = {
-            "dagServer": {
+            "dagDeploy": {
                 "enabled": True,
                 "serviceAccount": {"annotations": annotations},
             }

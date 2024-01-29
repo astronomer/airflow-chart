@@ -1,7 +1,7 @@
 #################################
 # dag-deploy-role
 #################################
-{{- if .Values.dagServer.enabled }}
+{{- if .Values.dagDeploy.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:

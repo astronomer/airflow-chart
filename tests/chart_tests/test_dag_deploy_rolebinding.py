@@ -17,7 +17,7 @@ class TestDagServerRoleBinding:
 
     def test_dag_deploy_rolebinding_dag_server_enabled(self, kube_version):
         """Test that a valid RoleBinding is rendered when dag-server is enabled."""
-        values = {"dagServer": {"enabled": True}}
+        values = {"dagDeploy": {"enabled": True}}
         docs = render_chart(
             kube_version=kube_version,
             show_only="templates/dag-deploy/dag-deploy-rolebinding.yaml",

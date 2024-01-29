@@ -18,7 +18,7 @@ class TestDagServerStatefulSet:
 
     def test_dag_server_statefulset_dag_server_enabled(self, kube_version):
         """Test that a valid statefulset is rendered when dag-server is enabled."""
-        values = {"dagServer": {"enabled": True}}
+        values = {"dagDeploy": {"enabled": True}}
 
         docs = render_chart(
             kube_version=kube_version,
@@ -53,7 +53,7 @@ class TestDagServerStatefulSet:
             "limits": {"cpu": 66.6, "memory": "888Mi"},
         }
         values = {
-            "dagServer": {
+            "dagDeploy": {
                 "enabled": True,
                 "resources": resources,
             }
@@ -76,7 +76,7 @@ class TestDagServerStatefulSet:
         """Test that dag-server statefulset are configurable with custom securitycontext."""
         dag_serversecuritycontext = {"runAsUser": 12345, "privileged": True}
         values = {
-            "dagServer": {"enabled": True, "securityContext": dag_serversecuritycontext}
+            "dagDeploy": {"enabled": True, "securityContext": dag_serversecuritycontext}
         }
 
         docs = render_chart(
@@ -98,7 +98,7 @@ class TestDagServerStatefulSet:
         """Test dag-server statefulset with custom registry secret."""
         values = {
             "airflow": {"registry": {"secretName": "gscsecret"}},
-            "dagServer": {"enabled": True},
+            "dagDeploy": {"enabled": True},
         }
 
         docs = render_chart(

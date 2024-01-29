@@ -1,7 +1,7 @@
 ########################
 ## dag-server Service ##
 ########################
-{{- if .Values.dagServer.enabled }}
+{{- if .Values.dagDeploy.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -15,7 +15,7 @@ metadata:
 spec:
   ports:
     - name: http
-      port: {{ .Values.dagServer.ports.dagServerHttp }}
+      port: {{ .Values.dagDeploy.ports.dagServerHttp }}
       protocol: TCP
       targetPort: 8000
   selector:

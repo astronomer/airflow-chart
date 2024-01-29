@@ -58,7 +58,7 @@ class TestIngress:
             show_only="templates/ingress.yaml",
             values={
                 "ingress": {"baseDomain": "example.com"},
-                "dagServer": {"enabled": True},
+                "dagDeploy": {"enabled": True},
             },
         )
 

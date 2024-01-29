@@ -505,7 +505,7 @@ ingress:
   flowerAnnotations: {}
 
   # Annotations always injected when configuring Dag Server Ingress object
-  dagServerAnnotations: {}
+  dagDeployAnnotations: {}
 
   # Base domain for ingress vhosts
   baseDomain: ~
@@ -532,7 +532,7 @@ astronomer:
       repository: quay.io/astronomer/ap-certgenerator
       tag: 0.1.6
 
-dagServer:
+dagDeploy:
   enabled: false
   images:
     dagServer:

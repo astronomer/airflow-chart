@@ -4,7 +4,7 @@ airflow:
       enabled: true
 authSidecar:
   enabled: true
-dagServer:
+dagDeploy:
   enabled: true
 gitSyncRelay:
   enabled: true
