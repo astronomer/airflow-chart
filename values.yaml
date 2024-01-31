@@ -486,6 +486,7 @@ loggingSidecar:
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
   image: quay.io/astronomer/ap-vector:0.32.2-2
+
 # Ingress configuration
 ingress:
   # Enable ingress resource
@@ -502,6 +503,9 @@ ingress:
 
   # Annotations always injected when configuring Flower Ingress object
   flowerAnnotations: {}
+
+  # Annotations always injected when configuring Dag Server Ingress object
+  dagDeployAnnotations: {}
 
   # Base domain for ingress vhosts
   baseDomain: ~
@@ -527,6 +531,48 @@ astronomer:
     certgenerator:
       repository: quay.io/astronomer/ap-certgenerator
       tag: 0.1.6
+
+dagDeploy:
+  enabled: false
+  images:
+    dagServer:
+      repository: quay.io/astronomer/ap-dag-deploy
+      tag: 0.3.0
+      imagePullPolicy: IfNotPresent
+  livenessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 30
+  terminationGracePeriodSeconds: 30
+  podAnnotations: {}
+  extraEnv: []
+  extraContainers: []
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClassName: ~
+    annotations: {}
+
+  ports:
+    dagServerHttp: 8000
+
+  serviceAccount:
+    annotations: {}
+
+  resources: {}
+  #  limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  # This setting tells kubernetes that its ok to evict
+  # when it wants to scale a node down.
+  safeToEvict: true
+
+  securityContext: {}
+  #  runAsUser: 999
+  #  runAsGroup: 0
 
 gitSyncRelay:
   enabled: ~

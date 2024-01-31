@@ -1,0 +1,97 @@
+############################
+## dag-server StatefulSet ##
+############################
+{{- if .Values.dagDeploy.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-dag-server
+  labels:
+    component: dag-server
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+    {{- with .Values.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  serviceName: {{ include "airflow.fullname" . }}-dag-server
+  replicas: 1
+  selector:
+    matchLabels:
+      component: dag-server
+      tier: airflow
+      release: {{ .Release.Name }}
+  serviceName: {{ .Release.Name }}-dag-server
+  template:
+    metadata:
+      labels:
+        component: dag-server
+        tier: airflow
+        release: {{ .Release.Name }}
+        chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+        heritage: {{ .Release.Service }}
+        {{- with .Values.labels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
+      imagePullSecrets:
+        - name: {{ template "astro.registry_secret" . }}
+      {{- end }}
+      serviceAccountName: {{ .Release.Name }}-dag-server
+      securityContext: {{ toYaml .Values.dagDeploy.securityContext | nindent 8 }}
+      containers:
+        - name: dag-server
+          image: "{{ .Values.dagDeploy.images.dagServer.repository }}:{{ .Values.dagDeploy.images.dagServer.tag }}"
+          imagePullPolicy: {{ .Values.dagDeploy.images.dagServer.pullPolicy }}
+          command: ["sanic", "dag_deploy.server.app", "-H", "0.0.0.0"]
+          ports:
+          - name: server
+            containerPort: {{ .Values.dagDeploy.ports.dagServerHttp }}
+          resources:
+            {{- toYaml .Values.dagDeploy.resources | nindent 12 }}
+          env:
+{{- if .Values.dagDeploy.extraEnv }}
+{{ toYaml .Values.dagDeploy.extraEnv | indent 10 }}
+{{- end }}
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: {{ .Values.dagDeploy.ports.dagServerHttp }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.dagDeploy.ports.dagServerHttp }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+          - name: data
+            mountPath: /data
+            readOnly: false
+{{- if .Values.dagDeploy.extraContainers }}
+{{- toYaml .Values.dagDeploy.extraContainers | nindent 8 }}
+{{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      {{- if .Values.dagDeploy.persistence.annotations }}
+      annotations:
+        {{- toYaml .Values.dagDeploy.persistence.annotations | nindent 10 }}
+      {{- end }}
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.dagDeploy.persistence.size }}
+      {{- if .Values.dagDeploy.persistence.storageClass }}
+      storageClassName: {{ .Values.dagDeploy.persistence.storageClass }}
+      {{- end }}
+{{- end }}

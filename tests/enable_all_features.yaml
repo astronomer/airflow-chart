@@ -4,6 +4,8 @@ airflow:
       enabled: true
 authSidecar:
   enabled: true
+dagDeploy:
+  enabled: true
 gitSyncRelay:
   enabled: true
 ingress:

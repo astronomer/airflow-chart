@@ -17,10 +17,11 @@
 
 import subprocess
 import sys
-from functools import lru_cache
+from functools import cache
 from tempfile import NamedTemporaryFile
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 from pathlib import Path
+import os
 
 import jmespath
 import jsonschema
@@ -33,6 +34,7 @@ api_client = ApiClient()
 
 BASE_URL_SPEC = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master"
 GIT_ROOT = Path(__file__).parent.parent.parent
+DEBUG = os.getenv("DEBUG", "").lower() in ["yes", "true", "1"]
 
 
 def get_schema_k8s(api_version, kind, kube_version):
@@ -58,7 +60,7 @@ def get_schema_k8s(api_version, kind, kube_version):
     return json.loads(local_sp.read_text())
 
 
-@lru_cache(maxsize=None)
+@cache
 def create_validator(api_version, kind, kube_version):
     """Create a k8s validator for the given inputs."""
     schema = get_schema_k8s(api_version, kind, kube_version=kube_version)
@@ -90,14 +92,14 @@ def render_chart(
     chart_dir: Optional[str] = None,
     kube_version: str = "1.27.0",
     namespace: Optional[str] = None,
+    validate_objects: bool = True,
 ):
     """
     Render a helm chart into dictionaries. For helm chart testing only.
     """
     values = values or {}
     chart_dir = chart_dir or sys.path[0]
-    namespace = namespace or "default"
-    with NamedTemporaryFile(delete=True) as tmp_file:  # use delete=False when debugging
+    with NamedTemporaryFile(delete=not DEBUG) as tmp_file:  # export DEBUG=true to keep
         content = yaml.dump(values)
         tmp_file.write(content.encode())
         tmp_file.flush()
@@ -110,9 +112,9 @@ def render_chart(
             chart_dir,
             "--values",
             tmp_file.name,
-            "--namespace",
-            namespace,
         ]
+        if namespace:
+            command.extend(["--namespace", namespace])
         if show_only:
             if isinstance(show_only, str):
                 show_only = [show_only]
@@ -123,28 +125,32 @@ def render_chart(
             if not templates:
                 return None
         except subprocess.CalledProcessError as error:
-            print("ERROR: subprocess.CalledProcessError:")
-            print(f"helm command: {' '.join(command)}")
-            print(f"Values file contents:\n{'-' * 21}\n{yaml.dump(values)}{'-' * 21}")
-            print(f"{error.output=}\n{error.stderr=}")
-
-            if "could not find template" in error.stderr.decode("utf-8"):
+            if DEBUG:
+                print("ERROR: subprocess.CalledProcessError:")
+                print(f"helm command: {' '.join(command)}")
                 print(
-                    "ERROR: command is probably using templates with null output, which "
-                    + "usually means there is a helm value that needs to be set to render "
-                    + "the content of the chart.\n"
-                    + "command: "
-                    + " ".join(command)
+                    f"Values file contents:\n{'-' * 21}\n{yaml.dump(values)}{'-' * 21}"
                 )
+                print(f"{error.output=}\n{error.stderr=}")
+
+                if "could not find template" in error.stderr.decode("utf-8"):
+                    print(
+                        "ERROR: command is probably using templates with null output, which "
+                        + "usually means there is a helm value that needs to be set to render "
+                        + "the content of the chart.\n"
+                        + "command: "
+                        + " ".join(command)
+                    )
             raise
         k8s_objects = yaml.full_load_all(templates)
-        k8s_objects = [k8s_object for k8s_object in k8s_objects if k8s_object]  # type: ignore
-        for k8s_object in k8s_objects:
-            validate_k8s_object(k8s_object, kube_version=kube_version)
+        k8s_objects: list = [k8s_object for k8s_object in k8s_objects if k8s_object]
+        if validate_objects:
+            for k8s_object in k8s_objects:
+                validate_k8s_object(k8s_object, kube_version=kube_version)
         return k8s_objects
 
 
-def prepare_k8s_lookup_dict(k8s_objects) -> Dict[Tuple[str, str], Dict[str, Any]]:
+def prepare_k8s_lookup_dict(k8s_objects) -> dict[tuple[str, str], dict[str, Any]]:
     """
     Helper to create a lookup dict from k8s_objects.
     The keys of the dict are the k8s object's kind and name

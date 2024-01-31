@@ -15,5 +15,6 @@ helm install \
   -n airflow \
   --set executor="$EXECUTOR" \
   --set workers.persistence.fixPermissions=true \
+  --set ingress.baseDomain=example.com \
   airflow \
   "$REPO_DIR"

@@ -1,0 +1,24 @@
+#################################
+# dag-deploy-role
+#################################
+{{- if .Values.dagDeploy.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: "{{ .Release.Namespace }}"
+  name: {{ .Release.Name }}-dag-server-role
+rules:
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: "{{ .Release.Namespace }}"
+  name: {{ .Release.Name }}-dag-downloader-role
+rules:
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["watch"]
+{{- end -}}

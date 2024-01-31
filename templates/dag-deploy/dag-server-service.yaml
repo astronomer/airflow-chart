@@ -1,0 +1,27 @@
+########################
+## dag-server Service ##
+########################
+{{- if .Values.dagDeploy.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-dag-server
+  labels:
+    component: dag-server
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.dagDeploy.ports.dagServerHttp }}
+      protocol: TCP
+      targetPort: 8000
+  selector:
+    component: dag-server
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+{{- end -}}

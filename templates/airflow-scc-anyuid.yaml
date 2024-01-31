@@ -32,6 +32,9 @@ users:
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.triggerer.serviceAccountName" . }}
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.pgbouncer.serviceAccountName" . }}
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.cleanup.serviceAccountName" . }}
+{{- if .Values.dagDeploy.enabled }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-dag-server
+{{- end }}
 volumes:
 - configMap
 - downwardAPI
