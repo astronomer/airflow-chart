@@ -15,7 +15,6 @@ helm install \
   -n airflow \
   --set executor="$EXECUTOR" \
   --set workers.persistence.fixPermissions=true \
-  --set dagDeploy.enabled=True \
   --set ingress.baseDomain=example.com \
   airflow \
   "$REPO_DIR"
