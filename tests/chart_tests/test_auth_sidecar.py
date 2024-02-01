@@ -69,6 +69,7 @@ class TestAuthSidecar:
             "protocol": "TCP",
             "targetPort": 8084,
         }
+
         docs = render_chart(
             kube_version=kube_version,
             values={
