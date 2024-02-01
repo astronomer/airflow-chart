@@ -18,6 +18,12 @@ spec:
       port: {{ .Values.dagDeploy.ports.dagServerHttp }}
       protocol: TCP
       targetPort: 8000
+{{- if .Values.authSidecar.enabled }}
+    - name: auth-proxy
+      port: {{ .Values.authSidecar.port }}
+      protocol: TCP
+      targetPort: {{ .Values.authSidecar.port }}
+{{- end }}
   selector:
     component: dag-server
     tier: airflow

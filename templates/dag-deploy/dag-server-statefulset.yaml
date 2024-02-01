@@ -76,8 +76,44 @@ spec:
           - name: data
             mountPath: /data
             readOnly: false
+{{- if .Values.authSidecar.enabled }}
+        - name: auth-proxy
+          image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
+          imagePullPolicy: {{ .Values.authSidecar.pullPolicy }}
+          {{- if .Values.authSidecar.resources }}
+          resources: {{- toYaml .Values.authSidecar.resources | nindent 12 }}
+          {{- end }}
+          ports:
+          - containerPort: {{ .Values.authSidecar.port }}
+            name: auth-proxy
+            protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.authSidecar.port }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.authSidecar.port }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+          - mountPath: /etc/nginx/nginx.conf
+            name: nginx-sidecar-conf
+            subPath: nginx.conf
+{{- end }}
 {{- if .Values.dagDeploy.extraContainers }}
 {{- toYaml .Values.dagDeploy.extraContainers | nindent 8 }}
+{{- end }}
+{{- if .Values.authSidecar.enabled }}
+      volumes:
+      - name: nginx-sidecar-conf
+        configMap:
+          name: {{ .Release.Name }}-dag-server-nginx-conf
 {{- end }}
   volumeClaimTemplates:
   - metadata:

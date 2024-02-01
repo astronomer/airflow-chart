@@ -1,0 +1,69 @@
+#######################################
+## Dag Server auth sidecar ConfigMap ##
+#######################################
+{{- if and .Values.dagDeploy.enabled .Values.authSidecar.enabled  }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-dag-server-nginx-conf
+  labels:
+    tier: airflow
+    component: dag-server
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+data:
+  nginx.conf: |
+    pid /tmp/nginx.pid;
+    worker_processes auto;
+    events {
+      multi_accept        on;
+      worker_connections  16384;
+      use                 epoll;
+      }
+    http {
+      upstream astro-dag-server {
+        server localhost:{{ .Values.dagDeploy.ports.dagServerHttp }} ;
+      }
+      server {
+        server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
+        listen {{ .Values.authSidecar.port }}  ;
+        # Disable Nginx Server version
+        server_tokens off;
+        location  = /auth {
+{{ include "default_nginx_settings" . | indent 8  }}
+          proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};
+          proxy_pass  https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization;
+        }
+
+        location @401_auth_error {
+          internal;
+          add_header Set-Cookie $auth_cookie;
+          return 302 https://app.{{ .Values.ingress.baseDomain }}/login?rd=https://$http_host$request_uri;
+        }
+
+        location ~ ^/{{ .Release.Name }}/dags/(upload|download) {
+{{ include "default_nginx_settings_location" . | indent 8  }}
+
+
+          #proxy_set_header X-Original-URI        $request_uri;
+          if ($host = '{{ .Values.platform.release }}-airflow.{{ .Values.ingress.baseDomain }}' ) {
+            return 308 https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/dags/$request_uri;
+          }
+
+          # Custom headers to proxied server
+          proxy_set_header  Host  deployments.{{ .Values.ingress.baseDomain}};
+          #proxy_set_header  X-Forwarded-Proto https;
+          proxy_cookie_path                       off;
+          rewrite ^/{{ .Release.Name }}/dags(.*)$ $1 break;
+          proxy_pass http://astro-dag-server;
+
+        }
+
+        location /healthz {
+          return 200;
+        }
+
+      }
+    }
+{{- end }}
