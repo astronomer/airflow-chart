@@ -30,12 +30,6 @@ data:
         listen {{ .Values.authSidecar.port }}  ;
         # Disable Nginx Server version
         server_tokens off;
-        location ^~ /dags/(upload|download)(/.*)? {
-          if ($host = 'deployments.{{ .Values.ingress.baseDomain }}' ) {
-            return 404;
-            }
-            proxy_pass https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/dags/$request_uri;
-          }
         location  = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
           proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};
@@ -48,7 +42,7 @@ data:
           return 302 https://app.{{ .Values.ingress.baseDomain }}/login?rd=https://$http_host$request_uri;
         }
 
-        location / {
+        location ~ ^/{{ .Release.Name }}/dags/(upload|download) { {
 {{ include "default_nginx_settings_location" . | indent 8  }}
 
 
@@ -61,6 +55,7 @@ data:
           proxy_set_header  Host  deployments.{{ .Values.ingress.baseDomain}};
           #proxy_set_header  X-Forwarded-Proto https;
           proxy_cookie_path                       off;
+          rewrite ^/{{ .Release.Name }}/dags(.*)$ $1 break;
           proxy_pass http://astro-dag-server;
 
         }
