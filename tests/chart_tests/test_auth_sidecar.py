@@ -57,6 +57,7 @@ class TestAuthSidecar:
             "requests": {"cpu": 99.9, "memory": "777Mi"},
             "limits": {"cpu": 66.6, "memory": "888Mi"},
         }
+
         volumeMounts = {
             "mountPath": "/etc/nginx/nginx.conf",
             "name": "nginx-sidecar-conf",
