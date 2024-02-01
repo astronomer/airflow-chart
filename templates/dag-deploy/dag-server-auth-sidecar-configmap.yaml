@@ -22,7 +22,7 @@ data:
       use                 epoll;
       }
     http {
-      upstream astro-webserver {
+      upstream astro-dag-server {
         server localhost:{{ .Values.dagDeploy.ports.dagServerHttp }} ;
       }
       server {
@@ -30,11 +30,11 @@ data:
         listen {{ .Values.authSidecar.port }}  ;
         # Disable Nginx Server version
         server_tokens off;
-        location ^~ /api/ {
+        location ^~ /dags/(upload|download)(/.*)? {
           if ($host = 'deployments.{{ .Values.ingress.baseDomain }}' ) {
             return 404;
             }
-            proxy_pass https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/airflow/$request_uri;
+            proxy_pass https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/dags/$request_uri;
           }
         location  = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
@@ -54,7 +54,7 @@ data:
 
           #proxy_set_header X-Original-URI        $request_uri;
           if ($host = '{{ .Values.platform.release }}-airflow.{{ .Values.ingress.baseDomain }}' ) {
-            return 308 https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/airflow/$request_uri;
+            return 308 https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/dags/$request_uri;
           }
 
           # Custom headers to proxied server
