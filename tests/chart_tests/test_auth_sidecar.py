@@ -16,7 +16,9 @@ class TestAuthSidecar:
 
     def test_auth_sidecar_config_defaults(self, kube_version):
         """Test logging sidecar config with defaults"""
-        docs = render_chart(kube_version=kube_version, values={}, show_only=self.show_only)
+        docs = render_chart(
+            kube_version=kube_version, values={}, show_only=self.show_only
+        )
         assert len(docs) == 0
 
     def test_auth_sidecar_config_enabled_with_celeryexecutor(self, kube_version):
