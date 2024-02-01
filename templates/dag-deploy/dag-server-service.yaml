@@ -14,10 +14,17 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   ports:
+{{- if .Values.authSidecar.enabled }}
+    - name: auth-proxy
+      port: {{ .Values.authSidecar.port }}
+      protocol: TCP
+      targetPort: {{ .Values.authSidecar.port }}
+{{- else }}
     - name: http
       port: {{ .Values.dagDeploy.ports.dagServerHttp }}
       protocol: TCP
       targetPort: 8000
+{{- end }}
   selector:
     component: dag-server
     tier: airflow
