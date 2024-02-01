@@ -1,6 +1,6 @@
-######################################
-## WebServer auth sidecar ConfigMap ##
-######################################
+#######################################
+## Dag Server auth sidecar ConfigMap ##
+#######################################
 {{- if and .Values.dagDeploy.enabled .Values.authSidecar.enabled  }}
 kind: ConfigMap
 apiVersion: v1
@@ -42,7 +42,7 @@ data:
           return 302 https://app.{{ .Values.ingress.baseDomain }}/login?rd=https://$http_host$request_uri;
         }
 
-        location ~ ^/{{ .Release.Name }}/dags/(upload|download) { {
+        location ~ ^/{{ .Release.Name }}/dags/(upload|download) {
 {{ include "default_nginx_settings_location" . | indent 8  }}
 
 
