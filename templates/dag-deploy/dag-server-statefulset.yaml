@@ -113,7 +113,7 @@ spec:
       volumes:
       - name: nginx-sidecar-conf
         configMap:
-          name: {{ .Release.Name }}-nginx-conf
+          name: {{ .Release.Name }}-dag-server-nginx-conf
 {{- end }}
   volumeClaimTemplates:
   - metadata:
