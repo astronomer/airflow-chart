@@ -21,18 +21,35 @@ class TestAuthSidecar:
         )
         assert len(docs) == 0
 
-    def test_auth_sidecar_config_enabled(self, kube_version):
+    def test_auth_sidecar_config_enabled_with_celeryexecutor(self, kube_version):
+        """Test logging sidecar config with defaults"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "authSidecar": {"enabled": True},
+                "dagDeploy": {"enabled": True},
+                "airflow": {"executor": "CeleryExecutor"},
+            },
+            show_only=[
+                "templates/dag-deploy/dag-server-auth-sidecar-configmap.yaml",
+                "templates/webserver/webserver-auth-sidecar-configmap.yaml",
+                "templates/flower/flower-auth-sidecar-configmap.yaml",
+            ],
+        )
+        assert len(docs) == 3
+
+    def test_auth_sidecar_config_enabled_with_kubernetesexecutor(self, kube_version):
         """Test logging sidecar config with defaults"""
         docs = render_chart(
             kube_version=kube_version,
             values={"authSidecar": {"enabled": True}, "dagDeploy": {"enabled": True}},
             show_only=[
                 "templates/dag-deploy/dag-server-auth-sidecar-configmap.yaml",
-                "templates/flower/flower-auth-sidecar-configmap.yaml",
                 "templates/webserver/webserver-auth-sidecar-configmap.yaml",
+                "templates/flower/flower-auth-sidecar-configmap.yaml",
             ],
         )
-        assert len(docs) == 3
+        assert len(docs) == 2
 
     def test_auth_sidecar_config_with_dag_server_enabled(self, kube_version):
         """Test logging sidecar config with defaults"""
