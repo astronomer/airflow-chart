@@ -10,11 +10,10 @@ from jinja2 import Template
 # https://hub.docker.com/r/kindest/node/tags
 # This should match what is in tests/__init__.py
 kube_versions = [
-    "1.24.15",
-    "1.25.11",
-    "1.26.6",
-    "1.27.3",
-    "1.28.0",
+    "1.25.16",
+    "1.26.13",
+    "1.27.10",
+    "1.28.6",
 ]
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
