@@ -19,13 +19,10 @@ import subprocess
 from pathlib import Path
 
 import docker
-import git
 import pytest
 from filelock import FileLock
 
-# The top-level path of this repository
-git_repo = git.Repo(__file__, search_parent_directories=True)
-git_root_dir = Path(git_repo.git.rev_parse("--show-toplevel"))
+GIT_ROOT = [x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()][-1]
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -41,7 +38,7 @@ def upgrade_helm(tmp_path_factory, worker_id):
             )
             # The following command may modify any requirements.yaml with updated metadata
             subprocess.check_output(
-                f"find {git_root_dir} -type f -name requirements.yaml -print -execdir helm dep update ;".split()
+                f"find {GIT_ROOT} -type f -name requirements.yaml -print -execdir helm dep update ;".split()
             )
             subprocess.check_output("helm repo update".split())
         except subprocess.CalledProcessError as e:
