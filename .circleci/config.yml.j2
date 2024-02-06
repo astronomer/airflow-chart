@@ -96,7 +96,6 @@ jobs:
       - image: quay.io/astronomer/ci-helm-release:{{ ci_runner_version }}
     steps:
       - setup_remote_docker:
-          version: {{ remote_docker_version }}
           docker_layer_caching: true
       - checkout
       - run:

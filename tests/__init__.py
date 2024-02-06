@@ -1,20 +1,14 @@
 from pathlib import Path
 
-import git
 import yaml
 
 # The top-level path of this repository
-git_repo = git.Repo(__file__, search_parent_directories=True)
-git_root_dir = Path(git_repo.git.rev_parse("--show-toplevel"))
+git_root_dir = [x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()][
+    -1
+]
 
-with open(f"{git_root_dir}/.circleci/config.yml") as f:
-    circleci_config = yaml.safe_load(f.read())
-
-# This should match the major.minor version list in .circleci/generate_circleci_config.py
-# Patch version should always be 0
+metadata = yaml.safe_load((Path(git_root_dir) / "metadata.yaml").read_text())
+# replace all patch versions with 0 so we end up with ['1.26.0', '1.27.0']
 supported_k8s_versions = [
-    "1.24.0",
-    "1.25.0",
-    "1.26.0",
-    "1.27.0",
+    ".".join(x.split(".")[:-1] + ["0"]) for x in metadata["test_k8s_versions"]
 ]
