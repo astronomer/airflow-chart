@@ -33,7 +33,10 @@ from kubernetes.client.api_client import ApiClient
 api_client = ApiClient()
 
 BASE_URL_SPEC = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master"
-GIT_ROOT = Path(__file__).parent.parent.parent
+# The top-level path of this repository
+git_root_dir = [x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()][
+    -1
+]
 DEBUG = os.getenv("DEBUG", "").lower() in ["yes", "true", "1"]
 
 
@@ -49,7 +52,7 @@ def get_schema_k8s(api_version, kind, kube_version):
     else:
         schema_path = f"v{kube_version}-standalone/{kind}-{api_version}.json"
 
-    local_sp = Path(f"{GIT_ROOT}/tests/k8s_schema/{schema_path}")
+    local_sp = Path(f"{git_root_dir}/tests/k8s_schema/{schema_path}")
     if not local_sp.exists():
         if not local_sp.parent.is_dir():
             local_sp.parent.mkdir()

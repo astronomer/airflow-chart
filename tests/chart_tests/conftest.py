@@ -19,13 +19,12 @@ import subprocess
 from pathlib import Path
 
 import docker
-import git
 import pytest
 from filelock import FileLock
 
-# The top-level path of this repository
-git_repo = git.Repo(__file__, search_parent_directories=True)
-git_root_dir = Path(git_repo.git.rev_parse("--show-toplevel"))
+git_root_dir = [x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()][
+    -1
+]
 
 
 @pytest.fixture(autouse=True, scope="session")
