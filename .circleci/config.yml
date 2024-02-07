@@ -234,6 +234,7 @@ jobs:
   unittest-charts:
     docker:
       - image: quay.io/astronomer/ci-helm-release:2024-02
+    parallelism: 8
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -242,6 +243,8 @@ jobs:
           name: unittest the Airflow chart
           command: |
             mkdir test-results
+            TEST_FILES=$(circleci tests glob "tests/chart_tests/test_*.py" | circleci tests split --split-by=timings)
+            venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml $TEST_FILES
             make unittest-chart
       - store_test_results:
           path: test-results
