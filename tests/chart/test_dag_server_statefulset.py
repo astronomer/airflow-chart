@@ -1,6 +1,6 @@
 import pytest
 
-from tests.chart_tests.helm_template_generator import render_chart
+from tests.chart.helm_template_generator import render_chart
 
 from .. import supported_k8s_versions
 from . import get_containers_by_name

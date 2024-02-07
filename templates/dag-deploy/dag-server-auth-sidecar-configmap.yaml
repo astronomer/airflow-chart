@@ -1,7 +1,7 @@
 #######################################
 ## Dag Server auth sidecar ConfigMap ##
 #######################################
-{{- if and .Values.dagDeploy.enabled .Values.authSidecar.enabled  }}
+{{- if and .Values.dagDeploy.enabled .Values.authSidecar.enabled }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -30,8 +30,8 @@ data:
         listen {{ .Values.authSidecar.port }}  ;
         # Disable Nginx Server version
         server_tokens off;
+{{ include "default_nginx_settings" . | indent 6 }}
         location  = /auth {
-{{ include "default_nginx_settings" . | indent 8  }}
           proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};
           proxy_pass  https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization;
         }
@@ -43,7 +43,7 @@ data:
         }
 
         location ~ ^/{{ .Release.Name }}/dags/(upload|download) {
-{{ include "default_nginx_settings_location" . | indent 8  }}
+{{ include "default_nginx_settings_location" . | indent 8 }}
 
 
           #proxy_set_header X-Original-URI        $request_uri;
