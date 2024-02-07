@@ -1,4 +1,4 @@
-from tests.chart_tests.helm_template_generator import render_chart
+from tests.chart.helm_template_generator import render_chart
 
 
 class TestTriggerer:
