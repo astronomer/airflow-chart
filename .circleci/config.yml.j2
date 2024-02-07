@@ -107,7 +107,6 @@ jobs:
             make charts
             TEST_FILES=$(circleci tests glob "tests/chart_tests/test_*.py" | circleci tests split --split-by=timings)
             venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml $TEST_FILES
-            make unittest-chart
       - store_test_results:
           path: test-results
 
