@@ -35,12 +35,10 @@ repos:
         args: ["-b", "master"]
       - id: requirements-txt-fixer
         args:
-          [
-            "tests/chart_tests/requirements.in",
-            "tests/chart_tests/requirements.txt",
-            "tests/functional-tests/requirements.in",
-            "tests/functional-tests/requirements.txt",
-          ]
+          - "requirements/chart.in"
+          - "requirements/chart.txt"
+          - "requirements/functional.in"
+          - "requirements/functional.txt"
       - id: sort-simple-yaml
       - id: trailing-whitespace
   - repo: https://github.com/shellcheck-py/shellcheck-py
@@ -64,9 +62,9 @@ repos:
       - id: circle-config-yaml
         name: Ensure .circleci/config.yml is up to date
         language: python
-        files: "config.yml$|config.yml.j2|generate_circleci_config.py$"
-        entry: .circleci/generate_circleci_config.py
-        additional_dependencies: ["jinja2"]
+        files: "(config.yml|config.yml.j2|generate_circleci_config.py)$"
+        entry: bin/generate_circleci_config.py
+        additional_dependencies: ["jinja2", "PyYAML"]
       - id: helm-dependency-update
         name: Ensure helm lock is up to date with requirements in Chart.yaml
         files: "Chart.yaml"

@@ -95,6 +95,7 @@ workflows:
           requires:
             - build-and-release-internal
 
+            - approve-test-all
       - airflow-test:
           name: test-1-28-6-LocalExecutor
           kube_version: 1.28.6
@@ -102,9 +103,32 @@ workflows:
           requires:
             - build-and-release-internal
 
+            - approve-test-all
       - airflow-test:
           name: test-1-28-6-KubernetesExecutor
           kube_version: 1.28.6
+          executor: KubernetesExecutor
+          requires:
+            - build-and-release-internal
+
+            - approve-test-all
+      - airflow-test:
+          name: test-1-29-1-CeleryExecutor
+          kube_version: 1.29.1
+          executor: CeleryExecutor
+          requires:
+            - build-and-release-internal
+
+      - airflow-test:
+          name: test-1-29-1-LocalExecutor
+          kube_version: 1.29.1
+          executor: LocalExecutor
+          requires:
+            - build-and-release-internal
+
+      - airflow-test:
+          name: test-1-29-1-KubernetesExecutor
+          kube_version: 1.29.1
           executor: KubernetesExecutor
           requires:
             - build-and-release-internal
@@ -124,6 +148,9 @@ workflows:
             - "test-1-28-6-CeleryExecutor"
             - "test-1-28-6-LocalExecutor"
             - "test-1-28-6-KubernetesExecutor"
+            - "test-1-29-1-CeleryExecutor"
+            - "test-1-29-1-LocalExecutor"
+            - "test-1-29-1-KubernetesExecutor"
           filters:
             branches:
               only:
@@ -144,7 +171,7 @@ workflows:
 jobs:
   run_pre_commit:
     docker:
-      - image: quay.io/astronomer/ci-pre-commit:2024-01
+      - image: quay.io/astronomer/ci-pre-commit:2024-02
     steps:
       - checkout
       - run:
@@ -179,7 +206,8 @@ jobs:
 
   unittest-charts:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2024-01
+      - image: quay.io/astronomer/ci-helm-release:2024-02
+    parallelism: 8
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -188,13 +216,16 @@ jobs:
           name: unittest the Airflow chart
           command: |
             mkdir test-results
-            make unittest-chart
+            make venv
+            make charts
+            TEST_FILES=$(circleci tests glob "tests/chart/test_*.py" | circleci tests split --split-by=timings)
+            venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml $TEST_FILES
       - store_test_results:
           path: test-results
 
   build-and-release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2024-01
+      - image: quay.io/astronomer/ci-helm-release:2024-02
     steps:
       - checkout
       - run:
@@ -234,7 +265,7 @@ jobs:
           path: test-results
   release-internal:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2024-01
+      - image: quay.io/astronomer/ci-helm-release:2024-02
     steps:
       - checkout
       - run:
@@ -243,7 +274,7 @@ jobs:
 
   release-public:
     docker:
-      - image: quay.io/astronomer/ci-helm-release:2024-01
+      - image: quay.io/astronomer/ci-helm-release:2024-02
     steps:
       - checkout
       - publish-github-release
