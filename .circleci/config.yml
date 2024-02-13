@@ -20,34 +20,12 @@ workflows:
             - run_pre_commit
             - unittest-charts
       - airflow-test:
-          name: test-1-24-15-CeleryExecutor
-          kube_version: 1.24.15
-          executor: CeleryExecutor
-          requires:
-            - build-and-release-internal
-
-      - airflow-test:
-          name: test-1-24-15-LocalExecutor
-          kube_version: 1.24.15
-          executor: LocalExecutor
-          requires:
-            - build-and-release-internal
-
-      - airflow-test:
-          name: test-1-24-15-KubernetesExecutor
-          kube_version: 1.24.15
-          executor: KubernetesExecutor
-          requires:
-            - build-and-release-internal
-
-      - airflow-test:
           name: test-1-25-16-CeleryExecutor
           kube_version: 1.25.16
           executor: CeleryExecutor
           requires:
             - build-and-release-internal
 
-            - approve-test-all
       - airflow-test:
           name: test-1-25-16-LocalExecutor
           kube_version: 1.25.16
@@ -55,7 +33,6 @@ workflows:
           requires:
             - build-and-release-internal
 
-            - approve-test-all
       - airflow-test:
           name: test-1-25-16-KubernetesExecutor
           kube_version: 1.25.16
@@ -63,7 +40,6 @@ workflows:
           requires:
             - build-and-release-internal
 
-            - approve-test-all
       - airflow-test:
           name: test-1-26-13-CeleryExecutor
           kube_version: 1.26.13
@@ -160,9 +136,6 @@ workflows:
       - approve-release-prod:
           type: approval
           requires:
-            - "test-1-24-15-CeleryExecutor"
-            - "test-1-24-15-LocalExecutor"
-            - "test-1-24-15-KubernetesExecutor"
             - "test-1-25-16-CeleryExecutor"
             - "test-1-25-16-LocalExecutor"
             - "test-1-25-16-KubernetesExecutor"
