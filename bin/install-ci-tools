@@ -1,13 +1,8 @@
 #!/bin/bash
 set -e
 
-if [[ -z "${KIND_VERSION}" ]]; then
-  export KIND_VERSION="0.20.0"
-fi
-
-if [[ -z "${HELM_VERSION}" ]]; then
-  export HELM_VERSION="3.13.3"
-fi
+export KIND_VERSION="${KIND_VERSION:-0.22.0}"
+export HELM_VERSION="${HELM_VERSION:-3.14.2}"
 
 # Determine the platform we are running on
 OS=$(uname | tr '[:upper:]' '[:lower:]')

@@ -2,12 +2,12 @@
 exclude: '^(venv|\.vscode|tests/k8s_schema)' # regex
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.1.13"
+    rev: "v0.3.0"
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --ignore, E501]
   - repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 24.2.0
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -46,23 +46,25 @@ repos:
     hooks:
       - id: shellcheck
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.4
+    rev: v1.5.5
     hooks:
       - id: remove-tabs
         exclude_types: [makefile, binary]
   - repo: https://github.com/astronomer/pre-commit-hooks
-    rev: bd325c947efcba13c03b4f4c93d882f2f83ed6ff
+    rev: 8b2d969bd549cd7c9454cc8bb54eec5b35c2e5e6
     hooks:
-      - id: remove-en-dashes
-      - id: remove-unicode-non-breaking-spaces
+      - id: CVE-2017-18342
       - id: remove-unicode-zero-width-non-breaking-spaces
       - id: remove-unicode-zero-width-space
+      - id: replace-en-dashes
+      - id: replace-greek-question-mark
+      - id: replace-unicode-non-breaking-spaces
   - repo: local
     hooks:
       - id: circle-config-yaml
         name: Ensure .circleci/config.yml is up to date
         language: python
-        files: "(config.yml|config.yml.j2|generate_circleci_config.py)$"
+        files: "(config.yml|config.yml.j2|generate_circleci_config.py|values.yaml|metadata.yaml)$"
         entry: bin/generate_circleci_config.py
         additional_dependencies: ["jinja2", "PyYAML"]
       - id: helm-dependency-update
