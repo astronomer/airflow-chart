@@ -32,3 +32,39 @@ class TestExtraObjects:
             assert doc["metadata"]["labels"]["heritage"] == "Helm"
 
         assert all(bool(x) for x in doc["metadata"]["labels"].values())
+
+    test_tags = (
+        "1",
+        "2.3",
+        "9.8.7",
+        5,
+        "asdf",
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ-0.1.2.3.4.5.6.7.8.9_abcdefghijklmnopqrstuvwxyz",
+    )
+
+    @pytest.mark.parametrize("tag", test_tags, ids=test_tags)
+    def test_default_chart_various_tags(self, tag, kube_version):
+        """Test that everything works with various docker tags."""
+        values = {
+            "airflow": {
+                "defaultAirflowTag": tag,
+                "images": {
+                    "airflow": {"tag": tag},
+                    "statsd": {"tag": tag},
+                    "pgbouncer": {"tag": tag},
+                    "pgbouncerExporter": {"tag": tag},
+                    "gitSync": {"tag": tag},
+                },
+                "authSidecar": {"tag": tag},
+                "astronomer": {"images": {"certgenerator": {"tag": tag}}},
+                "dagDeploy": {"images": {"dagServer": {"tag": tag}}},
+                "gitSyncRelay": {
+                    "images": {
+                        "gitDaemon": {"tag": tag},
+                        "gitSync": {"tag": tag},
+                    }
+                },
+            },
+        }
+        docs = render_chart(kube_version=kube_version, values=values)
+        assert len(docs) == 29
