@@ -1,12 +1,36 @@
-################################
-## Airflow Ingress
-#################################
+
+{{- $purposes := list -}}
+{{- if $.Values.ingress.perHostnameIngresses -}}
+  {{- $purposes = list "primary" "compat" -}}
+{{- else -}}
+  {{- $purposes = list "combined" -}}
+{{- end -}}
+
+{{/* START AIRFLOW INGRESS SECTION */}}
 {{- if .Values.ingress.enabled }}
   {{ $ctx := . }}
+
+{{/* begin range iteration loop over purposes */}}
+{{ range $purpose := $purposes -}}
+{{/* begin ctx scope-inversion for purpose */}}
+{{- with $ctx -}}
+{{- $section_affix  := "" -}}
+{{- if not ( eq $purpose "combined" ) }}
+{{- $section_affix = printf " - %s" $purpose }}
+{{- else -}}
+{{- end -}}
+################################
+## Airflow Ingress{{ $section_affix}}
+#################################
+{{ $ingress_name := printf "%s-%s" $.Release.Name "airflow-ingress" }}
+{{- if not (or (eq $purpose "combined") (eq $purpose "primary")) -}}
+{{ $ingress_name = printf "%s-%s" $ingress_name $purpose  }}
+{{- end}}
+
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}-airflow-ingress
+  name: {{ $ingress_name }}
   labels:
     tier: airflow
     component: airflow-ingress
@@ -39,9 +63,15 @@ spec:
     - secretName: ~
   {{- end }}
       hosts:
+      {{- if or (eq $purpose "combined") (eq $purpose "primary") }}
         - {{- include "deployments_subdomain" . | indent 1 }}
+      {{- end }}
+      {{- if or (eq $purpose "combined") (eq $purpose "compat") }}
         - {{- include "airflow_subdomain" . | indent 1 }}
+      {{- end }}
+
   rules:
+  {{- if or (eq $purpose "combined") (eq $purpose "primary") }}
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
         paths:
@@ -56,6 +86,8 @@ spec:
                   {{- else }}
                   name: airflow-ui
                   {{- end }}
+  {{- end}}
+  {{- if or (eq $purpose "combined") (eq $purpose "compat") }}
     - host: {{- include "airflow_subdomain" . | indent 1 }}
       http:
         paths:
@@ -70,13 +102,39 @@ spec:
                   {{- else }}
                   name: airflow-ui
                   {{- end }}
-{{- end }}
-{{- if and .Values.ingress.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
+  {{- end}}
+{{/* end ctx scope-inversion for purpose */}}
+{{ end }}
 ---
+{{/* end range iteration loop over purposes */}}
+{{ end }}
+{{/* end check on if ingress is enabled */}}
+{{- end }}
+{{/* END AIRFLOW INGRESS SECTION */}}
+{{/* START FLOWER INGRESS SECTION */}}
+{{- if and .Values.ingress.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
+  {{ $ctx := . }}
+
+{{/* begin range iteration loop over purposes */}}
+{{ range $purpose := $purposes -}}
+{{/* begin ctx scope-inversion for purpose */}}
+{{- with $ctx -}}
+{{- $section_affix  := "" -}}
+{{- if not ( eq $purpose "combined" ) }}
+{{- $section_affix = printf " - %s" $purpose }}
+{{- else -}}
+{{- end -}}
+################################
+## Flower Ingress{{ $section_affix}}
+#################################
+{{ $ingress_name := printf "%s-%s" $.Release.Name "flower-ingress" }}
+{{- if not (or (eq $purpose "combined") (eq $purpose "primary")) -}}
+{{ $ingress_name = printf "%s-%s" $ingress_name $purpose  }}
+{{- end}}
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}-flower-ingress
+  name: {{ $ingress_name }}
   labels:
     tier: airflow
     component: flower-ingress
@@ -109,9 +167,14 @@ spec:
     - secretName: ~
             {{- end }}
       hosts:
+      {{- if or (eq $purpose "combined") (eq $purpose "primary") }}
         - {{- include "deployments_subdomain" . | indent 1 }}
+      {{- end }}
+      {{- if or (eq $purpose "combined") (eq $purpose "compat") }}
         - {{- include "flower_subdomain" . | indent 1 }}
+      {{- end }}
   rules:
+  {{- if or (eq $purpose "combined") (eq $purpose "primary") }}
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
         paths:
@@ -132,6 +195,8 @@ spec:
                 port:
                   name: flower-ui
           {{ end }}
+  {{- end }}
+  {{- if or (eq $purpose "combined") (eq $purpose "compat") }}
     - host: {{- include "flower_subdomain" . | indent 1 }}
       http:
         paths:
@@ -146,9 +211,20 @@ spec:
                   {{- else }}
                   name: flower-ui
                   {{- end }}
-{{- end }}
-{{- if and .Values.dagDeploy.enabled  }}
+  {{- end }}
+{{/* end ctx scope-inversion for purpose */}}
+{{ end }}
 ---
+{{/* end range iteration loop over purposes */}}
+{{ end }}
+{{/* end check on if ingress is enabled */}}
+{{- end }}
+{{/* END FLOWER INGRESS SECTION */}}
+{{/* START DAG DEPLOY SERVER INGRESS SECTION */}}
+################################
+## Dag Deployment Server
+#################################
+{{- if and .Values.ingress.enabled .Values.dagDeploy.enabled  }}
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:
