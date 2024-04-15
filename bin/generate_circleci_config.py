@@ -13,7 +13,7 @@ metadata = yaml.safe_load((git_root_dir / "metadata.yaml").read_text())
 kube_versions = metadata["test_k8s_versions"]
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
-ci_runner_version = "2024-02"
+ci_runner_version = "2024-04"
 
 
 def main():
