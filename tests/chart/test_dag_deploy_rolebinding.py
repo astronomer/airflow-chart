@@ -27,4 +27,4 @@ class TestDagServerRoleBinding:
         doc = docs[0]
         assert doc["kind"] == "RoleBinding"
         assert doc["apiVersion"] == "rbac.authorization.k8s.io/v1"
-        assert doc["metadata"]["name"] == "release-name-dag-server-role-binding"
+        assert doc["metadata"]["name"] == "release-name-dag-server-rolebinding"
