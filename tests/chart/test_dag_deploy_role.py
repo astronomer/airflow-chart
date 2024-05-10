@@ -24,7 +24,26 @@ class TestDagServerRole:
             values=values,
         )
         assert len(docs) == 2
-        doc = docs[0]
-        assert doc["kind"] == "Role"
-        assert doc["apiVersion"] == "rbac.authorization.k8s.io/v1"
-        assert doc["metadata"]["name"] == "release-name-dag-server-role"
+        for doc in docs:
+            assert doc["kind"] == "Role"
+            assert doc["apiVersion"] == "rbac.authorization.k8s.io/v1"
+            assert doc["rules"][0]["apiGroups"] == [""]
+            assert doc["rules"][0]["resources"] == ["configmaps"]
+
+        server = docs[0]
+        downloader = docs[1]
+
+        assert server["metadata"]["name"] == "release-name-dag-server-role"
+        assert len(server["rules"]) == 1
+        assert server["rules"][0]["verbs"] == [
+            "create",
+            "get",
+            "list",
+            "patch",
+            "update",
+            "watch",
+        ]
+
+        assert downloader["metadata"]["name"] == "release-name-dag-downloader-role"
+        assert len(downloader["rules"]) == 1
+        assert downloader["rules"][0]["verbs"] == ["get", "list", "watch"]
