@@ -2,12 +2,12 @@
 exclude: '^(venv|\.vscode|tests/k8s_schema)' # regex
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.3.7"
+    rev: "v0.4.4"
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --ignore, E501]
   - repo: https://github.com/psf/black
-    rev: 24.4.0
+    rev: 24.4.2
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -59,6 +59,12 @@ repos:
       - id: remove-unicode-zero-width-space
   - repo: local
     hooks:
+      - id: ensure-rolebinding-without-dash
+        language: pygrep
+        name: "Ensure we're using 'rolebinding' and not 'role-binding'"
+        entry: "role-binding"
+        pass_filenames: true
+        exclude: "^.pre-commit-config.yaml$"
       - id: circle-config-yaml
         name: Ensure .circleci/config.yml is up to date
         language: python
