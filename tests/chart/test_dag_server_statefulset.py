@@ -72,11 +72,18 @@ class TestDagServerStatefulSet:
         c_by_name = get_containers_by_name(doc)
         assert c_by_name["dag-server"]["resources"] == resources
 
-    def test_dag_server_statefulset_with_securitycontext_overrides(self, kube_version):
+    def test_dag_server_statefulset_with_podsecuritycontext_overrides(
+        self, kube_version
+    ):
         """Test that dag-server statefulset are configurable with custom securitycontext."""
-        dag_serversecuritycontext = {"runAsUser": 12345, "privileged": True}
+        dag_server_pod_securitycontext = {"runAsUser": 12345, "privileged": True}
+        dag_server_container_securitycontext = {"allowPrivilegeEscalation": False}
         values = {
-            "dagDeploy": {"enabled": True, "securityContext": dag_serversecuritycontext}
+            "dagDeploy": {
+                "enabled": True,
+                "podSecurityContext": dag_server_pod_securitycontext,
+                "securityContext": dag_server_container_securitycontext,
+            }
         }
 
         docs = render_chart(
@@ -90,8 +97,12 @@ class TestDagServerStatefulSet:
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-dag-server"
         assert (
-            dag_serversecuritycontext
+            dag_server_pod_securitycontext
             == doc["spec"]["template"]["spec"]["securityContext"]
+        )
+        assert (
+            dag_server_container_securitycontext
+            == doc["spec"]["template"]["spec"]["containers"][0]["securityContext"]
         )
 
     def test_dag_server_statefulset_with_custom_registry_secret(self, kube_version):
