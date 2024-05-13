@@ -573,7 +573,7 @@ dagDeploy:
   podSecurityContext: {}
   #  runAsUser: 999
   #  runAsGroup: 0
-  securityContext: {}
+  containerSecurityContext: {}
 
 gitSyncRelay:
   enabled: ~

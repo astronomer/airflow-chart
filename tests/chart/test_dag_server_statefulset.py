@@ -82,7 +82,7 @@ class TestDagServerStatefulSet:
             "dagDeploy": {
                 "enabled": True,
                 "podSecurityContext": dag_server_pod_securitycontext,
-                "securityContext": dag_server_container_securitycontext,
+                "containerSecurityContext": dag_server_container_securitycontext,
             }
         }
 
