@@ -11,6 +11,9 @@ venv: ## Setup venv required for unit testing the helm chart
 charts: ## Update dependent charts
 	helm dep update
 
+.PHONY: test
+test: unittest-chart ## Run all tests
+
 .PHONY: unittest-chart
 unittest-chart: charts venv ## Unittest the helm chart
 	# Protip: you can modify pytest behavior like: make unittest-chart PYTEST_ADDOPTS='-v --maxfail=1 --pdb -k 1.20'
