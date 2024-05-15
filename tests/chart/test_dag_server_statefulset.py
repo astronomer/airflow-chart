@@ -81,8 +81,10 @@ class TestDagServerStatefulSet:
         values = {
             "dagDeploy": {
                 "enabled": True,
-                "podSecurityContext": dag_server_pod_securitycontext,
-                "containerSecurityContext": dag_server_container_securitycontext,
+                "securityContexts": {
+                    "pod": dag_server_pod_securitycontext,
+                    "container": dag_server_container_securitycontext,
+                },
             }
         }
 
