@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2181
 
-KUBE_VERSION="${KUBE_VERSION:-1.28.0}"
+KUBE_VERSION="${KUBE_VERSION:-1.30.0}"
 
 # Create a kind cluster
 kind create cluster --image "kindest/node:v${KUBE_VERSION}"
