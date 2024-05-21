@@ -47,6 +47,9 @@ spec:
           image: "{{ .Values.dagDeploy.images.dagServer.repository }}:{{ .Values.dagDeploy.images.dagServer.tag }}"
           imagePullPolicy: {{ .Values.dagDeploy.images.dagServer.pullPolicy }}
           command: ["sanic", "dag_deploy.server.app", "-H", "0.0.0.0"]
+          env:
+          - name: HOUSTON_SERVICE_ENDPOINT
+            value: "https://{{ .Values.platform.release }}-houston.{{ .Values.platform.namespace }}.svc.cluster.local.:8871/v1/"
           ports:
           - name: server
             containerPort: {{ .Values.dagDeploy.ports.dagServerHttp }}

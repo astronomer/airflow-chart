@@ -525,6 +525,7 @@ ingress:
 
 platform:
   release: ~
+  namespace: ~
 
 astronomer:
   images:
