@@ -2,16 +2,16 @@
 exclude: '^(venv|\.vscode|tests/k8s_schema)' # regex
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.1.13"
+    rev: "v0.4.4"
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --ignore, E501]
   - repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 24.4.2
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-case-conflict
       - id: check-executables-have-shebangs
@@ -35,36 +35,42 @@ repos:
         args: ["-b", "master"]
       - id: requirements-txt-fixer
         args:
-          [
-            "tests/chart_tests/requirements.in",
-            "tests/chart_tests/requirements.txt",
-            "tests/functional-tests/requirements.in",
-            "tests/functional-tests/requirements.txt",
-          ]
+          - "requirements/chart.in"
+          - "requirements/chart.txt"
+          - "requirements/functional.in"
+          - "requirements/functional.txt"
       - id: sort-simple-yaml
       - id: trailing-whitespace
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6
+    rev: v0.10.0.1
     hooks:
       - id: shellcheck
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.4
+    rev: v1.5.5
     hooks:
       - id: remove-tabs
         exclude_types: [makefile, binary]
   - repo: https://github.com/astronomer/pre-commit-hooks
-    rev: bd325c947efcba13c03b4f4c93d882f2f83ed6ff
+    rev: 8b2d969bd549cd7c9454cc8bb54eec5b35c2e5e6
     hooks:
-      - id: remove-en-dashes
-      - id: remove-unicode-non-breaking-spaces
+      - id: CVE-2017-18342
       - id: remove-unicode-zero-width-non-breaking-spaces
       - id: remove-unicode-zero-width-space
+      - id: replace-en-dashes
+      - id: replace-greek-question-mark
+      - id: replace-unicode-non-breaking-spaces
   - repo: local
     hooks:
+      - id: ensure-rolebinding-without-dash
+        language: pygrep
+        name: "Ensure we're using 'rolebinding' and not 'role-binding'"
+        entry: "role-binding"
+        pass_filenames: true
+        exclude: "^.pre-commit-config.yaml$"
       - id: circle-config-yaml
         name: Ensure .circleci/config.yml is up to date
         language: python
-        files: "(config.yml|config.yml.j2|generate_circleci_config.py)$"
+        files: "(config.yml|config.yml.j2|generate_circleci_config.py|yaml|tpl)$"
         entry: bin/generate_circleci_config.py
         additional_dependencies: ["jinja2", "PyYAML"]
       - id: helm-dependency-update

@@ -6,15 +6,18 @@ help: ## Print Makefile help.
 
 venv: ## Setup venv required for unit testing the helm chart
 	virtualenv venv -p python3
-	venv/bin/pip install -r tests/chart_tests/requirements.txt
+	venv/bin/pip install -r requirements/chart.txt
 
 charts: ## Update dependent charts
 	helm dep update
 
+.PHONY: test
+test: unittest-chart ## Run all tests
+
 .PHONY: unittest-chart
 unittest-chart: charts venv ## Unittest the helm chart
 	# Protip: you can modify pytest behavior like: make unittest-chart PYTEST_ADDOPTS='-v --maxfail=1 --pdb -k 1.20'
-	venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml tests/chart_tests
+	venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml tests/chart
 
 .PHONY: clean
 clean: ## Clean build and test artifacts
@@ -26,8 +29,8 @@ clean: ## Clean build and test artifacts
 	find . -name __pycache__ -exec rm -rf {} \+
 
 .PHONY: update-requirements
-update-requirements: ## Update all requirements.txt files
-	for FILE in tests/chart_tests/requirements.in tests/functional-tests/requirements.in ; do pip-compile --generate-hashes --quiet --allow-unsafe --upgrade $${FILE} ; done ;
+update-requirements: ## Update all python requirements files
+	for FILE in requirements/*.in ; do pip-compile --generate-hashes --quiet --allow-unsafe --upgrade $${FILE} ; done ;
 	-pre-commit run requirements-txt-fixer --all-files --show-diff-on-failure
 
 .PHONY: show-docker-images
