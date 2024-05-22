@@ -58,7 +58,7 @@ class TestDagServerStatefulSet:
         env_vars = {x["name"]: x["value"] for x in c_by_name["dag-server"]["env"]}
         assert (
             env_vars["HOUSTON_SERVICE_ENDPOINT"]
-            == "https://-houston..svc.cluster.local.:8871/v1/"
+            == "http://-houston..svc.cluster.local.:8871/v1/"
         )
 
     def test_dag_server_statefulset_houston_service_endpoint_override(
@@ -85,7 +85,7 @@ class TestDagServerStatefulSet:
         env_vars = {x["name"]: x["value"] for x in c_by_name["dag-server"]["env"]}
         assert (
             env_vars["HOUSTON_SERVICE_ENDPOINT"]
-            == "https://test-release-houston.test-namespace.svc.cluster.local.:8871/v1/"
+            == "http://test-release-houston.test-namespace.svc.cluster.local.:8871/v1/"
         )
 
     def test_dag_server_statefulset_with_resource_overrides(self, kube_version):

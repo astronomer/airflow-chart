@@ -54,7 +54,7 @@ spec:
             {{- toYaml .Values.dagDeploy.resources | nindent 12 }}
           env:
           - name: HOUSTON_SERVICE_ENDPOINT
-            value: "https://{{ .Values.platform.release }}-houston.{{ .Values.platform.namespace }}.svc.cluster.local.:8871/v1/"
+            value: "http://{{ .Values.platform.release }}-houston.{{ .Values.platform.namespace }}.svc.cluster.local.:8871/v1/"
 {{- if .Values.dagDeploy.extraEnv }}
 {{ toYaml .Values.dagDeploy.extraEnv | indent 10 }}
 {{- end }}
