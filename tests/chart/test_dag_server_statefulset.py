@@ -6,6 +6,29 @@ from .. import supported_k8s_versions
 from . import get_containers_by_name
 
 
+def common_default_tests(doc):
+    """Test cases for default dag-server sts enabled"""
+
+    assert doc["kind"] == "StatefulSet"
+    assert doc["apiVersion"] == "apps/v1"
+    assert doc["metadata"]["name"] == "release-name-dag-server"
+    c_by_name = get_containers_by_name(doc)
+    assert len(c_by_name) == 1
+    assert c_by_name["dag-server"]["command"] == [
+        "sanic",
+        "dag_deploy.server.app",
+        "-H",
+        "0.0.0.0",
+    ]
+    assert c_by_name["dag-server"]["image"].startswith(
+        "quay.io/astronomer/ap-dag-deploy:"
+    )
+    assert c_by_name["dag-server"]["image"].startswith(
+        "quay.io/astronomer/ap-dag-deploy:"
+    )
+    assert c_by_name["dag-server"]["livenessProbe"]
+
+
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
 class TestDagServerStatefulSet:
     def test_dag_server_statefulset_default(self, kube_version):
@@ -27,24 +50,43 @@ class TestDagServerStatefulSet:
         )
         assert len(docs) == 1
         doc = docs[0]
-        assert doc["kind"] == "StatefulSet"
-        assert doc["apiVersion"] == "apps/v1"
-        assert doc["metadata"]["name"] == "release-name-dag-server"
+
+        common_default_tests(doc)
+
         c_by_name = get_containers_by_name(doc)
-        assert len(c_by_name) == 1
-        assert c_by_name["dag-server"]["command"] == [
-            "sanic",
-            "dag_deploy.server.app",
-            "-H",
-            "0.0.0.0",
-        ]
-        assert c_by_name["dag-server"]["image"].startswith(
-            "quay.io/astronomer/ap-dag-deploy:"
+
+        env_vars = {x["name"]: x["value"] for x in c_by_name["dag-server"]["env"]}
+        assert (
+            env_vars["HOUSTON_SERVICE_ENDPOINT"]
+            == "http://-houston..svc.cluster.local.:8871/v1/"
         )
-        assert c_by_name["dag-server"]["image"].startswith(
-            "quay.io/astronomer/ap-dag-deploy:"
+
+    def test_dag_server_statefulset_houston_service_endpoint_override(
+        self, kube_version
+    ):
+        """Test that we see the right HOUSTON_SERVICE_ENDPOINT value when the relevant variables are set."""
+        values = {
+            "dagDeploy": {"enabled": True},
+            "platform": {"release": "test-release", "namespace": "test-namespace"},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
         )
-        assert c_by_name["dag-server"]["livenessProbe"]
+        assert len(docs) == 1
+        doc = docs[0]
+
+        common_default_tests(doc)
+
+        c_by_name = get_containers_by_name(doc)
+
+        env_vars = {x["name"]: x["value"] for x in c_by_name["dag-server"]["env"]}
+        assert (
+            env_vars["HOUSTON_SERVICE_ENDPOINT"]
+            == "http://test-release-houston.test-namespace.svc.cluster.local.:8871/v1/"
+        )
 
     def test_dag_server_statefulset_with_resource_overrides(self, kube_version):
         """Test that Dag Server statefulset are configurable with custom resource limits."""
@@ -66,9 +108,9 @@ class TestDagServerStatefulSet:
         )
         assert len(docs) == 1
         doc = docs[0]
-        assert doc["kind"] == "StatefulSet"
-        assert doc["apiVersion"] == "apps/v1"
-        assert doc["metadata"]["name"] == "release-name-dag-server"
+
+        common_default_tests(doc)
+
         c_by_name = get_containers_by_name(doc)
         assert c_by_name["dag-server"]["resources"] == resources
 
@@ -86,9 +128,9 @@ class TestDagServerStatefulSet:
         )
         assert len(docs) == 1
         doc = docs[0]
-        assert doc["kind"] == "StatefulSet"
-        assert doc["apiVersion"] == "apps/v1"
-        assert doc["metadata"]["name"] == "release-name-dag-server"
+
+        common_default_tests(doc)
+
         assert (
             dag_serversecuritycontext
             == doc["spec"]["template"]["spec"]["securityContext"]
@@ -108,9 +150,9 @@ class TestDagServerStatefulSet:
         )
         assert len(docs) == 1
         doc = docs[0]
-        assert doc["kind"] == "StatefulSet"
-        assert doc["apiVersion"] == "apps/v1"
-        assert doc["metadata"]["name"] == "release-name-dag-server"
+
+        common_default_tests(doc)
+
         assert [{"name": "gscsecret"}] == doc["spec"]["template"]["spec"][
             "imagePullSecrets"
         ]
