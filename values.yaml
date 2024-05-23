@@ -530,6 +530,7 @@ ingress:
 # what namespace astronomer is running in.
 platform:
   release: ~
+  namespace: ~
 
 astronomer:
   images:
