@@ -28,7 +28,7 @@ data:
       server {
         server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
         listen {{ .Values.authSidecar.port }}  ;
-{{ include "default_nginx_server_settings" . | indent 8 }}
+        {{ include "default_nginx_server_settings" . }}
         location  = /auth {
 {{ include "default_nginx_settings" . | indent 8 }}
           proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};
