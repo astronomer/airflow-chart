@@ -4,6 +4,7 @@ from tests.chart.helm_template_generator import render_chart
 
 from .. import supported_k8s_versions
 from . import get_containers_by_name
+import pathlib
 
 
 def common_dagserver_sts_test_cases(docs, docs_length):
@@ -89,10 +90,11 @@ class TestAuthSidecar:
             show_only=[
                 "templates/dag-deploy/dag-server-statefulset.yaml",
                 "templates/dag-deploy/dag-server-service.yaml",
+                "templates/dag-deploy/dag-server-auth-sidecar-configmap.yaml",
             ],
         )
 
-        common_dagserver_sts_test_cases(docs, 2)
+        common_dagserver_sts_test_cases(docs, 3)
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["resources"] == resources
         assert volumeMounts in c_by_name["auth-proxy"]["volumeMounts"]
@@ -100,7 +102,13 @@ class TestAuthSidecar:
         assert docs[1]["kind"] == "Service"
         assert docs[1]["apiVersion"] == "v1"
         assert docs[1]["metadata"]["name"] == "release-name-dag-server"
+        print(docs[2]["data"]["nginx.conf"])
         assert authSidecarServicePorts in docs[1]["spec"]["ports"]
+
+        nginx_conf = pathlib.Path(
+            "tests/chart/test_data/dag-server-authsidecar-nginx.conf"
+        ).read_text()
+        assert nginx_conf in docs[2]["data"]["nginx.conf"]
 
     def test_auth_sidecar_security_context_with_dag_server_enabled(self, kube_version):
         """Test logging sidecar config with defaults"""

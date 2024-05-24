@@ -23,15 +23,14 @@ data:
       }
     http {
       upstream astro-dag-server {
-        server localhost:{{ .Values.dagDeploy.ports.dagServerHttp }} ;
+        server 127.0.0.1:{{ .Values.dagDeploy.ports.dagServerHttp }} ;
       }
       server {
         server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
         listen {{ .Values.authSidecar.port }}  ;
-        # Disable Nginx Server version
-        server_tokens off;
-{{ include "default_nginx_settings" . | indent 6 }}
+{{ include "default_nginx_server_settings" . | indent 8 }}
         location  = /auth {
+{{ include "default_nginx_settings" . | indent 8 }}
           proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};
           proxy_pass  https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization;
         }
