@@ -23,7 +23,7 @@ data:
       }
     http {
       upstream astro-dag-server {
-        server localhost:{{ .Values.dagDeploy.ports.dagServerHttp }} ;
+        server 127.0.0.1:{{ .Values.dagDeploy.ports.dagServerHttp }} ;
       }
       server {
         server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
