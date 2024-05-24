@@ -95,3 +95,28 @@ class TestAuthSidecar:
         assert docs[1]["apiVersion"] == "v1"
         assert docs[1]["metadata"]["name"] == "release-name-dag-server"
         assert authSidecarServicePorts in docs[1]["spec"]["ports"]
+
+    def test_auth_sidecar_security_context_with_dag_server_enabled(self, kube_version):
+        """Test logging sidecar config with defaults"""
+        securityContext = {
+            "allowPrivilegeEscalation": False,
+            "runAsNonRoot": True,
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "authSidecar": {"enabled": True, "securityContext": securityContext},
+                "dagDeploy": {"enabled": True},
+            },
+            show_only=[
+                "templates/dag-deploy/dag-server-statefulset.yaml",
+            ],
+        )
+
+        assert len(docs) == 1
+        assert docs[0]["kind"] == "StatefulSet"
+        assert docs[0]["apiVersion"] == "apps/v1"
+        assert docs[0]["metadata"]["name"] == "release-name-dag-server"
+        c_by_name = get_containers_by_name(docs[0])
+        assert c_by_name["auth-proxy"]["securityContext"] == securityContext
