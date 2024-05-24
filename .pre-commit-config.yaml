@@ -1,5 +1,5 @@
 ---
-exclude: '^(venv|\.vscode|tests/k8s_schema)' # regex
+exclude: '^(venv|\.vscode|tests/k8s_schema|tests/chart/test_data)' # regex
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: "v0.4.4"
