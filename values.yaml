@@ -478,6 +478,7 @@ authSidecar:
   tag: 1.25.2-2
   pullPolicy: IfNotPresent
   port: 8084
+  securityContext: {}
 
 loggingSidecar:
   enabled: false
