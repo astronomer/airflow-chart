@@ -28,7 +28,7 @@ data:
       server {
         server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
         listen {{ .Values.authSidecar.port }}  ;
-{{ include "default_nginx_server_settings" . | indent 8 }}
+        {{ include "default_nginx_server_settings" . }}
         location ^~ /api/ {
           if ($host = 'deployments.{{ .Values.ingress.baseDomain }}' ) {
             return 404;
