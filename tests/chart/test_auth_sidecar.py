@@ -111,7 +111,7 @@ class TestAuthSidecar:
         assert nginx_conf in docs[2]["data"]["nginx.conf"]
 
     def test_auth_sidecar_security_context_with_dag_server_enabled(self, kube_version):
-        """Test logging sidecar config with defaults"""
+        """Test auth sidecar security context overrides"""
         securityContext = {
             "allowPrivilegeEscalation": False,
             "runAsNonRoot": True,
@@ -131,3 +131,25 @@ class TestAuthSidecar:
         common_dagserver_sts_test_cases(docs, 1)
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["securityContext"] == securityContext
+
+    def test_auth_sidecar_resources_with_dag_server_enabled(self, kube_version):
+        """Test auth sidecar resource overrides"""
+        resources = {
+            "requests": {"cpu": 99.9, "memory": "777Mi"},
+            "limits": {"cpu": 66.6, "memory": "888Mi"},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "authSidecar": {"enabled": True, "resources": resources},
+                "dagDeploy": {"enabled": True},
+            },
+            show_only=[
+                "templates/dag-deploy/dag-server-statefulset.yaml",
+            ],
+        )
+
+        common_dagserver_sts_test_cases(docs, 1)
+        c_by_name = get_containers_by_name(docs[0])
+        assert c_by_name["auth-proxy"]["resources"] == resources
