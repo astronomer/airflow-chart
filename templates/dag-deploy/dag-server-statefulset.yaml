@@ -85,6 +85,9 @@ spec:
           {{- if .Values.authSidecar.resources }}
           resources: {{- toYaml .Values.authSidecar.resources | nindent 12 }}
           {{- end }}
+          {{- if .Values.authSidecar.securityContext }}
+          securityContext: {{- toYaml .Values.authSidecar.securityContext | nindent 12 }}
+          {{- end }}
           ports:
           - containerPort: {{ .Values.authSidecar.port }}
             name: auth-proxy
