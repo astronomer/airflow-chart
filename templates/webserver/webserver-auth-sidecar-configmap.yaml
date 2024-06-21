@@ -49,7 +49,7 @@ data:
 
         location / {
 {{ include "default_nginx_settings_location" . | indent 8  }}
-
+{{ include "default_nginx_auth_headers" . | indent 8 }}
 
           #proxy_set_header X-Original-URI        $request_uri;
           if ($host = '{{ .Values.platform.release }}-airflow.{{ .Values.ingress.baseDomain }}' ) {
