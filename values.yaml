@@ -507,7 +507,7 @@ ingress:
   flowerAnnotations: {}
 
   # Annotations always injected when configuring Dag Server Ingress object
-  dagDeployAnnotations: {}
+  dagServerAnnotations: {}
 
   # Base domain for ingress vhosts
   baseDomain: ~
