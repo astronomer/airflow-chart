@@ -120,7 +120,7 @@ helm install --name my-release \
 
 ### Install kind, and create a cluster
 
-We recommend testing with the latest version of kubernetes listed in [metadata.yaml](metadata.yaml]:
+We recommend testing with the latest version of kubernetes listed in [metadata.yaml](metadata.yaml):
 
 ```sh
 kind create cluster --image kindest/node:v1.30.2
