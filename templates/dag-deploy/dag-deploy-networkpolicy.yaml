@@ -1,0 +1,44 @@
+##################################
+## dag-server NetworkPolicy ##
+##################################
+{{- if .Values.dagDeploy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-dag-server
+  labels:
+    component: dag-server
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  podSelector:
+    matchLabels:
+      tier: airflow
+      component: dag-server
+      release: {{ .Release.Name }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    # allow access from the airflow pods in the same namespace
+    - podSelector:
+        matchLabels:
+          release: {{ .Release.Name }}
+          tier: airflow
+    ports:
+    - protocol: TCP
+      port: 8000
+  - from:
+    # allow access from houston in the platform namespace
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .Values.platform.namespace }}
+    - podSelector:
+        matchLabels:
+          component: houston
+    ports:
+    - protocol: TCP
+      port: 8000
+{{- end -}}
