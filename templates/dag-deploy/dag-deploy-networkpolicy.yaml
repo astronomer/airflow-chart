@@ -16,7 +16,7 @@ spec:
   podSelector:
     matchLabels:
       tier: airflow
-      component: dag-deploy
+      component: dag-server
       release: {{ .Release.Name }}
   policyTypes:
   - Ingress
@@ -32,13 +32,12 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          name: {{ .Values.platform.namespace }}
+          "kubernetes.io/metadata.name": {{ .Values.platform.namespace }}
       podSelector:
         matchLabels:
-          release: {{ .Values.platform.release }}
           app: houston
           component: houston
-          tier: astronomer
+          release: {{ .Values.platform.release }}
     ports:
     - protocol: TCP
       port: 8000
