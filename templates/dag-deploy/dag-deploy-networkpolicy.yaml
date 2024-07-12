@@ -38,6 +38,11 @@ spec:
           app: houston
           component: houston
           release: {{ .Values.platform.release }}
+      podSelector:
+        matchLabels:
+          component: ingress-controller
+          release: {{ .Values.platform.release }}
+          tier: nginx
     ports:
     - protocol: TCP
       port: 8000
