@@ -525,6 +525,9 @@ ingress:
 #    enabled: true
 #    # TODO: Originated from https://github.com/astronomer/issues/issues/2516
 
+# This section describes the astronomer platform, and is used to share values
+# from astronomer that are useful here, like networkPolicies that need to know
+# what namespace astronomer is running in.
 platform:
   release: ~
 

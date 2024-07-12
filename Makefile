@@ -13,7 +13,7 @@ charts: ## Update dependent charts
 
 .PHONY: unittest-chart
 unittest-chart: charts venv ## Unittest the helm chart
-	# Protip: you can modify pytest behavior like: make unittest-chart PYTEST_ADDOPTS='-v --maxfail=1 --pdb -k 1.20'
+	# Protip: you can modify pytest behavior like: make unittest-chart PYTEST_ADDOPTS='-v --maxfail=1 --pdb -k "1.30 and git-sync"'
 	venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml tests/chart
 
 .PHONY: clean

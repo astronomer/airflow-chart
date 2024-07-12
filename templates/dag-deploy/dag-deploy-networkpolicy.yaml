@@ -1,0 +1,62 @@
+##############################
+## dag-deploy NetworkPolicy ##
+##############################
+{{- if .Values.dagDeploy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-dag-deploy
+  labels:
+    component: dag-deploy
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  podSelector:
+    matchLabels:
+      tier: airflow
+      component: dag-server
+      release: {{ .Release.Name }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          release: {{ .Release.Name }}
+          tier: airflow
+    ports:
+    - protocol: TCP
+      port: 8000
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          "kubernetes.io/metadata.name": {{ .Values.platform.namespace }}
+      podSelector:
+        matchLabels:
+          app: houston
+          component: houston
+          release: {{ .Values.platform.release }}
+    {{ if .Values.authSidecar.enabled }}
+    - namespaceSelector:
+        matchLabels:
+          network.openshift.io/policy-group: ingress
+    {{ else }}
+    - namespaceSelector:
+        matchLabels:
+          "kubernetes.io/metadata.name": {{ .Values.platform.namespace }}
+      podSelector:
+        matchLabels:
+          component: ingress-controller
+          release: {{ .Values.platform.release }}
+          tier: nginx
+    {{ end }}
+    ports:
+    - protocol: TCP
+      port: 8000
+    {{ if .Values.authSidecar.enabled }}
+    - protocol: TCP
+      port: {{ .Values.authSidecar.port }}
+    {{- end -}}
+{{- end -}}

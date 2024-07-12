@@ -1,0 +1,140 @@
+import pytest
+
+from tests.chart.helm_template_generator import render_chart
+
+from .. import supported_k8s_versions
+
+
+@pytest.mark.parametrize("kube_version", supported_k8s_versions)
+class TestDagDeployNetworkPolicy:
+    def test_dag_deploy_networkpolicy_default(self, kube_version):
+        """Test that no dag-deploy templates are rendered by default."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-deploy-networkpolicy.yaml",
+        )
+        assert len(docs) == 0
+
+    def test_dag_deploy_networkpolicy_dag_deploy_enabled(self, kube_version):
+        """Test that a valid networkPolicy are rendered when dag-deploy is enabled."""
+
+        values = {
+            "dagDeploy": {"enabled": True},
+            "platform": {"namespace": "test-ns-99", "release": "test-release-42"},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-deploy-networkpolicy.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        spec = docs[0]["spec"]
+
+        assert list(spec["podSelector"].keys()) == ["matchLabels"]
+        assert spec["policyTypes"] == ["Ingress"]
+        assert spec["podSelector"]["matchLabels"] == {
+            "tier": "airflow",
+            "component": "dag-server",
+            "release": "release-name",
+        }
+
+        assert all(
+            [x["ports"] == [{"protocol": "TCP", "port": 8000}] for x in spec["ingress"]]
+        )
+
+        assert spec["ingress"][0]["from"] == [
+            {
+                "podSelector": {
+                    "matchLabels": {"release": "release-name", "tier": "airflow"}
+                }
+            }
+        ]
+
+        assert len(spec["ingress"][1]["from"]) == 2
+
+        assert {
+            "namespaceSelector": {
+                "matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}
+            },
+            "podSelector": {
+                "matchLabels": {
+                    "app": "houston",
+                    "component": "houston",
+                    "release": "test-release-42",
+                }
+            },
+        } == spec["ingress"][1]["from"][0]
+        assert {
+            "namespaceSelector": {
+                "matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}
+            },
+            "podSelector": {
+                "matchLabels": {
+                    "tier": "nginx",
+                    "component": "ingress-controller",
+                    "release": "test-release-42",
+                }
+            },
+        } == spec["ingress"][1]["from"][1]
+
+        assert [{"protocol": "TCP", "port": 8000}] == spec["ingress"][1]["ports"]
+
+    def test_dag_deploy_networkpolicy_with_authsidecar_enabled(self, kube_version):
+        """Test that a valid networkPolicy are rendered when dag-deploy is enabled."""
+
+        values = {
+            "dagDeploy": {"enabled": True},
+            "authSidecar": {"enabled": True},
+            "platform": {"namespace": "test-ns-99", "release": "test-release-42"},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-deploy-networkpolicy.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        spec = docs[0]["spec"]
+
+        assert list(spec["podSelector"].keys()) == ["matchLabels"]
+        assert spec["policyTypes"] == ["Ingress"]
+        assert spec["podSelector"]["matchLabels"] == {
+            "tier": "airflow",
+            "component": "dag-server",
+            "release": "release-name",
+        }
+
+        assert spec["ingress"][0]["from"] == [
+            {
+                "podSelector": {
+                    "matchLabels": {"release": "release-name", "tier": "airflow"}
+                }
+            }
+        ]
+
+        assert len(spec["ingress"][1]["from"]) == 2
+
+        assert {
+            "namespaceSelector": {
+                "matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}
+            },
+            "podSelector": {
+                "matchLabels": {
+                    "app": "houston",
+                    "component": "houston",
+                    "release": "test-release-42",
+                }
+            },
+        } == spec["ingress"][1]["from"][0]
+
+        assert {
+            "namespaceSelector": {
+                "matchLabels": {"network.openshift.io/policy-group": "ingress"}
+            }
+        } == spec["ingress"][1]["from"][1]
+
+        assert [
+            {"protocol": "TCP", "port": 8000},
+            {"protocol": "TCP", "port": 8084},
+        ] == spec["ingress"][1]["ports"]
