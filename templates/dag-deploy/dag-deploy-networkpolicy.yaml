@@ -57,6 +57,6 @@ spec:
       port: 8000
     {{ if .Values.authSidecar.enabled }}
     - protocol: TCP
-      port: 8084
+      port: {{ .Values.authSidecar.port }}
     {{- end -}}
 {{- end -}}
