@@ -51,20 +51,29 @@ class TestDagDeployNetworkPolicy:
             }
         ]
 
-        assert len(spec["ingress"][1]["from"]) == 1
-        assert (
-            spec["ingress"][1]["from"][0]["namespaceSelector"]["matchLabels"][
-                "kubernetes.io/metadata.name"
-            ]
-            == "test-ns-99"
-        )
-        assert spec["ingress"][1]["from"][0]["podSelector"]["matchLabels"] == {
-            "app": "houston",
-            "component": "houston",
-            "release": "test-release-42",
-        }
-        assert spec["ingress"][1]["from"][1]["podSelector"]["matchLabels"] == {
-            "app": "ingress-controller",
-            "release": "test-release-42",
-            "tier" : "nginx"
-        }
+        assert len(spec["ingress"][1]["from"]) == 2
+
+        assert {
+            "namespaceSelector": {
+                "matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}
+            },
+            "podSelector": {
+                "matchLabels": {
+                    "app": "houston",
+                    "component": "houston",
+                    "release": "test-release-42",
+                }
+            },
+        } == spec["ingress"][1]["from"][0]
+        assert {
+            "namespaceSelector": {
+                "matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}
+            },
+            "podSelector": {
+                "matchLabels": {
+                    "tier": "nginx",
+                    "component": "ingress-controller",
+                    "release": "test-release-42",
+                }
+            },
+        } == spec["ingress"][1]["from"][1]

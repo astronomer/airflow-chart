@@ -38,6 +38,9 @@ spec:
           app: houston
           component: houston
           release: {{ .Values.platform.release }}
+    - namespaceSelector:
+        matchLabels:
+          "kubernetes.io/metadata.name": {{ .Values.platform.namespace }}
       podSelector:
         matchLabels:
           component: ingress-controller
