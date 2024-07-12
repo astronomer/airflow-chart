@@ -78,6 +78,8 @@ class TestDagDeployNetworkPolicy:
             },
         } == spec["ingress"][1]["from"][1]
 
+        assert [{"protocol": "TCP", "port": 8000}] == spec["ingress"][1]["ports"]
+
     def test_dag_deploy_networkpolicy_with_authsidecar_enabled(self, kube_version):
         """Test that a valid networkPolicy are rendered when dag-deploy is enabled."""
 
@@ -131,3 +133,8 @@ class TestDagDeployNetworkPolicy:
                 "matchLabels": {"network.openshift.io/policy-group": "ingress"}
             }
         } == spec["ingress"][1]["from"][1]
+
+        assert [
+            {"protocol": "TCP", "port": 8000},
+            {"protocol": "TCP", "port": 8084},
+        ] == spec["ingress"][1]["ports"]
