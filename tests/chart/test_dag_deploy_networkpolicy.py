@@ -63,3 +63,8 @@ class TestDagDeployNetworkPolicy:
             "component": "houston",
             "release": "test-release-42",
         }
+        assert spec["ingress"][1]["from"][1]["podSelector"]["matchLabels"] == {
+            "app": "ingress-controller",
+            "release": "test-release-42",
+            "tier" : "nginx"
+        }
