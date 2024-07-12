@@ -38,6 +38,11 @@ spec:
           app: houston
           component: houston
           release: {{ .Values.platform.release }}
+    {{ if .Values.authSidecar.enabled }}
+    - namespaceSelector:
+        matchLabels:
+          network.openshift.io/policy-group: ingress
+    {{ else }}
     - namespaceSelector:
         matchLabels:
           "kubernetes.io/metadata.name": {{ .Values.platform.namespace }}
@@ -46,7 +51,12 @@ spec:
           component: ingress-controller
           release: {{ .Values.platform.release }}
           tier: nginx
+    {{ end }}
     ports:
     - protocol: TCP
       port: 8000
+    {{ if .Values.authSidecar.enabled }}
+    - protocol: TCP
+      port: 8084
+    {{- end -}}
 {{- end -}}
