@@ -2,6 +2,7 @@
 ## dag-server StatefulSet ##
 ############################
 {{- if .Values.dagDeploy.enabled }}
+{{- $persistenceEnabled := .Values.dagDeploy.persistence.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -16,7 +17,7 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  {{- if  .Values.dagDeploy.persistentVolumeClaimRetentionPolicy }}
+  {{- if and $persistenceEnabled .Values.dagDeploy.persistentVolumeClaimRetentionPolicy }}
   persistentVolumeClaimRetentionPolicy: {{- toYaml .Values.dagDeploy.persistentVolumeClaimRetentionPolicy  | nindent 4 }}
   {{ end }}
   serviceName: {{ include "airflow.fullname" . }}-dag-server
