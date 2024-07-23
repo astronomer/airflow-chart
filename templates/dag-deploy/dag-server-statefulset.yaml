@@ -17,8 +17,8 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  {{- if and $persistenceEnabled .Values.dagDeploy.persistentVolumeClaimRetentionPolicy }}
-  persistentVolumeClaimRetentionPolicy: {{- toYaml .Values.dagDeploy.persistentVolumeClaimRetentionPolicy  | nindent 4 }}
+  {{- if and $persistenceEnabled .Values.dagDeploy.persistence.persistentVolumeClaimRetentionPolicy }}
+  persistentVolumeClaimRetentionPolicy: {{- toYaml .Values.dagDeploy.persistence.persistentVolumeClaimRetentionPolicy  | nindent 4 }}
   {{ end }}
   serviceName: {{ include "airflow.fullname" . }}-dag-server
   replicas: 1
