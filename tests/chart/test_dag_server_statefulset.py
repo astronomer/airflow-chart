@@ -61,6 +61,8 @@ class TestDagServerStatefulSet:
             == "http://-houston..svc.cluster.local.:8871/v1/"
         )
 
+        assert "persistentVolumeClaimRetentionPolicy" not in doc["spec"]
+
     def test_dag_server_statefulset_houston_service_endpoint_override(
         self, kube_version
     ):
@@ -156,3 +158,37 @@ class TestDagServerStatefulSet:
         assert [{"name": "gscsecret"}] == doc["spec"]["template"]["spec"][
             "imagePullSecrets"
         ]
+
+    def test_dag_server_statefulset_with_persistentVolumeClaimRetentionPolicy_overrides(
+        self, kube_version
+    ):
+        """Test that dag-server statefulset are configurable with persistentVolumeClaimRetentionPolicy."""
+        persistentVolumeClaimRetentionPolicy = {
+            "persistentVolumeClaimRetentionPolicy": {
+                "whenDeleted": "Retain",
+                "whenScaled": "Delete",
+            }
+        }
+        values = {
+            "dagDeploy": {
+                "enabled": True,
+                "persistence": {
+                    "persistentVolumeClaimRetentionPolicy": persistentVolumeClaimRetentionPolicy,
+                },
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        common_default_tests(doc)
+
+        assert (
+            persistentVolumeClaimRetentionPolicy
+            == doc["spec"]["persistentVolumeClaimRetentionPolicy"]
+        )
