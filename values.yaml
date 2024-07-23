@@ -549,6 +549,7 @@ dagDeploy:
     initialDelaySeconds: 30
     timeoutSeconds: 30
   terminationGracePeriodSeconds: 30
+  persistentVolumeClaimRetentionPolicy: ~
   podAnnotations: {}
   extraEnv: []
   extraContainers: []
