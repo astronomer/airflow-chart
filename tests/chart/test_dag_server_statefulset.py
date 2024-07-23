@@ -164,17 +164,16 @@ class TestDagServerStatefulSet:
     ):
         """Test that dag-server statefulset are configurable with persistentVolumeClaimRetentionPolicy."""
         persistentVolumeClaimRetentionPolicy = {
-            "persistence": {
                 "persistentVolumeClaimRetentionPolicy": {
                     "whenDeleted": "Retain",
                     "whenScaled": "Delete",
                 }
             }
-        }
         values = {
             "dagDeploy": {
                 "enabled": True,
-                "persistentVolumeClaimRetentionPolicy": persistentVolumeClaimRetentionPolicy,
+                "persistence": {
+                "persistentVolumeClaimRetentionPolicy": persistentVolumeClaimRetentionPolicy,}
             }
         }
 
