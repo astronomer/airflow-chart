@@ -94,7 +94,7 @@ class TestIngress:
         rule_0 = docs[1]["spec"]["rules"][0]
         assert (
             rule_0["http"]["paths"][0]["path"]
-            == "/release-name/dags/(upload|download)(/.*)?"
+            == "/release-name/dags/(upload|downloads|healthz)(/.*)?"
         )
         assert rule_0["host"] == "deployments.example.com"
 
