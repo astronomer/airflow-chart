@@ -550,7 +550,7 @@ dagDeploy:
     timeoutSeconds: 30
   terminationGracePeriodSeconds: 30
   podAnnotations: {}
-  extraEnv: []
+  extraEnv: {}
   extraContainers: []
   persistence:
     enabled: true
