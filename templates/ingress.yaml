@@ -193,7 +193,7 @@ spec:
           {{- if .Values.authSidecar.enabled  }}
           - path: /{{ .Release.Name }}/dags
           {{- else }}
-          - path: /{{ .Release.Name }}/dags/(upload|download)(/.*)?
+          - path: /{{ .Release.Name }}/dags/(upload|downloads|healthz)(/.*)?
           {{- end }}
             pathType: Prefix
             backend:
