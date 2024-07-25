@@ -13,7 +13,8 @@ metadata = yaml.safe_load((git_root_dir / "metadata.yaml").read_text())
 kube_versions = metadata["test_k8s_versions"]
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
-ci_runner_version = "2024-04"
+machine_image_version = "ubuntu-2204:2024.05.1"
+ci_runner_version = "2024-07"
 
 
 def main():
@@ -26,6 +27,7 @@ def main():
     config = template.render(
         kube_versions=kube_versions,
         executors=executors,
+        machine_image_version=machine_image_version,
         ci_runner_version=ci_runner_version,
     )
     with open(config_file_path, "w") as circle_ci_config_file:

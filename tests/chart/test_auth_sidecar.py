@@ -4,6 +4,16 @@ from tests.chart.helm_template_generator import render_chart
 
 from .. import supported_k8s_versions
 from . import get_containers_by_name
+import pathlib
+
+
+def common_dagserver_sts_test_cases(docs, docs_length):
+    """Test some things that should apply to all cases."""
+    len(docs) == docs_length
+    doc = docs[0]
+    assert doc["kind"] == "StatefulSet"
+    assert doc["apiVersion"] == "apps/v1"
+    assert doc["metadata"]["name"] == "release-name-dag-server"
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
@@ -80,13 +90,11 @@ class TestAuthSidecar:
             show_only=[
                 "templates/dag-deploy/dag-server-statefulset.yaml",
                 "templates/dag-deploy/dag-server-service.yaml",
+                "templates/dag-deploy/dag-server-auth-sidecar-configmap.yaml",
             ],
         )
 
-        assert len(docs) == 2
-        assert docs[0]["kind"] == "StatefulSet"
-        assert docs[0]["apiVersion"] == "apps/v1"
-        assert docs[0]["metadata"]["name"] == "release-name-dag-server"
+        common_dagserver_sts_test_cases(docs, 3)
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["resources"] == resources
         assert volumeMounts in c_by_name["auth-proxy"]["volumeMounts"]
@@ -94,4 +102,54 @@ class TestAuthSidecar:
         assert docs[1]["kind"] == "Service"
         assert docs[1]["apiVersion"] == "v1"
         assert docs[1]["metadata"]["name"] == "release-name-dag-server"
+        print(docs[2]["data"]["nginx.conf"])
         assert authSidecarServicePorts in docs[1]["spec"]["ports"]
+
+        nginx_conf = pathlib.Path(
+            "tests/chart/test_data/dag-server-authsidecar-nginx.conf"
+        ).read_text()
+        assert nginx_conf in docs[2]["data"]["nginx.conf"]
+
+    def test_auth_sidecar_security_context_with_dag_server_enabled(self, kube_version):
+        """Test auth sidecar security context overrides"""
+        securityContext = {
+            "allowPrivilegeEscalation": False,
+            "runAsNonRoot": True,
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "authSidecar": {"enabled": True, "securityContext": securityContext},
+                "dagDeploy": {"enabled": True},
+            },
+            show_only=[
+                "templates/dag-deploy/dag-server-statefulset.yaml",
+            ],
+        )
+
+        common_dagserver_sts_test_cases(docs, 1)
+        c_by_name = get_containers_by_name(docs[0])
+        assert c_by_name["auth-proxy"]["securityContext"] == securityContext
+
+    def test_auth_sidecar_resources_with_dag_server_enabled(self, kube_version):
+        """Test auth sidecar resource overrides"""
+        resources = {
+            "requests": {"cpu": 99.9, "memory": "777Mi"},
+            "limits": {"cpu": 66.6, "memory": "888Mi"},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "authSidecar": {"enabled": True, "resources": resources},
+                "dagDeploy": {"enabled": True},
+            },
+            show_only=[
+                "templates/dag-deploy/dag-server-statefulset.yaml",
+            ],
+        )
+
+        common_dagserver_sts_test_cases(docs, 1)
+        c_by_name = get_containers_by_name(docs[0])
+        assert c_by_name["auth-proxy"]["resources"] == resources

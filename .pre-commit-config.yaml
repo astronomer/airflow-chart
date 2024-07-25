@@ -1,13 +1,13 @@
 ---
-exclude: '^(venv|\.vscode|tests/k8s_schema)' # regex
+exclude: '^(venv|\.vscode|tests/k8s_schema|tests/chart/test_data)' # regex
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.3.7"
+    rev: "v0.4.10"
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --ignore, E501]
   - repo: https://github.com/psf/black
-    rev: 24.4.0
+    rev: 24.4.2
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -53,16 +53,24 @@ repos:
   - repo: https://github.com/astronomer/pre-commit-hooks
     rev: 8b2d969bd549cd7c9454cc8bb54eec5b35c2e5e6
     hooks:
-      - id: replace-en-dashes
-      - id: replace-unicode-non-breaking-spaces
+      - id: CVE-2017-18342
       - id: remove-unicode-zero-width-non-breaking-spaces
       - id: remove-unicode-zero-width-space
+      - id: replace-en-dashes
+      - id: replace-greek-question-mark
+      - id: replace-unicode-non-breaking-spaces
   - repo: local
     hooks:
+      - id: ensure-rolebinding-without-dash
+        language: pygrep
+        name: "Ensure we're using 'rolebinding' and not 'role-binding'"
+        entry: "role-binding"
+        pass_filenames: true
+        exclude: "^.pre-commit-config.yaml$"
       - id: circle-config-yaml
         name: Ensure .circleci/config.yml is up to date
         language: python
-        files: "(config.yml|config.yml.j2|generate_circleci_config.py)$"
+        files: "(config.yml|config.yml.j2|generate_circleci_config.py|yaml|tpl)$"
         entry: bin/generate_circleci_config.py
         additional_dependencies: ["jinja2", "PyYAML"]
       - id: helm-dependency-update

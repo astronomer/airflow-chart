@@ -16,6 +16,9 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if and .Values.dagDeploy.persistence.enabled .Values.dagDeploy.persistence.persistentVolumeClaimRetentionPolicy }}
+  persistentVolumeClaimRetentionPolicy: {{- toYaml .Values.dagDeploy.persistence.persistentVolumeClaimRetentionPolicy  | nindent 4 }}
+  {{ end }}
   serviceName: {{ include "airflow.fullname" . }}-dag-server
   replicas: 1
   selector:
@@ -54,6 +57,8 @@ spec:
           resources:
             {{- toYaml .Values.dagDeploy.resources | nindent 12 }}
           env:
+          - name: HOUSTON_SERVICE_ENDPOINT
+            value: "http://{{ .Values.platform.release }}-houston.{{ .Values.platform.namespace }}.svc.cluster.local.:8871/v1/"
 {{- if .Values.dagDeploy.extraEnv }}
 {{ toYaml .Values.dagDeploy.extraEnv | indent 10 }}
 {{- end }}
@@ -83,6 +88,9 @@ spec:
           imagePullPolicy: {{ .Values.authSidecar.pullPolicy }}
           {{- if .Values.authSidecar.resources }}
           resources: {{- toYaml .Values.authSidecar.resources | nindent 12 }}
+          {{- end }}
+          {{- if .Values.authSidecar.securityContext }}
+          securityContext: {{- toYaml .Values.authSidecar.securityContext | nindent 12 }}
           {{- end }}
           ports:
           - containerPort: {{ .Values.authSidecar.port }}

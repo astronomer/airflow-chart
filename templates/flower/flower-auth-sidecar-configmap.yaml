@@ -28,8 +28,7 @@ data:
       server {
         server_name {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }} ;
         listen {{ .Values.authSidecar.port }}  ;
-        # Disable Nginx Server version
-        server_tokens off;
+{{ include "default_nginx_server_settings" . | indent 8 }}
         location  = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
           proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};
@@ -44,6 +43,7 @@ data:
 
         location ~* "^/{{ .Release.Name }}/flower(/|$)(.*)"  {
 {{ include "default_nginx_settings_location" . | indent 8  }}
+{{ include "default_nginx_auth_headers" . | indent 8 }}
 
           if ($host = '{{ .Values.platform.release }}-flower.{{ .Values.ingress.baseDomain }}' ) {
             rewrite ^ https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/flower permanent;
