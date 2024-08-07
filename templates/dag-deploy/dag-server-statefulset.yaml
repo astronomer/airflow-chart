@@ -81,6 +81,10 @@ spec:
           - name: data
             mountPath: /data
             readOnly: false
+          {{- if .Values.loggingSidecar.enabled }}
+          - mountPath: /var/log/sidecar-logging-consumer
+              name: sidecar-logging-consumer
+          {{- end }}
 {{- if .Values.authSidecar.enabled }}
         - name: auth-proxy
           image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
@@ -114,14 +118,51 @@ spec:
             name: nginx-sidecar-conf
             subPath: nginx.conf
 {{- end }}
+{{- if .Values.loggingSidecar.enabled }}
+        - name: vector
+          image: "{{ .Values.loggingSidecar.image }}"
+          env:
+          - name: VECTOR_CONFIG
+            value: /etc/sidecar-logging/vector-config.yaml
+          - name: SIDECAR_LOGS
+            value: /var/log/sidecar-logging-consumer
+          - name: COMPONENT
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.labels['component']
+          - name: RELEASE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.labels['release']
+          - name: WORKSPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.labels['workspace']
+          volumeMounts:
+          - mountPath: /etc/sidecar-logging
+            name: config-volume
+          - name: sidecar-logging-consumer
+            mountPath: /var/log/sidecar-logging-consumer
+            readOnly: False
+{{- end }}
 {{- if .Values.dagDeploy.extraContainers }}
 {{- toYaml .Values.dagDeploy.extraContainers | nindent 8 }}
 {{- end }}
-{{- if .Values.authSidecar.enabled }}
       volumes:
+{{- if .Values.authSidecar.enabled }}
       - name: nginx-sidecar-conf
         configMap:
           name: {{ .Release.Name }}-dag-server-nginx-conf
+{{- end }}
+{{- if .Values.loggingSidecar.enabled }}
+      - name: config-volume
+        configMap:
+          name: {{ .Release.Name }}-sidecar-config
+      - emptyDir: {}
+        name: sidecar-logging-consumer
 {{- end }}
   volumeClaimTemplates:
   - metadata:
