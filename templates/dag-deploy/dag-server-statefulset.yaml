@@ -81,10 +81,6 @@ spec:
           - name: data
             mountPath: /data
             readOnly: false
-          {{- if .Values.loggingSidecar.enabled }}
-          - mountPath: /var/log/sidecar-logging-consumer
-              name: sidecar-logging-consumer
-          {{- end }}
 {{- if .Values.authSidecar.enabled }}
         - name: auth-proxy
           image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
@@ -151,7 +147,7 @@ spec:
 {{- if .Values.dagDeploy.extraContainers }}
 {{- toYaml .Values.dagDeploy.extraContainers | nindent 8 }}
 {{- end }}
-      volumes:
+  volumes:
 {{- if .Values.authSidecar.enabled }}
       - name: nginx-sidecar-conf
         configMap:
