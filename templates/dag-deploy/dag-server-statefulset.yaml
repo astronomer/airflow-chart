@@ -19,7 +19,6 @@ spec:
   {{- if and .Values.dagDeploy.persistence.enabled .Values.dagDeploy.persistence.persistentVolumeClaimRetentionPolicy }}
   persistentVolumeClaimRetentionPolicy: {{- toYaml .Values.dagDeploy.persistence.persistentVolumeClaimRetentionPolicy  | nindent 4 }}
   {{ end }}
-  serviceName: {{ include "airflow.fullname" . }}-dag-server
   replicas: 1
   selector:
     matchLabels:
@@ -147,7 +146,7 @@ spec:
 {{- if .Values.dagDeploy.extraContainers }}
 {{- toYaml .Values.dagDeploy.extraContainers | nindent 8 }}
 {{- end }}
-  volumes:
+      volumes:
 {{- if .Values.authSidecar.enabled }}
       - name: nginx-sidecar-conf
         configMap:
