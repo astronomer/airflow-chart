@@ -66,6 +66,14 @@ data:
           type: "vrl"
           source: 'includes(["git-sync-relay"], .component)'
 
+      filter_dagserver_logs:
+        type: filter
+        inputs:
+          - transform_airflow_logs
+        condition:
+          type: "vrl"
+          source: 'includes(["dag-server"], .component)'
+
       transform_task_log:
         type: remap
         inputs:
@@ -96,6 +104,7 @@ data:
           - final_task_log
           - filter_common_logs
           - filter_gitsyncrelay_logs
+          - filter_dagserver_logs
         source: |
           del(.host)
           del(.file)
