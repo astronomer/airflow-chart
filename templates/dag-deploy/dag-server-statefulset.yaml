@@ -121,7 +121,7 @@ spec:
             subPath: nginx.conf
 {{- end }}
 {{- if .Values.loggingSidecar.enabled }}
-        - name: vector
+        - name: sidecar-log-consumer
           image: "{{ .Values.loggingSidecar.image }}"
           env:
           - name: VECTOR_CONFIG
