@@ -87,6 +87,10 @@ spec:
           - name: data
             mountPath: /data
             readOnly: false
+          {{- if .Values.loggingSidecar.enabled }}
+          - mountPath: /var/log/sidecar-logging-consumer
+            name: sidecar-logging-consumer
+          {{ end }}
 {{- if .Values.authSidecar.enabled }}
         - name: auth-proxy
           image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
