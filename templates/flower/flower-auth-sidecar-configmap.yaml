@@ -23,7 +23,7 @@ data:
       }
     http {
       upstream astro-flower {
-        server localhost:{{ .Values.airflow.ports.flowerUI }} ;
+        server 127.0.0.1:{{ .Values.airflow.ports.flowerUI }} ;
       }
       server {
         server_name {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }} ;
