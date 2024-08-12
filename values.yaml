@@ -483,7 +483,7 @@ authSidecar:
 
 loggingSidecar:
   enabled: false
-  name: sidecar-logging-consumer
+  name: sidecar-log-consumer
   customConfig: false
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
