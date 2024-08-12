@@ -127,34 +127,7 @@ spec:
           resources:
             {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
         {{- if .Values.loggingSidecar.enabled }}
-        - name: vector
-          image: "{{ .Values.loggingSidecar.image }}"
-          env:
-          - name: VECTOR_CONFIG
-            value: /etc/sidecar-logging/vector-config.yaml
-          - name: SIDECAR_LOGS
-            value: /var/log/sidecar-logging-consumer
-          - name: COMPONENT
-            valueFrom:
-              fieldRef:
-                apiVersion: v1
-                fieldPath: metadata.labels['component']
-          - name: RELEASE
-            valueFrom:
-              fieldRef:
-                apiVersion: v1
-                fieldPath: metadata.labels['release']
-          - name: WORKSPACE
-            valueFrom:
-              fieldRef:
-                apiVersion: v1
-                fieldPath: metadata.labels['workspace']
-          volumeMounts:
-          - mountPath: /etc/sidecar-logging
-            name: config-volume
-          - name: sidecar-logging-consumer
-            mountPath: /var/log/sidecar-logging-consumer
-            readOnly: False
+{{- include "sideccar_container_spec" . | nindent 8 }}
           {{- end }}
 
 {{- if .Values.gitSyncRelay.extraContainers }}
