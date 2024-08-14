@@ -32,13 +32,13 @@ airflow:
       tag: 0.27.1
     redis:
       repository: quay.io/astronomer/ap-redis
-      tag: 6.2.14
+      tag: 7.2.5
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
-      tag: 1.21.0
+      tag: 1.23.1-1
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.15.0-9
+      tag: 0.15.0-10
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
       tag: 3.6.9
@@ -588,10 +588,10 @@ gitSyncRelay:
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
-      tag: "3.18.7-1"
+      tag: "3.18.8"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync-relay"
-      tag: "0.0.3-4"
+      tag: "0.0.3-5"
   repo:
     url: ~
     branch: main
