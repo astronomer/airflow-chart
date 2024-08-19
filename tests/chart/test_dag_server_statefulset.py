@@ -192,3 +192,53 @@ class TestDagServerStatefulSet:
             persistentVolumeClaimRetentionPolicy
             == doc["spec"]["persistentVolumeClaimRetentionPolicy"]
         )
+
+    def test_dag_server_statefulset_with_sidecar_enabled(self, kube_version):
+        """Test dag-server statefulset with custom registry secret."""
+        values = {"dagDeploy": {"enabled": True}, "loggingSidecar": {"enabled": True}}
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        c_by_name = get_containers_by_name(doc)
+        assert len(c_by_name) == 2
+        assert c_by_name["dag-server"]["command"] == ["bash"]
+        c_by_name["dag-server"]["args"] == [
+            "-c",
+            "sanic dag_deploy.server.app -H 0.0.0.0 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
+        ]
+        assert "sidecar-log-consumer" in c_by_name
+
+    def test_dag_server_statefulset_with_sidecar_and_authproxy_enabled(
+        self, kube_version
+    ):
+        """Test dag-server statefulset with custom registry secret."""
+        values = {
+            "dagDeploy": {"enabled": True},
+            "loggingSidecar": {"enabled": True},
+            "authSidecar": {"enabled": True},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        c_by_name = get_containers_by_name(doc)
+        assert len(c_by_name) == 3
+        assert "dag-server" in c_by_name
+        assert "auth-proxy" in c_by_name
+        assert c_by_name["dag-server"]["command"] == ["bash"]
+        c_by_name["dag-server"]["args"] == [
+            "-c",
+            "sanic dag_deploy.server.app -H 0.0.0.0 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
+        ]
+        assert "sidecar-log-consumer" in c_by_name

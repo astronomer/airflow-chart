@@ -19,7 +19,6 @@ spec:
   {{- if and .Values.dagDeploy.persistence.enabled .Values.dagDeploy.persistence.persistentVolumeClaimRetentionPolicy }}
   persistentVolumeClaimRetentionPolicy: {{- toYaml .Values.dagDeploy.persistence.persistentVolumeClaimRetentionPolicy  | nindent 4 }}
   {{ end }}
-  serviceName: {{ include "airflow.fullname" . }}-dag-server
   replicas: 1
   selector:
     matchLabels:
@@ -49,7 +48,14 @@ spec:
         - name: dag-server
           image: "{{ .Values.dagDeploy.images.dagServer.repository }}:{{ .Values.dagDeploy.images.dagServer.tag }}"
           imagePullPolicy: {{ .Values.dagDeploy.images.dagServer.pullPolicy }}
+          {{- if .Values.loggingSidecar.enabled }}
+          command: ["bash"]
+          args:
+            - -c
+            - sanic dag_deploy.server.app -H 0.0.0.0 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )
+          {{ else }}
           command: ["sanic", "dag_deploy.server.app", "-H", "0.0.0.0"]
+          {{ end }}
           ports:
           - name: server
             containerPort: {{ .Values.dagDeploy.ports.dagServerHttp }}
@@ -81,6 +87,10 @@ spec:
           - name: data
             mountPath: /data
             readOnly: false
+          {{- if .Values.loggingSidecar.enabled }}
+          - mountPath: /var/log/sidecar-logging-consumer
+            name: sidecar-logging-consumer
+          {{ end }}
 {{- if .Values.authSidecar.enabled }}
         - name: auth-proxy
           image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
@@ -114,14 +124,24 @@ spec:
             name: nginx-sidecar-conf
             subPath: nginx.conf
 {{- end }}
+{{- if .Values.loggingSidecar.enabled }}
+{{- include "sideccar_container_spec" . | nindent 8 }}
+{{- end }}
 {{- if .Values.dagDeploy.extraContainers }}
 {{- toYaml .Values.dagDeploy.extraContainers | nindent 8 }}
 {{- end }}
-{{- if .Values.authSidecar.enabled }}
       volumes:
+{{- if .Values.authSidecar.enabled }}
       - name: nginx-sidecar-conf
         configMap:
           name: {{ .Release.Name }}-dag-server-nginx-conf
+{{- end }}
+{{- if .Values.loggingSidecar.enabled }}
+      - name: config-volume
+        configMap:
+          name: {{ .Release.Name }}-sidecar-config
+      - emptyDir: {}
+        name: sidecar-logging-consumer
 {{- end }}
   volumeClaimTemplates:
   - metadata:
