@@ -564,6 +564,8 @@ dagDeploy:
 
   serviceAccount:
     annotations: {}
+    name: airflow-dag-server
+    create: true
 
   resources: {}
   #  limits:
