@@ -1,6 +1,6 @@
 dependencies:
 - name: airflow
-  repository: https://github.com/astronomer/airflow/releases/download/oss-helm-chart/1.11.1-astro
-  version: 1.11.1-astro
-digest: sha256:6d7c55a8e643d3e50723187c70177ec8baa8610a4b27f430a28805afaaf7a05f
-generated: "2023-12-06T11:30:00.49718-05:00"
+  repository: https://airflow.apache.org
+  version: 1.11.0
+digest: sha256:53b083811a0d9129833f7f6a5047b4fe73084611850c1327063ebd93fa54b7ba
+generated: "2024-09-05T13:28:33.996621+05:30"
