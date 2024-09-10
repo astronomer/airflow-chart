@@ -2,7 +2,7 @@
 set -e
 
 export KIND_VERSION="${KIND_VERSION:-0.23.0}"
-export HELM_VERSION="${HELM_VERSION:-3.15.2}"
+export HELM_VERSION="${HELM_VERSION:-3.15.4}"
 
 # Determine the platform we are running on
 OS=$(uname | tr '[:upper:]' '[:lower:]')
