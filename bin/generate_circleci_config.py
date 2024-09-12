@@ -14,7 +14,7 @@ kube_versions = metadata["test_k8s_versions"]
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
 machine_image_version = "ubuntu-2204:2024.05.1"
-ci_runner_version = "2024-07"
+ci_runner_version = "2024-09"
 
 
 def main():
