@@ -18,10 +18,7 @@ class TestIngress:
         doc = docs[0]
         assert "Ingress" == doc["kind"]
         assert "networking.k8s.io/v1" == doc["apiVersion"]
-        assert (
-            "/release-name/airflow"
-            == docs[0]["spec"]["rules"][0]["http"]["paths"][0]["path"]
-        )
+        assert "/release-name/airflow" == docs[0]["spec"]["rules"][0]["http"]["paths"][0]["path"]
 
     def test_airflow_ingress_with_celery_executor(self, kube_version):
         """Test airflow ingress with CeleryExecutor."""
@@ -38,18 +35,12 @@ class TestIngress:
         doc = docs[0]
         assert "Ingress" == doc["kind"]
         assert "networking.k8s.io/v1" == doc["apiVersion"]
-        assert (
-            "/release-name/airflow"
-            == docs[0]["spec"]["rules"][0]["http"]["paths"][0]["path"]
-        )
+        assert "/release-name/airflow" == docs[0]["spec"]["rules"][0]["http"]["paths"][0]["path"]
 
         doc = docs[1]
         assert "Ingress" == doc["kind"]
         assert "networking.k8s.io/v1" == doc["apiVersion"]
-        assert (
-            "/release-name/airflow"
-            == docs[0]["spec"]["rules"][0]["http"]["paths"][0]["path"]
-        )
+        assert "/release-name/airflow" == docs[0]["spec"]["rules"][0]["http"]["paths"][0]["path"]
 
     def test_airflow_ingress_with_dag_server(self, kube_version):
         """Test airflow ingress with DagServer."""
@@ -65,10 +56,7 @@ class TestIngress:
         assert len(docs) == 1
         assert docs[0]["metadata"]["name"] == "release-name-dag-server-ingress"
         rule_0 = docs[0]["spec"]["rules"][0]
-        assert (
-            rule_0["http"]["paths"][0]["path"]
-            == "/release-name/dags/(upload|downloads|healthz)(/.*)?"
-        )
+        assert rule_0["http"]["paths"][0]["path"] == "/release-name/dags/(upload|downloads|healthz)(/.*)?"
         assert rule_0["host"] == "deployments.example.com"
 
     def test_airflow_ingress_with_dag_server_ingress_annotation(self, kube_version):
@@ -92,10 +80,7 @@ class TestIngress:
 
         assert docs[1]["metadata"]["name"] == "release-name-dag-server-ingress"
         rule_0 = docs[1]["spec"]["rules"][0]
-        assert (
-            rule_0["http"]["paths"][0]["path"]
-            == "/release-name/dags/(upload|downloads|healthz)(/.*)?"
-        )
+        assert rule_0["http"]["paths"][0]["path"] == "/release-name/dags/(upload|downloads|healthz)(/.*)?"
         assert rule_0["host"] == "deployments.example.com"
 
         assert ingressAnnotation == docs[1]["metadata"]["annotations"]

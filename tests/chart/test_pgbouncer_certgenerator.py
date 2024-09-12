@@ -50,9 +50,7 @@ class TestPgbouncersslFeature:
             show_only="templates/generate-ssl.yaml",
         )
         assert len(docs) == 4
-        assert [{"name": "gscsecret"}] == docs[3]["spec"]["template"]["spec"][
-            "imagePullSecrets"
-        ]
+        assert [{"name": "gscsecret"}] == docs[3]["spec"]["template"]["spec"]["imagePullSecrets"]
 
     def test_pgbouncer_certgenerator_pgbouncerssl_extraannotations(self, kube_version):
         """Test that certgenerator.extraAnnotations correctly inserts the annotations."""
@@ -73,9 +71,7 @@ class TestPgbouncersslFeature:
             show_only="templates/generate-ssl.yaml",
         )
         assert len(docs) == 4
-        assert (
-            docs[3]["spec"]["template"]["metadata"]["annotations"] == extraAnnotations
-        )
+        assert docs[3]["spec"]["template"]["metadata"]["annotations"] == extraAnnotations
 
     def test_pgbouncer_certgenerator_pgbouncerssl_affinity(self, kube_version):
         """Test that certgenerator.affinity correctly inserts the affinity."""

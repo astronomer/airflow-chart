@@ -6,9 +6,7 @@ import yaml
 
 from jinja2 import Template
 
-git_root_dir = next(
-    iter([x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()]), None
-)
+git_root_dir = next(iter([x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()]), None)
 metadata = yaml.safe_load((git_root_dir / "metadata.yaml").read_text())
 kube_versions = metadata["test_k8s_versions"]
 
