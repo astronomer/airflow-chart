@@ -22,9 +22,7 @@ import docker
 import pytest
 from filelock import FileLock
 
-git_root_dir = [x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()][
-    -1
-]
+git_root_dir = [x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()][-1]
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -35,9 +33,7 @@ def upgrade_helm(tmp_path_factory, worker_id):
 
     def _upgrade_helm():
         try:
-            subprocess.check_output(
-                "helm repo add stable --force-update https://charts.helm.sh/stable/".split()
-            )
+            subprocess.check_output("helm repo add stable --force-update https://charts.helm.sh/stable/".split())
             # The following command may modify any requirements.yaml with updated metadata
             subprocess.check_output(
                 f"find {git_root_dir} -type f -name requirements.yaml -print -execdir helm dep update ;".split()

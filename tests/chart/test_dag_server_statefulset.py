@@ -38,12 +38,8 @@ class TestDagServerStatefulSet:
             "-H",
             "0.0.0.0",
         ]
-        assert c_by_name["dag-server"]["image"].startswith(
-            "quay.io/astronomer/ap-dag-deploy:"
-        )
-        assert c_by_name["dag-server"]["image"].startswith(
-            "quay.io/astronomer/ap-dag-deploy:"
-        )
+        assert c_by_name["dag-server"]["image"].startswith("quay.io/astronomer/ap-dag-deploy:")
+        assert c_by_name["dag-server"]["image"].startswith("quay.io/astronomer/ap-dag-deploy:")
         assert c_by_name["dag-server"]["livenessProbe"]
 
     def test_dag_server_statefulset_with_resource_overrides(self, kube_version):
@@ -75,9 +71,7 @@ class TestDagServerStatefulSet:
     def test_dag_server_statefulset_with_securitycontext_overrides(self, kube_version):
         """Test that dag-server statefulset are configurable with custom securitycontext."""
         dag_serversecuritycontext = {"runAsUser": 12345, "privileged": True}
-        values = {
-            "dagDeploy": {"enabled": True, "securityContext": dag_serversecuritycontext}
-        }
+        values = {"dagDeploy": {"enabled": True, "securityContext": dag_serversecuritycontext}}
 
         docs = render_chart(
             kube_version=kube_version,
@@ -89,10 +83,7 @@ class TestDagServerStatefulSet:
         assert doc["kind"] == "StatefulSet"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-dag-server"
-        assert (
-            dag_serversecuritycontext
-            == doc["spec"]["template"]["spec"]["securityContext"]
-        )
+        assert dag_serversecuritycontext == doc["spec"]["template"]["spec"]["securityContext"]
 
     def test_dag_server_statefulset_with_custom_registry_secret(self, kube_version):
         """Test dag-server statefulset with custom registry secret."""
@@ -111,6 +102,4 @@ class TestDagServerStatefulSet:
         assert doc["kind"] == "StatefulSet"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-dag-server"
-        assert [{"name": "gscsecret"}] == doc["spec"]["template"]["spec"][
-            "imagePullSecrets"
-        ]
+        assert [{"name": "gscsecret"}] == doc["spec"]["template"]["spec"]["imagePullSecrets"]

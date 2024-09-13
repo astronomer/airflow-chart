@@ -34,9 +34,7 @@ cron_test_data = [
 ]
 
 
-@pytest.mark.parametrize(
-    "release_name,result_minute", cron_test_data, ids=[x[0] for x in cron_test_data]
-)
+@pytest.mark.parametrize("release_name,result_minute", cron_test_data, ids=[x[0] for x in cron_test_data])
 def test_cron_splay(release_name, result_minute):
     """Test that our adler32sum method of generating deterministic random numbers works. This test
     ensures the apache/airflow chart continues to work as we expect it to work."""

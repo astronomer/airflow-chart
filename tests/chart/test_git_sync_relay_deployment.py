@@ -32,12 +32,8 @@ class TestGitSyncRelayDeployment:
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
-        assert c_by_name["git-sync"]["image"].startswith(
-            "quay.io/astronomer/ap-git-sync-relay:"
-        )
-        assert c_by_name["git-daemon"]["image"].startswith(
-            "quay.io/astronomer/ap-git-daemon:"
-        )
+        assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
+        assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
 
     def test_gsr_deployment_with_ssh_credentials_and_known_hosts(self, kube_version):
@@ -80,12 +76,8 @@ class TestGitSyncRelayDeployment:
                 "configMap": {"name": "release-name-git-sync-config"},
             },
         ]
-        assert c_by_name["git-sync"]["image"].startswith(
-            "quay.io/astronomer/ap-git-sync-relay:"
-        )
-        assert c_by_name["git-daemon"]["image"].startswith(
-            "quay.io/astronomer/ap-git-daemon:"
-        )
+        assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
+        assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-sync"]["volumeMounts"] == [
             {
                 "name": "git-secret",
@@ -151,12 +143,8 @@ class TestGitSyncRelayDeployment:
                 "configMap": {"name": "release-name-git-sync-config"},
             },
         ]
-        assert c_by_name["git-sync"]["image"].startswith(
-            "quay.io/astronomer/ap-git-sync-relay:"
-        )
-        assert c_by_name["git-daemon"]["image"].startswith(
-            "quay.io/astronomer/ap-git-daemon:"
-        )
+        assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
+        assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-sync"]["volumeMounts"] == [
             {"name": "git-repo-contents", "mountPath": "/git"},
         ]
@@ -200,9 +188,7 @@ class TestGitSyncRelayDeployment:
     def test_gsr_deployment_with_securitycontext_overrides(self, kube_version):
         """Test that gitsync  deployment are configurable with custom securitycontext."""
         gsrsecuritycontext = {"runAsUser": 12345, "privileged": True}
-        values = {
-            "gitSyncRelay": {"enabled": True, "securityContext": gsrsecuritycontext}
-        }
+        values = {"gitSyncRelay": {"enabled": True, "securityContext": gsrsecuritycontext}}
 
         docs = render_chart(
             kube_version=kube_version,
@@ -233,6 +219,4 @@ class TestGitSyncRelayDeployment:
         assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
-        assert [{"name": "gscsecret"}] == doc["spec"]["template"]["spec"][
-            "imagePullSecrets"
-        ]
+        assert [{"name": "gscsecret"}] == doc["spec"]["template"]["spec"]["imagePullSecrets"]
