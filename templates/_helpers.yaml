@@ -169,7 +169,7 @@ Create the name of the webserver service account to use
 */}}
 {{- define "astro.webserver.serviceAccountName" -}}
 {{- if .Values.airflow.webserver.serviceAccount.create -}}
-    {{ default (printf "%s-webserver" (include "airflow.fullname" .)) .Values.airflow.webserver.serviceAccount.name }}
+    {{ default (printf "%s-webserver" (include "airflow.serviceAccountName" .)) .Values.airflow.webserver.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.airflow.webserver.serviceAccount.name }}
 {{- end -}}
@@ -180,7 +180,7 @@ Create the name of the redis service account to use
 */}}
 {{- define "astro.redis.serviceAccountName" -}}
 {{- if .Values.airflow.redis.serviceAccount.create -}}
-    {{ default (printf "%s-redis" (include "airflow.fullname" .)) .Values.airflow.redis.serviceAccount.name }}
+    {{ default (printf "%s-redis" (include "airflow.serviceAccountName" .)) .Values.airflow.redis.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.airflow.redis.serviceAccount.name }}
 {{- end -}}
@@ -191,7 +191,7 @@ Create the name of the flower service account to use
 */}}
 {{- define "astro.flower.serviceAccountName" -}}
 {{- if .Values.airflow.flower.serviceAccount.create -}}
-    {{ default (printf "%s-flower" (include "airflow.fullname" .)) .Values.airflow.flower.serviceAccount.name }}
+    {{ default (printf "%s-flower" (include "airflow.serviceAccountName" .)) .Values.airflow.flower.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.airflow.flower.serviceAccount.name }}
 {{- end -}}
@@ -202,7 +202,7 @@ Create the name of the scheduler service account to use
 */}}
 {{- define "astro.scheduler.serviceAccountName" -}}
 {{- if .Values.airflow.scheduler.serviceAccount.create -}}
-    {{ default (printf "%s-scheduler" (include "airflow.fullname" .)) .Values.airflow.scheduler.serviceAccount.name }}
+    {{ default (printf "%s-scheduler" (include "airflow.serviceAccountName" .)) .Values.airflow.scheduler.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.airflow.scheduler.serviceAccount.name }}
 {{- end -}}
@@ -213,7 +213,7 @@ Create the name of the statsd service account to use
 */}}
 {{- define "astro.statsd.serviceAccountName" -}}
 {{- if .Values.airflow.statsd.serviceAccount.create -}}
-    {{ default (printf "%s-statsd" (include "airflow.fullname" .)) .Values.airflow.statsd.serviceAccount.name }}
+    {{ default (printf "%s-statsd" (include "airflow.serviceAccountName" .)) .Values.airflow.statsd.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.airflow.statsd.serviceAccount.name }}
 {{- end -}}
@@ -224,7 +224,7 @@ Create the name of the create user job service account to use
 */}}
 {{- define "astro.createUserJob.serviceAccountName" -}}
 {{- if .Values.airflow.createUserJob.serviceAccount.create -}}
-    {{ default (printf "%s-create-user-job" (include "airflow.fullname" .)) .Values.airflow.createUserJob.serviceAccount.name }}
+    {{ default (printf "%s-create-user-job" (include "airflow.serviceAccountName" .)) .Values.airflow.createUserJob.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.airflow.createUserJob.serviceAccount.name }}
 {{- end -}}
@@ -235,7 +235,7 @@ Create the name of the migrate database job service account to use
 */}}
 {{- define "astro.migrateDatabaseJob.serviceAccountName" -}}
 {{- if .Values.airflow.migrateDatabaseJob.serviceAccount.create -}}
-    {{ default (printf "%s-migrate-database-job" (include "airflow.fullname" .)) .Values.airflow.migrateDatabaseJob.serviceAccount.name }}
+    {{ default (printf "%s-migrate-database-job" (include "airflow.serviceAccountName" .)) .Values.airflow.migrateDatabaseJob.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.airflow.migrateDatabaseJob.serviceAccount.name }}
 {{- end -}}
@@ -246,7 +246,7 @@ Create the name of the worker service account to use
 */}}
 {{- define "astro.worker.serviceAccountName" -}}
 {{- if .Values.airflow.workers.serviceAccount.create -}}
-    {{ default (printf "%s-worker" (include "airflow.fullname" .)) .Values.airflow.workers.serviceAccount.name }}
+    {{ default (printf "%s-worker" (include "airflow.serviceAccountName" .)) .Values.airflow.workers.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.airflow.workers.serviceAccount.name }}
 {{- end -}}
@@ -257,7 +257,7 @@ Create the name of the triggerer service account to use
 */}}
 {{- define "astro.triggerer.serviceAccountName" -}}
 {{- if .Values.airflow.triggerer.serviceAccount.create -}}
-    {{ default (printf "%s-triggerer" (include "airflow.fullname" .)) .Values.airflow.triggerer.serviceAccount.name }}
+    {{ default (printf "%s-triggerer" (include "airflow.serviceAccountName" .)) .Values.airflow.triggerer.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.airflow.triggerer.serviceAccount.name }}
 {{- end -}}
@@ -279,7 +279,7 @@ Create the name of the cleanup service account to use
 */}}
 {{- define "astro.cleanup.serviceAccountName" -}}
 {{- if .Values.airflow.cleanup.serviceAccount.create -}}
-    {{ default (printf "%s-cleanup" (include "airflow.fullname" .)) .Values.airflow.cleanup.serviceAccount.name }}
+    {{ default (printf "%s-cleanup" (include "airflow.serviceAccountName" .)) .Values.airflow.cleanup.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.airflow.cleanup.serviceAccount.name }}
 {{- end -}}
