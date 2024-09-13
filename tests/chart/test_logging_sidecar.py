@@ -29,7 +29,7 @@ class TestLoggingSidecar:
         doc = docs[0]
         assert "ConfigMap" == doc["kind"]
         assert "v1" == doc["apiVersion"]
-        assert (vc := yaml.safe_load(doc["data"]["vector-config.yaml"]))
+        vc = yaml.safe_load(doc["data"]["vector-config.yaml"])
         assert vc["sinks"]["out"]["auth"] == {
             "strategy": "basic",
             "user": "testuser",
@@ -81,7 +81,7 @@ class TestLoggingSidecar:
             show_only="templates/logging-sidecar-configmap.yaml",
         )
         assert len(docs) == 1
-        assert (vc := yaml.safe_load(docs[0]["data"]["vector-config.yaml"]))
+        vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
         assert vc["sinks"]["out"]["bulk"] == {
             "index": "vector.${RELEASE:--}.%Y.%m",
             "action": "create",
@@ -104,7 +104,7 @@ class TestLoggingSidecar:
             show_only="templates/logging-sidecar-configmap.yaml",
         )
         assert len(docs) == 1
-        assert (vc := yaml.safe_load(docs[0]["data"]["vector-config.yaml"]))
+        vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
         assert vc["sinks"]["out"]["bulk"] == {
             "index": "fluentd.${RELEASE:--}.%Y.%m.%d",
             "action": "create",

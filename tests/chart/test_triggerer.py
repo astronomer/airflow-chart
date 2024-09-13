@@ -11,7 +11,4 @@ class TestTriggerer:
             show_only=["charts/airflow/templates/triggerer/triggerer-deployment.yaml"],
         )
         assert len(docs) == 1
-        assert (
-            "/usr/local/bin/clean-airflow-logs"
-            in docs[0]["spec"]["template"]["spec"]["containers"][1]["args"]
-        )
+        assert "/usr/local/bin/clean-airflow-logs" in docs[0]["spec"]["template"]["spec"]["containers"][1]["args"]
