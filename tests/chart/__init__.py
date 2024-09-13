@@ -7,11 +7,7 @@ def get_containers_by_name(doc, include_init_containers=False):
 
     c_by_name = {c["name"]: c for c in doc["spec"]["template"]["spec"]["containers"]}
 
-    if include_init_containers and doc["spec"]["template"]["spec"].get(
-        "initContainers"
-    ):
-        c_by_name |= {
-            c["name"]: c for c in doc["spec"]["template"]["spec"].get("initContainers")
-        }
+    if include_init_containers and doc["spec"]["template"]["spec"].get("initContainers"):
+        c_by_name |= {c["name"]: c for c in doc["spec"]["template"]["spec"].get("initContainers")}
 
     return c_by_name
