@@ -52,4 +52,25 @@ class TestDagServerRoleBinding:
         assert downloader["roleRef"]["kind"] == "Role"
         assert downloader["roleRef"]["name"] == "release-name-dag-downloader-role"
         assert downloader["roleRef"]["apiGroup"] == "rbac.authorization.k8s.io"
-        assert [{'kind': 'ServiceAccount', 'name': 'release-name-airflow-webserver', 'namespace': 'test-namespace'}, {'kind': 'ServiceAccount', 'name': 'release-name-airflow-triggerer', 'namespace': 'test-namespace'}, {'kind': 'ServiceAccount', 'name': 'release-name-airflow-worker', 'namespace': 'test-namespace'}, {'kind': 'ServiceAccount', 'name': 'release-name-airflow-scheduler', 'namespace': 'test-namespace'}] == downloader["subjects"]
+        assert [
+            {
+                "kind": "ServiceAccount",
+                "name": "release-name-airflow-webserver",
+                "namespace": "test-namespace",
+            },
+            {
+                "kind": "ServiceAccount",
+                "name": "release-name-airflow-triggerer",
+                "namespace": "test-namespace",
+            },
+            {
+                "kind": "ServiceAccount",
+                "name": "release-name-airflow-worker",
+                "namespace": "test-namespace",
+            },
+            {
+                "kind": "ServiceAccount",
+                "name": "release-name-airflow-scheduler",
+                "namespace": "test-namespace",
+            },
+        ] == downloader["subjects"]
