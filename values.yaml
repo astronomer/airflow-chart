@@ -564,7 +564,7 @@ dagDeploy:
 
   serviceAccount:
     annotations: {}
-    name: airflow-dag-server
+    name: ""
     create: true
 
   resources: {}
