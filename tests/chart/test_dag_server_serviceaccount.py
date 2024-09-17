@@ -27,7 +27,7 @@ class TestDagServerServiceAccount:
         doc = docs[0]
         assert doc["kind"] == "ServiceAccount"
         assert doc["apiVersion"] == "v1"
-        assert doc["metadata"]["name"] == "release-name-airflow-dag-server"
+        assert doc["metadata"]["name"] == "release-name-dag-server"
 
     def test_dag_server_service_dag_server_annotations(self, kube_version):
         """Test that a valid serviceAccount is rendered with proper annotations
@@ -48,5 +48,5 @@ class TestDagServerServiceAccount:
         doc = docs[0]
         assert doc["kind"] == "ServiceAccount"
         assert doc["apiVersion"] == "v1"
-        assert doc["metadata"]["name"] == "release-name-airflow-dag-server"
+        assert doc["metadata"]["name"] == "release-name-dag-server"
         assert doc["metadata"]["annotations"] == annotations
