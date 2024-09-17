@@ -9,7 +9,7 @@ metadata:
   name: {{ .Release.Name }}-dag-server-rolebinding
 subjects:
 - kind: ServiceAccount
-  name: {{ .Release.Name }}-dag-server
+  name: {{ template "astro.dagDeploy.serviceAccountName" . }}
   namespace: "{{ .Release.Namespace }}"
 roleRef:
   kind: Role
