@@ -59,9 +59,7 @@ def test_elasticsearch_version(webserver):
     except KeyError:
         raise Exception("elasticsearch pip module is not installed")
     version = elasticsearch_module["version"]
-    assert semantic_version(version) >= semantic_version(
-        "5.5.3"
-    ), "elasticsearch module must be version 5.5.3 or greater"
+    assert semantic_version(version) >= semantic_version("5.5.3"), "elasticsearch module must be version 5.5.3 or greater"
 
 
 def test_redis_version(webserver):
@@ -71,17 +69,13 @@ def test_redis_version(webserver):
     except KeyError:
         raise Exception("redis pip module is not installed")
     version = redis_module["version"]
-    assert semantic_version(version) != semantic_version(
-        "3.4.0"
-    ), "redis module must not be 3.4.0"
+    assert semantic_version(version) != semantic_version("3.4.0"), "redis module must not be 3.4.0"
 
 
 def test_astronomer_airflow_check_version(webserver):
     """astronomer-airflow-version-check 1.0.0 has an issue in the Astronomer platform"""
     try:
-        version_check_module = webserver.pip_package.get_packages()[
-            "astronomer-airflow-version-check"
-        ]
+        version_check_module = webserver.pip_package.get_packages()["astronomer-airflow-version-check"]
     except KeyError:
         print("astronomer-airflow-version-check pip module is not installed")
         return
@@ -97,17 +91,13 @@ def test_airflow_connections(scheduler):
     test_conn_id = "test"
 
     # Assert Connection can be added
-    assert (
-        f"Successfully added `conn_id`={test_conn_id} : {test_conn_uri}"
-        in scheduler.check_output(
-            "airflow connections add --conn-uri %s %s", test_conn_uri, test_conn_id
-        )
+    assert f"Successfully added `conn_id`={test_conn_id} : {test_conn_uri}" in scheduler.check_output(
+        "airflow connections add --conn-uri %s %s", test_conn_uri, test_conn_id
     )
 
     # Assert Connection can be removed
-    assert (
-        f"Successfully deleted connection with `conn_id`={test_conn_id}"
-        in scheduler.check_output("airflow connections delete %s", test_conn_id)
+    assert f"Successfully deleted connection with `conn_id`={test_conn_id}" in scheduler.check_output(
+        "airflow connections delete %s", test_conn_id
     )
 
 
@@ -133,13 +123,10 @@ def test_airflow_trigger_dags(scheduler):
     assert "Dag: example_dag, paused: True" in scheduler.check_output(pause_dag_command)
     assert (
         "Created <DagRun example_dag @ 2020-05-01T00:00:00+00:00: "
-        "test_run, externally triggered: True>"
-        in scheduler.check_output(trigger_dag_command)
+        "test_run, externally triggered: True>" in scheduler.check_output(trigger_dag_command)
     )
 
-    assert "Dag: example_dag, paused: False" in scheduler.check_output(
-        unpause_dag_command
-    )
+    assert "Dag: example_dag, paused: False" in scheduler.check_output(unpause_dag_command)
 
     # Verify the DAG succeeds in 100 seconds
     timeout = 100
@@ -207,13 +194,9 @@ def statsd():
         namespace = "airflow"
     kube = create_kube_client()
     pods = kube.list_namespaced_pod(namespace, label_selector="component=statsd")
-    assert (
-        len(pods.items) > 0
-    ), "Expected to find at least one pod with label 'component: statsd'"
+    assert len(pods.items) > 0, "Expected to find at least one pod with label 'component: statsd'"
     pod = pods.items[0]
-    yield testinfra.get_host(
-        f"kubectl://{pod.metadata.name}?container=statsd&namespace={namespace}"
-    )
+    yield testinfra.get_host(f"kubectl://{pod.metadata.name}?container=statsd&namespace={namespace}")
 
 
 @pytest.fixture(scope="session")
@@ -224,13 +207,9 @@ def webserver():
         namespace = "airflow"
     kube = create_kube_client()
     pods = kube.list_namespaced_pod(namespace, label_selector="component=webserver")
-    assert (
-        len(pods.items) > 0
-    ), "Expected to find at least one pod with label 'component: webserver'"
+    assert len(pods.items) > 0, "Expected to find at least one pod with label 'component: webserver'"
     pod = pods.items[0]
-    yield testinfra.get_host(
-        f"kubectl://{pod.metadata.name}?container=webserver&namespace={namespace}"
-    )
+    yield testinfra.get_host(f"kubectl://{pod.metadata.name}?container=webserver&namespace={namespace}")
 
 
 @pytest.fixture(scope="session")
@@ -241,13 +220,9 @@ def scheduler():
         namespace = "airflow"
     kube = create_kube_client()
     pods = kube.list_namespaced_pod(namespace, label_selector="component=scheduler")
-    assert (
-        len(pods.items) > 0
-    ), "Expected to find at least one pod with label 'component: scheduler'"
+    assert len(pods.items) > 0, "Expected to find at least one pod with label 'component: scheduler'"
     pod = pods.items[0]
-    yield testinfra.get_host(
-        f"kubectl://{pod.metadata.name}?container=scheduler&namespace={namespace}"
-    )
+    yield testinfra.get_host(f"kubectl://{pod.metadata.name}?container=scheduler&namespace={namespace}")
 
 
 @pytest.fixture(scope="session")
