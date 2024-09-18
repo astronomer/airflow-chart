@@ -564,7 +564,7 @@ dagDeploy:
 
   serviceAccount:
     annotations: {}
-    name: ""
+    name: ~
     create: true
 
   resources: {}
