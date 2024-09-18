@@ -42,7 +42,7 @@ spec:
       imagePullSecrets:
         - name: {{ template "astro.registry_secret" . }}
       {{- end }}
-      serviceAccountName: {{ .Release.Name }}-dag-server
+      serviceAccountName: {{ template "astro.dagDeploy.serviceAccountName" . }}
       securityContext: {{ toYaml .Values.dagDeploy.securityContext | nindent 8 }}
       containers:
         - name: dag-server

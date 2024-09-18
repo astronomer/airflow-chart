@@ -41,12 +41,45 @@ class TestDagServerServiceAccount:
         }
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-serviceaccount.yaml",
+            show_only=["templates/dag-deploy/dag-server-serviceaccount.yaml", "templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
-        assert len(docs) == 1
+        assert len(docs) == 2
         doc = docs[0]
         assert doc["kind"] == "ServiceAccount"
         assert doc["apiVersion"] == "v1"
         assert doc["metadata"]["name"] == "release-name-dag-server"
         assert doc["metadata"]["annotations"] == annotations
+        assert "release-name-dag-server" == docs[1]["spec"]["template"]["spec"]["serviceAccountName"]
+
+    def test_dag_server_serviceaccount_overrides_defaults(self, kube_version):
+        """Test that a serviceAccount overridable with disabled creation"""
+        values = {
+            "dagDeploy": {
+                "enabled": True,
+                "serviceAccount": {"create": False},
+            }
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["templates/dag-deploy/dag-server-serviceaccount.yaml", "templates/dag-deploy/dag-server-statefulset.yaml"],
+            values=values,
+        )
+        assert len(docs) == 1
+        assert "default" == docs[0]["spec"]["template"]["spec"]["serviceAccountName"]
+
+    def test_dag_server_serviceaccount_overrides(self, kube_version):
+        """Test that a serviceAccount overridable with disabled creation"""
+        values = {
+            "dagDeploy": {
+                "enabled": True,
+                "serviceAccount": {"create": False, "name": "dag-server"},
+            }
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["templates/dag-deploy/dag-server-serviceaccount.yaml", "templates/dag-deploy/dag-server-statefulset.yaml"],
+            values=values,
+        )
+        assert len(docs) == 1
+        assert "dag-server" == docs[0]["spec"]["template"]["spec"]["serviceAccountName"]

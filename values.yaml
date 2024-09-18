@@ -564,6 +564,8 @@ dagDeploy:
 
   serviceAccount:
     annotations: {}
+    name: ~
+    create: true
 
   resources: {}
   #  limits:
