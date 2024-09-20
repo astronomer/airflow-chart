@@ -19,3 +19,23 @@ class TestPodTemplate:
         assert doc["kind"] == "ConfigMap"
         podTemplate = yaml.safe_load(doc["data"]["pod_template_file.yaml"])
         assert {"tier": "airflow", "component": "worker", "release": "release-name"} == podTemplate["metadata"]["labels"]
+
+    def test_pod_template_labels_overrides(self, kube_version):
+        """Test airflow pod template labels overrides."""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "airflow": {
+                    "labels": {"service": "airflow"},
+                    "workers": {"labels": {"servicetype": "workers"}},
+                }
+            },
+            show_only="charts/airflow/templates/configmaps/configmap.yaml",
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "ConfigMap"
+        podTemplate = yaml.safe_load(doc["data"]["pod_template_file.yaml"])
+        assert {"tier": "airflow", "component": "worker", "release": "release-name", "service": "airflow", "servicetype": "workers"} == podTemplate[
+            "metadata"
+        ]["labels"]
