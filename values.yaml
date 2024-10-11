@@ -475,7 +475,7 @@ extraObjects: []
 authSidecar:
   enabled: false
   repository: quay.io/astronomer/ap-auth-sidecar
-  tag: 1.25.5
+  tag: 1.27.1
   pullPolicy: IfNotPresent
   port: 8084
   securityContext: {}
@@ -543,7 +543,7 @@ dagDeploy:
   images:
     dagServer:
       repository: quay.io/astronomer/ap-dag-deploy
-      tag: 0.3.2
+      tag: 0.3.5
       imagePullPolicy: IfNotPresent
   livenessProbe:
     initialDelaySeconds: 30
