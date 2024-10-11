@@ -20,12 +20,8 @@ def common_default_tests(doc):
         "-H",
         "0.0.0.0",
     ]
-    assert c_by_name["dag-server"]["image"].startswith(
-        "quay.io/astronomer/ap-dag-deploy:"
-    )
-    assert c_by_name["dag-server"]["image"].startswith(
-        "quay.io/astronomer/ap-dag-deploy:"
-    )
+    assert c_by_name["dag-server"]["image"].startswith("quay.io/astronomer/ap-dag-deploy:")
+    assert c_by_name["dag-server"]["image"].startswith("quay.io/astronomer/ap-dag-deploy:")
     assert c_by_name["dag-server"]["livenessProbe"]
 
 
@@ -56,14 +52,9 @@ class TestDagServerStatefulSet:
         c_by_name = get_containers_by_name(doc)
 
         env_vars = {x["name"]: x["value"] for x in c_by_name["dag-server"]["env"]}
-        assert (
-            env_vars["HOUSTON_SERVICE_ENDPOINT"]
-            == "http://-houston..svc.cluster.local.:8871/v1/"
-        )
+        assert env_vars["HOUSTON_SERVICE_ENDPOINT"] == "http://-houston..svc.cluster.local.:8871/v1/"
 
-    def test_dag_server_statefulset_houston_service_endpoint_override(
-        self, kube_version
-    ):
+    def test_dag_server_statefulset_houston_service_endpoint_override(self, kube_version):
         """Test that we see the right HOUSTON_SERVICE_ENDPOINT value when the relevant variables are set."""
         values = {
             "dagDeploy": {"enabled": True},
@@ -83,10 +74,7 @@ class TestDagServerStatefulSet:
         c_by_name = get_containers_by_name(doc)
 
         env_vars = {x["name"]: x["value"] for x in c_by_name["dag-server"]["env"]}
-        assert (
-            env_vars["HOUSTON_SERVICE_ENDPOINT"]
-            == "http://test-release-houston.test-namespace.svc.cluster.local.:8871/v1/"
-        )
+        assert env_vars["HOUSTON_SERVICE_ENDPOINT"] == "http://test-release-houston.test-namespace.svc.cluster.local.:8871/v1/"
 
     def test_dag_server_statefulset_with_resource_overrides(self, kube_version):
         """Test that Dag Server statefulset are configurable with custom resource limits."""

@@ -80,10 +80,7 @@ class TestIngress:
 
         assert docs[1]["metadata"]["name"] == "release-name-dag-server-ingress"
         rule_0 = docs[1]["spec"]["rules"][0]
-        assert (
-            rule_0["http"]["paths"][0]["path"]
-            == "/release-name/dags/(upload|download)(/.*)?"
-        )
+        assert rule_0["http"]["paths"][0]["path"] == "/release-name/dags/(upload|download)(/.*)?"
         assert rule_0["host"] == "deployments.example.com"
 
         assert ingressAnnotation == docs[1]["metadata"]["annotations"]
