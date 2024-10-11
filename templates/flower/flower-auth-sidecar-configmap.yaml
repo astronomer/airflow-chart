@@ -23,7 +23,7 @@ data:
       }
     http {
       upstream astro-flower {
-        server localhost:{{ .Values.airflow.ports.flowerUI }} ;
+        server 127.0.0.1:{{ .Values.airflow.ports.flowerUI }} ;
       }
       server {
         server_name {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }} ;
@@ -43,6 +43,7 @@ data:
 
         location ~* "^/{{ .Release.Name }}/flower(/|$)(.*)"  {
 {{ include "default_nginx_settings_location" . | indent 8  }}
+{{ include "default_nginx_auth_headers" . | indent 8 }}
 
           if ($host = '{{ .Values.platform.release }}-flower.{{ .Values.ingress.baseDomain }}' ) {
             rewrite ^ https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/flower permanent;
