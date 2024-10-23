@@ -19,6 +19,21 @@ class TestIngress:
         assert "Ingress" == doc["kind"]
         assert "networking.k8s.io/v1" == doc["apiVersion"]
         assert "/release-name/airflow" == docs[0]["spec"]["rules"][0]["http"]["paths"][0]["path"]
+        assert doc["spec"]["tls"][0]["secretName"] is None
+
+    def test_airflow_ingress_tls_secret_overrides(self, kube_version):
+        """Test airflow ingress with defaults - KubernetesExecutor."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/ingress.yaml",
+            values={"ingress": {"enabled": True, "baseDomain": "example.com", "tlsSecretName": "astronomer-tls"}},
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert "Ingress" == doc["kind"]
+        assert "networking.k8s.io/v1" == doc["apiVersion"]
+        assert "/release-name/airflow" == doc["spec"]["rules"][0]["http"]["paths"][0]["path"]
+        assert "astronomer-tls" == doc["spec"]["tls"][0]["secretName"]
 
     def test_airflow_ingress_with_celery_executor(self, kube_version):
         """Test airflow ingress with CeleryExecutor."""
