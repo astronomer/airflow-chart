@@ -32,9 +32,6 @@ spec:
     - secretName: {{ .Release.Name }}-airflow-tls
   {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
-  # this option to be relooked, for the sake of POC we have hardcoded
-  {{- else if .Values.authSidecar.enabled  }}
-    - secretName: astronomer-tls
   {{ else }}
     - secretName: ~
   {{- end }}
@@ -103,8 +100,6 @@ spec:
     - secretName: {{ .Release.Name }}-airflow-tls
           {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
-          {{- else if .Values.authSidecar.enabled  }}
-    - secretName: astronomer-tls
           {{ else }}
     - secretName: ~
             {{- end }}
@@ -179,9 +174,6 @@ spec:
     - secretName: {{ .Release.Name }}-airflow-tls
           {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
-          {{- else if .Values.authSidecar.enabled  }}
-    - secretName: astronomer-tls
-          {{ else }}
     - secretName: ~
             {{- end }}
       hosts:
