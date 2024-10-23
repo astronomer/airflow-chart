@@ -5,6 +5,8 @@ from tests.chart.helm_template_generator import render_chart
 from .. import supported_k8s_versions
 
 tls_secret_name = "astronomer-tls"
+
+
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
 class TestIngress:
     def test_airflow_ingress_defaults(self, kube_version):
