@@ -29,10 +29,10 @@ airflow:
       tag: ~
     statsd:
       repository: quay.io/astronomer/ap-statsd-exporter
-      tag: 0.27.1
+      tag: 0.27.2
     redis:
       repository: quay.io/astronomer/ap-redis
-      tag: 7.2.5
+      tag: 7.2.6
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
       tag: 1.23.1-1
@@ -487,7 +487,7 @@ loggingSidecar:
   customConfig: false
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
-  image: quay.io/astronomer/ap-vector:0.32.2-2
+  image: quay.io/astronomer/ap-vector:0.40.2-1
 
 # Ingress configuration
 ingress:
