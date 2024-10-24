@@ -25,7 +25,7 @@ class TestAirflow:
         """Test custom behaviors of the scheduler that we rely on."""
         env = {"name": "ENABLE_AUTH_TYPE", "value": "SHA256"}
         values = {
-            "airflow":{
+            "airflow": {
                 "migrateDatabaseJob": {
                     "env": [env],
                 }
