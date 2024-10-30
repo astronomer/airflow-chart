@@ -1,7 +1,7 @@
 #################################
 # dag-deploy-rolebinding
 #################################
-{{- if .Values.dagDeploy.enabled }}
+{{- if and .Values.dagDeploy.enabled .Values.dagDeploy.serviceAccount.create }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -9,7 +9,7 @@ metadata:
   name: {{ .Release.Name }}-dag-server-rolebinding
 subjects:
 - kind: ServiceAccount
-  name: {{ .Release.Name }}-dag-server
+  name: {{ template "astro.dagDeploy.serviceAccountName" . }}
   namespace: "{{ .Release.Namespace }}"
 roleRef:
   kind: Role

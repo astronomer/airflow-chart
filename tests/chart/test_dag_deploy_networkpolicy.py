@@ -39,24 +39,14 @@ class TestDagDeployNetworkPolicy:
             "release": "release-name",
         }
 
-        assert all(
-            [x["ports"] == [{"protocol": "TCP", "port": 8000}] for x in spec["ingress"]]
-        )
+        assert all(x["ports"] == [{"protocol": "TCP", "port": 8000}] for x in spec["ingress"])
 
-        assert spec["ingress"][0]["from"] == [
-            {
-                "podSelector": {
-                    "matchLabels": {"release": "release-name", "tier": "airflow"}
-                }
-            }
-        ]
+        assert spec["ingress"][0]["from"] == [{"podSelector": {"matchLabels": {"release": "release-name", "tier": "airflow"}}}]
 
         assert len(spec["ingress"][1]["from"]) == 2
 
         assert {
-            "namespaceSelector": {
-                "matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}
-            },
+            "namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}},
             "podSelector": {
                 "matchLabels": {
                     "app": "houston",
@@ -66,9 +56,7 @@ class TestDagDeployNetworkPolicy:
             },
         } == spec["ingress"][1]["from"][0]
         assert {
-            "namespaceSelector": {
-                "matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}
-            },
+            "namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}},
             "podSelector": {
                 "matchLabels": {
                     "tier": "nginx",
@@ -105,20 +93,12 @@ class TestDagDeployNetworkPolicy:
             "release": "release-name",
         }
 
-        assert spec["ingress"][0]["from"] == [
-            {
-                "podSelector": {
-                    "matchLabels": {"release": "release-name", "tier": "airflow"}
-                }
-            }
-        ]
+        assert spec["ingress"][0]["from"] == [{"podSelector": {"matchLabels": {"release": "release-name", "tier": "airflow"}}}]
 
         assert len(spec["ingress"][1]["from"]) == 2
 
         assert {
-            "namespaceSelector": {
-                "matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}
-            },
+            "namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}},
             "podSelector": {
                 "matchLabels": {
                     "app": "houston",
@@ -128,13 +108,13 @@ class TestDagDeployNetworkPolicy:
             },
         } == spec["ingress"][1]["from"][0]
 
-        assert {
-            "namespaceSelector": {
-                "matchLabels": {"network.openshift.io/policy-group": "ingress"}
-            }
-        } == spec["ingress"][1]["from"][1]
+        assert {"namespaceSelector": {"matchLabels": {"network.openshift.io/policy-group": "ingress"}}} == spec["ingress"][1][
+            "from"
+        ][1]
 
         assert [
             {"protocol": "TCP", "port": 8000},
             {"protocol": "TCP", "port": 8084},
-        ] == spec["ingress"][1]["ports"]
+        ] == spec["ingress"][
+            1
+        ]["ports"]

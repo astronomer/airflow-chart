@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-export KIND_VERSION="${KIND_VERSION:-0.23.0}"
-export HELM_VERSION="${HELM_VERSION:-3.15.2}"
+export KIND_VERSION="${KIND_VERSION:-0.24.0}"
+export HELM_VERSION="${HELM_VERSION:-3.16.1}"
 
 # Determine the platform we are running on
 OS=$(uname | tr '[:upper:]' '[:lower:]')

@@ -26,9 +26,7 @@ class TestAuthSidecar:
 
     def test_auth_sidecar_config_defaults(self, kube_version):
         """Test logging sidecar config with defaults"""
-        docs = render_chart(
-            kube_version=kube_version, values={}, show_only=self.show_only
-        )
+        docs = render_chart(kube_version=kube_version, values={}, show_only=self.show_only)
         assert len(docs) == 0
 
     def test_auth_sidecar_config_enabled_with_celeryexecutor(self, kube_version):
@@ -105,9 +103,7 @@ class TestAuthSidecar:
         print(docs[2]["data"]["nginx.conf"])
         assert authSidecarServicePorts in docs[1]["spec"]["ports"]
 
-        nginx_conf = pathlib.Path(
-            "tests/chart/test_data/dag-server-authsidecar-nginx.conf"
-        ).read_text()
+        nginx_conf = pathlib.Path("tests/chart/test_data/dag-server-authsidecar-nginx.conf").read_text()
         assert nginx_conf in docs[2]["data"]["nginx.conf"]
 
     def test_auth_sidecar_security_context_with_dag_server_enabled(self, kube_version):
