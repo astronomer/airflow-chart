@@ -111,3 +111,22 @@ class TestPodTemplate:
         doc = docs[0]
         podTemplate = yaml.safe_load(doc["data"]["pod_template_file.yaml"])
         assert "criticalworkload" == podTemplate["spec"]["runtimeClassName"]
+
+    def test_pod_template_worker_env_overrides(self, kube_version):
+        """Test airflow pod template labels overrides."""
+        env = {"name": "WORKERS_TYPE", "value": "GPU_ONLY"}
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "airflow": {
+                    "workers": {
+                        "env": [env],
+                    },
+                },
+            },
+            show_only="charts/airflow/templates/configmaps/configmap.yaml",
+        )
+        common_pod_template_test(docs)
+        doc = docs[0]
+        podTemplate = yaml.safe_load(doc["data"]["pod_template_file.yaml"])
+        assert env in podTemplate["spec"]["containers"][0]["env"]
