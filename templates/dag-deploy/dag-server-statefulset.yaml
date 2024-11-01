@@ -59,7 +59,7 @@ spec:
           ports:
           - name: server
             containerPort: {{ .Values.dagDeploy.ports.dagServerHttp }}
-          securityContext: {{ toYaml .Values.dagDeploy.securityContexts.container  | nindent 12 }}
+          securityContext: {{ toYaml .Values.dagDeploy.securityContexts.container | nindent 12 }}
           resources:
             {{- toYaml .Values.dagDeploy.resources | nindent 12 }}
           env:
