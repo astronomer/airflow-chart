@@ -104,7 +104,7 @@ class TestDagServerStatefulSet:
         c_by_name = get_containers_by_name(doc)
         assert c_by_name["dag-server"]["resources"] == resources
 
-    def test_dag_server_statefulset_with_podsecuritycontext_overrides(self, kube_version):
+    def test_dag_server_statefulset_with_securitycontext_overrides(self, kube_version):
         """Test that dag-server statefulset are configurable with custom securitycontext."""
         dag_server_pod_securitycontext = {
             "runAsUser": 12345,
