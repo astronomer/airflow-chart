@@ -61,6 +61,7 @@ spec:
             containerPort: {{ .Values.dagDeploy.ports.dagServerHttp }}
           resources:
             {{- toYaml .Values.dagDeploy.resources | nindent 12 }}
+          securityContext: {{ toYaml .Values.dagDeploy.securityContexts.container  | nindent 12 }}
           env:
           - name: HOUSTON_SERVICE_ENDPOINT
             value: "http://{{ .Values.platform.release }}-houston.{{ .Values.platform.namespace }}.svc.cluster.local.:8871/v1/"
