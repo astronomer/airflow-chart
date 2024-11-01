@@ -106,7 +106,13 @@ class TestDagServerStatefulSet:
 
     def test_dag_server_statefulset_with_securitycontext_overrides(self, kube_version):
         """Test that dag-server statefulset are configurable with custom securitycontext."""
-        dag_serversecuritycontext = {"runAsUser": 12345, "allowPrivilegeEscalation": True, 'fsGroup': 2000, 'readOnlyRootFilesystem': True, 'runAsGroup': 1000,}
+        dag_serversecuritycontext = {
+            "runAsUser": 12345,
+            "allowPrivilegeEscalation": True,
+            "fsGroup": 2000,
+            "readOnlyRootFilesystem": True,
+            "runAsGroup": 1000,
+        }
         values = {"dagDeploy": {"enabled": True, "securityContext": dag_serversecuritycontext}}
 
         docs = render_chart(
