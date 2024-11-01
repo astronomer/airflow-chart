@@ -106,7 +106,13 @@ class TestDagServerStatefulSet:
 
     def test_dag_server_statefulset_with_podsecuritycontext_overrides(self, kube_version):
         """Test that dag-server statefulset are configurable with custom securitycontext."""
-        dag_server_pod_securitycontext = {"runAsUser": 12345, "privileged": True}
+        dag_server_pod_securitycontext = {
+            "runAsUser": 12345,
+            "allowPrivilegeEscalation": True,
+            "runAsGroup": 1000,
+            "fsGroup": 2000,
+            "readOnlyRootFilesystem": True,
+        }
         dag_server_container_securitycontext = {"allowPrivilegeEscalation": False}
         values = {
             "dagDeploy": {
