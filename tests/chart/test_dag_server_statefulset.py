@@ -133,8 +133,9 @@ class TestDagServerStatefulSet:
         doc = docs[0]
 
         common_default_tests(doc)
-        assert dag_server_pod_securitycontext == doc["spec"]["template"]["spec"]["securityContext"]
-        assert dag_server_container_securitycontext == doc["spec"]["template"]["spec"]["containers"][0]["securityContext"]
+        spec = doc["spec"]["template"]["spec"]
+        assert dag_server_pod_securitycontext == spec["securityContext"]
+        assert dag_server_container_securitycontext == spec["containers"][0]["securityContext"]
 
     def test_dag_server_statefulset_with_custom_registry_secret(self, kube_version):
         """Test dag-server statefulset with custom registry secret."""
