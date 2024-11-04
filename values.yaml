@@ -594,9 +594,9 @@ dagDeploy:
   # when it wants to scale a node down.
   safeToEvict: true
 
-  securityContext: {}
-  #  runAsUser: 999
-  #  runAsGroup: 0
+  securityContexts:
+    pod: {}
+    container: {}
 
 gitSyncRelay:
   enabled: ~

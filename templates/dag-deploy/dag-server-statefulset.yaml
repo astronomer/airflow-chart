@@ -43,7 +43,7 @@ spec:
         - name: {{ template "astro.registry_secret" . }}
       {{- end }}
       serviceAccountName: {{ template "astro.dagDeploy.serviceAccountName" . }}
-      securityContext: {{ toYaml .Values.dagDeploy.securityContext | nindent 8 }}
+      securityContext: {{ toYaml .Values.dagDeploy.securityContexts.pod | nindent 8 }}
       containers:
         - name: dag-server
           image: "{{ .Values.dagDeploy.images.dagServer.repository }}:{{ .Values.dagDeploy.images.dagServer.tag }}"
@@ -59,6 +59,7 @@ spec:
           ports:
           - name: server
             containerPort: {{ .Values.dagDeploy.ports.dagServerHttp }}
+          securityContext: {{ toYaml .Values.dagDeploy.securityContexts.container | nindent 12 }}
           resources:
             {{- toYaml .Values.dagDeploy.resources | nindent 12 }}
           env:
