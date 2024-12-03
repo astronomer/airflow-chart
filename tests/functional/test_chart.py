@@ -151,7 +151,7 @@ def test_airflow_trigger_dags(scheduler):
                     "scheduler",
                     "--tail",
                     "100",
-                ]
+                ], check=False
             )
             raise Exception("DAGRun failed !")
         if (try_count * sleep_time_between_polls) >= timeout:
@@ -169,7 +169,7 @@ def test_airflow_trigger_dags(scheduler):
                     "scheduler",
                     "--tail",
                     "100",
-                ]
+                ], check=False
             )
             break
 
