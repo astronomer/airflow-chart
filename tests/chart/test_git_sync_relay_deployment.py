@@ -1,6 +1,6 @@
 import pytest
 
-from tests import supported_k8s_versions
+from tests import git_root_dir, supported_k8s_versions
 from tests.chart.helm_template_generator import render_chart
 
 from . import get_containers_by_name
@@ -12,7 +12,7 @@ class TestGitSyncRelayDeployment:
         """Test that no git-sync-relay templates are rendered by default."""
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            show_only=[x.relative_to(git_root_dir) for x in (git_root_dir / "templates/git-sync-relay").glob("*")],
         )
         assert len(docs) == 0
 
