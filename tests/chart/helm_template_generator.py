@@ -15,19 +15,19 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import json
+import os
 import subprocess
 import sys
 from functools import cache
-from tempfile import NamedTemporaryFile
-from typing import Any, Optional
 from pathlib import Path
-import os
+from tempfile import NamedTemporaryFile
+from typing import Any
 
 import jmespath
 import jsonschema
 import requests
 import yaml
-import json
 from kubernetes.client.api_client import ApiClient
 
 api_client = ApiClient()
@@ -86,11 +86,11 @@ def validate_k8s_object(instance, kube_version):
 def render_chart(
     *,  # require keyword args
     name: str = "release-name",
-    values: Optional[dict] = None,
-    show_only: Optional[list] = None,
-    chart_dir: Optional[str] = None,
+    values: dict | None = None,
+    show_only: list | None = None,
+    chart_dir: str | None = None,
     kube_version: str = "1.27.0",
-    namespace: Optional[str] = None,
+    namespace: str | None = None,
     validate_objects: bool = True,
 ):
     """

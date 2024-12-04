@@ -2,8 +2,8 @@
 """This script is used to create the circle config file so that we can stay
 DRY."""
 from pathlib import Path
-import yaml
 
+import yaml
 from jinja2 import Template
 
 git_root_dir = next(iter([x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()]), None)
@@ -11,8 +11,8 @@ metadata = yaml.safe_load((git_root_dir / "metadata.yaml").read_text())
 kube_versions = metadata["test_k8s_versions"]
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
-machine_image_version = "ubuntu-2204:2024.05.1"
-ci_runner_version = "2024-09"
+machine_image_version = "ubuntu-2204:2024.11.1" # https://circleci.com/developer/machine/image/ubuntu-2204
+ci_runner_version = "2024-12" # This should be the current YYYY-MM
 
 
 def main():

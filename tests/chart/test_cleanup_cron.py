@@ -1,5 +1,6 @@
-from tests.chart.helm_template_generator import render_chart
 import pytest
+
+from tests.chart.helm_template_generator import render_chart
 
 cron_test_data = [
     ("development-angular-system-6091", 3),
