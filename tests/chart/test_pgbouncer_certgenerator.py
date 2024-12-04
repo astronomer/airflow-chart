@@ -1,9 +1,8 @@
 import jmespath
 import pytest
 
+from tests import supported_k8s_versions
 from tests.chart.helm_template_generator import render_chart
-
-from .. import supported_k8s_versions
 
 expected_rbac = {
     "apiGroups": [""],

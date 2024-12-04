@@ -1,5 +1,9 @@
-[tool.black]
+# https://www.python.org/dev/peps/pep-0518/#file-format
+
+# https://docs.astral.sh/ruff/settings/
+[tool.ruff]
 line-length = 132
+target-version = "py311"
 
 [tool.ruff.lint]
 fixable = ["ALL"]
@@ -7,16 +11,27 @@ fixable = ["ALL"]
 # https://docs.astral.sh/ruff/rules/
 select = [
   "ASYNC",
+  "ARG",
+  "BLE",
   "C",
   "E",
   "F",
+  # "FBT",
+  "FLY",
   "FURB",
+  "I",
+  # "N",
   "PERF",
+  "PGH",
+  # "PL",
   "Q",
+  "R",
   "RUF",
   "S",
+  "TID",
   "UP",
   "W",
+  "YTT",
 ]
 ignore = [
   "E501",
