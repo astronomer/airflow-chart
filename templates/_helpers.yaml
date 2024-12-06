@@ -301,7 +301,7 @@ Create the name of the cleanup service account to use
   {{- default (printf "%s-registry" .Release.Name) .Values.airflow.registry.secretName }}
 {{- end }}
 
-{{- define "sideccar_container_spec" -}}
+{{- define "sidecar_container_spec" -}}
 - name: {{ .Values.loggingSidecar.name }}
   image: "{{ .Values.loggingSidecar.image }}"
   env:

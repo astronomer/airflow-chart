@@ -2,7 +2,6 @@
 ## git-sync-relay Deployment ##
 ###############################
 {{- if .Values.gitSyncRelay.enabled }}
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,8 +31,7 @@ spec:
       imagePullSecrets:
         - name: {{ template "astro.registry_secret" . }}
       {{- end }}
-      securityContext:
-{{ toYaml .Values.gitSyncRelay.securityContext | indent 8 }}
+      securityContext: {{ toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
       volumes:
         - name: git-repo-contents
           emptyDir: {}
@@ -124,13 +122,11 @@ spec:
               - /git/.git/git-daemon-export-ok
             initialDelaySeconds: 5
             periodSeconds: 15
-          resources:
-            {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
-        {{- if .Values.loggingSidecar.enabled }}
-{{- include "sideccar_container_spec" . | nindent 8 }}
-          {{- end }}
-
-{{- if .Values.gitSyncRelay.extraContainers }}
-{{- toYaml .Values.gitSyncRelay.extraContainers | nindent 8 }}
-{{- end }}
+          resources: {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
+      {{- if .Values.loggingSidecar.enabled }}
+        {{- include "sidecar_container_spec" . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.gitSyncRelay.extraContainers }}
+        {{- toYaml .Values.gitSyncRelay.extraContainers | nindent 8 }}
+      {{- end }}
 {{- end -}}
