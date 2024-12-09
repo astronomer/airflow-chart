@@ -126,7 +126,7 @@ spec:
             subPath: nginx.conf
 {{- end }}
 {{- if .Values.loggingSidecar.enabled }}
-{{- include "sideccar_container_spec" . | nindent 8 }}
+{{- include "sidecar_container_spec" . | nindent 8 }}
 {{- end }}
 {{- if .Values.dagDeploy.extraContainers }}
 {{- toYaml .Values.dagDeploy.extraContainers | nindent 8 }}
