@@ -106,6 +106,7 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.gitSyncRelay.gitSyncResources | nindent 12 }}
+        {{- if not .Values.gitSyncRelay.volumeSync.enabled }}
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
           volumeMounts:
@@ -123,6 +124,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 15
           resources: {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
+        {{- end }}
       {{- if .Values.loggingSidecar.enabled }}
         {{- include "sidecar_container_spec" . | nindent 8 }}
       {{- end }}

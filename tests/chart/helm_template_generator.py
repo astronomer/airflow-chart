@@ -38,7 +38,6 @@ git_root_dir = [x for x in Path(__file__).resolve().parents if (x / ".git").is_d
 DEBUG = os.getenv("DEBUG", "").lower() in ["yes", "true", "1"]
 default_version = supported_k8s_versions[-1]
 
-
 def get_schema_k8s(api_version, kind, kube_version=default_version):
     """Return a standalone k8s schema for use in validation."""
     api_version = api_version.lower()
