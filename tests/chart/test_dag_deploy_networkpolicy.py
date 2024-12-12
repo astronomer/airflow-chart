@@ -114,6 +114,4 @@ class TestDagDeployNetworkPolicy:
         assert [
             {"protocol": "TCP", "port": 8000},
             {"protocol": "TCP", "port": 8084},
-        ] == spec["ingress"][
-            1
-        ]["ports"]
+        ] == spec["ingress"][1]["ports"]

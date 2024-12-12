@@ -9,6 +9,7 @@ repos:
           - "--fix"
           - "--exit-non-zero-on-fix"
           # - "--unsafe-fixes"
+      - id: ruff-format
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:

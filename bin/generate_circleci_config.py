@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """This script is used to create the circle config file so that we can stay
 DRY."""
+
 from pathlib import Path
 
 import yaml
@@ -11,8 +12,8 @@ metadata = yaml.safe_load((git_root_dir / "metadata.yaml").read_text())
 kube_versions = metadata["test_k8s_versions"]
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
-machine_image_version = "ubuntu-2204:2024.11.1" # https://circleci.com/developer/machine/image/ubuntu-2204
-ci_runner_version = "2024-12" # This should be the current YYYY-MM
+machine_image_version = "ubuntu-2204:2024.11.1"  # https://circleci.com/developer/machine/image/ubuntu-2204
+ci_runner_version = "2024-12"  # This should be the current YYYY-MM
 
 
 def main():
