@@ -24,21 +24,22 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
 
-import jmespath
 import jsonschema
 import requests
 import yaml
 from kubernetes.client.api_client import ApiClient
 
+from tests import supported_k8s_versions
+
 api_client = ApiClient()
 
 BASE_URL_SPEC = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master"
-# The top-level path of this repository
 git_root_dir = [x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()][-1]
 DEBUG = os.getenv("DEBUG", "").lower() in ["yes", "true", "1"]
+default_version = supported_k8s_versions[-1]
 
 
-def get_schema_k8s(api_version, kind, kube_version):
+def get_schema_k8s(api_version, kind, kube_version=default_version):
     """Return a standalone k8s schema for use in validation."""
     api_version = api_version.lower()
     kind = kind.lower()
@@ -54,7 +55,7 @@ def get_schema_k8s(api_version, kind, kube_version):
     if not local_sp.exists():
         if not local_sp.parent.is_dir():
             local_sp.parent.mkdir()
-        request = requests.get(f"{BASE_URL_SPEC}/{schema_path}", timeout=15)
+        request = requests.get(f"{BASE_URL_SPEC}/{schema_path}", timeout=30)
         request.raise_for_status()
         local_sp.write_text(request.text)
 
@@ -62,23 +63,15 @@ def get_schema_k8s(api_version, kind, kube_version):
 
 
 @cache
-def create_validator(api_version, kind, kube_version):
+def create_validator(api_version, kind, kube_version=default_version):
     """Create a k8s validator for the given inputs."""
     schema = get_schema_k8s(api_version, kind, kube_version=kube_version)
     jsonschema.Draft7Validator.check_schema(schema)
     return jsonschema.Draft7Validator(schema)
 
 
-def validate_k8s_object(instance, kube_version):
+def validate_k8s_object(instance, kube_version=default_version):
     """Validate the k8s object."""
-    # Skip PostgreSQL chart because it doesn't pass kubernetes json schema validation with all-numeric namespace
-    labels = jmespath.search("metadata.labels", instance) or {}
-    if "helm.sh/chart" in labels:
-        chart = labels["helm.sh/chart"]
-    else:
-        chart = labels.get("chart")
-    if chart and "postgresql" in chart:
-        return
     validate = create_validator(instance.get("apiVersion"), instance.get("kind"), kube_version=kube_version)
     validate.validate(instance)
 
@@ -89,7 +82,7 @@ def render_chart(
     values: dict | None = None,
     show_only: list | None = None,
     chart_dir: str | None = None,
-    kube_version: str = "1.27.0",
+    kube_version: str = default_version,
     namespace: str | None = None,
     validate_objects: bool = True,
 ):
@@ -148,15 +141,8 @@ def render_chart(
 
 
 def prepare_k8s_lookup_dict(k8s_objects) -> dict[tuple[str, str], dict[str, Any]]:
-    """
-    Helper to create a lookup dict from k8s_objects.
+    """Helper to create a lookup dict from k8s_objects.
+
     The keys of the dict are the k8s object's kind and name
     """
     return {(k8s_object["kind"], k8s_object["metadata"]["name"]): k8s_object for k8s_object in k8s_objects}
-
-
-def render_k8s_object(obj, type_to_render):
-    """
-    Function that renders dictionaries into k8s objects. For helm chart testing only.
-    """
-    return api_client._ApiClient__deserialize_model(obj, type_to_render)  # pylint: disable=W0212
