@@ -1,7 +1,6 @@
 ########################
 ## git-sync-relay pvc ##
 ########################
-# .Values.gitSyncRelay.mode = {{ .Values.gitSyncRelay.mode }}
 {{- if and .Values.gitSyncRelay.enabled ( eq .Values.gitSyncRelay.mode "shared_volume") }}
 apiVersion: v1
 kind: PersistentVolumeClaim
