@@ -10,7 +10,6 @@ from . import get_containers_by_name
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
 class TestAirflow:
-
     def test_migrate_database_job_defaults(self, kube_version):
         """Test custom behaviors of the scheduler that we rely on."""
         docs = render_chart(
