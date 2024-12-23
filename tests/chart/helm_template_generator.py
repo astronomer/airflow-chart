@@ -87,9 +87,7 @@ def render_chart(
     namespace: str | None = None,
     validate_objects: bool = True,
 ):
-    """
-    Render a helm chart into dictionaries. For helm chart testing only.
-    """
+    """Render a helm chart into dictionaries."""
     values = values or {}
     chart_dir = chart_dir or sys.path[0]
     with NamedTemporaryFile(delete=not DEBUG) as tmp_file:  # export DEBUG=true to keep
@@ -111,8 +109,8 @@ def render_chart(
         if show_only:
             if isinstance(show_only, str):
                 show_only = [show_only]
-            for i in show_only:
-                command.extend(["--show-only", i])
+            for file in show_only:
+                command.extend(["--show-only", str(file)])
 
         if DEBUG:
             print(f"helm command:\n  {shlex.join(command)}")
