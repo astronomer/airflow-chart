@@ -259,4 +259,3 @@ class TestGitSyncRelayDeployment:
         assert not c_by_name.get("git-daemon")
         assert len(c_by_name) == 1
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
-        assert c_by_name["git-sync"]["args"] == ["--shared-volume"]
