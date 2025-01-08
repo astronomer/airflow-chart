@@ -5,7 +5,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Release.Name }}-git-sync-relay
+  name: {{ .Release.Name }}-git-data
   labels:
     component: git-sync-relay
     tier: airflow
@@ -14,8 +14,10 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
+    # - ReadWriteMany
   resources:
     requests:
       storage: {{ .Values.gitSyncRelay.volumeSync.volumeSize }}
+  storageClassName: {{ .Values.gitSyncRelay.volumeSync.storageClassName }}
 {{- end }}

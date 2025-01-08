@@ -34,7 +34,12 @@ spec:
       securityContext: {{ toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
       volumes:
         - name: git-repo-contents
+        {{- if eq .Values.gitSyncRelay.mode "shared_volume" }}
+          persistentVolumeClaim:
+            claimName: git-repo-contents
+        {{- else }}
           emptyDir: {}
+        {{- end }}
         {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
         - name: git-secret
           secret:
@@ -104,11 +109,11 @@ spec:
               value: "false"
             {{- end }}
             {{- end }}
-          resources:
-            {{- toYaml .Values.gitSyncRelay.gitSyncResources | nindent 12 }}
+          resources: {{- toYaml .Values.gitSyncRelay.gitSyncResources | nindent 12 }}
         {{- if eq .Values.gitSyncRelay.mode "git_daemon" }}
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
+          # TODO: Use the pvc when this is set to volume mode
           volumeMounts:
             - name: git-repo-contents
               mountPath: /git

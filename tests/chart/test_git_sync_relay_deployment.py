@@ -252,6 +252,7 @@ class TestGitSyncRelayDeployment:
         )
         assert len(docs) == 2
         deployment, pvc = docs if docs[0]["kind"] == "Deployment" else docs[::-1]
+        breakpoint()
         assert deployment["kind"] == "Deployment"
         assert deployment["apiVersion"] == "apps/v1"
         assert deployment["metadata"]["name"] == "release-name-git-sync-relay"
