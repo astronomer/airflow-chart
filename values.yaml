@@ -608,10 +608,10 @@ gitSyncRelay:
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
-      tag: "3.18.8"
+      tag: "3.18.9"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync-relay"
-      tag: "0.0.3-5"
+      tag: "0.0.3-6"
   repo:
     url: ~
     branch: main
@@ -635,6 +635,8 @@ gitSyncRelay:
   ## the git-sync-relay
   volumeSync:
     volumeSize: 10Gi
+    # The specified storageClassName must support ReadWriteMany
+    storageClassName: ~
 
 certgenerator:
   extraAnnotations: {}
