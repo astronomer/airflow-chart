@@ -5,7 +5,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Release.Name }}-git-data
+  name: git-repo-contents
   labels:
     component: git-sync-relay
     tier: airflow
