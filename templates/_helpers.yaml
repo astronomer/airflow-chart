@@ -324,6 +324,12 @@ Create the name of the cleanup service account to use
       fieldRef:
         apiVersion: v1
         fieldPath: metadata.labels['workspace']
+{{- if .Values.loggingSidecar.livenessProbe  }}
+  livenessProbe: {{ tpl (toYaml .Values.loggingSidecar.livenessProbe) . | nindent 4 }}
+{{- end }}
+{{- if .Values.loggingSidecar.readinessProbe  }}
+  readinessProbe: {{ tpl (toYaml .Values.loggingSidecar.readinessProbe) . | nindent 4 }}
+{{- end }}
   volumeMounts:
   - mountPath: /etc/sidecar-logging
     name: config-volume
