@@ -259,6 +259,7 @@ class TestDagServerStatefulSet:
         values = {
             "dagDeploy": {"enabled": True},
             "authSidecar": {"enabled": True, "readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
+            "loggingSidecar": {"enabled": True, "readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
         }
 
         docs = render_chart(
@@ -270,8 +271,11 @@ class TestDagServerStatefulSet:
         doc = docs[0]
 
         c_by_name = get_containers_by_name(doc)
-        assert len(c_by_name) == 2
+        assert len(c_by_name) == 3
         assert "dag-server" in c_by_name
         assert "auth-proxy" in c_by_name
+        assert "sidecar-log-consumer" in c_by_name
         assert readinessProbe == c_by_name["auth-proxy"]["readinessProbe"]
         assert livenessProbe == c_by_name["auth-proxy"]["livenessProbe"]
+        assert readinessProbe == c_by_name["sidecar-log-consumer"]["readinessProbe"]
+        assert livenessProbe == c_by_name["sidecar-log-consumer"]["livenessProbe"]
