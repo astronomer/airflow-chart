@@ -69,7 +69,7 @@ spec:
 {{ toYaml .Values.dagDeploy.extraEnv | indent 10 }}
 {{- end }}
         {{- if .Values.dagDeploy.livenessProbe  }}
-        livenessProbe: {{ tpl (toYaml .Values.dagDeploy.livenessProbe) . | nindent 12 }}
+          livenessProbe: {{ tpl (toYaml .Values.dagDeploy.livenessProbe) . | nindent 12 }}
         {{- else }}
           livenessProbe:
             failureThreshold: 5

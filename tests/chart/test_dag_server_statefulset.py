@@ -232,3 +232,27 @@ class TestDagServerStatefulSet:
             "sanic dag_deploy.server.app -H 0.0.0.0 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
         ]
         assert "sidecar-log-consumer" in c_by_name
+
+    def test_dag_server_statefulset_liveliness_and_readiness_probes_with_dag_server_enabled(self, kube_version):
+        """Test that a valid statefulset is rendered when dag-server is enabled."""
+        readinessProbe = {
+            "httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}
+        }
+        livenessProbe = {
+            "httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}
+        }
+        values = {"dagDeploy": {"enabled": True, "readinessProbe": readinessProbe, "livenessProbe": livenessProbe}}
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        common_default_tests(doc)
+
+        c_by_name = get_containers_by_name(doc)
+        assert readinessProbe == c_by_name["dag-server"]["readinessProbe"]
+        assert livenessProbe == c_by_name["dag-server"]["livenessProbe"]
