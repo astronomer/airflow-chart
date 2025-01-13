@@ -83,7 +83,7 @@ spec:
             timeoutSeconds: 5
         {{- end }}
         {{- if .Values.dagDeploy.readinessProbe  }}
-        readinessProbe: {{ tpl (toYaml .Values.dagDeploy.readinessProbe) . | nindent 12 }}
+          readinessProbe: {{ tpl (toYaml .Values.dagDeploy.readinessProbe) . | nindent 12 }}
         {{- else }}
           readinessProbe:
             httpGet:
@@ -91,7 +91,7 @@ spec:
               port: {{ .Values.dagDeploy.ports.dagServerHttp }}
             initialDelaySeconds: 10
             periodSeconds: 10
-        {{- end }}
+        {{ end }}
           volumeMounts:
           - name: data
             mountPath: /data
