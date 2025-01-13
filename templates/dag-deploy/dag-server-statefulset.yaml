@@ -68,6 +68,9 @@ spec:
 {{- if .Values.dagDeploy.extraEnv }}
 {{ toYaml .Values.dagDeploy.extraEnv | indent 10 }}
 {{- end }}
+        {{- if .Values.dagDeploy.livenessProbe  }}
+          livenessProbe: {{ tpl (toYaml .Values.dagDeploy.livenessProbe) . | nindent 12 }}
+        {{- else }}
           livenessProbe:
             failureThreshold: 5
             httpGet:
@@ -78,12 +81,17 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
+        {{- end }}
+        {{- if .Values.dagDeploy.readinessProbe  }}
+          readinessProbe: {{ tpl (toYaml .Values.dagDeploy.readinessProbe) . | nindent 12 }}
+        {{- else }}
           readinessProbe:
             httpGet:
               path: /healthz
               port: {{ .Values.dagDeploy.ports.dagServerHttp }}
             initialDelaySeconds: 10
             periodSeconds: 10
+        {{ end }}
           volumeMounts:
           - name: data
             mountPath: /data
@@ -106,6 +114,9 @@ spec:
           - containerPort: {{ .Values.authSidecar.port }}
             name: auth-proxy
             protocol: TCP
+        {{- if .Values.authSidecar.readinessProbe  }}
+          readinessProbe: {{ tpl (toYaml .Values.authSidecar.readinessProbe) . | nindent 12 }}
+        {{- else }}
           readinessProbe:
             httpGet:
               path: /healthz
@@ -113,6 +124,10 @@ spec:
               scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 10
+        {{- end }}
+        {{- if .Values.authSidecar.livenessProbe  }}
+          livenessProbe: {{ tpl (toYaml .Values.authSidecar.livenessProbe) . | nindent 12 }}
+        {{- else }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -120,6 +135,7 @@ spec:
               scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 10
+        {{- end }}
           volumeMounts:
           - mountPath: /etc/nginx/nginx.conf
             name: nginx-sidecar-conf
