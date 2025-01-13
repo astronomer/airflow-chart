@@ -5,6 +5,9 @@ from tests.chart.helm_template_generator import render_chart
 
 from . import get_containers_by_name
 
+readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
+livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
+
 
 def common_default_tests(doc):
     """Test cases for default dag-server sts enabled"""
@@ -234,13 +237,7 @@ class TestDagServerStatefulSet:
         assert "sidecar-log-consumer" in c_by_name
 
     def test_dag_server_statefulset_liveliness_and_readiness_probes_with_dag_server_enabled(self, kube_version):
-        """Test that a valid statefulset is rendered when dag-server is enabled."""
-        readinessProbe = {
-            "httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}
-        }
-        livenessProbe = {
-            "httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}
-        }
+        """Test that a valid statefulset is rendered when dag-server is enabled with readiness and liveliness probes."""
         values = {"dagDeploy": {"enabled": True, "readinessProbe": readinessProbe, "livenessProbe": livenessProbe}}
 
         docs = render_chart(
@@ -256,3 +253,25 @@ class TestDagServerStatefulSet:
         c_by_name = get_containers_by_name(doc)
         assert readinessProbe == c_by_name["dag-server"]["readinessProbe"]
         assert livenessProbe == c_by_name["dag-server"]["livenessProbe"]
+
+    def test_dag_server_statefulset_with_probes_and_authproxy_enabled(self, kube_version):
+        """Test that a valid statefulset is rendered when dag-server and authsidecar is enabled with readiness and liveliness probes."""
+        values = {
+            "dagDeploy": {"enabled": True},
+            "authSidecar": {"enabled": True, "readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        c_by_name = get_containers_by_name(doc)
+        assert len(c_by_name) == 2
+        assert "dag-server" in c_by_name
+        assert "auth-proxy" in c_by_name
+        assert readinessProbe == c_by_name["auth-proxy"]["readinessProbe"]
+        assert livenessProbe == c_by_name["auth-proxy"]["livenessProbe"]
