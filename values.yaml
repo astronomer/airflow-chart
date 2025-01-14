@@ -607,6 +607,7 @@ gitSyncRelay:
   gitDaemonResources: {}
   securityContext: {}
   gitDaemon: {}
+  gitSync: {}
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"

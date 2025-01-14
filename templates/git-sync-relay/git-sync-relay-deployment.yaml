@@ -104,8 +104,14 @@ spec:
               value: "false"
             {{- end }}
             {{- end }}
+          {{- if .Values.gitSyncRelay.gitSync.livenessProbe  }}
+          livenessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitSync.livenessProbe) . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.gitSyncRelay.gitSync.readinessProbe  }}
+          readinessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitSync.readinessProbe) . | nindent 12 }}
+          {{- end }}
           resources:
-            {{- toYaml .Values.gitSyncRelay.gitSyncResources | nindent 12 }}
+            {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
           volumeMounts:
@@ -129,7 +135,7 @@ spec:
           {{- if .Values.gitSyncRelay.gitDaemon.readinessProbe  }}
           readinessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitDaemon.readinessProbe) . | nindent 12 }}
           {{- end }}
-          resources: {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
+          resources: {{- toYaml .Values.gitSyncRelay.gitDaemon.resources | nindent 12 }}
       {{- if .Values.loggingSidecar.enabled }}
         {{- include "sidecar_container_spec" . | nindent 8 }}
       {{- end }}
