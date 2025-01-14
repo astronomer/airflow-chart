@@ -166,8 +166,8 @@ class TestGitSyncRelayDeployment:
         values = {
             "gitSyncRelay": {
                 "enabled": True,
-                "gitSyncResources": resources,
-                "gitDaemonResources": resources,
+                "gitSync": { "resources": resources },
+                "gitDaemon": { "resources": resources },
             }
         }
 
