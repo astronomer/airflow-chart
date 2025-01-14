@@ -115,6 +115,9 @@ spec:
           env:
             - name: GIT_ROOT
               value: /git
+          {{- if .Values.gitSyncRelay.gitDaemon.livenessProbe  }}
+          livenessProbe: {{ tpl (toYaml .Values.authSidecar.livenessProbe) . | nindent 12 }}
+          {{- else }}
           livenessProbe:
             exec:
               command:
@@ -122,6 +125,10 @@ spec:
               - /git/.git/git-daemon-export-ok
             initialDelaySeconds: 5
             periodSeconds: 15
+          {{- end }}
+          {{- if .Values.gitSyncRelay.gitDaemon.readinessProbe  }}
+          readinessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitDaemon.readinessProbe) . | nindent 12 }}
+          {{- end }}
           resources: {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
       {{- if .Values.loggingSidecar.enabled }}
         {{- include "sidecar_container_spec" . | nindent 8 }}
