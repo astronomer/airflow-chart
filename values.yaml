@@ -602,10 +602,12 @@ dagDeploy:
     container: {}
 
 gitSyncRelay:
-  enabled: ~
+  enabled: false
   gitSyncResources: {}
   gitDaemonResources: {}
   securityContext: {}
+  gitDaemon: {}
+  gitSync: {}
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
