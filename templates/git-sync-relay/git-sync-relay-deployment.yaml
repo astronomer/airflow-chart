@@ -122,7 +122,7 @@ spec:
             - name: GIT_ROOT
               value: /git
           {{- if .Values.gitSyncRelay.gitDaemon.livenessProbe  }}
-          livenessProbe: {{ tpl (toYaml .Values.authSidecar.livenessProbe) . | nindent 12 }}
+          livenessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitDaemon.livenessProbe) . | nindent 12 }}
           {{- else }}
           livenessProbe:
             exec:
