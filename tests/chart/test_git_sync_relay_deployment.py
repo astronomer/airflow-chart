@@ -8,6 +8,7 @@ from . import get_containers_by_name
 readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
 livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
 
+
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
 class TestGitSyncRelayDeployment:
     def test_gsr_deployment_default(self, kube_version):
@@ -229,7 +230,8 @@ class TestGitSyncRelayDeployment:
             "gitSyncRelay": {
                 "enabled": True,
                 "gitSync": {"readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
-                "gitDaemon": {"readinessProbe": readinessProbe, "livenessProbe": livenessProbe}}
+                "gitDaemon": {"readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
+            }
         }
 
         docs = render_chart(
