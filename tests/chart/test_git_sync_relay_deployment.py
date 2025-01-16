@@ -5,6 +5,25 @@ from tests.chart.helm_template_generator import render_chart
 
 from . import get_containers_by_name
 
+readinessProbe = {
+    "httpGet": {
+        "initialDelaySeconds": 20,
+        "periodSeconds": 20,
+        "path": "/rhealthz",
+        "port": 8080,
+        "scheme": "HTTP",
+    }
+}
+livenessProbe = {
+    "httpGet": {
+        "initialDelaySeconds": 20,
+        "periodSeconds": 20,
+        "path": "/chealthz",
+        "port": 8080,
+        "scheme": "HTTP",
+    }
+}
+
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
 class TestGitSyncRelayDeployment:
@@ -183,8 +202,8 @@ class TestGitSyncRelayDeployment:
         values = {
             "gitSyncRelay": {
                 "enabled": True,
-                "gitSyncResources": resources,
-                "gitDaemonResources": resources,
+                "gitSync": {"resources": resources},
+                "gitDaemon": {"resources": resources},
             }
         }
 
@@ -238,6 +257,38 @@ class TestGitSyncRelayDeployment:
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
         assert [{"name": "gscsecret"}] == doc["spec"]["template"]["spec"]["imagePullSecrets"]
 
+    def test_gsr_deployment_with_custom_probes(self, kube_version):
+        """Test git-sync-relay deployment with custom liveliness and readiness probes."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "gitSync": {
+                    "readinessProbe": readinessProbe,
+                    "livenessProbe": livenessProbe,
+                },
+                "gitDaemon": {
+                    "readinessProbe": readinessProbe,
+                    "livenessProbe": livenessProbe,
+                },
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        c_by_name = get_containers_by_name(doc)
+        assert readinessProbe == c_by_name["git-daemon"]["readinessProbe"]
+        assert livenessProbe == c_by_name["git-daemon"]["livenessProbe"]
+        assert readinessProbe == c_by_name["git-sync"]["readinessProbe"]
+        assert livenessProbe == c_by_name["git-sync"]["livenessProbe"]
+
     def test_gsr_deployment_with_shared_volume(self, kube_version):
         """Test that a valid deployment is rendered when git-sync-relay is enabled."""
         values = {"gitSyncRelay": {"enabled": True, "mode": "shared_volume"}}
@@ -252,7 +303,7 @@ class TestGitSyncRelayDeployment:
         )
         assert len(docs) == 2
         deployment, pvc = docs if docs[0]["kind"] == "Deployment" else docs[::-1]
-        breakpoint()
+        # breakpoint()
         assert deployment["kind"] == "Deployment"
         assert deployment["apiVersion"] == "apps/v1"
         assert deployment["metadata"]["name"] == "release-name-git-sync-relay"
