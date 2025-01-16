@@ -41,7 +41,10 @@ class TestGitSyncRelayDeployment:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            show_only=[
+                "templates/git-sync-relay/git-sync-relay-deployment.yaml",
+                "templates/git-sync-relay/git-sync-relay-pvc.yaml",
+            ],
             values=values,
         )
         assert len(docs) == 1
@@ -291,7 +294,9 @@ class TestGitSyncRelayDeployment:
 
     def test_gsr_deployment_with_shared_volume(self, kube_version):
         """Test that a valid deployment is rendered when git-sync-relay is enabled."""
-        values = {"gitSyncRelay": {"enabled": True, "mode": "shared_volume"}}
+        values = {
+            "gitSyncRelay": {"enabled": True, "mode": "shared_volume", "volumeSync": {"storageClassName": "dollar-store-age"}}
+        }
 
         docs = render_chart(
             kube_version=kube_version,
@@ -303,10 +308,12 @@ class TestGitSyncRelayDeployment:
         )
         assert len(docs) == 2
         deployment, pvc = docs if docs[0]["kind"] == "Deployment" else docs[::-1]
-        # breakpoint()
         assert deployment["kind"] == "Deployment"
         assert deployment["apiVersion"] == "apps/v1"
         assert deployment["metadata"]["name"] == "release-name-git-sync-relay"
+        assert pvc["kind"] == "PersistentVolumeClaim"
+        assert pvc["kind"] == "PersistentVolumeClaim"
+        assert pvc["spec"]["storageClassName"] == "dollar-store-age"
         c_by_name = get_containers_by_name(deployment)
         assert not c_by_name.get("git-daemon")
         assert len(c_by_name) == 1

@@ -76,7 +76,6 @@ spec:
               readOnly: true
               subPath: known_hosts
             {{- end }}
-          # TODO: Use the pvc when this is set to volume mode
             {{- end }}
             - name: git-repo-contents
               mountPath: /git
