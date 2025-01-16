@@ -76,6 +76,7 @@ spec:
               readOnly: true
               subPath: known_hosts
             {{- end }}
+          # TODO: Use the pvc when this is set to volume mode
             {{- end }}
             - name: git-repo-contents
               mountPath: /git
@@ -119,7 +120,6 @@ spec:
         {{- if eq .Values.gitSyncRelay.mode "git_daemon" }}
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
-          # TODO: Use the pvc when this is set to volume mode
           volumeMounts:
             - name: git-repo-contents
               mountPath: /git
