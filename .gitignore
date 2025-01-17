@@ -17,3 +17,4 @@ kubeconfig
 letsencrypt*
 repo_state.log
 repository
+test*.yaml

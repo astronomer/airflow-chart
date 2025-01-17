@@ -1,0 +1,49 @@
+Git repository -> The Internet
+The Internet -> Airflow Deployment.git-clone pod.git-clone container
+
+The Internet: {shape: cloud}
+
+Airflow Deployment: {
+  git-repo pvc: {
+    shape: cylinder
+    label: /git RWO pvc
+  }
+
+  git-clone pod: {
+    git-clone container: {
+      description: |md
+        - pulls from external repo infrequently
+        - stores repo in /git/reponame
+      |
+    }
+  }
+
+  worker pod: {
+    worker container: {
+      description: |md
+        - mounts /git/reponame/dags as airflow dags dir
+      |
+    }
+  }
+
+  scheduler pod: {
+    scheduler container: {
+      description: |md
+        - mounts /git/reponame/dags as airflow dags dir
+      |
+    }
+  }
+
+  kpo pod: {
+    kpo container: {
+      description: |md
+        - mounts /git/reponame/dags as airflow dags dir
+      |
+    }
+  }
+
+  git-clone pod.git-clone container -> git-repo pvc
+  git-repo pvc -> worker pod.worker container
+  git-repo pvc -> scheduler pod.scheduler container
+  git-repo pvc -> kpo pod.kpo container
+}

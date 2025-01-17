@@ -17,6 +17,7 @@
 
 import json
 import os
+import shlex
 import subprocess
 import sys
 from functools import cache
@@ -86,9 +87,7 @@ def render_chart(
     namespace: str | None = None,
     validate_objects: bool = True,
 ):
-    """
-    Render a helm chart into dictionaries. For helm chart testing only.
-    """
+    """Render a helm chart into dictionaries."""
     values = values or {}
     chart_dir = chart_dir or sys.path[0]
     with NamedTemporaryFile(delete=not DEBUG) as tmp_file:  # export DEBUG=true to keep
@@ -110,16 +109,19 @@ def render_chart(
         if show_only:
             if isinstance(show_only, str):
                 show_only = [show_only]
-            for i in show_only:
-                command.extend(["--show-only", i])
+            for file in show_only:
+                command.extend(["--show-only", str(file)])
+
+        if DEBUG:
+            print(f"helm command:\n  {shlex.join(command)}")
+
         try:
-            templates = subprocess.check_output(command, stderr=subprocess.PIPE)
-            if not templates:
+            manifests = subprocess.check_output(command, stderr=subprocess.PIPE)
+            if not manifests:
                 return None
         except subprocess.CalledProcessError as error:
             if DEBUG:
                 print("ERROR: subprocess.CalledProcessError:")
-                print(f"helm command: {' '.join(command)}")
                 print(f"Values file contents:\n{'-' * 21}\n{yaml.dump(values)}{'-' * 21}")
                 print(f"{error.output=}\n{error.stderr=}")
 
@@ -129,15 +131,20 @@ def render_chart(
                         + "usually means there is a helm value that needs to be set to render "
                         + "the content of the chart.\n"
                         + "command: "
-                        + " ".join(command)
+                        + shlex.join(command)
                     )
             raise
-        k8s_objects = yaml.full_load_all(templates)
-        k8s_objects: list = [k8s_object for k8s_object in k8s_objects if k8s_object]
-        if validate_objects:
-            for k8s_object in k8s_objects:
-                validate_k8s_object(k8s_object, kube_version=kube_version)
-        return k8s_objects
+        return load_and_validate_k8s_manifests(manifests, validate_objects=validate_objects, kube_version=kube_version)
+
+
+def load_and_validate_k8s_manifests(manifests: str, validate_objects: bool = True, kube_version: str = default_version):
+    """Load k8s objecdts from yaml into python, optionally validating them. yaml can contain multiple documents."""
+    k8s_objects = [k8s_object for k8s_object in yaml.full_load_all(manifests) if k8s_object]
+
+    if validate_objects:
+        for k8s_object in k8s_objects:
+            validate_k8s_object(k8s_object, kube_version=kube_version)
+    return k8s_objects
 
 
 def prepare_k8s_lookup_dict(k8s_objects) -> dict[tuple[str, str], dict[str, Any]]:
