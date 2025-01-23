@@ -132,7 +132,7 @@ class TestPodTemplate:
         assert env in podTemplate["spec"]["containers"][0]["env"]
 
     def test_pod_template_resource_overrides(self, kube_version):
-        """Test airflow pod template labels overrides."""
+        """Test airflow pod template resources overrides."""
         resources = {
             "requests": {"cpu": "500m", "memory": "512Mi"},
             "limits": {"cpu": "1000m", "memory": "1Gi"},
