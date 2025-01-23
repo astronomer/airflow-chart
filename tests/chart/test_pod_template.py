@@ -130,3 +130,26 @@ class TestPodTemplate:
         doc = docs[0]
         podTemplate = yaml.safe_load(doc["data"]["pod_template_file.yaml"])
         assert env in podTemplate["spec"]["containers"][0]["env"]
+
+    def test_pod_template_resource_overrides(self, kube_version):
+        """Test airflow pod template resources overrides."""
+        resources = {
+            "requests": {"cpu": "500m", "memory": "512Mi"},
+            "limits": {"cpu": "1000m", "memory": "1Gi"},
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "airflow": {
+                    "workers": {
+                        "resources": resources,
+                    },
+                },
+            },
+            show_only="charts/airflow/templates/configmaps/configmap.yaml",
+        )
+        common_pod_template_test(docs)
+        doc = docs[0]
+        podTemplate = yaml.safe_load(doc["data"]["pod_template_file.yaml"])
+        assert "resources" in podTemplate["spec"]["containers"][0]
+        assert resources == podTemplate["spec"]["containers"][0]["resources"]

@@ -249,6 +249,7 @@ airflow:
           securityContext: {{ $containerSecurityContext | nindent 8 }}
           name: base
           ports: []
+          resources: {{- toYaml .Values.workers.resources | nindent 8 }}
           volumeMounts:
             - mountPath: {{ template "airflow_logs" . }}
               name: logs
