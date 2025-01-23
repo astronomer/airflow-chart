@@ -201,6 +201,8 @@ airflow:
     {{- $nodeSelector := or .Values.nodeSelector .Values.workers.nodeSelector }}
     {{- $affinity := or .Values.affinity .Values.workers.affinity }}
     {{- $tolerations := or .Values.tolerations .Values.workers.tolerations }}
+    {{- $securityContext := include "airflowPodSecurityContext" (list . .Values.workers) }}
+    {{- $containerSecurityContext := include "containerSecurityContext" (list . .Values.workers) }}
     apiVersion: v1
     kind: Pod
     metadata:
@@ -244,6 +246,7 @@ airflow:
     {{- include "container_extra_envs" (list . .Values.workers.env) | indent 6 }}
           image: {{ template "pod_template_image" . }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
+          securityContext: {{ $containerSecurityContext | nindent 8 }}
           name: base
           ports: []
           volumeMounts:
@@ -283,10 +286,8 @@ airflow:
         - name: {{ template "registry_secret" . }}
       {{- end }}
       restartPolicy: Never
-      securityContext:
-        runAsUser: {{ .Values.uid }}
-        fsGroup: {{ .Values.gid }}
       nodeSelector: {{ toYaml $nodeSelector | nindent 4 }}
+      securityContext: {{ $securityContext | nindent 4 }}
       affinity: {{ toYaml $affinity | nindent 4 }}
       tolerations: {{ toYaml $tolerations | nindent 4 }}
       serviceAccountName: {{ include "worker.serviceAccountName" . }}
