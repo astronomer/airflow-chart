@@ -5,24 +5,8 @@ from tests.chart.helm_template_generator import render_chart
 
 from . import get_containers_by_name
 
-readinessProbe = {
-    "httpGet": {
-        "initialDelaySeconds": 20,
-        "periodSeconds": 20,
-        "path": "/rhealthz",
-        "port": 8080,
-        "scheme": "HTTP",
-    }
-}
-livenessProbe = {
-    "httpGet": {
-        "initialDelaySeconds": 20,
-        "periodSeconds": 20,
-        "path": "/chealthz",
-        "port": 8080,
-        "scheme": "HTTP",
-    }
-}
+readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
+livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
@@ -35,9 +19,9 @@ class TestGitSyncRelayDeployment:
         )
         assert len(docs) == 0
 
-    def test_gsr_deployment_gsr_mode_daemon(self, kube_version):
-        """Test that a valid deployment is rendered when git-sync-relay is enabled with daemon repoShareMode."""
-        values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "daemon"}}
+    def test_gsr_deployment_gsr_enabled_with_defaults(self, kube_version):
+        """Test that a valid deployment is rendered when git-sync-relay is enabled with defaults."""
+        values = {"gitSyncRelay": {"enabled": True}}
 
         docs = render_chart(
             kube_version=kube_version,
@@ -58,9 +42,9 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
 
-    def test_gsr_deployment_gsr_mode_volume(self, kube_version):
-        """Test that a valid deployment is rendered when git-sync-relay is enabled with volume repoShareMode."""
-        values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "volume"}}
+    def test_gsr_deployment_gsr_repo_share_mode_volume(self, kube_version):
+        """Test that a valid deployment is rendered when git-sync-relay is enabled with repoShareMode=shared_volume."""
+        values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
 
         docs = render_chart(
             kube_version=kube_version,
@@ -77,6 +61,37 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
+
+    def test_gsr_deployment_with_shared_volume(self, kube_version):
+        """Test that a valid deployment is rendered when git-sync-relay is enabled with repoShareMode=shared_volume."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repoShareMode": "shared_volume",
+                "volumeSync": {"storageClassName": "dollar-store-age"},
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=[
+                "templates/git-sync-relay/git-sync-relay-deployment.yaml",
+                "templates/git-sync-relay/git-sync-relay-pvc.yaml",
+            ],
+            values=values,
+        )
+        assert len(docs) == 2
+        deployment, pvc = docs if docs[0]["kind"] == "Deployment" else docs[::-1]
+        assert deployment["kind"] == "Deployment"
+        assert deployment["apiVersion"] == "apps/v1"
+        assert deployment["metadata"]["name"] == "release-name-git-sync-relay"
+        assert pvc["kind"] == "PersistentVolumeClaim"
+        assert pvc["kind"] == "PersistentVolumeClaim"
+        assert pvc["spec"]["storageClassName"] == "dollar-store-age"
+        c_by_name = get_containers_by_name(deployment)
+        assert not c_by_name.get("git-daemon")
+        assert len(c_by_name) == 1
+        assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
 
     def test_gsr_deployment_with_ssh_credentials_and_known_hosts(self, kube_version):
         """Test that a valid deployment is rendered when enabling git-sync with ssh credentials and known hosts and other custom configs."""
@@ -265,14 +280,8 @@ class TestGitSyncRelayDeployment:
         values = {
             "gitSyncRelay": {
                 "enabled": True,
-                "gitSync": {
-                    "readinessProbe": readinessProbe,
-                    "livenessProbe": livenessProbe,
-                },
-                "gitDaemon": {
-                    "readinessProbe": readinessProbe,
-                    "livenessProbe": livenessProbe,
-                },
+                "gitSync": {"readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
+                "gitDaemon": {"readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
             }
         }
 
@@ -291,34 +300,3 @@ class TestGitSyncRelayDeployment:
         assert livenessProbe == c_by_name["git-daemon"]["livenessProbe"]
         assert readinessProbe == c_by_name["git-sync"]["readinessProbe"]
         assert livenessProbe == c_by_name["git-sync"]["livenessProbe"]
-
-    def test_gsr_deployment_with_shared_volume(self, kube_version):
-        """Test that a valid deployment is rendered when git-sync-relay is enabled."""
-        values = {
-            "gitSyncRelay": {
-                "enabled": True,
-                "repoShareMode": "shared_volume",
-                "volumeSync": {"storageClassName": "dollar-store-age"},
-            }
-        }
-
-        docs = render_chart(
-            kube_version=kube_version,
-            show_only=[
-                "templates/git-sync-relay/git-sync-relay-deployment.yaml",
-                "templates/git-sync-relay/git-sync-relay-pvc.yaml",
-            ],
-            values=values,
-        )
-        assert len(docs) == 2
-        deployment, pvc = docs if docs[0]["kind"] == "Deployment" else docs[::-1]
-        assert deployment["kind"] == "Deployment"
-        assert deployment["apiVersion"] == "apps/v1"
-        assert deployment["metadata"]["name"] == "release-name-git-sync-relay"
-        assert pvc["kind"] == "PersistentVolumeClaim"
-        assert pvc["kind"] == "PersistentVolumeClaim"
-        assert pvc["spec"]["storageClassName"] == "dollar-store-age"
-        c_by_name = get_containers_by_name(deployment)
-        assert not c_by_name.get("git-daemon")
-        assert len(c_by_name) == 1
-        assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
