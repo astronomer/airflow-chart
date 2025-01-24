@@ -604,8 +604,8 @@ dagDeploy:
 
 gitSyncRelay:
   enabled: false
-  # 'mode' must be git_daemon or shared_volume
-  mode: "git_daemon"
+  # 'repoShareMode' must be git_daemon or shared_volume
+  repoShareMode: "git_daemon"
   securityContext: {}
   gitDaemon: {}
   gitSync: {}

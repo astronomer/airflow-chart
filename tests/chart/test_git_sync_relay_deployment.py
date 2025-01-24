@@ -36,8 +36,8 @@ class TestGitSyncRelayDeployment:
         assert len(docs) == 0
 
     def test_gsr_deployment_gsr_mode_daemon(self, kube_version):
-        """Test that a valid deployment is rendered when git-sync-relay is enabled with daemon mode."""
-        values = {"gitSyncRelay": {"enabled": True}}
+        """Test that a valid deployment is rendered when git-sync-relay is enabled with daemon repoShareMode."""
+        values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "daemon"}}
 
         docs = render_chart(
             kube_version=kube_version,
@@ -59,8 +59,8 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-daemon"]["livenessProbe"]
 
     def test_gsr_deployment_gsr_mode_volume(self, kube_version):
-        """Test that a valid deployment is rendered when git-sync-relay is enabled with default mode."""
-        values = {"gitSyncRelay": {"enabled": True}}
+        """Test that a valid deployment is rendered when git-sync-relay is enabled with volume repoShareMode."""
+        values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "volume"}}
 
         docs = render_chart(
             kube_version=kube_version,
@@ -295,7 +295,11 @@ class TestGitSyncRelayDeployment:
     def test_gsr_deployment_with_shared_volume(self, kube_version):
         """Test that a valid deployment is rendered when git-sync-relay is enabled."""
         values = {
-            "gitSyncRelay": {"enabled": True, "mode": "shared_volume", "volumeSync": {"storageClassName": "dollar-store-age"}}
+            "gitSyncRelay": {
+                "enabled": True,
+                "repoShareMode": "shared_volume",
+                "volumeSync": {"storageClassName": "dollar-store-age"},
+            }
         }
 
         docs = render_chart(
