@@ -44,31 +44,11 @@ class TestGitSyncRelayDeployment:
 
     def test_gsr_deployment_gsr_repo_share_mode_volume(self, kube_version):
         """Test that a valid deployment is rendered when git-sync-relay is enabled with repoShareMode=shared_volume."""
-        values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
-
-        docs = render_chart(
-            kube_version=kube_version,
-            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
-            values=values,
-        )
-        assert len(docs) == 1
-        doc = docs[0]
-        assert doc["kind"] == "Deployment"
-        assert doc["apiVersion"] == "apps/v1"
-        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
-        c_by_name = get_containers_by_name(doc)
-        assert len(c_by_name) == 2
-        assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
-        assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
-        assert c_by_name["git-daemon"]["livenessProbe"]
-
-    def test_gsr_deployment_with_shared_volume(self, kube_version):
-        """Test that a valid deployment is rendered when git-sync-relay is enabled with repoShareMode=shared_volume."""
         values = {
             "gitSyncRelay": {
                 "enabled": True,
                 "repoShareMode": "shared_volume",
-                "volumeSync": {"storageClassName": "dollar-store-age"},
+                "volumeSync": {"storageClassName": "my-usb-thumb-drive"},
             }
         }
 
@@ -87,7 +67,7 @@ class TestGitSyncRelayDeployment:
         assert deployment["metadata"]["name"] == "release-name-git-sync-relay"
         assert pvc["kind"] == "PersistentVolumeClaim"
         assert pvc["kind"] == "PersistentVolumeClaim"
-        assert pvc["spec"]["storageClassName"] == "dollar-store-age"
+        assert pvc["spec"]["storageClassName"] == "my-usb-thumb-drive"
         c_by_name = get_containers_by_name(deployment)
         assert not c_by_name.get("git-daemon")
         assert len(c_by_name) == 1
