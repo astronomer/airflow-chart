@@ -5,6 +5,9 @@ Git Sync Relay acts as a git repo relay between an upstream git server and the a
 <a href="git-sync-gsr-git_daemon.svg"><img src="git-sync-gsr-git_daemon.svg"></a>
 <a href="git-sync-gsr-shared_volume.svg"><img src="git-sync-gsr-shared_volume.svg"></a>
 
+> [!IMPORTANT]
+> Notice that shared_volume mode requires a RWX volume.
+
 ## Manual installation and management
 
 When using this chart outside of Astronomer, for instance when testing or developing, if you are authenticating the git-sync-relay using ssh, you must manage a kubernetes secret that contains the ssh key. This is not managed by helm so that it is never stored in plaintext in the Astronomer houston database. Using k8s secrets for any fields that can contain credentials, such as environment variables, is standard practice in Astronomer components. This is also how it is implemented in the OSS helm chart <https://github.com/apache/airflow/blob/c8e6e5d52f999e9f/chart/values.yaml#L1493-L1511>
@@ -36,6 +39,7 @@ Create a `values.yaml` file with contents similar to the following:
 ```yaml
 gitSyncRelay:
   enabled: True
+  repoShareMode: git_daemon
   repo:
     url: ssh+git://git@github.com/astronomer/2-4-example-dags.git # this can be https:// for public repositories
     branch: main
@@ -50,6 +54,17 @@ airflow:
       enabled: True
       repo: git://airflow-git-sync-relay.${NAMESPACE}.svc.cluster.local./git
       branch: main
+```
+
+For `repoSyncMode = volume_mode` you must also provide:
+
+```yaml
+gitSyncRelay:
+  repoShareMode: shared_volume
+  volumeSync:
+    volumeSize: 10Gi
+    # The specified storageClassName must support ReadWriteMany
+    storageClassName: ~
 ```
 
 ### Install airflow
