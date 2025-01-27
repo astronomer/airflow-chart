@@ -2,9 +2,8 @@
 
 Git Sync Relay acts as a git repo relay between an upstream git server and the airflow deployment namespace. It uses the [kubernetes/git-sync](https://github.com/kubernetes/git-sync) sidecar to fetch a repo, and an additional container to expose this repo to the local namespace. This has been tested to work when logging into the git remote with authenticated git+ssh, and unauthenticated https. git-sync-relay can operate either through git_daemon repoSyncMode or shared_volume repoSyncMode
 
-<img src="git-sync-gsr-git_daemon.svg" width='640px'>
-<br>
-<img src="git-sync-gsr-shared_volume.svg" width='640px'>
+<a href="git-sync-gsr-git_daemon.svg"><img src="git-sync-gsr-git_daemon.svg"></a>
+<a href="git-sync-gsr-shared_volume.svg"><img src="git-sync-gsr-shared_volume.svg"></a>
 
 ## Manual installation and management
 
