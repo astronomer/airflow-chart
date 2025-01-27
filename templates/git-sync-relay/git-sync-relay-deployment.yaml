@@ -34,7 +34,12 @@ spec:
       securityContext: {{ toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
       volumes:
         - name: git-repo-contents
+        {{- if eq .Values.gitSyncRelay.repoShareMode "shared_volume" }}
+          persistentVolumeClaim:
+            claimName: git-repo-contents
+        {{- else }}
           emptyDir: {}
+        {{- end }}
         {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
         - name: git-secret
           secret:
@@ -110,8 +115,8 @@ spec:
           {{- if .Values.gitSyncRelay.gitSync.readinessProbe  }}
           readinessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitSync.readinessProbe) . | nindent 12 }}
           {{- end }}
-          resources:
-            {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
+          resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
+        {{- if eq .Values.gitSyncRelay.repoShareMode "git_daemon" }}
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
           volumeMounts:
@@ -136,6 +141,8 @@ spec:
           readinessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitDaemon.readinessProbe) . | nindent 12 }}
           {{- end }}
           resources: {{- toYaml .Values.gitSyncRelay.gitDaemon.resources | nindent 12 }}
+        {{- end }}
+
       {{- if .Values.loggingSidecar.enabled }}
         {{- include "sidecar_container_spec" . | nindent 8 }}
       {{- end }}
