@@ -1,6 +1,6 @@
-###########################################################################
-# git-sync-relay ingress
-###########################################################################
+##########################
+# git-sync-relay ingress #
+##########################
 {{- if and
   .Values.gitSyncRelay.enabled
   (eq .Values.gitSyncRelay.repoFetchMode "webhook")
@@ -45,7 +45,7 @@ spec:
           {{- if .Values.authSidecar.enabled }}
           - path: /{{ .Release.Name }}/webhook
           {{- else }}
-          - path: /{{ .Release.Name }}/(webhook|healthz)(/.*)?
+          - path: /{{ .Release.Name }}/webhook(/.*)?
           {{- end }}
             pathType: Prefix
             backend:
