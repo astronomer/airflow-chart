@@ -246,6 +246,7 @@ airflow:
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
           name: base
           ports: []
+          resources: {{- toYaml .Values.workers.resources | nindent 8 }}
           volumeMounts:
             - mountPath: {{ template "airflow_logs" . }}
               name: logs
@@ -495,6 +496,8 @@ authSidecar:
   port: 8084
   securityContext: {}
   resources: {}
+  livenessProbe: {}
+  readinessProbe: {}
 
 loggingSidecar:
   enabled: false
@@ -503,6 +506,8 @@ loggingSidecar:
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
   image: quay.io/astronomer/ap-vector:0.40.2-1
+  livenessProbe: {}
+  readinessProbe: {}
 
 # Ingress configuration
 ingress:
@@ -560,9 +565,8 @@ dagDeploy:
       repository: quay.io/astronomer/ap-dag-deploy
       tag: 0.5.1
       imagePullPolicy: IfNotPresent
-  livenessProbe:
-    initialDelaySeconds: 30
-    timeoutSeconds: 30
+  livenessProbe: {}
+  readinessProbe: {}
   terminationGracePeriodSeconds: 30
   podAnnotations: {}
   extraEnv: []
@@ -599,17 +603,19 @@ dagDeploy:
     container: {}
 
 gitSyncRelay:
-  enabled: ~
-  gitSyncResources: {}
-  gitDaemonResources: {}
+  enabled: false
+  # 'repoShareMode' must be git_daemon or shared_volume
+  repoShareMode: "git_daemon"
   securityContext: {}
+  gitDaemon: {}
+  gitSync: {}
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
-      tag: "3.18.8"
+      tag: "3.18.9"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync-relay"
-      tag: "0.0.3-5"
+      tag: "0.0.3-6"
   repo:
     url: ~
     branch: main
@@ -629,6 +635,16 @@ gitSyncRelay:
       gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
       gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
   extraContainers: []
+  ## Enabling volumeSync disables the git-daemon and uses a shared volume as the sync mechanism between all airflow components and
+  ## the git-sync-relay
+  volumeSync:
+    volumeSize: 10Gi
+    # The specified storageClassName must support ReadWriteMany
+    storageClassName: ~
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ~
 
 certgenerator:
   extraAnnotations: {}

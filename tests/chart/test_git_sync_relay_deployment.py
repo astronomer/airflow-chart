@@ -1,9 +1,12 @@
 import pytest
 
-from tests import supported_k8s_versions
+from tests import container_env_to_dict, git_root_dir, supported_k8s_versions
 from tests.chart.helm_template_generator import render_chart
 
 from . import get_containers_by_name
+
+readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
+livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
@@ -12,17 +15,20 @@ class TestGitSyncRelayDeployment:
         """Test that no git-sync-relay templates are rendered by default."""
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            show_only=[x.relative_to(git_root_dir) for x in (git_root_dir / "templates/git-sync-relay").glob("*")],
         )
         assert len(docs) == 0
 
-    def test_gsr_deployment_gsr_enabled(self, kube_version):
-        """Test that a valid deployment is rendered when git-sync-relay is enabled."""
+    def test_gsr_deployment_gsr_enabled_with_defaults(self, kube_version):
+        """Test that a valid deployment is rendered when git-sync-relay is enabled with defaults."""
         values = {"gitSyncRelay": {"enabled": True}}
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            show_only=[
+                "templates/git-sync-relay/git-sync-relay-deployment.yaml",
+                "templates/git-sync-relay/git-sync-relay-pvc.yaml",
+            ],
             values=values,
         )
         assert len(docs) == 1
@@ -35,6 +41,37 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
+
+    def test_gsr_deployment_gsr_repo_share_mode_volume(self, kube_version):
+        """Test that a valid deployment is rendered when git-sync-relay is enabled with repoShareMode=shared_volume."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repoShareMode": "shared_volume",
+                "volumeSync": {"storageClassName": "my-usb-thumb-drive"},
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=[
+                "templates/git-sync-relay/git-sync-relay-deployment.yaml",
+                "templates/git-sync-relay/git-sync-relay-pvc.yaml",
+            ],
+            values=values,
+        )
+        assert len(docs) == 2
+        deployment, pvc = docs if docs[0]["kind"] == "Deployment" else docs[::-1]
+        assert deployment["kind"] == "Deployment"
+        assert deployment["apiVersion"] == "apps/v1"
+        assert deployment["metadata"]["name"] == "release-name-git-sync-relay"
+        assert pvc["kind"] == "PersistentVolumeClaim"
+        assert pvc["kind"] == "PersistentVolumeClaim"
+        assert pvc["spec"]["storageClassName"] == "my-usb-thumb-drive"
+        c_by_name = get_containers_by_name(deployment)
+        assert not c_by_name.get("git-daemon")
+        assert len(c_by_name) == 1
+        assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
 
     def test_gsr_deployment_with_ssh_credentials_and_known_hosts(self, kube_version):
         """Test that a valid deployment is rendered when enabling git-sync with ssh credentials and known hosts and other custom configs."""
@@ -93,20 +130,17 @@ class TestGitSyncRelayDeployment:
             },
             {"name": "git-repo-contents", "mountPath": "/git"},
         ]
-        assert c_by_name["git-sync"]["env"] == [
-            {"name": "GIT_SYNC_ROOT", "value": "/git"},
-            {"name": "GIT_SYNC_REPO", "value": "not-the-default-url"},
-            {"name": "GIT_SYNC_BRANCH", "value": "not-the-default-branch"},
-            {"name": "GIT_SYNC_DEPTH", "value": "22"},
-            {"name": "GIT_SYNC_WAIT", "value": "333"},
-            {"name": "GIT_SYNC_SSH", "value": "true"},
-            {"name": "GIT_SSH_KEY_FILE", "value": "/etc/git-secret/ssh"},
-            {"name": "GIT_KNOWN_HOSTS", "value": "true"},
-            {
-                "name": "GIT_SSH_KNOWN_HOSTS_FILE",
-                "value": "/etc/git-secret/known_hosts",
-            },
-        ]
+        assert container_env_to_dict(c_by_name["git-sync"]) == {
+            "GIT_SYNC_ROOT": "/git",
+            "GIT_SYNC_REPO": "not-the-default-url",
+            "GIT_SYNC_BRANCH": "not-the-default-branch",
+            "GIT_SYNC_DEPTH": "22",
+            "GIT_SYNC_WAIT": "333",
+            "GIT_SYNC_SSH": "true",
+            "GIT_SSH_KEY_FILE": "/etc/git-secret/ssh",
+            "GIT_KNOWN_HOSTS": "true",
+            "GIT_SSH_KNOWN_HOSTS_FILE": "/etc/git-secret/known_hosts",
+        }
         assert c_by_name["git-daemon"]["livenessProbe"]
 
     def test_gsr_deployment_without_ssh_credentials_and_known_hosts(self, kube_version):
@@ -148,13 +182,13 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-sync"]["volumeMounts"] == [
             {"name": "git-repo-contents", "mountPath": "/git"},
         ]
-        assert c_by_name["git-sync"]["env"] == [
-            {"name": "GIT_SYNC_ROOT", "value": "/git"},
-            {"name": "GIT_SYNC_REPO", "value": "not-the-default-url"},
-            {"name": "GIT_SYNC_BRANCH", "value": "not-the-default-branch"},
-            {"name": "GIT_SYNC_DEPTH", "value": "22"},
-            {"name": "GIT_SYNC_WAIT", "value": "333"},
-        ]
+        assert container_env_to_dict(c_by_name["git-sync"]) == {
+            "GIT_SYNC_ROOT": "/git",
+            "GIT_SYNC_REPO": "not-the-default-url",
+            "GIT_SYNC_BRANCH": "not-the-default-branch",
+            "GIT_SYNC_DEPTH": "22",
+            "GIT_SYNC_WAIT": "333",
+        }
         assert c_by_name["git-daemon"]["livenessProbe"]
 
     def test_gsr_deployment_with_resource_overrides(self, kube_version):
@@ -166,8 +200,8 @@ class TestGitSyncRelayDeployment:
         values = {
             "gitSyncRelay": {
                 "enabled": True,
-                "gitSyncResources": resources,
-                "gitDaemonResources": resources,
+                "gitSync": {"resources": resources},
+                "gitDaemon": {"resources": resources},
             }
         }
 
@@ -220,3 +254,29 @@ class TestGitSyncRelayDeployment:
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
         assert [{"name": "gscsecret"}] == doc["spec"]["template"]["spec"]["imagePullSecrets"]
+
+    def test_gsr_deployment_with_custom_probes(self, kube_version):
+        """Test git-sync-relay deployment with custom liveliness and readiness probes."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "gitSync": {"readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
+                "gitDaemon": {"readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        c_by_name = get_containers_by_name(doc)
+        assert readinessProbe == c_by_name["git-daemon"]["readinessProbe"]
+        assert livenessProbe == c_by_name["git-daemon"]["livenessProbe"]
+        assert readinessProbe == c_by_name["git-sync"]["readinessProbe"]
+        assert livenessProbe == c_by_name["git-sync"]["livenessProbe"]

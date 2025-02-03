@@ -31,10 +31,16 @@ spec:
       imagePullSecrets:
         - name: {{ template "astro.registry_secret" . }}
       {{- end }}
+      serviceAccountName: {{ template "astro.gitSyncRelay.serviceAccountName" . }}
       securityContext: {{ toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
       volumes:
         - name: git-repo-contents
+        {{- if eq .Values.gitSyncRelay.repoShareMode "shared_volume" }}
+          persistentVolumeClaim:
+            claimName: git-repo-contents
+        {{- else }}
           emptyDir: {}
+        {{- end }}
         {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
         - name: git-secret
           secret:
@@ -104,8 +110,14 @@ spec:
               value: "false"
             {{- end }}
             {{- end }}
-          resources:
-            {{- toYaml .Values.gitSyncRelay.gitSyncResources | nindent 12 }}
+          {{- if .Values.gitSyncRelay.gitSync.livenessProbe  }}
+          livenessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitSync.livenessProbe) . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.gitSyncRelay.gitSync.readinessProbe  }}
+          readinessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitSync.readinessProbe) . | nindent 12 }}
+          {{- end }}
+          resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
+        {{- if eq .Values.gitSyncRelay.repoShareMode "git_daemon" }}
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
           volumeMounts:
@@ -115,6 +127,9 @@ spec:
           env:
             - name: GIT_ROOT
               value: /git
+          {{- if .Values.gitSyncRelay.gitDaemon.livenessProbe  }}
+          livenessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitDaemon.livenessProbe) . | nindent 12 }}
+          {{- else }}
           livenessProbe:
             exec:
               command:
@@ -122,7 +137,13 @@ spec:
               - /git/.git/git-daemon-export-ok
             initialDelaySeconds: 5
             periodSeconds: 15
-          resources: {{- toYaml .Values.gitSyncRelay.gitDaemonResources | nindent 12 }}
+          {{- end }}
+          {{- if .Values.gitSyncRelay.gitDaemon.readinessProbe  }}
+          readinessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitDaemon.readinessProbe) . | nindent 12 }}
+          {{- end }}
+          resources: {{- toYaml .Values.gitSyncRelay.gitDaemon.resources | nindent 12 }}
+        {{- end }}
+
       {{- if .Values.loggingSidecar.enabled }}
         {{- include "sidecar_container_spec" . | nindent 8 }}
       {{- end }}
