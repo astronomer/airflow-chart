@@ -646,7 +646,6 @@ gitSyncRelay:
     annotations: {}
     name: ~
 
-
 certgenerator:
   extraAnnotations: {}
   affinity: {}
