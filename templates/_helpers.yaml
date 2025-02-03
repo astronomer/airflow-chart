@@ -175,6 +175,16 @@ Create the name of the dag-server service account to use
 {{- end -}}
 {{- end -}}
 
+{{/*
+Create the name of the git-sync-relay service account to use
+*/}}
+{{- define "astro.gitSyncRelay.serviceAccountName" -}}
+{{- if .Values.gitSyncRelay.serviceAccount.create -}}
+    {{ default (printf "%s-git-sync-relay" (include "airflow.fullname" .)) .Values.gitSyncRelay.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.gitSyncRelay.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Create the name of the webserver service account to use
