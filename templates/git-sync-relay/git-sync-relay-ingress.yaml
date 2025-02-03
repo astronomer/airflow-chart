@@ -19,8 +19,10 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 
-{{- if .Values.ingress.gitSyncRelayAnnotations }}
   annotations:
+# TODO: have vishnu verify that this is the right extraAnnotations implementation, then add tests
+{{- toYaml .Values.gitSyncRelay.extraAnnotations | nindent 4 }}
+{{- if .Values.ingress.gitSyncRelayAnnotations }}
   {{- if .Values.authSidecar.enabled }}
     {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
   {{- else }}

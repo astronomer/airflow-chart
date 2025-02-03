@@ -604,6 +604,8 @@ dagDeploy:
 
 gitSyncRelay:
   enabled: false
+  # extraAnnotations to add to the git-sync-relay ingress
+  extraAnnotations: {}
   # 'repoShareMode' must be git_daemon or shared_volume
   repoShareMode: "git_daemon"
   # 'repoFetchMode' must be webhook or poll
