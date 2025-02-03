@@ -641,6 +641,10 @@ gitSyncRelay:
     volumeSize: 10Gi
     # The specified storageClassName must support ReadWriteMany
     storageClassName: ~
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ~
 
 certgenerator:
   extraAnnotations: {}
