@@ -612,7 +612,8 @@ gitSyncRelay:
   webhookSecretKey: ~
   securityContext: {}
   gitDaemon: {}
-  gitSync: {}
+  gitSync:
+    webhookPort: 8000
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"

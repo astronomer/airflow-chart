@@ -58,4 +58,3 @@ spec:
                   name: http
                   {{- end }}
 {{- end }}
-{{- end -}}
