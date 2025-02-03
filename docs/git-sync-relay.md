@@ -1,8 +1,12 @@
 # Git Sync Relay
 
-Git Sync Relay acts as a git repo relay between an upstream git server and the airflow deployment namespace. It uses the [kubernetes/git-sync](https://github.com/kubernetes/git-sync) sidecar to fetch a repo, and an additional container to expose this repo to the local namespace. This has been tested to work when logging into the git remote with authenticated git+ssh, and unauthenticated https.
+Git Sync Relay acts as a git repo relay between an upstream git server and the airflow deployment namespace. It uses the [kubernetes/git-sync](https://github.com/kubernetes/git-sync) sidecar to fetch a repo, and an additional container to expose this repo to the local namespace. This has been tested to work when logging into the git remote with authenticated git+ssh, and unauthenticated https. git-sync-relay can operate either through `repoShareMode: git_daemon` or `repoShareMode: shared_volume`.
 
-<img src="./git-sync-relay.svg">
+<a href="git-sync-gsr-git_daemon.svg"><img src="git-sync-gsr-git_daemon.svg"></a>
+<a href="git-sync-gsr-shared_volume.svg"><img src="git-sync-gsr-shared_volume.svg"></a>
+
+> [!IMPORTANT]
+> Notice that shared_volume mode requires a RWX volume.
 
 ## Manual installation and management
 
@@ -35,6 +39,7 @@ Create a `values.yaml` file with contents similar to the following:
 ```yaml
 gitSyncRelay:
   enabled: True
+  repoShareMode: git_daemon
   repo:
     url: ssh+git://git@github.com/astronomer/2-4-example-dags.git # this can be https:// for public repositories
     branch: main
@@ -49,6 +54,17 @@ airflow:
       enabled: True
       repo: git://airflow-git-sync-relay.${NAMESPACE}.svc.cluster.local./git
       branch: main
+```
+
+For `repoShareMode = volume_mode` you must also provide:
+
+```yaml
+gitSyncRelay:
+  repoShareMode: shared_volume
+  volumeSync:
+    volumeSize: 10Gi
+    # The specified storageClassName must support ReadWriteMany
+    storageClassName: ~
 ```
 
 ### Install airflow
