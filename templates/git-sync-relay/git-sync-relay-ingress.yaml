@@ -51,9 +51,5 @@ spec:
               service:
                 name: {{ .Release.Name }}-git-sync-relay
                 port:
-                  {{- if .Values.authSidecar.enabled }}
-                  name: auth-proxy
-                  {{- else }}
-                  name: http
-                  {{- end }}
+                  name: webhook
 {{- end }}
