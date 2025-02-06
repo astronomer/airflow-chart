@@ -41,7 +41,7 @@ airflow:
       tag: 0.18.0
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
-      tag: 3.6.9
+      tag: 4.2.3-1
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
@@ -505,7 +505,7 @@ loggingSidecar:
   customConfig: false
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
-  image: quay.io/astronomer/ap-vector:0.40.2-1
+  image: quay.io/astronomer/ap-vector:0.44.0-1
   livenessProbe: {}
   readinessProbe: {}
 
@@ -619,10 +619,10 @@ gitSyncRelay:
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
-      tag: "3.18.9"
+      tag: "3.20.3-1"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync-relay"
-      tag: "0.0.3-6"
+      tag: "0.0.3-7"
   repo:
     url: ~
     branch: main
