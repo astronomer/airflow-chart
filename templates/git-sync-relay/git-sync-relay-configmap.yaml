@@ -7,7 +7,7 @@ apiVersion: v1
 metadata:
   name: {{ .Release.Name }}-git-sync-config
   labels:
-    component: {{ .Release.Name }}-git-sync-relay
+    component: git-sync-relay
     tier: airflow
     release: {{ .Release.Name }}
     chart: "{{ .Release.Name }}-{{ .Chart.Version }}"

@@ -6,7 +6,7 @@ from tests.chart.helm_template_generator import render_chart
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
 class TestGitSyncRelayServiceAccount:
-    def test_git_sync_relay_service_default(self, kube_version):
+    def test_gsr_service_default(self, kube_version):
         """Test that no git-sync-relay service templates are rendered by default."""
         docs = render_chart(
             kube_version=kube_version,
@@ -14,7 +14,7 @@ class TestGitSyncRelayServiceAccount:
         )
         assert len(docs) == 0
 
-    def test_git_sync_relay_service_enabled(self, kube_version):
+    def test_gsr_service_enabled(self, kube_version):
         """Test that a valid serviceAccount is rendered when git-sync-relay is enabled."""
         values = {"gitSyncRelay": {"enabled": True}}
         docs = render_chart(
@@ -28,9 +28,9 @@ class TestGitSyncRelayServiceAccount:
         assert doc["apiVersion"] == "v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
 
-    def test_git_sync_relay_server_annotations(self, kube_version):
+    def test_gsr_server_annotations(self, kube_version):
         """Test that a valid serviceAccount is rendered with proper annotations
-        when git_sync_relay is enabled and annotations are provided."""
+        when gsr is enabled and annotations are provided."""
         annotations = {"foo-key": "foo-value", "bar-key": "bar-value"}
         values = {
             "gitSyncRelay": {
@@ -54,7 +54,7 @@ class TestGitSyncRelayServiceAccount:
         assert doc["metadata"]["annotations"] == annotations
         assert "release-name-git-sync-relay" == docs[1]["spec"]["template"]["spec"]["serviceAccountName"]
 
-    def test_git_sync_relay_server_serviceaccount_overrides_defaults(self, kube_version):
+    def test_gsr_server_serviceaccount_overrides_defaults(self, kube_version):
         """Test that a serviceAccount overridable with disabled creation"""
         values = {
             "gitSyncRelay": {
@@ -73,7 +73,7 @@ class TestGitSyncRelayServiceAccount:
         assert len(docs) == 1
         assert "default" == docs[0]["spec"]["template"]["spec"]["serviceAccountName"]
 
-    def test_git_sync_relay_server_serviceaccount_overrides(self, kube_version):
+    def test_gsr_server_serviceaccount_overrides(self, kube_version):
         """Test that a serviceAccount overridable with disabled creation"""
         values = {
             "gitSyncRelay": {
