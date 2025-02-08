@@ -32,11 +32,7 @@ class TestGitSyncRelayNetworkPolicy:
 
         assert list(spec["podSelector"].keys()) == ["matchLabels"]
         assert spec["policyTypes"] == ["Ingress"]
-        assert spec["podSelector"]["matchLabels"] == {
-            "tier": "airflow",
-            "component": "dag-server",
-            "release": "release-name",
-        }
+        assert spec["podSelector"]["matchLabels"] == {"tier": "airflow", "component": "git-sync-relay", "release": "release-name"}
 
         assert all(x["ports"] == [{"protocol": "TCP", "port": 8000}] for x in spec["ingress"])
 
@@ -86,11 +82,7 @@ class TestGitSyncRelayNetworkPolicy:
 
         assert list(spec["podSelector"].keys()) == ["matchLabels"]
         assert spec["policyTypes"] == ["Ingress"]
-        assert spec["podSelector"]["matchLabels"] == {
-            "tier": "airflow",
-            "component": "dag-server",
-            "release": "release-name",
-        }
+        assert spec["podSelector"]["matchLabels"] == {"tier": "airflow", "component": "git-sync-relay", "release": "release-name"}
 
         assert spec["ingress"][0]["from"] == [{"podSelector": {"matchLabels": {"release": "release-name", "tier": "airflow"}}}]
 

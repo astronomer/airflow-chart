@@ -1,20 +1,20 @@
 import pytest
 
-from tests import supported_k8s_versions
+from tests import git_root_dir, supported_k8s_versions
 from tests.chart.helm_template_generator import render_chart
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
 class TestGitSyncRelayServiceAccount:
-    def test_gsr_service_default(self, kube_version):
+    def test_gsr_defaults(self, kube_version):
         """Test that no git-sync-relay service templates are rendered by default."""
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/git-sync-relay/git-sync-relay-serviceaccount.yaml",
+            show_only=sorted([str(x.relative_to(git_root_dir)) for x in git_root_dir.rglob("*git-sync-relay*.yaml")]),
         )
         assert len(docs) == 0
 
-    def test_gsr_service_enabled(self, kube_version):
+    def test_gsr_enabled_service_account(self, kube_version):
         """Test that a valid serviceAccount is rendered when git-sync-relay is enabled."""
         values = {"gitSyncRelay": {"enabled": True}}
         docs = render_chart(
