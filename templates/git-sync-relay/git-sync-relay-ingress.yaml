@@ -42,11 +42,11 @@ spec:
       http:
         paths:
           {{- if .Values.authSidecar.enabled }}
-          - path: /{{ .Release.Name }}/webhook
+          - path: /{{ .Release.Name }}/git_sync
           {{- else }}
-          - path: /{{ .Release.Name }}/webhook(/.*)?
+          - path: /{{ .Release.Name }}/git_sync(/|$)(.*)
           {{- end }}
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Release.Name }}-git-sync-relay
