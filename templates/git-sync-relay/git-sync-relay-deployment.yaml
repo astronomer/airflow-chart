@@ -95,6 +95,14 @@ spec:
               value: "{{ .Values.gitSyncRelay.repo.depth }}"
             - name: GIT_SYNC_WAIT
               value: "{{ .Values.gitSyncRelay.repo.wait }}"
+            {{- if .Values.gitSyncRelay.repoFetchMode }}
+            - name: GIT_SYNC_REPO_FETCH_MODE
+              value: "{{ .Values.gitSyncRelay.repoFetchMode }}"
+            {{- end }}
+            {{- if .Values.gitSyncRelay.webhookSecretKey }}
+            - name: GIT_SYNC_WEBHOOK_SECRET
+              value: "{{ .Values.gitSyncRelay.webhookSecretKey }}"
+            {{- end }}
             {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: GIT_SYNC_SSH
               value: "true"

@@ -604,18 +604,25 @@ dagDeploy:
 
 gitSyncRelay:
   enabled: false
+  # extraAnnotations to add to the git-sync-relay ingress
+  extraAnnotations: {}
   # 'repoShareMode' must be git_daemon or shared_volume
   repoShareMode: "git_daemon"
+  # 'repoFetchMode' must be webhook or poll
+  repoFetchMode: poll
+  # webhookSecurityKey is only needed when repoFetchMode=webhook
+  webhookSecretKey: ~
   securityContext: {}
   gitDaemon: {}
-  gitSync: {}
+  gitSync:
+    webhookPort: 8000
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
-      tag: "3.20.3-1"
+      tag: "3.20.5"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync-relay"
-      tag: "0.0.3-7"
+      tag: "0.1.5"
   repo:
     url: ~
     branch: main
