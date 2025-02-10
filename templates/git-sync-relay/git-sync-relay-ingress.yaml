@@ -6,7 +6,7 @@
   (eq .Values.gitSyncRelay.repoFetchMode "webhook")
 }}
 kind: Ingress
-apiVersion: networking.k8s.io/v1
+apiVersion: "networking.k8s.io/v1"
 metadata:
   name: git-sync-relay
   labels:
@@ -20,7 +20,6 @@ metadata:
 {{- end }}
 
   annotations:
-# TODO: have vishnu verify that this is the right extraAnnotations implementation, then add tests
 {{- if .Values.authSidecar.enabled }}
   {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
 {{- else }}
