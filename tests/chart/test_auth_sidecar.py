@@ -8,7 +8,7 @@ from tests.chart.helm_template_generator import render_chart
 from . import get_containers_by_name
 
 
-def common_sts_test_cases(docs, docs_length, release_name, kind):
+def common_pod_manager_test_cases(docs, docs_length, release_name, kind):
     """Test some things that should apply to all cases."""
     len(docs) == docs_length
     doc = docs[0]
