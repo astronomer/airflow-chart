@@ -29,6 +29,29 @@ class TestGitSyncRelayService:
         assert doc["apiVersion"] == "v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
 
+    def test_gsr_service_auth_proxy_enabled(self, kube_version):
+        """Test that a valid service is rendered when git-sync-relay is enabled webhook and auth proxy."""
+        values = {
+            "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
+            "authSidecar": {"enabled": True},
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-service.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Service"
+        assert doc["apiVersion"] == "v1"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        assert {
+            "name": "auth-proxy",
+            "port": 8084,
+            "targetPort": 8084,
+            "protocol": "TCP",
+        } in doc["spec"]["ports"]
+
     @pytest.mark.parametrize("repoShareMode,", ["git_daemon", "shared_volume"])
     @pytest.mark.parametrize("repoFetchMode", ["poll", "webhook"])
     def test_gsr_service_gsr_enabled_configured_ports(self, kube_version, repoFetchMode, repoShareMode):
