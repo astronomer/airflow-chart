@@ -183,7 +183,7 @@ class TestAuthSidecar:
             ],
         )
 
-        common_sts_test_cases(docs, 3, "release-name-git-sync-relay", "Deployment")
+        common_pod_manager_test_cases(docs, 3, "release-name-git-sync-relay", "Deployment")
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["resources"] == resources
         assert volumeMounts in c_by_name["auth-proxy"]["volumeMounts"]
