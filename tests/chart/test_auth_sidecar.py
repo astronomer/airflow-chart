@@ -124,7 +124,7 @@ class TestAuthSidecar:
             ],
         )
 
-        common_sts_test_cases(docs, 1, "release-name-dag-server", "StatefulSet")
+        common_pod_manager_test_cases(docs, 1, "release-name-dag-server", "StatefulSet")
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["securityContext"] == securityContext
 
