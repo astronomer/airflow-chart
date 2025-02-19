@@ -8,7 +8,7 @@
 kind: Ingress
 apiVersion: "networking.k8s.io/v1"
 metadata:
-  name: git-sync-relay
+  name: {{ .Release.Name }}-git-sync-relay
   labels:
     component: git-sync-relay
     tier: airflow
@@ -18,7 +18,6 @@ metadata:
 {{- with .Values.airflow.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
-
   annotations:
 {{- if .Values.authSidecar.enabled }}
   {{- toYaml .Values.authSidecar.annotations | nindent 4 }}

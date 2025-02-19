@@ -60,7 +60,7 @@ spec:
         - name: "git-sync"
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
           {{- if .Values.loggingSidecar.enabled }}
-          command: ["sh"]
+          command: ["bash"]
           args:
             - -c
             - /gitsync.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )
