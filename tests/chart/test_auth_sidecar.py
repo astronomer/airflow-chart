@@ -8,7 +8,7 @@ from tests.chart.helm_template_generator import render_chart
 from . import get_containers_by_name
 
 
-def common_sts_test_cases(docs, docs_length,release_name,kind):
+def common_sts_test_cases(docs, docs_length, release_name, kind):
     """Test some things that should apply to all cases."""
     len(docs) == docs_length
     doc = docs[0]
@@ -93,7 +93,7 @@ class TestAuthSidecar:
             ],
         )
 
-        common_sts_test_cases(docs, 3,"release-name-dag-server","StatefulSet")
+        common_sts_test_cases(docs, 3, "release-name-dag-server", "StatefulSet")
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["resources"] == resources
         assert volumeMounts in c_by_name["auth-proxy"]["volumeMounts"]
@@ -124,7 +124,7 @@ class TestAuthSidecar:
             ],
         )
 
-        common_sts_test_cases(docs, 1,"release-name-dag-server","StatefulSet")
+        common_sts_test_cases(docs, 1, "release-name-dag-server", "StatefulSet")
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["securityContext"] == securityContext
 
@@ -146,7 +146,7 @@ class TestAuthSidecar:
             ],
         )
 
-        common_sts_test_cases(docs, 1,"release-name-dag-server","StatefulSet")
+        common_sts_test_cases(docs, 1, "release-name-dag-server", "StatefulSet")
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["resources"] == resources
 
@@ -172,10 +172,10 @@ class TestAuthSidecar:
 
         docs = render_chart(
             kube_version=kube_version,
-            values= {
-            "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
-            "authSidecar": {"enabled": True, "resources": resources},
-        },
+            values={
+                "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
+                "authSidecar": {"enabled": True, "resources": resources},
+            },
             show_only=[
                 "templates/git-sync-relay/git-sync-relay-deployment.yaml",
                 "templates/git-sync-relay/git-sync-relay-service.yaml",
@@ -183,7 +183,7 @@ class TestAuthSidecar:
             ],
         )
 
-        common_sts_test_cases(docs, 3,"release-name-git-sync-relay","Deployment")
+        common_sts_test_cases(docs, 3, "release-name-git-sync-relay", "Deployment")
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["resources"] == resources
         assert volumeMounts in c_by_name["auth-proxy"]["volumeMounts"]
