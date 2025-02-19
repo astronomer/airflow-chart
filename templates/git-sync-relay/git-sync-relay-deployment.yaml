@@ -56,6 +56,11 @@ spec:
         - emptyDir: {}
           name: sidecar-logging-consumer
         {{- end }}
+        {{- if and .Values.authSidecar.enabled (eq .Values.gitSyncRelay.repoFetchMode "webhook") }}
+        - name: nginx-sidecar-conf
+          configMap:
+            name: {{ .Release.Name }}-git-sync-relay-nginx-conf
+        {{- end }}
       containers:
         - name: "git-sync"
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
@@ -154,6 +159,9 @@ spec:
 
       {{- if .Values.loggingSidecar.enabled }}
         {{- include "sidecar_container_spec" . | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.authSidecar.enabled (eq .Values.gitSyncRelay.repoFetchMode "webhook") }}
+        {{- include "authsidecar_container_spec" . | nindent 8 }}
       {{- end }}
       {{- if .Values.gitSyncRelay.extraContainers }}
         {{- toYaml .Values.gitSyncRelay.extraContainers | nindent 8 }}

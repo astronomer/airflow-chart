@@ -39,7 +39,7 @@ spec:
     - host: {{ include "deployments_subdomain" . }}
       http:
         paths:
-          {{- if .Values.authSidecar.enabled }}
+          {{- if and .Values.authSidecar.enabled (eq .Values.gitSyncRelay.repoFetchMode "webhook")}}
           - path: /{{ .Release.Name }}/git_sync
           {{- else }}
           - path: /{{ .Release.Name }}/git_sync(/|$)(.*)
@@ -49,5 +49,9 @@ spec:
               service:
                 name: {{ .Release.Name }}-git-sync-relay
                 port:
+                  {{- if and .Values.authSidecar.enabled (eq .Values.gitSyncRelay.repoFetchMode "webhook")}}
+                  name: auth-proxy
+                  {{- else }}
                   name: webhook
+                  {{- end }}
 {{- end }}

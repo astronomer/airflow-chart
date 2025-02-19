@@ -32,6 +32,12 @@ spec:
       protocol: TCP
       targetPort: 8000
 {{- end }}
+{{- if and .Values.authSidecar.enabled (eq .Values.gitSyncRelay.repoFetchMode "webhook")}}
+    - name: auth-proxy
+      port: {{ .Values.authSidecar.port }}
+      protocol: TCP
+      targetPort: {{ .Values.authSidecar.port }}
+{{- end }}
   selector:
     component: git-sync-relay
     tier: airflow
