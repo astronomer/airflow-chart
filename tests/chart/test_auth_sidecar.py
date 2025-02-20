@@ -9,7 +9,7 @@ from . import get_containers_by_name
 
 
 def common_pod_manager_test_cases(docs, docs_length, release_name, kind):
-    """Test some things that should apply to all cases."""
+    """Test some things that should apply to all apps/v1 pod managers."""
     len(docs) == docs_length
     doc = docs[0]
     assert doc["kind"] == kind

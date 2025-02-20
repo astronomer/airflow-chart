@@ -337,9 +337,9 @@ class TestGitSyncRelayDeployment:
         assert "git-sync" in c_by_name
         assert "git-daemon" in c_by_name
         assert "auth-proxy" in c_by_name
+        assert "sidecar-log-consumer" in c_by_name
         assert c_by_name["git-sync"]["command"] == ["bash"]
         c_by_name["git-sync"]["args"] == [
             "-c",
             "/entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
         ]
-        assert "sidecar-log-consumer" in c_by_name
