@@ -8,7 +8,7 @@
 kind: Ingress
 apiVersion: "networking.k8s.io/v1"
 metadata:
-  name: git-sync-relay
+  name: {{ .Release.Name }}-git-sync-relay-ingress
   labels:
     component: git-sync-relay
     tier: airflow
@@ -18,7 +18,6 @@ metadata:
 {{- with .Values.airflow.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
-
   annotations:
 {{- if .Values.authSidecar.enabled }}
   {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
@@ -40,7 +39,7 @@ spec:
     - host: {{ include "deployments_subdomain" . }}
       http:
         paths:
-          {{- if .Values.authSidecar.enabled }}
+          {{- if and .Values.authSidecar.enabled (eq .Values.gitSyncRelay.repoFetchMode "webhook")}}
           - path: /{{ .Release.Name }}/git_sync
           {{- else }}
           - path: /{{ .Release.Name }}/git_sync(/|$)(.*)
@@ -50,5 +49,9 @@ spec:
               service:
                 name: {{ .Release.Name }}-git-sync-relay
                 port:
+                  {{- if and .Values.authSidecar.enabled (eq .Values.gitSyncRelay.repoFetchMode "webhook")}}
+                  name: auth-proxy
+                  {{- else }}
                   name: webhook
+                  {{- end }}
 {{- end }}

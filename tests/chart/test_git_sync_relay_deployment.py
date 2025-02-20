@@ -315,3 +315,31 @@ class TestGitSyncRelayDeployment:
         git_dameon_env = container_env_to_dict(c_by_name["git-daemon"])
         assert not git_dameon_env.get("GIT_SYNC_REPO_FETCH_MODE")
         assert not git_dameon_env.get("GIT_SYNC_WEBHOOK_SECRET")
+
+    def test_git_sync_server_deployment_with_sidecar_and_authproxy_enabled(self, kube_version):
+        """Test git sync server deployment with sidecar components."""
+        values = {
+            "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
+            "loggingSidecar": {"enabled": True},
+            "authSidecar": {"enabled": True},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        c_by_name = get_containers_by_name(doc)
+        assert len(c_by_name) == 4
+        assert "git-sync" in c_by_name
+        assert "git-daemon" in c_by_name
+        assert "auth-proxy" in c_by_name
+        assert "sidecar-log-consumer" in c_by_name
+        assert c_by_name["git-sync"]["command"] == ["bash"]
+        c_by_name["git-sync"]["args"] == [
+            "-c",
+            "/entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
+        ]
