@@ -29,7 +29,7 @@ spec:
     ports:
     - protocol: TCP
       port: {{ .Values.gitSyncRelay.gitSync.webhookPort }}
-{{ if  (eq .Values.gitSyncRelay.repoShareMode "git_daemon") }}
+{{- if eq .Values.gitSyncRelay.repoShareMode "git_daemon" }}
   - from:
     - podSelector:
         matchLabels:
