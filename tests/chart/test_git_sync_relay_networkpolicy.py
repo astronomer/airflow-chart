@@ -34,11 +34,9 @@ class TestGitSyncRelayNetworkPolicy:
         assert spec["policyTypes"] == ["Ingress"]
         assert spec["podSelector"]["matchLabels"] == {"tier": "airflow", "component": "git-sync-relay", "release": "release-name"}
 
-        assert all(x["ports"] == [{"protocol": "TCP", "port": 8000}] for x in spec["ingress"])
-
         assert spec["ingress"][0]["from"] == [{"podSelector": {"matchLabels": {"release": "release-name", "tier": "airflow"}}}]
-
-        assert len(spec["ingress"][1]["from"]) == 2
+        assert len(spec["ingress"][1]["from"]) == 1
+        assert len(spec["ingress"][2]["from"]) == 2
 
         assert {
             "namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}},
@@ -49,7 +47,7 @@ class TestGitSyncRelayNetworkPolicy:
                     "release": "test-release-42",
                 }
             },
-        } == spec["ingress"][1]["from"][0]
+        } == spec["ingress"][2]["from"][0]
         assert {
             "namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}},
             "podSelector": {
@@ -59,9 +57,10 @@ class TestGitSyncRelayNetworkPolicy:
                     "release": "test-release-42",
                 }
             },
-        } == spec["ingress"][1]["from"][1]
+        } == spec["ingress"][2]["from"][1]
 
-        assert [{"protocol": "TCP", "port": 8000}] == spec["ingress"][1]["ports"]
+        assert [{"protocol": "TCP", "port": 8000}] == spec["ingress"][0]["ports"]
+        assert [{"protocol": "TCP", "port": 9418}] == spec["ingress"][1]["ports"]
 
     def test_gsr_networkpolicy_with_authsidecar_enabled(self, kube_version):
         """Test that a valid networkPolicy are rendered when git-sync-relay is enabled."""
@@ -86,7 +85,7 @@ class TestGitSyncRelayNetworkPolicy:
 
         assert spec["ingress"][0]["from"] == [{"podSelector": {"matchLabels": {"release": "release-name", "tier": "airflow"}}}]
 
-        assert len(spec["ingress"][1]["from"]) == 2
+        assert len(spec["ingress"][2]["from"]) == 2
 
         assert {
             "namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}},
@@ -97,13 +96,13 @@ class TestGitSyncRelayNetworkPolicy:
                     "release": "test-release-42",
                 }
             },
-        } == spec["ingress"][1]["from"][0]
+        } == spec["ingress"][2]["from"][0]
 
-        assert {"namespaceSelector": {"matchLabels": {"network.openshift.io/policy-group": "ingress"}}} == spec["ingress"][1][
+        assert {"namespaceSelector": {"matchLabels": {"network.openshift.io/policy-group": "ingress"}}} == spec["ingress"][2][
             "from"
         ][1]
-
+        assert [{"protocol": "TCP", "port": 9418}] == spec["ingress"][1]["ports"]
         assert [
             {"protocol": "TCP", "port": 8000},
             {"protocol": "TCP", "port": 8084},
-        ] == spec["ingress"][1]["ports"]
+        ] == spec["ingress"][2]["ports"]
