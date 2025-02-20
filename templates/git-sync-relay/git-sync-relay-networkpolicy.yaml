@@ -28,7 +28,17 @@ spec:
           tier: airflow
     ports:
     - protocol: TCP
-      port: 8000
+      port: {{ .Values.gitSyncRelay.gitSync.webhookPort }}
+{{- if eq .Values.gitSyncRelay.repoShareMode "git_daemon" }}
+  - from:
+    - podSelector:
+        matchLabels:
+          release: {{ .Release.Name }}
+          tier: airflow
+    ports:
+    - protocol: TCP
+      port: 9418
+{{- end }}
   - from:
     - namespaceSelector:
         matchLabels:
