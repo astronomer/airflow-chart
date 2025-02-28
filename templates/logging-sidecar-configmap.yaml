@@ -24,6 +24,7 @@ data:
         include:
           - "${SIDECAR_LOGS}/*.log"
         read_from: beginning
+        ignore_older_secs: 600
     transforms:
       transform_airflow_logs:
         type: remap
