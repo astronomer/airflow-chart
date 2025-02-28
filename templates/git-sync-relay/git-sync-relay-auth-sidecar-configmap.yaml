@@ -1,0 +1,54 @@
+###########################################
+## Gitsync Server auth sidecar ConfigMap ##
+###########################################
+{{- if and .Values.gitSyncRelay.enabled .Values.authSidecar.enabled (eq .Values.gitSyncRelay.repoFetchMode "webhook") }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-git-sync-relay-nginx-conf
+  labels:
+    component: git-sync-relay
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+data:
+  nginx.conf: |
+    pid /tmp/nginx.pid;
+    worker_processes 1;
+    events {
+      multi_accept        on;
+      worker_connections  3072;
+      use                 epoll;
+      }
+    http {
+      upstream astro-gitsync-server {
+        server 127.0.0.1:{{ .Values.gitSyncRelay.gitSync.webhookPort }} ;
+      }
+      server {
+        server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
+        listen {{ .Values.authSidecar.port }}  ;
+{{ include "default_nginx_server_settings" . | indent 8 }}
+        location ~ ^/{{ .Release.Name }}/git_sync/(webhook|healthz) {
+
+          #proxy_set_header X-Original-URI        $request_uri;
+          if ($host = '{{ .Values.platform.release }}-airflow.{{ .Values.ingress.baseDomain }}' ) {
+            return 308 https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/git_sync/$request_uri;
+          }
+
+          # Custom headers to proxied server
+          proxy_set_header  Host  deployments.{{ .Values.ingress.baseDomain}};
+          #proxy_set_header  X-Forwarded-Proto https;
+          proxy_cookie_path                       off;
+          rewrite ^/{{ .Release.Name }}/git_sync(.*)$ $1 break;
+          proxy_pass http://astro-gitsync-server;
+
+        }
+
+        location /healthz {
+          return 200;
+        }
+
+      }
+    }
+{{- end }}

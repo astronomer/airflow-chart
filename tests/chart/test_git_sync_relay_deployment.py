@@ -42,6 +42,13 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
 
+        git_dameon_env = container_env_to_dict(c_by_name["git-daemon"])
+        assert not git_dameon_env.get("GIT_SYNC_REPO_FETCH_MODE")
+        assert not git_dameon_env.get("GIT_SYNC_WEBHOOK_SECRET")
+        git_sync_env = container_env_to_dict(c_by_name["git-sync"])
+        assert git_sync_env.get("GIT_SYNC_REPO_FETCH_MODE") == "poll"
+        assert not git_sync_env.get("GIT_SYNC_WEBHOOK_SECRET")
+
     def test_gsr_deployment_gsr_repo_share_mode_volume(self, kube_version):
         """Test that a valid deployment is rendered when git-sync-relay is enabled with repoShareMode=shared_volume."""
         values = {
@@ -140,6 +147,7 @@ class TestGitSyncRelayDeployment:
             "GIT_SSH_KEY_FILE": "/etc/git-secret/ssh",
             "GIT_KNOWN_HOSTS": "true",
             "GIT_SSH_KNOWN_HOSTS_FILE": "/etc/git-secret/known_hosts",
+            "GIT_SYNC_REPO_FETCH_MODE": "poll",
         }
         assert c_by_name["git-daemon"]["livenessProbe"]
 
@@ -188,6 +196,7 @@ class TestGitSyncRelayDeployment:
             "GIT_SYNC_BRANCH": "not-the-default-branch",
             "GIT_SYNC_DEPTH": "22",
             "GIT_SYNC_WAIT": "333",
+            "GIT_SYNC_REPO_FETCH_MODE": "poll",
         }
         assert c_by_name["git-daemon"]["livenessProbe"]
 
@@ -280,3 +289,57 @@ class TestGitSyncRelayDeployment:
         assert livenessProbe == c_by_name["git-daemon"]["livenessProbe"]
         assert readinessProbe == c_by_name["git-sync"]["readinessProbe"]
         assert livenessProbe == c_by_name["git-sync"]["livenessProbe"]
+
+    def test_gsr_deployment_with_repo_fetch_mode_webhook(self, kube_version):
+        """Test git-sync-relay deployment with repoFetchMode=webhook."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repoFetchMode": "webhook",
+                "webhookSecretKey": "be sure to drink your ovaltine",
+            },
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+
+        assert len(docs) == 1
+        c_by_name = get_containers_by_name(docs[0])
+        assert len(c_by_name) == 2
+        git_sync_env = container_env_to_dict(c_by_name["git-sync"])
+        assert git_sync_env["GIT_SYNC_REPO_FETCH_MODE"] == "webhook"
+        assert git_sync_env["GIT_SYNC_WEBHOOK_SECRET"] == "be sure to drink your ovaltine"
+        git_dameon_env = container_env_to_dict(c_by_name["git-daemon"])
+        assert not git_dameon_env.get("GIT_SYNC_REPO_FETCH_MODE")
+        assert not git_dameon_env.get("GIT_SYNC_WEBHOOK_SECRET")
+
+    def test_git_sync_server_deployment_with_sidecar_and_authproxy_enabled(self, kube_version):
+        """Test git sync server deployment with sidecar components."""
+        values = {
+            "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
+            "loggingSidecar": {"enabled": True},
+            "authSidecar": {"enabled": True},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        c_by_name = get_containers_by_name(doc)
+        assert len(c_by_name) == 4
+        assert "git-sync" in c_by_name
+        assert "git-daemon" in c_by_name
+        assert "auth-proxy" in c_by_name
+        assert "sidecar-log-consumer" in c_by_name
+        assert c_by_name["git-sync"]["command"] == ["bash"]
+        c_by_name["git-sync"]["args"] == [
+            "-c",
+            "/entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
+        ]

@@ -11,3 +11,9 @@ def get_containers_by_name(doc, include_init_containers=False):
         c_by_name |= {c["name"]: c for c in doc["spec"]["template"]["spec"].get("initContainers")}
 
     return c_by_name
+
+
+def get_service_ports_by_name(doc):
+    """Given a single service doc, return all the ports by name."""
+
+    return {port_config["name"]: port_config for port_config in doc["spec"]["ports"]}

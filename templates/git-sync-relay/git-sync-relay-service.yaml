@@ -1,7 +1,13 @@
 ############################
 ## git-sync-relay Service ##
 ############################
-{{- if .Values.gitSyncRelay.enabled }}
+{{- if and
+  .Values.gitSyncRelay.enabled
+  (or
+    (eq .Values.gitSyncRelay.repoShareMode "git_daemon")
+    (eq .Values.gitSyncRelay.repoFetchMode "webhook")
+  )
+}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -14,10 +20,24 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   ports:
+{{- if eq .Values.gitSyncRelay.repoShareMode "git_daemon" }}
     - name: git
       port: 9418
       protocol: TCP
       targetPort: 9418
+{{- end }}
+{{- if eq .Values.gitSyncRelay.repoFetchMode "webhook"}}
+    - name: webhook
+      port: {{ .Values.gitSyncRelay.gitSync.webhookPort }}
+      protocol: TCP
+      targetPort: 8000
+{{- end }}
+{{- if and .Values.authSidecar.enabled (eq .Values.gitSyncRelay.repoFetchMode "webhook")}}
+    - name: auth-proxy
+      port: {{ .Values.authSidecar.port }}
+      protocol: TCP
+      targetPort: {{ .Values.authSidecar.port }}
+{{- end }}
   selector:
     component: git-sync-relay
     tier: airflow
