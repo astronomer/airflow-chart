@@ -13,7 +13,7 @@ kube_versions = metadata["test_k8s_versions"]
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
 machine_image_version = "ubuntu-2204:2024.11.1"  # https://circleci.com/developer/machine/image/ubuntu-2204
-ci_runner_version = "2024-12"  # This should be the current YYYY-MM
+ci_runner_version = "2025-03"  # This should be the current YYYY-MM
 
 
 def main():
