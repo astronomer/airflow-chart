@@ -80,9 +80,9 @@ def test_astronomer_airflow_check_version(webserver):
         print("astronomer-airflow-version-check pip module is not installed")
         return
     version = version_check_module["version"]
-    assert semantic_version(version) >= semantic_version(
-        "1.0.1"
-    ), "astronomer-airflow-version-check module must be greater than 1.0.0"
+    assert semantic_version(version) >= semantic_version("1.0.1"), (
+        "astronomer-airflow-version-check module must be greater than 1.0.0"
+    )
 
 
 def test_airflow_connections(scheduler):
