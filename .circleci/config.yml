@@ -20,58 +20,12 @@ workflows:
             - run_pre_commit
             - unittest-charts
       - airflow-test:
-          name: test-1-27-16-CeleryExecutor
-          kube_version: 1.27.16
-          executor: CeleryExecutor
-          requires:
-            - build-and-release-internal
-
-      - airflow-test:
-          name: test-1-27-16-LocalExecutor
-          kube_version: 1.27.16
-          executor: LocalExecutor
-          requires:
-            - build-and-release-internal
-
-      - airflow-test:
-          name: test-1-27-16-KubernetesExecutor
-          kube_version: 1.27.16
-          executor: KubernetesExecutor
-          requires:
-            - build-and-release-internal
-
-      - airflow-test:
-          name: test-1-28-15-CeleryExecutor
-          kube_version: 1.28.15
-          executor: CeleryExecutor
-          requires:
-            - build-and-release-internal
-
-            - approve-test-all
-      - airflow-test:
-          name: test-1-28-15-LocalExecutor
-          kube_version: 1.28.15
-          executor: LocalExecutor
-          requires:
-            - build-and-release-internal
-
-            - approve-test-all
-      - airflow-test:
-          name: test-1-28-15-KubernetesExecutor
-          kube_version: 1.28.15
-          executor: KubernetesExecutor
-          requires:
-            - build-and-release-internal
-
-            - approve-test-all
-      - airflow-test:
           name: test-1-29-14-CeleryExecutor
           kube_version: 1.29.14
           executor: CeleryExecutor
           requires:
             - build-and-release-internal
 
-            - approve-test-all
       - airflow-test:
           name: test-1-29-14-LocalExecutor
           kube_version: 1.29.14
@@ -79,7 +33,6 @@ workflows:
           requires:
             - build-and-release-internal
 
-            - approve-test-all
       - airflow-test:
           name: test-1-29-14-KubernetesExecutor
           kube_version: 1.29.14
@@ -87,7 +40,6 @@ workflows:
           requires:
             - build-and-release-internal
 
-            - approve-test-all
       - airflow-test:
           name: test-1-30-10-CeleryExecutor
           kube_version: 1.30.10
@@ -119,6 +71,7 @@ workflows:
           requires:
             - build-and-release-internal
 
+            - approve-test-all
       - airflow-test:
           name: test-1-31-6-LocalExecutor
           kube_version: 1.31.6
@@ -126,6 +79,7 @@ workflows:
           requires:
             - build-and-release-internal
 
+            - approve-test-all
       - airflow-test:
           name: test-1-31-6-KubernetesExecutor
           kube_version: 1.31.6
@@ -133,15 +87,31 @@ workflows:
           requires:
             - build-and-release-internal
 
+            - approve-test-all
+      - airflow-test:
+          name: test-1-32-2-CeleryExecutor
+          kube_version: 1.32.2
+          executor: CeleryExecutor
+          requires:
+            - build-and-release-internal
+
+      - airflow-test:
+          name: test-1-32-2-LocalExecutor
+          kube_version: 1.32.2
+          executor: LocalExecutor
+          requires:
+            - build-and-release-internal
+
+      - airflow-test:
+          name: test-1-32-2-KubernetesExecutor
+          kube_version: 1.32.2
+          executor: KubernetesExecutor
+          requires:
+            - build-and-release-internal
+
       - approve-release-prod:
           type: approval
           requires:
-            - "test-1-27-16-CeleryExecutor"
-            - "test-1-27-16-LocalExecutor"
-            - "test-1-27-16-KubernetesExecutor"
-            - "test-1-28-15-CeleryExecutor"
-            - "test-1-28-15-LocalExecutor"
-            - "test-1-28-15-KubernetesExecutor"
             - "test-1-29-14-CeleryExecutor"
             - "test-1-29-14-LocalExecutor"
             - "test-1-29-14-KubernetesExecutor"
@@ -151,6 +121,9 @@ workflows:
             - "test-1-31-6-CeleryExecutor"
             - "test-1-31-6-LocalExecutor"
             - "test-1-31-6-KubernetesExecutor"
+            - "test-1-32-2-CeleryExecutor"
+            - "test-1-32-2-LocalExecutor"
+            - "test-1-32-2-KubernetesExecutor"
           filters:
             branches:
               only:
