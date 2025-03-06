@@ -168,4 +168,3 @@ class TestPodTemplate:
         assert {"allowPrivilegeEscalation": False, "capabilities": {"drop": ["ALL"]}} == podTemplate["spec"]["containers"][0][
             "securityContext"
         ]
-
