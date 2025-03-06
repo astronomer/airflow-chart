@@ -171,11 +171,10 @@ class TestPodTemplate:
 
     def test_pod_template_worker_securitycontext_overrides(self, kube_version):
         """Test airflow pod template security context defaults."""
-        securityContexts = {"pod": {"runAsNonRoot": False},
-                            "container": {"allowPrivilegeEscalation": False}}
+        securityContexts = {"pod": {"runAsNonRoot": False}, "container": {"allowPrivilegeEscalation": False}}
         docs = render_chart(
             kube_version=kube_version,
-            values={"airflow": { "workers": {"securityContexts": securityContexts}}},
+            values={"airflow": {"workers": {"securityContexts": securityContexts}}},
             show_only="charts/airflow/templates/configmaps/configmap.yaml",
         )
         common_pod_template_test(docs)
