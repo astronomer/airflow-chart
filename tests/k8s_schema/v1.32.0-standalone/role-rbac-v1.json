@@ -1,5 +1,5 @@
 {
-  "description": "PersistentVolumeClaim is a user's request for and claim to a persistent volume",
+  "description": "Role is a namespaced, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding.",
   "properties": {
     "apiVersion": {
       "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
@@ -8,7 +8,7 @@
         "null"
       ],
       "enum": [
-        "v1"
+        "rbac.authorization.k8s.io/v1"
       ]
     },
     "kind": {
@@ -18,7 +18,7 @@
         "null"
       ],
       "enum": [
-        "PersistentVolumeClaim"
+        "Role"
       ]
     },
     "metadata": {
@@ -73,6 +73,7 @@
             "array",
             "null"
           ],
+          "x-kubernetes-list-type": "set",
           "x-kubernetes-patch-strategy": "merge"
         },
         "generateName": {
@@ -167,7 +168,8 @@
           "type": [
             "array",
             "null"
-          ]
+          ],
+          "x-kubernetes-list-type": "atomic"
         },
         "name": {
           "description": "Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names",
@@ -235,6 +237,10 @@
             "array",
             "null"
           ],
+          "x-kubernetes-list-map-keys": [
+            "uid"
+          ],
+          "x-kubernetes-list-type": "map",
           "x-kubernetes-patch-merge-key": "uid",
           "x-kubernetes-patch-strategy": "merge"
         },
@@ -265,406 +271,99 @@
         "null"
       ]
     },
-    "spec": {
-      "description": "PersistentVolumeClaimSpec describes the common attributes of storage devices and allows a Source for provider-specific attributes",
-      "properties": {
-        "accessModes": {
-          "description": "accessModes contains the desired access modes the volume should have. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1",
-          "items": {
+    "rules": {
+      "description": "Rules holds all the PolicyRules for this Role",
+      "items": {
+        "description": "PolicyRule holds information that describes a policy rule, but does not contain information about who the rule applies to or which namespace the rule applies to.",
+        "properties": {
+          "apiGroups": {
+            "description": "APIGroups is the name of the APIGroup that contains the resources.  If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. \"\" represents the core API group and \"*\" represents all API groups.",
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
             "type": [
-              "string",
+              "array",
               "null"
-            ]
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "dataSource": {
-          "description": "TypedLocalObjectReference contains enough information to let you locate the typed referenced object inside the same namespace.",
-          "properties": {
-            "apiGroup": {
-              "description": "APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.",
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "kind": {
-              "description": "Kind is the type of resource being referenced",
-              "type": "string"
-            },
-            "name": {
-              "description": "Name is the name of resource being referenced",
-              "type": "string"
-            }
-          },
-          "required": [
-            "kind",
-            "name"
-          ],
-          "type": [
-            "object",
-            "null"
-          ],
-          "x-kubernetes-map-type": "atomic"
-        },
-        "dataSourceRef": {
-          "properties": {
-            "apiGroup": {
-              "description": "APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.",
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "kind": {
-              "description": "Kind is the type of resource being referenced",
-              "type": "string"
-            },
-            "name": {
-              "description": "Name is the name of resource being referenced",
-              "type": "string"
-            },
-            "namespace": {
-              "description": "Namespace is the namespace of resource being referenced Note that when a namespace is specified, a gateway.networking.k8s.io/ReferenceGrant object is required in the referent namespace to allow that namespace's owner to accept the reference. See the ReferenceGrant documentation for details. (Alpha) This field requires the CrossNamespaceVolumeDataSource feature gate to be enabled.",
-              "type": [
-                "string",
-                "null"
-              ]
-            }
-          },
-          "required": [
-            "kind",
-            "name"
-          ],
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "resources": {
-          "description": "ResourceRequirements describes the compute resource requirements.",
-          "properties": {
-            "claims": {
-              "description": "Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container.\n\nThis is an alpha field and requires enabling the DynamicResourceAllocation feature gate.\n\nThis field is immutable. It can only be set for containers.",
-              "items": {
-                "description": "ResourceClaim references one entry in PodSpec.ResourceClaims.",
-                "properties": {
-                  "name": {
-                    "description": "Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name"
-                ],
-                "type": [
-                  "object",
-                  "null"
-                ]
-              },
-              "type": [
-                "array",
-                "null"
-              ],
-              "x-kubernetes-list-map-keys": [
-                "name"
-              ],
-              "x-kubernetes-list-type": "map"
-            },
-            "limits": {
-              "additionalProperties": {
-                "oneOf": [
-                  {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  {
-                    "type": [
-                      "number",
-                      "null"
-                    ]
-                  }
-                ]
-              },
-              "description": "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-              "type": [
-                "object",
-                "null"
-              ]
-            },
-            "requests": {
-              "additionalProperties": {
-                "oneOf": [
-                  {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  {
-                    "type": [
-                      "number",
-                      "null"
-                    ]
-                  }
-                ]
-              },
-              "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-              "type": [
-                "object",
-                "null"
-              ]
-            }
-          },
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "selector": {
-          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.",
-          "properties": {
-            "matchExpressions": {
-              "description": "matchExpressions is a list of label selector requirements. The requirements are ANDed.",
-              "items": {
-                "description": "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
-                "properties": {
-                  "key": {
-                    "description": "key is the label key that the selector applies to.",
-                    "type": "string",
-                    "x-kubernetes-patch-merge-key": "key",
-                    "x-kubernetes-patch-strategy": "merge"
-                  },
-                  "operator": {
-                    "description": "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.",
-                    "type": "string"
-                  },
-                  "values": {
-                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.",
-                    "items": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "type": [
-                      "array",
-                      "null"
-                    ]
-                  }
-                },
-                "required": [
-                  "key",
-                  "operator"
-                ],
-                "type": [
-                  "object",
-                  "null"
-                ]
-              },
-              "type": [
-                "array",
-                "null"
-              ]
-            },
-            "matchLabels": {
-              "additionalProperties": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "description": "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
-              "type": [
-                "object",
-                "null"
-              ]
-            }
-          },
-          "type": [
-            "object",
-            "null"
-          ],
-          "x-kubernetes-map-type": "atomic"
-        },
-        "storageClassName": {
-          "description": "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "volumeMode": {
-          "description": "volumeMode defines what type of volume is required by the claim. Value of Filesystem is implied when not included in claim spec.",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "volumeName": {
-          "description": "volumeName is the binding reference to the PersistentVolume backing this claim.",
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "type": [
-        "object",
-        "null"
-      ]
-    },
-    "status": {
-      "description": "PersistentVolumeClaimStatus is the current status of a persistent volume claim.",
-      "properties": {
-        "accessModes": {
-          "description": "accessModes contains the actual access modes the volume backing the PVC has. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1",
-          "items": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "allocatedResources": {
-          "additionalProperties": {
-            "oneOf": [
-              {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              {
-                "type": [
-                  "number",
-                  "null"
-                ]
-              }
-            ]
-          },
-          "description": "allocatedResources is the storage resource within AllocatedResources tracks the capacity allocated to a PVC. It may be larger than the actual capacity when a volume expansion operation is requested. For storage quota, the larger value from allocatedResources and PVC.spec.resources is used. If allocatedResources is not set, PVC.spec.resources alone is used for quota calculation. If a volume expansion capacity request is lowered, allocatedResources is only lowered if there are no expansion operations in progress and if the actual volume capacity is equal or lower than the requested capacity. This is an alpha field and requires enabling RecoverVolumeExpansionFailure feature.",
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "capacity": {
-          "additionalProperties": {
-            "oneOf": [
-              {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              {
-                "type": [
-                  "number",
-                  "null"
-                ]
-              }
-            ]
-          },
-          "description": "capacity represents the actual resources of the underlying volume.",
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "conditions": {
-          "description": "conditions is the current Condition of persistent volume claim. If underlying persistent volume is being resized then the Condition will be set to 'ResizeStarted'.",
-          "items": {
-            "description": "PersistentVolumeClaimCondition contains details about state of pvc",
-            "properties": {
-              "lastProbeTime": {
-                "description": "Time is a wrapper around time.Time which supports correct marshaling to YAML and JSON.  Wrappers are provided for many of the factory methods that the time package offers.",
-                "format": "date-time",
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "lastTransitionTime": {
-                "description": "Time is a wrapper around time.Time which supports correct marshaling to YAML and JSON.  Wrappers are provided for many of the factory methods that the time package offers.",
-                "format": "date-time",
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "message": {
-                "description": "message is the human-readable message indicating details about last transition.",
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "reason": {
-                "description": "reason is a unique, this should be a short, machine understandable string that gives the reason for condition's last transition. If it reports \"ResizeStarted\" that means the underlying persistent volume is being resized.",
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "status": {
-                "type": "string"
-              },
-              "type": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "type",
-              "status"
             ],
-            "type": [
-              "object",
-              "null"
-            ]
+            "x-kubernetes-list-type": "atomic"
           },
-          "type": [
-            "array",
-            "null"
-          ],
-          "x-kubernetes-patch-merge-key": "type",
-          "x-kubernetes-patch-strategy": "merge"
+          "nonResourceURLs": {
+            "description": "NonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding. Rules can either apply to API resources (such as \"pods\" or \"secrets\") or non-resource URL paths (such as \"/api\"),  but not both.",
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "type": [
+              "array",
+              "null"
+            ],
+            "x-kubernetes-list-type": "atomic"
+          },
+          "resourceNames": {
+            "description": "ResourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed.",
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "type": [
+              "array",
+              "null"
+            ],
+            "x-kubernetes-list-type": "atomic"
+          },
+          "resources": {
+            "description": "Resources is a list of resources this rule applies to. '*' represents all resources.",
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "type": [
+              "array",
+              "null"
+            ],
+            "x-kubernetes-list-type": "atomic"
+          },
+          "verbs": {
+            "description": "Verbs is a list of Verbs that apply to ALL the ResourceKinds contained in this rule. '*' represents all verbs.",
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "type": "array",
+            "x-kubernetes-list-type": "atomic"
+          }
         },
-        "phase": {
-          "description": "phase represents the current phase of PersistentVolumeClaim.",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "resizeStatus": {
-          "description": "resizeStatus stores status of resize operation. ResizeStatus is not set by default but when expansion is complete resizeStatus is set to empty string by resize controller or kubelet. This is an alpha field and requires enabling RecoverVolumeExpansionFailure feature.",
-          "type": [
-            "string",
-            "null"
-          ]
-        }
+        "required": [
+          "verbs"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
       },
       "type": [
-        "object",
+        "array",
         "null"
-      ]
+      ],
+      "x-kubernetes-list-type": "atomic"
     }
   },
   "type": "object",
   "x-kubernetes-group-version-kind": [
     {
-      "group": "",
-      "kind": "PersistentVolumeClaim",
+      "group": "rbac.authorization.k8s.io",
+      "kind": "Role",
       "version": "v1"
     }
   ],
