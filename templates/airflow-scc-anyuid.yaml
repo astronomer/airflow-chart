@@ -35,6 +35,9 @@ users:
 {{- if .Values.dagDeploy.enabled }}
 - system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-dag-server
 {{- end }}
+{{- if and .Values.gitSyncRelay.enabled }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.gitSyncRelay.serviceAccountName" . }}
+{{- end }}
 volumes:
 - configMap
 - downwardAPI
