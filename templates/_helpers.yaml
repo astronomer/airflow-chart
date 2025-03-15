@@ -280,7 +280,7 @@ Create the name of the pgbouncer service account to use
 */}}
 {{- define "astro.pgbouncer.serviceAccountName" -}}
 {{- if .Values.airflow.pgbouncer.serviceAccount.create -}}
-    {{ default (printf "%s-pgbouncer" (include "airflow.fullname" .)) .Values.airflow.pgbouncer.serviceAccount.name }}
+    {{ default (printf "%s-pgbouncer" (include "airflow.serviceAccountName" .)) .Values.airflow.pgbouncer.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.airflow.pgbouncer.serviceAccount.name }}
 {{- end -}}
