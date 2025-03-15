@@ -37,3 +37,19 @@ class TestPgbouncerSecret:
         ini = base64.b64decode(doc["data"]["pgbouncer.ini"]).decode()
 
         assert "server_idle_timeout" in ini
+
+    def test_pgbouncer_serviceaccount_defaults(self):
+        """Test pgbouncer service account defaults."""
+        docs = render_chart(
+            values={
+                "airflow": {
+                    "pgbouncer": {
+                        "enabled": True,
+                    },
+                },
+            },
+            show_only=["charts/airflow/templates/pgbouncer/pgbouncer-deployment.yaml"],
+        )
+
+        assert len(docs) == 1
+        assert "release-name-airflow-pgbouncer" == docs[0]["spec"]["template"]["spec"]["serviceAccountName"]
