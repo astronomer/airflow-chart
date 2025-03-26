@@ -29,19 +29,19 @@ airflow:
       tag: ~
     statsd:
       repository: quay.io/astronomer/ap-statsd-exporter
-      tag: 0.27.2
+      tag: 0.28.0-2
     redis:
       repository: quay.io/astronomer/ap-redis
       tag: 7.2.6
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
-      tag: 1.23.1-1
+      tag: 1.24.0-1
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.18.0
+      tag: 0.18.0-3
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
-      tag: 4.2.3-1
+      tag: 4.2.3-3
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
@@ -492,7 +492,7 @@ extraObjects: []
 authSidecar:
   enabled: false
   repository: quay.io/astronomer/ap-auth-sidecar
-  tag: 1.27.1
+  tag: 1.27.4-1
   pullPolicy: IfNotPresent
   port: 8084
   securityContext: {}
@@ -506,7 +506,7 @@ loggingSidecar:
   customConfig: false
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
-  image: quay.io/astronomer/ap-vector:0.44.0-1
+  image: quay.io/astronomer/ap-vector:0.45.0-1
   livenessProbe: {}
   readinessProbe: {}
 
@@ -555,7 +555,7 @@ dagDeploy:
   images:
     dagServer:
       repository: quay.io/astronomer/ap-dag-deploy
-      tag: 0.5.1
+      tag: 0.6.5
       imagePullPolicy: IfNotPresent
   livenessProbe: {}
   readinessProbe: {}
@@ -611,7 +611,7 @@ gitSyncRelay:
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
-      tag: "3.20.5"
+      tag: "3.21.3-1"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync-relay"
       tag: "0.1.9"
