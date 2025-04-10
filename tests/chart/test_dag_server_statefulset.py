@@ -203,7 +203,7 @@ class TestDagServerStatefulSet:
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert "sidecar-log-consumer" in c_by_name
-        assert c_by_name["sidecar-log-consume"]["resources"] == resources
+        assert c_by_name["sidecar-log-consumer"]["resources"] == resources
 
     def test_dag_server_statefulset_with_sidecar_enabled_with_resource_overrides(self, kube_version):
         """Test dag-server statefulset with logging sidecar resource overrides."""
