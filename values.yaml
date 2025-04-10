@@ -507,6 +507,7 @@ loggingSidecar:
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
   image: quay.io/astronomer/ap-vector:0.45.0-1
+  resources: {}
   livenessProbe: {}
   readinessProbe: {}
 
