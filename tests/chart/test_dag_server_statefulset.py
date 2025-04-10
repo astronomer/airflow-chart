@@ -8,9 +8,10 @@ from . import get_containers_by_name
 readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
 livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
 resources = {
-            "requests": {"cpu": 99.9, "memory": "777Mi"},
-            "limits": {"cpu": 66.6, "memory": "888Mi"},
-        }
+    "requests": {"cpu": 99.9, "memory": "777Mi"},
+    "limits": {"cpu": 66.6, "memory": "888Mi"},
+}
+
 
 def common_default_tests(doc):
     """Test cases for default dag-server sts enabled"""
