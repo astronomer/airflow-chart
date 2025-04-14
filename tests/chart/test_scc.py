@@ -14,3 +14,14 @@ class TestAirflowSccPrivileges:
             show_only="templates/airflow-scc-anyuid.yaml",
         )
         assert len(docs) == 0
+
+    def test_scc_privileges_enabled(self, kube_version):
+        """Test airflow scc privileges with defaults - disabled."""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "sccEnabled": True
+            },
+            show_only="templates/airflow-scc-anyuid.yaml",
+        )
+        assert len(docs) == 1
