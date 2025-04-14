@@ -7,6 +7,10 @@ from . import get_containers_by_name
 
 readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
 livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
+resources = {
+    "requests": {"cpu": 99.9, "memory": "777Mi"},
+    "limits": {"cpu": 66.6, "memory": "888Mi"},
+}
 
 
 def common_default_tests(doc):
@@ -83,10 +87,6 @@ class TestDagServerStatefulSet:
 
     def test_dag_server_statefulset_with_resource_overrides(self, kube_version):
         """Test that Dag Server statefulset are configurable with custom resource limits."""
-        resources = {
-            "requests": {"cpu": 99.9, "memory": "777Mi"},
-            "limits": {"cpu": 66.6, "memory": "888Mi"},
-        }
         values = {
             "dagDeploy": {
                 "enabled": True,
@@ -189,7 +189,24 @@ class TestDagServerStatefulSet:
         assert persistentVolumeClaimRetentionPolicy == doc["spec"]["persistentVolumeClaimRetentionPolicy"]
 
     def test_dag_server_statefulset_with_sidecar_enabled(self, kube_version):
-        """Test dag-server statefulset with custom registry secret."""
+        """Test dag-server statefulset with logging sidecar enabled."""
+        values = {"dagDeploy": {"enabled": True}, "loggingSidecar": {"enabled": True, "resources": resources}}
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        c_by_name = get_containers_by_name(doc)
+        assert len(c_by_name) == 2
+        assert "sidecar-log-consumer" in c_by_name
+        assert c_by_name["sidecar-log-consumer"]["resources"] == resources
+
+    def test_dag_server_statefulset_with_sidecar_enabled_with_resource_overrides(self, kube_version):
+        """Test dag-server statefulset with logging sidecar resource overrides."""
         values = {"dagDeploy": {"enabled": True}, "loggingSidecar": {"enabled": True}}
 
         docs = render_chart(
