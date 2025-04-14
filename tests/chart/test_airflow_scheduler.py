@@ -47,7 +47,6 @@ class TestAirflowScheduler:
         assert len(docs) == 1
         c_by_name = get_containers_by_name(docs[0])
         assert "/usr/local/bin/clean-airflow-logs" in c_by_name["scheduler-log-groomer"]["args"]
-        print(c_by_name["scheduler-log-groomer"]["env"])
         assert default_env_vars == c_by_name["scheduler-log-groomer"]["env"]
 
     def test_scheduler_log_grommer_overrides(self, kube_version):
