@@ -499,6 +499,7 @@ authSidecar:
   resources: {}
   livenessProbe: {}
   readinessProbe: {}
+  ingressAllowedNamespaces: ~
 
 loggingSidecar:
   enabled: false
