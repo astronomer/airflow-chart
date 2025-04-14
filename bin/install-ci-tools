@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-export KIND_VERSION="${KIND_VERSION:-0.25.0}"
-export HELM_VERSION="${HELM_VERSION:-3.16.2}"
+KIND_VERSION="0.27.0" # https://github.com/kubernetes-sigs/kind/releases
+HELM_VERSION="3.17.1" # https://github.com/helm/helm/releases
 
 # Determine the platform we are running on
 OS=$(uname | tr '[:upper:]' '[:lower:]')

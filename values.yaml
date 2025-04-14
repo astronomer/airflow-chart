@@ -29,19 +29,19 @@ airflow:
       tag: ~
     statsd:
       repository: quay.io/astronomer/ap-statsd-exporter
-      tag: 0.27.2
+      tag: 0.28.0-2
     redis:
       repository: quay.io/astronomer/ap-redis
       tag: 7.2.6
     pgbouncer:
       repository: quay.io/astronomer/ap-pgbouncer
-      tag: 1.23.1-1
+      tag: 1.24.0-1
     pgbouncerExporter:
       repository: quay.io/astronomer/ap-pgbouncer-exporter
-      tag: 0.18.0
+      tag: 0.18.0-3
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
-      tag: 3.6.9
+      tag: 4.2.3-3
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
@@ -201,6 +201,8 @@ airflow:
     {{- $nodeSelector := or .Values.nodeSelector .Values.workers.nodeSelector }}
     {{- $affinity := or .Values.affinity .Values.workers.affinity }}
     {{- $tolerations := or .Values.tolerations .Values.workers.tolerations }}
+    {{- $securityContext := include "airflowPodSecurityContext" (list . .Values.workers) }}
+    {{- $containerSecurityContext := include "containerSecurityContext" (list . .Values.workers) }}
     apiVersion: v1
     kind: Pod
     metadata:
@@ -244,6 +246,7 @@ airflow:
     {{- include "container_extra_envs" (list . .Values.workers.env) | indent 6 }}
           image: {{ template "pod_template_image" . }}
           imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
+          securityContext: {{ $containerSecurityContext | nindent 8 }}
           name: base
           ports: []
           resources: {{- toYaml .Values.workers.resources | nindent 8 }}
@@ -284,10 +287,8 @@ airflow:
         - name: {{ template "registry_secret" . }}
       {{- end }}
       restartPolicy: Never
-      securityContext:
-        runAsUser: {{ .Values.uid }}
-        fsGroup: {{ .Values.gid }}
       nodeSelector: {{ toYaml $nodeSelector | nindent 4 }}
+      securityContext: {{ $securityContext | nindent 4 }}
       affinity: {{ toYaml $affinity | nindent 4 }}
       tolerations: {{ toYaml $tolerations | nindent 4 }}
       serviceAccountName: {{ include "worker.serviceAccountName" . }}
@@ -491,7 +492,7 @@ extraObjects: []
 authSidecar:
   enabled: false
   repository: quay.io/astronomer/ap-auth-sidecar
-  tag: 1.27.1
+  tag: 1.27.4-1
   pullPolicy: IfNotPresent
   port: 8084
   securityContext: {}
@@ -505,7 +506,8 @@ loggingSidecar:
   customConfig: false
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
-  image: quay.io/astronomer/ap-vector:0.40.2-1
+  image: quay.io/astronomer/ap-vector:0.45.0-1
+  resources: {}
   livenessProbe: {}
   readinessProbe: {}
 
@@ -536,15 +538,6 @@ ingress:
   auth:
     enabled: true
 
-#####################################
-# Leftovers
-
-# Pgbouncer settings
-#pgbouncer:
-#  networkPolicies:
-#    enabled: true
-#    # TODO: Originated from https://github.com/astronomer/issues/issues/2516
-
 # This section describes the astronomer platform, and is used to share values
 # from astronomer that are useful here, like networkPolicies that need to know
 # what namespace astronomer is running in.
@@ -563,7 +556,7 @@ dagDeploy:
   images:
     dagServer:
       repository: quay.io/astronomer/ap-dag-deploy
-      tag: 0.5.1
+      tag: 0.6.5
       imagePullPolicy: IfNotPresent
   livenessProbe: {}
   readinessProbe: {}
@@ -604,18 +597,25 @@ dagDeploy:
 
 gitSyncRelay:
   enabled: false
+  # extraAnnotations to add to the git-sync-relay ingress
+  extraAnnotations: {}
   # 'repoShareMode' must be git_daemon or shared_volume
   repoShareMode: "git_daemon"
+  # 'repoFetchMode' must be webhook or poll
+  repoFetchMode: poll
+  # webhookSecurityKey is only needed when repoFetchMode=webhook
+  webhookSecretKey: ~
   securityContext: {}
   gitDaemon: {}
-  gitSync: {}
+  gitSync:
+    webhookPort: 8000
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
-      tag: "3.18.9"
+      tag: "3.21.3-1"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync-relay"
-      tag: "0.0.3-6"
+      tag: "0.1.9"
   repo:
     url: ~
     branch: main

@@ -1,7 +1,10 @@
 ########################
 ## git-sync-relay pvc ##
 ########################
-{{- if and .Values.gitSyncRelay.enabled ( eq .Values.gitSyncRelay.repoShareMode "shared_volume") }}
+{{- if and
+  .Values.gitSyncRelay.enabled
+  (eq .Values.gitSyncRelay.repoShareMode "shared_volume")
+}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -14,7 +17,7 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: {{ .Values.gitSyncRelay.volumeSync.volumeSize }}
