@@ -308,12 +308,12 @@ Create the name of the cleanup service account to use
 {{- end -}}
 
 {{/* Create the name of the dag processor service account to use */}}
-{{- define "astro.airflow.dagProcessor.serviceAccountName" -}}
-  {{- if .Values.airflow.dagProcessor.serviceAccount.create }}
-    {{- default (printf "%s-dag-processor" (include "airflow.serviceAccountName" .)) .Values.airflow.dagProcessor.serviceAccount.name }}
-  {{- else }}
-    {{- default "default" .Values.airflow.dagProcessor.serviceAccount.name }}
-  {{- end }}
+{{- define "astro.dagProcessor.serviceAccountName" -}}
+{{- if .Values.airflow.dagProcessor.serviceAccount.create }}
+  {{- default (printf "%s-dag-processor" (include "airflow.serviceAccountName" .)) .Values.airflow.dagProcessor.serviceAccount.name }}
+{{- else }}
+  {{- default "default" .Values.airflow.dagProcessor.serviceAccount.name }}
+{{- end }}
 {{- end }}
 
 {{- define "astro.registry_secret" -}}
