@@ -42,6 +42,13 @@ spec:
     - namespaceSelector:
         matchLabels:
           network.openshift.io/policy-group: ingress
+    {{- if .Values.authSidecar.ingressAllowedNamespaces }}
+    - namespaceSelector:
+        matchExpressions:
+          - key: kubernetes.io/metadata.name
+            operator: In
+            values: {{ .Values.authSidecar.ingressAllowedNamespaces | toJson }}
+    {{- end }}
     {{ else }}
     - namespaceSelector:
         matchLabels:
