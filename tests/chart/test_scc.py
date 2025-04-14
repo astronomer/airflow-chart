@@ -39,5 +39,5 @@ class TestAirflowSccPrivileges:
             "system:serviceaccount:default:release-name-airflow-triggerer",
             "system:serviceaccount:default:release-name-airflow-pgbouncer",
             "system:serviceaccount:default:release-name-airflow-cleanup",
-            "system:serviceaccount:default:airflow-dag-processor",
+            "system:serviceaccount:default:release-name-dag-processor",
         ]
