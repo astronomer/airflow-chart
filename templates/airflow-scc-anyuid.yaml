@@ -32,6 +32,7 @@ users:
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.triggerer.serviceAccountName" . }}
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.pgbouncer.serviceAccountName" . }}
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.cleanup.serviceAccountName" . }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.dagProcessor.serviceAccountName" .}}
 {{- if .Values.dagDeploy.enabled }}
 - system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-dag-server
 {{- end }}
