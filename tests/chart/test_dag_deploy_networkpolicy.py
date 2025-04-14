@@ -116,8 +116,8 @@ class TestDagDeployNetworkPolicy:
             {"protocol": "TCP", "port": 8084},
         ] == spec["ingress"][1]["ports"]
 
-    def test_dag_deploy_networkpolicy_with_authsidecar_enabled_and_ingress_allowed_namespaces_set(self, kube_version):
-        """Test that a valid networkPolicy are rendered when authsidecar is enabled and ingressAllowedNamespaces is set."""
+    def test_dag_deploy_networkpolicy_with_authsidecar_and_ingress_allowed_namespaces_enabled(self, kube_version):
+        """Test that a valid networkPolicy are rendered when authsidecar is enabled and ingressAllowedNamespaces is enabled."""
 
         values = {
             "dagDeploy": {"enabled": True},
