@@ -49,3 +49,24 @@ class TestDagProcessor:
         c_by_name = get_containers_by_name(docs[0])
         assert "/usr/local/bin/clean-airflow-logs" in c_by_name["dag-processor-log-groomer"]["args"]
         assert env in c_by_name["dag-processor-log-groomer"]["env"]
+
+    def test_dag_processor_deployment_enabled_with_defaults(self):
+        """Test dag processor defaults."""
+
+        docs = render_chart(
+            values={
+                "airflow": {
+                    "airflowVersion": "2.4.3",
+                    "dagProcessor": {"enabled": True},
+                },
+            },
+            show_only=["charts/airflow/templates/dag-processor/dag-processor-deployment.yaml"],
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "release-name-dag-processor"
+        assert doc["spec"]["template"]["spec"]["serviceAccountName"] == "release-name-airflow-dag-processor"
+        c_by_name = get_containers_by_name(doc)
+        assert len(c_by_name) == 2
