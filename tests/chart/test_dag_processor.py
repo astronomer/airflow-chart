@@ -15,7 +15,7 @@ class TestDagProcessor:
         )
         assert len(docs) == 0
 
-    def test_dag_processor_log_grommer_defaults(self):
+    def test_dag_processor_enabled_with_log_grommer_defaults(self):
         """Test Dag Processor enabled defaults with log groomer."""
         default_env_vars = [
             {"name": "AIRFLOW__LOG_RETENTION_DAYS", "value": "15"},
@@ -33,7 +33,7 @@ class TestDagProcessor:
         print(c_by_name["dag-processor-log-groomer"]["env"])
         assert default_env_vars == c_by_name["dag-processor-log-groomer"]["env"]
 
-    def test_triggerer_log_grommer_overrides(self):
+    def test_dag_processor_enbaled_with_log_grommer_overrides(self):
         """Test Dag Processor enabled defaults with log groomer custom env vars."""
         env = {"name": "ASTRONOMER__AIRFLOW___LOG_RETENTION_DAYS", "value": "5"}
         docs = render_chart(
