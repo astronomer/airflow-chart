@@ -34,6 +34,11 @@ subjects:
 - kind: ServiceAccount
   name: {{ include "astro.scheduler.serviceAccountName" . }}
   namespace: "{{ .Release.Namespace }}"
+{{- if .Values.airflow.dagProcessor.enabled }}
+- kind: ServiceAccount
+  name: {{ include "astro.dagProcessor.serviceAccountName" . }}
+  namespace: "{{ .Release.Namespace }}"
+{{- end }}
 roleRef:
   kind: Role
   name: {{ .Release.Name }}-dag-downloader-role
