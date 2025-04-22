@@ -62,7 +62,23 @@ class TestGitSyncRelayNetworkPolicy:
         assert [{"protocol": "TCP", "port": 8000}] == spec["ingress"][0]["ports"]
         assert [{"protocol": "TCP", "port": 9418}] == spec["ingress"][1]["ports"]
 
-    def test_gsr_networkpolicy_with_authsidecar_enabled(self, kube_version):
+    def test_gsr_networkpolicy_defaults_with_authsidecar_enabled(self, kube_version):
+        """Test that a no networkPolicy are rendered when git-sync-relay is enabled."""
+
+        values = {
+            "gitSyncRelay": {"enabled": True},
+            "authSidecar": {"enabled": True},
+            "platform": {"namespace": "test-ns-99", "release": "test-release-42"},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-networkpolicy.yaml",
+            values=values,
+        )
+        assert len(docs) == 0
+
+    def test_gsr_networkpolicy_enabled_with_authsidecar_enabled(self, kube_version):
         """Test that a valid networkPolicy are rendered when git-sync-relay is enabled."""
 
         values = {
