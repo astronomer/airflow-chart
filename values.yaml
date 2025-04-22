@@ -488,7 +488,7 @@ sccEnabled: false
 # Extra objects to deploy (these are passed through `tpl`)
 extraObjects: []
 
-# Disables networkpolicy for astronomer components 
+# Disables networkpolicy for astronomer components
 networkPolicyEnabled: true
 
 # Enable nginx auth sidecar
