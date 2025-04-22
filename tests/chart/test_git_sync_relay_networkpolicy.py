@@ -128,6 +128,7 @@ class TestGitSyncRelayNetworkPolicy:
         """Test that a valid networkPolicy are rendered when authSidecar is enabled and ingressAllowedNamespaces is enabled."""
 
         values = {
+            "airflow": {"networkPolicies": {"enabled": True}},
             "gitSyncRelay": {"enabled": True},
             "authSidecar": {"enabled": True, "ingressAllowedNamespaces": ["astro", "ingress-namespace"]},
             "platform": {"namespace": "test-ns-99", "release": "test-release-42"},
