@@ -88,6 +88,7 @@ class TestDagDeployNetworkPolicy:
         """Test that a valid networkPolicy are rendered when dag-deploy is enabled."""
 
         values = {
+            "airflow": {"networkPolicies": {"enabled": True}},
             "dagDeploy": {"enabled": True},
             "authSidecar": {"enabled": True},
             "platform": {"namespace": "test-ns-99", "release": "test-release-42"},
