@@ -1,7 +1,7 @@
 ##############################
 ## dag-deploy NetworkPolicy ##
 ##############################
-{{- if and .Values.networkPolicyEnabled .Values.dagDeploy.enabled }}
+{{- if and .Values.networkPolicies.enabled .Values.dagDeploy.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
