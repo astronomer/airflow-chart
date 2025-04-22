@@ -82,6 +82,7 @@ class TestGitSyncRelayNetworkPolicy:
         """Test that a valid networkPolicy are rendered when git-sync-relay is enabled."""
 
         values = {
+            "airflow": {"networkPolicies": {"enabled": True}},
             "gitSyncRelay": {"enabled": True},
             "authSidecar": {"enabled": True},
             "platform": {"namespace": "test-ns-99", "release": "test-release-42"},

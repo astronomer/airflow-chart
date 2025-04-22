@@ -14,10 +14,27 @@ class TestDagDeployNetworkPolicy:
         )
         assert len(docs) == 0
 
+    def test_gsr_networkpolicy_defaults_with_authsidecar_enabled(self, kube_version):
+        """Test that a no networkPolicy are rendered when dag-deploy is enabled."""
+
+        values = {
+            "dagDeploy": {"enabled": True},
+            "authSidecar": {"enabled": True},
+            "platform": {"namespace": "test-ns-99", "release": "test-release-42"},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-networkpolicy.yaml",
+            values=values,
+        )
+        assert len(docs) == 0
+
     def test_dag_deploy_networkpolicy_dag_deploy_enabled(self, kube_version):
         """Test that a valid networkPolicy are rendered when dag-deploy is enabled."""
 
         values = {
+            "airflow": {"networkPolicies": {"enabled": True}},
             "dagDeploy": {"enabled": True},
             "platform": {"namespace": "test-ns-99", "release": "test-release-42"},
         }
