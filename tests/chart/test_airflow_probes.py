@@ -4,7 +4,7 @@ from . import get_containers_by_name
 
 
 class TestAllComponentsProbes:
-    def test_scheduler_probes_added(self):
+    def test_scheduler_probes(self):
         """Test that scheduler has liveness and readiness probes."""
         docs = render_chart(
             values={
@@ -23,7 +23,7 @@ class TestAllComponentsProbes:
         assert "exec" in liveness_probe
         assert "airflow jobs check --job-type SchedulerJob --local" in " ".join(liveness_probe["exec"]["command"])
 
-    def test_triggerer_probes_added(self):
+    def test_triggerer_probes(self):
         """Test that triggerer has liveness and readiness probes."""
         docs = render_chart(
             values={
@@ -42,7 +42,7 @@ class TestAllComponentsProbes:
         assert "exec" in liveness_probe
         assert "airflow jobs check --job-type TriggererJob --local" in " ".join(liveness_probe["exec"]["command"])
 
-    def test_dag_processor_probes_added(self):
+    def test_dag_processor_probes(self):
         """Test that DAG processor has liveness and readiness probes."""
         docs = render_chart(
             values={
@@ -61,7 +61,7 @@ class TestAllComponentsProbes:
         assert "exec" in liveness_probe
         assert "python -Wignore -c" in " ".join(liveness_probe["exec"]["command"])
 
-    def test_workers_probes_added(self):
+    def test_workers_probes(self):
         """Test that workers have liveness and readiness probes."""
         docs = render_chart(
             values={
@@ -80,7 +80,7 @@ class TestAllComponentsProbes:
         assert "exec" in liveness_probe
         assert "CONNECTION_CHECK_MAX_COUNT=0 exec /entrypoint python -m celery --app" in " ".join(liveness_probe["exec"]["command"])
 
-    def test_redis_probes_added(self):
+    def test_redis_probes(self):
         """Test that Redis has liveness and readiness probes."""
         docs = render_chart(
             values={
@@ -98,7 +98,7 @@ class TestAllComponentsProbes:
         assert "exec" in liveness_probe
         assert "redis-cli -a $REDIS_PASSWORD ping" in " ".join(liveness_probe["exec"]["command"])
 
-    def test_cleanup_job_probes_added(self):
+    def test_cleanup_job_probes(self):
         """Test that cleanup job has liveness and readiness probes."""
         docs = render_chart(
             values={
@@ -112,7 +112,7 @@ class TestAllComponentsProbes:
         assert "livenessProbe" in c_by_name["cleanup"]
         assert "readinessProbe" in c_by_name["cleanup"]
 
-    def test_migrate_database_job_probes_added(self):
+    def test_migrate_database_job_probes(self):
         """Test that migrate database job has liveness and readiness probes."""
         docs = render_chart(
             values={
@@ -126,7 +126,7 @@ class TestAllComponentsProbes:
         assert "livenessProbe" in c_by_name["run-airflow-migrations"]
         assert "readinessProbe" in c_by_name["run-airflow-migrations"]
 
-    def test_log_groomer_sidecars_probes_added(self):
+    def test_log_groomer_sidecars_probes(self):
         """Test that log groomer sidecars have probes added."""
         docs = render_chart(
             values={
@@ -159,7 +159,7 @@ class TestAllComponentsProbes:
                 assert "livenessProbe" in c_by_name[container_name], f"Missing liveness probe in {container_name}"
                 assert "readinessProbe" in c_by_name[container_name], f"Missing readiness probe in {container_name}"
 
-    def test_kerberos_sidecar_probes_added(self):
+    def test_kerberos_sidecar_probes(self):
         """Test that kerberos sidecar has probes added."""
         docs = render_chart(
             values={
