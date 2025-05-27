@@ -1,4 +1,5 @@
 from tests.chart.helm_template_generator import render_chart
+
 from . import get_containers_by_name
 
 
@@ -8,10 +9,7 @@ class TestAllComponentsProbes:
         docs = render_chart(
             values={
                 "airflow": {"airflowVersion": "2.5.0"},
-                "scheduler": {
-                    "livenessProbe": {"enabled": True},
-                    "readinessProbe": {"enabled": True}
-                },
+                "scheduler": {"livenessProbe": {"enabled": True}, "readinessProbe": {"enabled": True}},
             },
             show_only=["charts/airflow/templates/scheduler/scheduler-deployment.yaml"],
         )
@@ -30,11 +28,7 @@ class TestAllComponentsProbes:
         docs = render_chart(
             values={
                 "airflow": {"airflowVersion": "2.5.0"},
-                "triggerer": {
-                    "enabled": True,
-                    "livenessProbe": {"enabled": True},
-                    "readinessProbe": {"enabled": True}
-                },
+                "triggerer": {"enabled": True, "livenessProbe": {"enabled": True}, "readinessProbe": {"enabled": True}},
             },
             show_only=["charts/airflow/templates/triggerer/triggerer-deployment.yaml"],
         )
@@ -53,11 +47,7 @@ class TestAllComponentsProbes:
         docs = render_chart(
             values={
                 "airflow": {"airflowVersion": "2.5.0"},
-                "dagProcessor": {
-                    "enabled": True,
-                    "livenessProbe": {"enabled": True},
-                    "readinessProbe": {"enabled": True}
-                },
+                "dagProcessor": {"enabled": True, "livenessProbe": {"enabled": True}, "readinessProbe": {"enabled": True}},
             },
             show_only=["charts/airflow/templates/dag-processor/dag-processor-deployment.yaml"],
         )
@@ -76,10 +66,7 @@ class TestAllComponentsProbes:
         docs = render_chart(
             values={
                 "airflow": {"airflowVersion": "2.5.0"},
-                "workers": {
-                    "livenessProbe": {"enabled": True},
-                    "readinessProbe": {"enabled": True}
-                },
+                "workers": {"livenessProbe": {"enabled": True}, "readinessProbe": {"enabled": True}},
             },
             show_only=["charts/airflow/templates/workers/worker-deployment.yaml"],
         )
@@ -97,11 +84,7 @@ class TestAllComponentsProbes:
         """Test that Redis has liveness and readiness probes."""
         docs = render_chart(
             values={
-                "redis": {
-                    "enabled": True,
-                    "livenessProbe": {"enabled": True},
-                    "readinessProbe": {"enabled": True}
-                },
+                "redis": {"enabled": True, "livenessProbe": {"enabled": True}, "readinessProbe": {"enabled": True}},
             },
             show_only=["charts/airflow/templates/redis/redis-statefulset.yaml"],
         )
@@ -119,11 +102,7 @@ class TestAllComponentsProbes:
         """Test that cleanup job has liveness and readiness probes."""
         docs = render_chart(
             values={
-                "cleanup": {
-                    "enabled": True,
-                    "livenessProbe": {"enabled": True},
-                    "readinessProbe": {"enabled": True}
-                },
+                "cleanup": {"enabled": True, "livenessProbe": {"enabled": True}, "readinessProbe": {"enabled": True}},
             },
             show_only=["charts/airflow/templates/cleanup/cleanup-cronjob.yaml"],
         )
@@ -137,11 +116,7 @@ class TestAllComponentsProbes:
         """Test that migrate database job has liveness and readiness probes."""
         docs = render_chart(
             values={
-                "migrateDatabaseJob": {
-                    "enabled": True,
-                    "livenessProbe": {"enabled": True},
-                    "readinessProbe": {"enabled": True}
-                },
+                "migrateDatabaseJob": {"enabled": True, "livenessProbe": {"enabled": True}, "readinessProbe": {"enabled": True}},
             },
             show_only=["charts/airflow/templates/jobs/migrate-database-job.yaml"],
         )
@@ -157,32 +132,20 @@ class TestAllComponentsProbes:
             values={
                 "airflow": {"airflowVersion": "2.5.0"},
                 "scheduler": {
-                    "logGroomerSidecar": {
-                        "enabled": True,
-                        "livenessProbe": {"enabled": True},
-                        "readinessProbe": {"enabled": True}
-                    }
+                    "logGroomerSidecar": {"enabled": True, "livenessProbe": {"enabled": True}, "readinessProbe": {"enabled": True}}
                 },
                 "triggerer": {
                     "enabled": True,
-                    "logGroomerSidecar": {
-                        "enabled": True,
-                        "livenessProbe": {"enabled": True},
-                        "readinessProbe": {"enabled": True}
-                    }
+                    "logGroomerSidecar": {"enabled": True, "livenessProbe": {"enabled": True}, "readinessProbe": {"enabled": True}},
                 },
                 "workers": {
-                    "logGroomerSidecar": {
-                        "enabled": True,
-                        "livenessProbe": {"enabled": True},
-                        "readinessProbe": {"enabled": True}
-                    }
+                    "logGroomerSidecar": {"enabled": True, "livenessProbe": {"enabled": True}, "readinessProbe": {"enabled": True}}
                 },
             },
             show_only=[
                 "charts/airflow/templates/scheduler/scheduler-deployment.yaml",
                 "charts/airflow/templates/triggerer/triggerer-deployment.yaml",
-                "charts/airflow/templates/workers/worker-deployment.yaml"
+                "charts/airflow/templates/workers/worker-deployment.yaml",
             ],
         )
         assert len(docs) == 3
@@ -201,11 +164,7 @@ class TestAllComponentsProbes:
         docs = render_chart(
             values={
                 "workers": {
-                    "kerberosSidecar": {
-                        "enabled": True,
-                        "livenessProbe": {"enabled": True},
-                        "readinessProbe": {"enabled": True}
-                    }
+                    "kerberosSidecar": {"enabled": True, "livenessProbe": {"enabled": True}, "readinessProbe": {"enabled": True}}
                 },
             },
             show_only=["charts/airflow/templates/workers/worker-deployment.yaml"],
@@ -224,40 +183,22 @@ class TestAllComponentsProbes:
         docs = render_chart(
             values={
                 "airflow": {"airflowVersion": "2.5.0"},
-                "scheduler": {
-                    "livenessProbe": {"enabled": True}
-                },
-                "triggerer": {
-                    "enabled": True,
-                    "livenessProbe": {"enabled": True}
-                },
-                "dagProcessor": {
-                    "enabled": True,
-                    "livenessProbe": {"enabled": True}
-                },
-                "workers": {
-                    "livenessProbe": {"enabled": True}
-                },
-                "redis": {
-                    "enabled": True,
-                    "livenessProbe": {"enabled": True}
-                }
+                "scheduler": {"livenessProbe": {"enabled": True}},
+                "triggerer": {"enabled": True, "livenessProbe": {"enabled": True}},
+                "dagProcessor": {"enabled": True, "livenessProbe": {"enabled": True}},
+                "workers": {"livenessProbe": {"enabled": True}},
+                "redis": {"enabled": True, "livenessProbe": {"enabled": True}},
             },
             show_only=[
                 "charts/airflow/templates/scheduler/scheduler-deployment.yaml",
                 "charts/airflow/templates/triggerer/triggerer-deployment.yaml",
                 "charts/airflow/templates/dag-processor/dag-processor-deployment.yaml",
                 "charts/airflow/templates/workers/worker-deployment.yaml",
-                "charts/airflow/templates/redis/redis-statefulset.yaml"
+                "charts/airflow/templates/redis/redis-statefulset.yaml",
             ],
         )
 
-        expected_defaults = {
-            "initialDelaySeconds": 10,
-            "timeoutSeconds": 20,
-            "failureThreshold": 5,
-            "periodSeconds": 60
-        }
+        expected_defaults = {"initialDelaySeconds": 10, "timeoutSeconds": 20, "failureThreshold": 5, "periodSeconds": 60}
 
         for doc in docs:
             c_by_name = get_containers_by_name(doc)
@@ -265,5 +206,6 @@ class TestAllComponentsProbes:
                 if "livenessProbe" in container:
                     liveness_probe = container["livenessProbe"]
                     for key, expected_value in expected_defaults.items():
-                        assert liveness_probe.get(key) == expected_value, \
+                        assert liveness_probe.get(key) == expected_value, (
                             f"Wrong {key} in {container_name}: expected {expected_value}, got {liveness_probe.get(key)}"
+                        )
