@@ -73,7 +73,6 @@ class TestAirflowScheduler:
             "exec": {"command": ["/bin/true"]},
             "initialDelaySeconds": 0,
             "periodSeconds": 1,
-            "successThreshold": 1,
             "timeoutSeconds": 5,
         }
         readinessProbe = {
@@ -81,7 +80,6 @@ class TestAirflowScheduler:
             "exec": {"command": ["/bin/true"]},
             "initialDelaySeconds": 0,
             "periodSeconds": 1,
-            "successThreshold": 1,
             "timeoutSeconds": 5,
         }
         docs = render_chart(
