@@ -265,7 +265,7 @@ class TestGitSyncRelayDeployment:
         assert [{"name": "gscsecret"}] == doc["spec"]["template"]["spec"]["imagePullSecrets"]
 
     def test_gsr_deployment_with_custom_probes(self, kube_version):
-        """Test git-sync-relay deployment with custom liveliness and readiness probes."""
+        """Test git-sync-relay deployment with custom liveness and readiness probes."""
         values = {
             "gitSyncRelay": {
                 "enabled": True,
