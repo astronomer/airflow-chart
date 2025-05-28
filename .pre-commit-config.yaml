@@ -61,6 +61,12 @@ repos:
       - id: replace-unicode-non-breaking-spaces
   - repo: local
     hooks:
+      - id: ensure-liveness-not-liveliness
+        language: pygrep
+        name: "Ensure we're using 'liveness' and not 'liveliness'"
+        entry: "liveliness"
+        pass_filenames: true
+        exclude: "^.pre-commit-config.yaml$"
       - id: ensure-rolebinding-without-dash
         language: pygrep
         name: "Ensure we're using 'rolebinding' and not 'role-binding'"
