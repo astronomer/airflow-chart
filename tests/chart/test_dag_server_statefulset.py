@@ -253,8 +253,8 @@ class TestDagServerStatefulSet:
         ]
         assert "sidecar-log-consumer" in c_by_name
 
-    def test_dag_server_statefulset_liveliness_and_readiness_probes_with_dag_server_enabled(self, kube_version):
-        """Test that a valid statefulset is rendered when dag-server is enabled with readiness and liveliness probes."""
+    def test_dag_server_statefulset_liveness_and_readiness_probes_with_dag_server_enabled(self, kube_version):
+        """Test that a valid statefulset is rendered when dag-server is enabled with readiness and liveness probes."""
         values = {"dagDeploy": {"enabled": True, "readinessProbe": readinessProbe, "livenessProbe": livenessProbe}}
 
         docs = render_chart(
@@ -272,7 +272,7 @@ class TestDagServerStatefulSet:
         assert livenessProbe == c_by_name["dag-server"]["livenessProbe"]
 
     def test_dag_server_statefulset_with_probes_and_authproxy_enabled(self, kube_version):
-        """Test that a valid statefulset is rendered when dag-server and authsidecar is enabled with readiness and liveliness probes."""
+        """Test that a valid statefulset is rendered when dag-server and authsidecar is enabled with readiness and liveness probes."""
         values = {
             "dagDeploy": {"enabled": True},
             "authSidecar": {"enabled": True, "readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
