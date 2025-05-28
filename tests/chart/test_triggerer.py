@@ -38,7 +38,7 @@ class TestTriggerer:
         assert "/usr/local/bin/clean-airflow-logs" in c_by_name["triggerer-log-groomer"]["args"]
         assert env in c_by_name["triggerer-log-groomer"]["env"]
 
-    def test_triggerer_liveliness_and_readiness_probes_are_configurable_with_gitsync_enabled(self):
+    def test_triggerer_liveness_and_readiness_probes_are_configurable_with_gitsync_enabled(self):
         livenessProbe = {
             "failureThreshold": 10,
             "exec": {"command": ["/bin/true"]},

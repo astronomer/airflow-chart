@@ -67,7 +67,7 @@ class TestAirflowScheduler:
         assert "/usr/local/bin/clean-airflow-logs" in c_by_name["scheduler-log-groomer"]["args"]
         assert env in c_by_name["scheduler-log-groomer"]["env"]
 
-    def test_scheduler_liveliness_and_readiness_probes_are_configurable_with_gitsync_enabled(self, kube_version):
+    def test_scheduler_liveness_and_readiness_probes_are_configurable_with_gitsync_enabled(self, kube_version):
         livenessProbe = {
             "failureThreshold": 10,
             "exec": {"command": ["/bin/true"]},
