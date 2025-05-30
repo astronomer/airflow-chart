@@ -7,12 +7,12 @@ class TestTriggerer:
     def test_triggerer_log_grommer_defaults(self):
         """Test Triggerer  Log Groomer defaults."""
         default_env_vars = [
-            {"name": "AIRFLOW__LOG_RETENTION_DAYS", "value": "15"},
-            {"name": "AIRFLOW_HOME", "value": "/usr/local/airflow"},
+            {"name": "AIRFLOW__LOG_RETENTION_DAYS", "value": "333"},
+            {"name": "AIRFLOW_HOME", "value": "/some/dummy/airflow_home"},
         ]
         docs = render_chart(
             values={
-                "airflow": {"airflowVersion": "2.4.3"},
+                "airflow": {"airflowVersion": "10.20.30"},
             },
             show_only=["charts/airflow/templates/triggerer/triggerer-deployment.yaml"],
         )
@@ -23,11 +23,11 @@ class TestTriggerer:
 
     def test_triggerer_log_grommer_overrides(self):
         """Test Triggerer  Log Groomer with custom env vars."""
-        env = {"name": "ASTRONOMER__AIRFLOW___LOG_RETENTION_DAYS", "value": "5"}
+        env = {"name": "ASTRONOMER__AIRFLOW___LOG_RETENTION_DAYS", "value": "777"}
         docs = render_chart(
             values={
                 "airflow": {
-                    "airflowVersion": "2.4.3",
+                    "airflowVersion": "40.50.60",
                     "triggerer": {"logGroomerSidecar": {"env": [env]}},
                 },
             },
@@ -39,40 +39,62 @@ class TestTriggerer:
         assert env in c_by_name["triggerer-log-groomer"]["env"]
 
     def test_triggerer_liveness_and_readiness_probes_are_configurable_with_gitsync_enabled(self):
-        livenessProbe = {
-            "failureThreshold": 10,
-            "exec": {"command": ["/bin/true"]},
-            "initialDelaySeconds": 0,
-            "periodSeconds": 1,
-            "timeoutSeconds": 5,
+        """Test Triggerer liveness and readiness probes are configurable with git sync enabled."""
+        git_sync_livenessProbe = {
+            "failureThreshold": 999,
+            "exec": {"command": ["/dummy/livenessProbe"]},
+            "initialDelaySeconds": 999,
+            "periodSeconds": 999,
+            "timeoutSeconds": 999,
         }
-        readinessProbe = {
-            "failureThreshold": 10,
-            "exec": {"command": ["/bin/true"]},
-            "initialDelaySeconds": 0,
-            "periodSeconds": 1,
-            "timeoutSeconds": 5,
+        git_sync_readinessProbe = {
+            "failureThreshold": 888,
+            "exec": {"command": ["/dummy/redinessProbe"]},
+            "initialDelaySeconds": 888,
+            "periodSeconds": 888,
+            "timeoutSeconds": 888,
         }
-        docs = render_chart(
-            values={
-                "airflow": {
-                    "airflowVersion": "2.4.3",
-                    "dags": {
-                        "gitSync": {
-                            "enabled": True,
-                            "livenessProbe": livenessProbe,
-                            "readinessProbe": readinessProbe,
-                        },
+        triggerer_liveness_probe_data = {
+            "initialDelaySeconds": 777,
+            "timeoutSeconds": 777,
+            "failureThreshold": 777,
+            "periodSeconds": 777,
+            "command": ["/dummy/airflow/livenessProbe"],
+        }
+        triggerer_readiness_probe_data = {
+            "initialDelaySeconds": 666,
+            "timeoutSeconds": 666,
+            "failureThreshold": 666,
+            "periodSeconds": 666,
+            "command": ["/dummy/airflow/readinessProbe"],
+        }
+        values = {
+            "airflow": {
+                "airflowVersion": "70.80.90",
+                "dags": {
+                    "gitSync": {
+                        "enabled": True,
+                        "livenessProbe": git_sync_livenessProbe,
+                        "readinessProbe": git_sync_readinessProbe,
+                    },
+                },
+                "triggerer": {
+                    "logGroomerSidecar": {
+                        "enabled": True,
+                        "livenessProbe": triggerer_liveness_probe_data,
+                        "readinessProbe": triggerer_readiness_probe_data,
                     },
                 },
             },
-            show_only=["charts/airflow/templates/triggerer/triggerer-deployment.yaml"],
-        )
+        }
+
+        docs = render_chart(values=values, show_only=["charts/airflow/templates/triggerer/triggerer-deployment.yaml"])
         assert len(docs) == 1
         c_by_name = get_containers_by_name(docs[0], include_init_containers=True)
-        assert "livenessProbe" in c_by_name["git-sync"]
-        assert "readinessProbe" in c_by_name["git-sync"]
+        assert "livenessProbe" not in c_by_name["git-sync-init"]
         assert "readinessProbe" not in c_by_name["git-sync-init"]
-        assert "readinessProbe" not in c_by_name["git-sync-init"]
-        assert livenessProbe == c_by_name["git-sync"]["livenessProbe"]
-        assert readinessProbe == c_by_name["git-sync"]["readinessProbe"]
+
+        assert c_by_name["git-sync"]["livenessProbe"] == git_sync_livenessProbe
+        assert c_by_name["git-sync"]["readinessProbe"] == git_sync_readinessProbe
+        assert c_by_name["triggerer-log-groomer"]["livenessProbe"] == triggerer_liveness_probe_data
+        assert c_by_name["triggerer-log-groomer"]["readinessProbe"] == triggerer_readiness_probe_data
