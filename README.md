@@ -154,7 +154,7 @@ kubectl get pods --all-namespaces
 helm list -n airflow
 ```
 
-Run `kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow`
+Run `kubectl port-forward svc/airflow-api-server 8080:8080 -n airflow`
 to port-forward the Airflow UI to http://localhost:8080/ to confirm Airflow is working.
 Login as _admin_ and password _admin_.
 
