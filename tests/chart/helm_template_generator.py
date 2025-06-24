@@ -86,7 +86,7 @@ def render_chart(
     kube_version: str = default_version,
     namespace: str | None = None,
     validate_objects: bool = True,
-):
+) -> list:
     """Render a helm chart into dictionaries."""
     values = values or {}
     chart_dir = chart_dir or sys.path[0]
@@ -118,7 +118,7 @@ def render_chart(
         try:
             manifests = subprocess.check_output(command, stderr=subprocess.PIPE)
             if not manifests:
-                return None
+                return []
         except subprocess.CalledProcessError as error:
             if DEBUG:
                 print("ERROR: subprocess.CalledProcessError:")
