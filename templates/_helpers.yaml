@@ -171,7 +171,7 @@ Create the name of the dag-server service account to use
 {{- if .Values.dagDeploy.serviceAccount.create -}}
     {{ default (printf "%s-dag-server" (include "airflow.fullname" .)) .Values.dagDeploy.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.dagDeploy.serviceAccount.name }}
+    {{- tpl (default "default" .Values.dagDeploy.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -182,7 +182,7 @@ Create the name of the git-sync-relay service account to use
 {{- if .Values.gitSyncRelay.serviceAccount.create -}}
     {{ default (printf "%s-git-sync-relay" (include "airflow.fullname" .)) .Values.gitSyncRelay.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.gitSyncRelay.serviceAccount.name }}
+    {{- tpl (default "default" .Values.gitSyncRelay.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -193,7 +193,7 @@ Create the name of the webserver service account to use
 {{- if .Values.airflow.webserver.serviceAccount.create -}}
     {{ default (printf "%s-webserver" (include "airflow.serviceAccountName" .)) .Values.airflow.webserver.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.webserver.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.webserver.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -204,7 +204,7 @@ Create the name of the redis service account to use
 {{- if .Values.airflow.redis.serviceAccount.create -}}
     {{ default (printf "%s-redis" (include "airflow.serviceAccountName" .)) .Values.airflow.redis.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.redis.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.redis.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -215,7 +215,7 @@ Create the name of the flower service account to use
 {{- if .Values.airflow.flower.serviceAccount.create -}}
     {{ default (printf "%s-flower" (include "airflow.serviceAccountName" .)) .Values.airflow.flower.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.flower.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.flower.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -226,7 +226,7 @@ Create the name of the scheduler service account to use
 {{- if .Values.airflow.scheduler.serviceAccount.create -}}
     {{ default (printf "%s-scheduler" (include "airflow.serviceAccountName" .)) .Values.airflow.scheduler.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.scheduler.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.scheduler.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -237,7 +237,7 @@ Create the name of the statsd service account to use
 {{- if .Values.airflow.statsd.serviceAccount.create -}}
     {{ default (printf "%s-statsd" (include "airflow.serviceAccountName" .)) .Values.airflow.statsd.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.statsd.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.statsd.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -248,7 +248,7 @@ Create the name of the create user job service account to use
 {{- if .Values.airflow.createUserJob.serviceAccount.create -}}
     {{ default (printf "%s-create-user-job" (include "airflow.serviceAccountName" .)) .Values.airflow.createUserJob.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.createUserJob.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.createUserJob.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -259,7 +259,7 @@ Create the name of the migrate database job service account to use
 {{- if .Values.airflow.migrateDatabaseJob.serviceAccount.create -}}
     {{ default (printf "%s-migrate-database-job" (include "airflow.serviceAccountName" .)) .Values.airflow.migrateDatabaseJob.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.migrateDatabaseJob.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.migrateDatabaseJob.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -270,7 +270,7 @@ Create the name of the worker service account to use
 {{- if .Values.airflow.workers.serviceAccount.create -}}
     {{ default (printf "%s-worker" (include "airflow.serviceAccountName" .)) .Values.airflow.workers.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.workers.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.workers.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -281,7 +281,7 @@ Create the name of the triggerer service account to use
 {{- if .Values.airflow.triggerer.serviceAccount.create -}}
     {{ default (printf "%s-triggerer" (include "airflow.serviceAccountName" .)) .Values.airflow.triggerer.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.triggerer.serviceAccount.name }}
+    {{- tpl(default "default" .Values.airflow.triggerer.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -292,7 +292,7 @@ Create the name of the pgbouncer service account to use
 {{- if .Values.airflow.pgbouncer.serviceAccount.create -}}
     {{ default (printf "%s-pgbouncer" (include "airflow.serviceAccountName" .)) .Values.airflow.pgbouncer.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.pgbouncer.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.pgbouncer.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -303,7 +303,7 @@ Create the name of the cleanup service account to use
 {{- if .Values.airflow.cleanup.serviceAccount.create -}}
     {{ default (printf "%s-cleanup" (include "airflow.serviceAccountName" .)) .Values.airflow.cleanup.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.cleanup.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.cleanup.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -312,7 +312,7 @@ Create the name of the cleanup service account to use
 {{- if .Values.airflow.dagProcessor.serviceAccount.create }}
   {{- default (printf "%s-dag-processor" (include "airflow.serviceAccountName" .)) .Values.airflow.dagProcessor.serviceAccount.name }}
 {{- else }}
-  {{- default "default" .Values.airflow.dagProcessor.serviceAccount.name }}
+  {{- tpl (default "default" .Values.airflow.dagProcessor.serviceAccount.name) . -}}
 {{- end }}
 {{- end }}
 
