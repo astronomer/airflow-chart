@@ -281,7 +281,7 @@ Create the name of the triggerer service account to use
 {{- if .Values.airflow.triggerer.serviceAccount.create -}}
     {{ default (printf "%s-triggerer" (include "airflow.serviceAccountName" .)) .Values.airflow.triggerer.serviceAccount.name }}
 {{- else -}}
-    {{- tpl(default "default" .Values.airflow.triggerer.serviceAccount.name) . -}}
+    {{- tpl (default "default" .Values.airflow.triggerer.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
