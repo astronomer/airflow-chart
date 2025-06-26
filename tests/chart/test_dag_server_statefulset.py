@@ -313,9 +313,12 @@ class TestDagServerStatefulSet:
                     "enabled": True,
                 },
             },
-            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml",
+                       "templates/dag-deploy/dag-server-serviceaccount.yaml"],
         )
         assert len(docs) == 1
+        service_accounts = [sa for sa in docs if sa.get("kind") == "ServiceAccount"]
+        assert len(service_accounts) == 0
         doc = docs[0]
         assert doc["kind"] == "StatefulSet"
         assert doc["metadata"]["name"] == "release-name-dag-server"

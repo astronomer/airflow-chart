@@ -357,9 +357,12 @@ class TestGitSyncRelayDeployment:
                     },
                 },
             },
-            show_only=["templates/git-sync-relay/git-sync-relay-deployment.yaml"],
+            show_only=["templates/git-sync-relay/git-sync-relay-deployment.yaml",
+                       "templates/git-sync-relay/git-sync-relay-serviceaccount.yaml"],
         )
         assert len(docs) == 1
+        service_accounts = [sa for sa in docs if sa.get("kind") == "ServiceAccount"]
+        assert len(service_accounts) == 0
         doc = docs[0]
         assert doc["kind"] == "Deployment"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
