@@ -354,16 +354,12 @@ class TestGitSyncRelayDeployment:
                     "serviceAccount": {
                         "create": False,
                         "name": "custom-{{ .Release.Name }}-dag-processor",
-            },
+                    },
                 },
-            }, 
+            },
             show_only=["templates/git-sync-relay/git-sync-relay-deployment.yaml"],
         )
         assert len(docs) == 1
         doc = docs[0]
         assert doc["kind"] == "Deployment"
-        assert doc['metadata']['name'] == "release-name-git-sync-relay"
-
-
-
-        
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"

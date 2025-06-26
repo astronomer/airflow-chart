@@ -307,15 +307,15 @@ class TestDagServerStatefulSet:
                     "serviceAccount": {
                         "create": False,
                         "name": "custom-{{ .Release.Name }}-dag-processor",
-            },
+                    },
                 },
                 "dagDeploy": {
-                    "enabled": True
-,                }
-            }, 
+                    "enabled": True,
+                },
+            },
             show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
         )
         assert len(docs) == 1
         doc = docs[0]
         assert doc["kind"] == "StatefulSet"
-        assert doc['metadata']['name'] == "release-name-dag-server"
+        assert doc["metadata"]["name"] == "release-name-dag-server"
