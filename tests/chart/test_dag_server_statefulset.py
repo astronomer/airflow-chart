@@ -310,8 +310,7 @@ class TestDagServerStatefulSet:
                     },
                 },
             },
-            show_only=["templates/dag-deploy/dag-server-statefulset.yaml",
-                       "templates/dag-deploy/dag-server-serviceaccount.yaml"],
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml", "templates/dag-deploy/dag-server-serviceaccount.yaml"],
         )
         assert len(docs) == 1
         service_accounts = [sa for sa in docs if sa.get("kind") == "ServiceAccount"]
