@@ -296,3 +296,25 @@ class TestDagServerStatefulSet:
         assert livenessProbe == c_by_name["auth-proxy"]["livenessProbe"]
         assert readinessProbe == c_by_name["sidecar-log-consumer"]["readinessProbe"]
         assert livenessProbe == c_by_name["sidecar-log-consumer"]["livenessProbe"]
+
+    def test_dag_server_service_account_with_template(self, kube_version):
+        """Test dag-server service account with template."""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "dagDeploy": {
+                    "enabled": True,
+                    "serviceAccount": {
+                        "create": False,
+                        "name": "custom-{{ .Release.Name }}-dag-processor",
+                    },
+                },
+            },
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml", "templates/dag-deploy/dag-server-serviceaccount.yaml"],
+        )
+        assert len(docs) == 1
+        service_accounts = [sa for sa in docs if sa.get("kind") == "ServiceAccount"]
+        assert len(service_accounts) == 0
+        doc = docs[0]
+        assert doc["kind"] == "StatefulSet"
+        assert doc["metadata"]["name"] == "release-name-dag-server"
