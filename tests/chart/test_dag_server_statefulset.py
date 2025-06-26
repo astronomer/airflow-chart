@@ -302,7 +302,7 @@ class TestDagServerStatefulSet:
         docs = render_chart(
             kube_version=kube_version,
             values={
-                "gitSyncRelay": {
+                "dagDeploy": {
                     "enabled": True,
                     "serviceAccount": {
                         "create": False,
