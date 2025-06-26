@@ -343,3 +343,27 @@ class TestGitSyncRelayDeployment:
             "-c",
             "/entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
         ]
+
+    def test_git_sync_service_account_with_template(self, kube_version):
+        """Test git-sync-relay service account with template."""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "gitSyncRelay": {
+                    "enabled": True,
+                    "serviceAccount": {
+                        "create": False,
+                        "name": "custom-{{ .Release.Name }}-dag-processor",
+            },
+                },
+            }, 
+            show_only=["templates/git-sync-relay/git-sync-relay-deployment.yaml"],
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc['metadata']['name'] == "release-name-git-sync-relay"
+
+
+
+        
