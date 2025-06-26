@@ -309,9 +309,6 @@ class TestDagServerStatefulSet:
                         "name": "custom-{{ .Release.Name }}-dag-processor",
                     },
                 },
-                "dagDeploy": {
-                    "enabled": True,
-                },
             },
             show_only=["templates/dag-deploy/dag-server-statefulset.yaml",
                        "templates/dag-deploy/dag-server-serviceaccount.yaml"],
