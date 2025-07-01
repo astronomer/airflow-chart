@@ -9,5 +9,5 @@ keywords:
   - airflow
 dependencies:
   - name: airflow
-    version: 1.15.4-astro
-    repository: https://github.com/astronomer/airflow/releases/download/oss-helm-chart/1.15.4-astro
+    version: 1.15.5-astro
+    repository: https://github.com/astronomer/airflow/releases/download/oss-helm-chart/1.15.5-astro
