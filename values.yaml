@@ -651,3 +651,6 @@ gitSyncRelay:
 certgenerator:
   extraAnnotations: {}
   affinity: {}
+
+# Labels that are attached to all pods created by the airflow-chart, but not the sub-charts.
+labels: {}
