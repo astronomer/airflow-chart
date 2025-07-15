@@ -26,6 +26,9 @@ spec:
         release: {{ .Release.Name }}
         chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
         heritage: {{ .Release.Service }}
+        {{- if .Values.labels }}
+        {{- .Values.labels | toYaml | nindent 8 }}
+        {{- end }}
     spec:
       {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
       imagePullSecrets:

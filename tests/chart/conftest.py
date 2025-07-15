@@ -16,13 +16,12 @@
 # under the License.
 
 import subprocess
-from pathlib import Path
 
 import docker
 import pytest
 from filelock import FileLock
 
-git_root_dir = [x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()][-1]
+from tests import git_root_dir
 
 
 @pytest.fixture(autouse=True, scope="session")
