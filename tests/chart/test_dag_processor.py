@@ -19,8 +19,8 @@ class TestDagProcessor:
         """Test Dag Processor enabled defaults with log groomer."""
         default_env_vars = [
             {"name": "AIRFLOW__LOG_RETENTION_DAYS", "value": "15"},
+            {"name": "AIRFLOW__LOG_CLEANUP_FREQUENCY_MINUTES", "value": "15"},
             {"name": "AIRFLOW_HOME", "value": "/usr/local/airflow"},
-            {'name': 'AIRFLOW__LOG_CLEANUP_FREQUENCY_MINUTES', 'value': '15'},
         ]
         docs = render_chart(
             values={
