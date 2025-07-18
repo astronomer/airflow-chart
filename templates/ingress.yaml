@@ -62,7 +62,7 @@ spec:
                   {{- else }}
                   name: airflow-ui
                   {{- end }}
-              {{- end }} 
+              {{- end }}
     - host: {{- include "airflow_subdomain" . | indent 1 }}
       http:
         paths:
