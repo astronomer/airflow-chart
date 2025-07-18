@@ -46,7 +46,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-              {{- if semverCompare ">=3.0.0" .Values.airflowVersion }}
+              {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
                 name: {{ .Release.Name }}-api-server
                 port:
                   {{- if .Values.authSidecar.enabled  }}
