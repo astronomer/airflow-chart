@@ -88,8 +88,7 @@ The following tables lists the configurable parameters of the Astronomer chart a
 | Parameter                              | Description                                                                                               | Default                       |
 | :------------------------------------- | :-------------------------------------------------------------------------------------------------------- | :---------------------------- |
 | `ingress.enabled`                      | Enable Kubernetes Ingress support                                                                         | `false`                       |
-| `ingress.acme`                         | Add acme annotations to Ingress object                                                                    | `false`                       |
-| `ingress.tlsSecretName`                | Name of secret that contains a TLS secret                                                                 | `~`                           |
+| `ingress.tlsSecretName`                | Name of secret that contains a TLS certificate and key                                                    | `~`                           |
 | `ingress.webserverAnnotations`         | Annotations added to Webserver Ingress object                                                             | `{}`                          |
 | `ingress.flowerAnnotations`            | Annotations added to Flower Ingress object                                                                | `{}`                          |
 | `ingress.baseDomain`                   | Base domain for VHOSTs                                                                                    | `~`                           |
