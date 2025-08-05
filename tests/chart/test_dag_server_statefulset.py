@@ -318,3 +318,35 @@ class TestDagServerStatefulSet:
         doc = docs[0]
         assert doc["kind"] == "StatefulSet"
         assert doc["metadata"]["name"] == "release-name-dag-server"
+
+    def test_dag_server_affinity(self, kube_version):
+        """Test that dagserver affinity correctly inserts the affinity."""
+        affinity = {
+            "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                    "nodeSelectorTerms": [
+                        {
+                            "matchExpressions": [
+                                {
+                                    "key": "foo",
+                                    "operator": "In",
+                                    "values": ["bar", "baz"],
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+        values = {"dagDeploy": {"enabled": True,
+                                "affinity": affinity }}
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
+        )
+        doc = docs[0]
+        common_default_tests(doc)
+        assert len(docs) == 1
+        assert docs[0]["spec"]["template"]["spec"]["affinity"] == affinity

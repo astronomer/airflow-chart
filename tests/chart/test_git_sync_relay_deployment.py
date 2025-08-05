@@ -368,3 +368,38 @@ class TestGitSyncRelayDeployment:
         doc = docs[0]
         assert doc["kind"] == "Deployment"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+
+
+    def test_git_sync_relay_affinity(self, kube_version):
+        """Test that git sync relay affinity correctly inserts the affinity."""
+        affinity = {
+            "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                    "nodeSelectorTerms": [
+                        {
+                            "matchExpressions": [
+                                {
+                                    "key": "foo",
+                                    "operator": "In",
+                                    "values": ["bar", "baz"],
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+        values={
+                "gitSyncRelay": {
+                    "enabled": True,
+                    "affinity": affinity
+                },
+            }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        assert docs[0]["spec"]["template"]["spec"]["affinity"] == affinity
