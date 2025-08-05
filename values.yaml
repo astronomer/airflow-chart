@@ -571,6 +571,9 @@ dagDeploy:
     size: 10Gi
     storageClassName: ~
     annotations: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
 
   ports:
     dagServerHttp: 8000
@@ -647,6 +650,9 @@ gitSyncRelay:
     create: true
     annotations: {}
     name: ~
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
 
 certgenerator:
   extraAnnotations: {}
