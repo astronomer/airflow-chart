@@ -338,8 +338,7 @@ class TestDagServerStatefulSet:
                 }
             }
         }
-        values = {"dagDeploy": {"enabled": True,
-                                "affinity": affinity }}
+        values = {"dagDeploy": {"enabled": True, "affinity": affinity}}
 
         docs = render_chart(
             kube_version=kube_version,

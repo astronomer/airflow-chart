@@ -369,7 +369,6 @@ class TestGitSyncRelayDeployment:
         assert doc["kind"] == "Deployment"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
 
-
     def test_git_sync_relay_affinity(self, kube_version):
         """Test that git sync relay affinity correctly inserts the affinity."""
         affinity = {
@@ -389,12 +388,9 @@ class TestGitSyncRelayDeployment:
                 }
             }
         }
-        values={
-                "gitSyncRelay": {
-                    "enabled": True,
-                    "affinity": affinity
-                },
-            }
+        values = {
+            "gitSyncRelay": {"enabled": True, "affinity": affinity},
+        }
 
         docs = render_chart(
             kube_version=kube_version,
