@@ -319,26 +319,16 @@ class TestDagServerStatefulSet:
         assert doc["kind"] == "StatefulSet"
         assert doc["metadata"]["name"] == "release-name-dag-server"
 
-    def test_dag_server_affinity(self, kube_version):
+    def test_dag_server_affinity(self, kube_version, airflow_node_pool_config):
         """Test that dagserver affinity correctly inserts the affinity."""
-        affinity = {
-            "nodeAffinity": {
-                "requiredDuringSchedulingIgnoredDuringExecution": {
-                    "nodeSelectorTerms": [
-                        {
-                            "matchExpressions": [
-                                {
-                                    "key": "foo",
-                                    "operator": "In",
-                                    "values": ["bar", "baz"],
-                                }
-                            ]
-                        }
-                    ]
-                }
+        values = {
+            "dagDeploy": {
+                "enabled": True,
+                "nodeSelector": airflow_node_pool_config["nodeSelector"],
+                "affinity": airflow_node_pool_config["affinity"],
+                "tolerations": airflow_node_pool_config["tolerations"],
             }
         }
-        values = {"dagDeploy": {"enabled": True, "affinity": affinity}}
 
         docs = render_chart(
             kube_version=kube_version,
@@ -348,4 +338,6 @@ class TestDagServerStatefulSet:
         doc = docs[0]
         common_default_tests(doc)
         assert len(docs) == 1
-        assert docs[0]["spec"]["template"]["spec"]["affinity"] == affinity
+        assert docs[0]["spec"]["template"]["spec"]["affinity"] == airflow_node_pool_config["affinity"]
+        assert docs[0]["spec"]["template"]["spec"]["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
+        assert docs[0]["spec"]["template"]["spec"]["tolerations"] == airflow_node_pool_config["tolerations"]
