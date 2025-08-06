@@ -48,6 +48,10 @@ class TestGitSyncRelayDeployment:
         git_sync_env = container_env_to_dict(c_by_name["git-sync"])
         assert git_sync_env.get("GIT_SYNC_REPO_FETCH_MODE") == "poll"
         assert not git_sync_env.get("GIT_SYNC_WEBHOOK_SECRET")
+        spec = docs[0]["spec"]["template"]["spec"]
+        assert spec["nodeSelector"] == {}
+        assert spec["affinity"] == {}
+        assert spec["tolerations"] == []
 
     def test_gsr_deployment_gsr_repo_share_mode_volume(self, kube_version):
         """Test that a valid deployment is rendered when git-sync-relay is enabled with repoShareMode=shared_volume."""
@@ -369,27 +373,15 @@ class TestGitSyncRelayDeployment:
         assert doc["kind"] == "Deployment"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
 
-    def test_git_sync_relay_affinity(self, kube_version):
-        """Test that git sync relay affinity correctly inserts the affinity."""
-        affinity = {
-            "nodeAffinity": {
-                "requiredDuringSchedulingIgnoredDuringExecution": {
-                    "nodeSelectorTerms": [
-                        {
-                            "matchExpressions": [
-                                {
-                                    "key": "foo",
-                                    "operator": "In",
-                                    "values": ["bar", "baz"],
-                                }
-                            ]
-                        }
-                    ]
-                }
-            }
-        }
+    def test_git_sync_relay_affinity(self, kube_version, airflow_node_pool_config):
+        """Test that git sync relay affinity, node pool and tolleration configs."""
         values = {
-            "gitSyncRelay": {"enabled": True, "affinity": affinity},
+            "gitSyncRelay": {
+                "enabled": True,
+                "nodeSelector": airflow_node_pool_config["nodeSelector"],
+                "affinity": airflow_node_pool_config["affinity"],
+                "tolerations": airflow_node_pool_config["tolerations"],
+            },
         }
 
         docs = render_chart(
@@ -398,4 +390,7 @@ class TestGitSyncRelayDeployment:
             values=values,
         )
         assert len(docs) == 1
-        assert docs[0]["spec"]["template"]["spec"]["affinity"] == affinity
+        spec = docs[0]["spec"]["template"]["spec"]
+        assert spec["affinity"] == airflow_node_pool_config["affinity"]
+        assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
+        assert spec["tolerations"] == airflow_node_pool_config["tolerations"]
