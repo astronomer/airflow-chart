@@ -62,6 +62,10 @@ class TestDagServerStatefulSet:
         assert env_vars["HOUSTON_SERVICE_ENDPOINT"] == "http://-houston..svc.cluster.local.:8871/v1/"
 
         assert "persistentVolumeClaimRetentionPolicy" not in doc["spec"]
+        spec = docs[0]["spec"]["template"]["spec"]
+        assert spec["nodeSelector"] == {}
+        assert spec["affinity"] == {}
+        assert spec["tolerations"] == []
 
     def test_dag_server_statefulset_houston_service_endpoint_override(self, kube_version):
         """Test that we see the right HOUSTON_SERVICE_ENDPOINT value when the relevant variables are set."""
@@ -318,3 +322,27 @@ class TestDagServerStatefulSet:
         doc = docs[0]
         assert doc["kind"] == "StatefulSet"
         assert doc["metadata"]["name"] == "release-name-dag-server"
+
+    def test_dag_server_affinity(self, kube_version, airflow_node_pool_config):
+        """Test that dagserver affinity correctly inserts affinity, node pool and toleration configs."""
+        values = {
+            "dagDeploy": {
+                "enabled": True,
+                "nodeSelector": airflow_node_pool_config["nodeSelector"],
+                "affinity": airflow_node_pool_config["affinity"],
+                "tolerations": airflow_node_pool_config["tolerations"],
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
+        )
+        doc = docs[0]
+        common_default_tests(doc)
+        assert len(docs) == 1
+        spec = docs[0]["spec"]["template"]["spec"]
+        assert spec["affinity"] == airflow_node_pool_config["affinity"]
+        assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
+        assert spec["tolerations"] == airflow_node_pool_config["tolerations"]
