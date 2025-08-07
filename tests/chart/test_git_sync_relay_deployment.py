@@ -374,7 +374,7 @@ class TestGitSyncRelayDeployment:
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
 
     def test_git_sync_relay_affinity(self, kube_version, airflow_node_pool_config):
-        """Test that git sync relay affinity, node pool and tolleration configs."""
+        """Test that git sync relay affinity, node pool and toleration configs."""
         values = {
             "gitSyncRelay": {
                 "enabled": True,
