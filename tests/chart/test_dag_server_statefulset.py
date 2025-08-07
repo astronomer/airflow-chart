@@ -324,7 +324,7 @@ class TestDagServerStatefulSet:
         assert doc["metadata"]["name"] == "release-name-dag-server"
 
     def test_dag_server_affinity(self, kube_version, airflow_node_pool_config):
-        """Test that dagserver affinity correctly inserts affinity, node pool and tolleration configs."""
+        """Test that dagserver affinity correctly inserts affinity, node pool and toleration configs."""
         values = {
             "dagDeploy": {
                 "enabled": True,
