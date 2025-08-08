@@ -610,6 +610,7 @@ gitSyncRelay:
   # webhookSecurityKey is only needed when repoFetchMode=webhook
   webhookSecretKey: ~
   securityContext: {}
+  terminationGracePeriodSeconds: 30
   gitDaemon: {}
   gitSync:
     webhookPort: 8000

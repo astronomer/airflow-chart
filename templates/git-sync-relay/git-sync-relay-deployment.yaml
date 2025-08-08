@@ -2,6 +2,9 @@
 ## git-sync-relay Deployment ##
 ###############################
 {{- if .Values.gitSyncRelay.enabled }}
+{{- $nodeSelector := or .Values.gitSyncRelay.nodeSelector .Values.airflow.nodeSelector }}
+{{- $affinity := or .Values.gitSyncRelay.affinity .Values.airflow.affinity }}
+{{- $tolerations := or .Values.gitSyncRelay.tolerations .Values.airflow.tolerations }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,9 +34,10 @@ spec:
       imagePullSecrets:
         - name: {{ template "astro.registry_secret" . }}
       {{- end }}
-      nodeSelector: {{ toYaml .Values.gitSyncRelay.nodeSelector | nindent 8 }}
-      affinity: {{ toYaml .Values.gitSyncRelay.affinity | nindent 8 }}
-      tolerations: {{ toYaml .Values.gitSyncRelay.tolerations | nindent 8 }}
+      nodeSelector: {{- toYaml $nodeSelector | nindent 8 }}
+      affinity: {{- toYaml $affinity | nindent 8 }}
+      tolerations: {{- toYaml $tolerations | nindent 8 }}
+      terminationGracePeriodSeconds: {{ .Values.gitSyncRelay.terminationGracePeriodSeconds }}
       serviceAccountName: {{ template "astro.gitSyncRelay.serviceAccountName" . }}
       securityContext: {{ toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
       volumes:

@@ -323,6 +323,32 @@ class TestDagServerStatefulSet:
         assert doc["kind"] == "StatefulSet"
         assert doc["metadata"]["name"] == "release-name-dag-server"
 
+    def test_dag_server_airflow_affinity(self, kube_version, airflow_node_pool_config):
+        """Test that dagserver affinity correctly inserts global airflow affinity, node pool and toleration configs."""
+        values = {
+            "airflow": {
+                "nodeSelector": airflow_node_pool_config["nodeSelector"],
+                "affinity": airflow_node_pool_config["affinity"],
+                "tolerations": airflow_node_pool_config["tolerations"],
+            },
+            "dagDeploy": {
+                "enabled": True,
+            },
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
+        )
+        doc = docs[0]
+        common_default_tests(doc)
+        assert len(docs) == 1
+        spec = docs[0]["spec"]["template"]["spec"]
+        assert spec["affinity"] == airflow_node_pool_config["affinity"]
+        assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
+        assert spec["tolerations"] == airflow_node_pool_config["tolerations"]
+
     def test_dag_server_affinity(self, kube_version, airflow_node_pool_config):
         """Test that dagserver affinity correctly inserts affinity, node pool and toleration configs."""
         values = {
