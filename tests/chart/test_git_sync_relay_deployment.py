@@ -373,6 +373,28 @@ class TestGitSyncRelayDeployment:
         assert doc["kind"] == "Deployment"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
 
+    def test_git_sync_relay_airflow_affinity(self, kube_version, airflow_node_pool_config):
+        """Test that git sync relay global airflow affinity, node pool and toleration configs."""
+        values = {
+            "airflow": {
+                "nodeSelector": airflow_node_pool_config["nodeSelector"],
+                "affinity": airflow_node_pool_config["affinity"],
+                "tolerations": airflow_node_pool_config["tolerations"],
+            },
+            "gitSyncRelay": {"enabled": True},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        spec = docs[0]["spec"]["template"]["spec"]
+        assert spec["affinity"] == airflow_node_pool_config["affinity"]
+        assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
+        assert spec["tolerations"] == airflow_node_pool_config["tolerations"]
+
     def test_git_sync_relay_affinity(self, kube_version, airflow_node_pool_config):
         """Test that git sync relay affinity, node pool and toleration configs."""
         values = {
