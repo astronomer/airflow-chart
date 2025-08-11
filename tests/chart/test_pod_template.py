@@ -27,6 +27,9 @@ class TestPodTemplate:
         assert {"tier": "airflow", "component": "worker", "release": "release-name"} == podTemplate["metadata"]["labels"]
         assert "runtimeClassName" not in podTemplate["spec"]
         assert "priorityClassName" not in podTemplate["spec"]
+        assert podTemplate["spec"]["nodeSelector"] == {}
+        assert podTemplate["spec"]["affinity"] == {}
+        assert podTemplate["spec"]["tolerations"] == []
 
     def test_pod_template_labels_overrides(self, kube_version):
         """Test airflow pod template labels overrides."""
