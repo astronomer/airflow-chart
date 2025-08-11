@@ -73,3 +73,34 @@ def docker_client():
         client = docker.from_env()
         yield client
         client.close()
+
+
+@pytest.fixture(scope="function")
+def airflow_node_pool_config():
+    yield {
+        "nodeSelector": {"role": "airflow"},
+        "affinity": {
+            "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                    "nodeSelectorTerms": [
+                        {
+                            "matchExpressions": [
+                                {
+                                    "key": "astronomer.io/multi-tenant",
+                                    "operator": "In",
+                                    "values": ["false"],
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "tolerations": [
+            {
+                "effect": "NoSchedule",
+                "key": "airflow",
+                "operator": "Exists",
+            }
+        ],
+    }
