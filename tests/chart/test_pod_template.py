@@ -209,7 +209,7 @@ class TestPodTemplate:
         assert podTemplate["spec"]["tolerations"] == airflow_node_pool_config["tolerations"]
 
     def test_pod_template_worker_scheduling_overrides(self, kube_version, airflow_node_pool_config):
-        """Test airflow pod template scheduling overrides."""
+        """Test that nodeSelector, affinity, and tolerations defined at the worker level take precedence over global values."""
         nodeSelector = {"role": "worker"}
         tolerations = [
             {
