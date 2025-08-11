@@ -185,3 +185,60 @@ class TestPodTemplate:
         podTemplate = yaml.safe_load(doc["data"]["pod_template_file.yaml"])
         assert {"runAsNonRoot": False} == podTemplate["spec"]["securityContext"]
         assert {"allowPrivilegeEscalation": False} == podTemplate["spec"]["containers"][0]["securityContext"]
+
+    def test_pod_template_airflow_scheduling_overrides(self, kube_version, airflow_node_pool_config):
+        """Test airflow pod template scheduling overrides."""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "airflow": {
+                    "labels": {"service": "airflow"},
+                    "nodeSelector": airflow_node_pool_config["nodeSelector"],
+                    "affinity": airflow_node_pool_config["affinity"],
+                    "tolerations": airflow_node_pool_config["tolerations"],
+                }
+            },
+            show_only="charts/airflow/templates/configmaps/configmap.yaml",
+        )
+        common_pod_template_test(docs)
+        doc = docs[0]
+        podTemplate = yaml.safe_load(doc["data"]["pod_template_file.yaml"])
+
+        assert podTemplate["spec"]["affinity"] == airflow_node_pool_config["affinity"]
+        assert podTemplate["spec"]["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
+        assert podTemplate["spec"]["tolerations"] == airflow_node_pool_config["tolerations"]
+
+    def test_pod_template_worker_scheduling_overrides(self, kube_version, airflow_node_pool_config):
+        """Test airflow pod template scheduling overrides."""
+        nodeSelector = {"role": "worker"}
+        tolerations = [
+            {
+                "effect": "NoSchedule",
+                "key": "worker",
+                "operator": "Exists",
+            }
+        ]
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "airflow": {
+                    "labels": {"service": "airflow"},
+                    "nodeSelector": airflow_node_pool_config["nodeSelector"],
+                    "affinity": airflow_node_pool_config["affinity"],
+                    "tolerations": airflow_node_pool_config["tolerations"],
+                    "workers": {
+                        "nodeSelector": nodeSelector,
+                        "affinity": airflow_node_pool_config["affinity"],
+                        "tolerations": tolerations,
+                    },
+                },
+            },
+            show_only="charts/airflow/templates/configmaps/configmap.yaml",
+        )
+        common_pod_template_test(docs)
+        doc = docs[0]
+        podTemplate = yaml.safe_load(doc["data"]["pod_template_file.yaml"])
+
+        assert podTemplate["spec"]["affinity"] == airflow_node_pool_config["affinity"]
+        assert podTemplate["spec"]["nodeSelector"] == nodeSelector
+        assert podTemplate["spec"]["tolerations"] == tolerations
