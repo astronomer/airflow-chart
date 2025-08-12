@@ -44,6 +44,15 @@ spec:
             pathType: Prefix
             backend:
               service:
+              {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
+                name: {{ .Release.Name }}-api-server
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: api-server
+                  {{- end }}
+              {{- else }}
                 name: {{ .Release.Name }}-webserver
                 port:
                   {{- if .Values.authSidecar.enabled  }}
@@ -51,6 +60,7 @@ spec:
                   {{- else }}
                   name: airflow-ui
                   {{- end }}
+              {{- end }}
     - host: {{- include "airflow_subdomain" . | indent 1 }}
       http:
         paths:
@@ -58,6 +68,15 @@ spec:
             pathType: Prefix
             backend:
               service:
+              {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
+                name: {{ .Release.Name }}-api-server
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: api-server
+                  {{- end }}
+              {{- else }}
                 name: {{ .Release.Name }}-webserver
                 port:
                   {{- if .Values.authSidecar.enabled  }}
@@ -65,6 +84,7 @@ spec:
                   {{- else }}
                   name: airflow-ui
                   {{- end }}
+              {{- end }}
 {{- end }}
 {{- if and .Values.ingress.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
 ---

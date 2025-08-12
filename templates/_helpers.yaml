@@ -90,6 +90,15 @@
         key: connection
     {{- end }}
   {{- end }}
+  {{- if semverCompare ">=3.0.0" .Values.airflowVersion }}
+  - name: AIRFLOW__API_AUTH__JWT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "fernet_key_secret" . }}
+        key: fernet-key
+  - name: AIRFLOW__CORE__AUTH_MANAGER
+    value: astronomer.runtime.auth_managers.astro.AstroAuthManager
+  {{- end }}
 {{- end }}
 
 {{ define "deployments_subdomain" -}}
