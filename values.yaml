@@ -358,6 +358,8 @@ airflow:
       # Set Flower URL prefix to empty string
       # Remove after https://github.com/apache/airflow/issues/27402 is resolved
       flower_url_prefix: ""
+    core:
+      execution_api_server_url: '{{ (printf "http://%s-api-server:%d/%s/airflow/execution/" (include "airflow.fullname" .) (int .Values.ports.apiServer) .Release.Name )  -}}'
 
     webserver:
       expose_config: True
