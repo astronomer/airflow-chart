@@ -64,16 +64,10 @@ class TestDagServerStatefulSet:
 
     def test_dag_server_statefulset_houston_service_endpoint_override(self, kube_version):
         """Test that we see the right HOUSTON_SERVICE_ENDPOINT value when the relevant variables are set."""
-        extraEnv = [{
-            "name": "HOUSTON_SERVICE_ENDPOINT",
-            "value": "http://test-release-houston.test-namespace.svc.cluster.local.:8871/v1/"
-        }]
-        values = {
-            "dagDeploy": {
-                "enabled": True,
-                "extraEnv":extraEnv
-                        }
-        }
+        extraEnv = [
+            {"name": "HOUSTON_SERVICE_ENDPOINT", "value": "http://test-release-houston.test-namespace.svc.cluster.local.:8871/v1/"}
+        ]
+        values = {"dagDeploy": {"enabled": True, "extraEnv": extraEnv}}
 
         docs = render_chart(
             kube_version=kube_version,
