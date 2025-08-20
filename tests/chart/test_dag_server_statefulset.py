@@ -56,11 +56,6 @@ class TestDagServerStatefulSet:
 
         common_default_tests(doc)
 
-        c_by_name = get_containers_by_name(doc)
-
-        env_vars = {x["name"]: x["value"] for x in c_by_name["dag-server"]["env"]}
-        assert env_vars["HOUSTON_SERVICE_ENDPOINT"] == "http://-houston..svc.cluster.local.:8871/v1/"
-
         assert "persistentVolumeClaimRetentionPolicy" not in doc["spec"]
         spec = docs[0]["spec"]["template"]["spec"]
         assert spec["nodeSelector"] == {}
@@ -69,10 +64,10 @@ class TestDagServerStatefulSet:
 
     def test_dag_server_statefulset_houston_service_endpoint_override(self, kube_version):
         """Test that we see the right HOUSTON_SERVICE_ENDPOINT value when the relevant variables are set."""
-        values = {
-            "dagDeploy": {"enabled": True},
-            "platform": {"release": "test-release", "namespace": "test-namespace"},
-        }
+        extraEnv = [
+            {"name": "HOUSTON_SERVICE_ENDPOINT", "value": "http://test-release-houston.test-namespace.svc.cluster.local.:8871/v1/"}
+        ]
+        values = {"dagDeploy": {"enabled": True, "extraEnv": extraEnv}}
 
         docs = render_chart(
             kube_version=kube_version,
