@@ -108,3 +108,24 @@ class TestLoggingSidecar:
             "index": "fluentd.${RELEASE:--}.%Y.%m.%d",
             "action": "create",
         }
+
+    def test_logging_sidecar_apiserver_filter(self, kube_version):
+        """Test that api-server logs are properly filtered and processed"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "loggingSidecar": {"enabled": True},
+            },
+            show_only="templates/logging-sidecar-configmap.yaml",
+        )
+        assert len(docs) == 1
+        vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
+
+        assert "filter_apiserver_logs" in vc["transforms"]
+        assert 'includes(["api-server"], .component)' in vc["transforms"]["filter_apiserver_logs"]["condition"]["source"]
+
+        transform_remove_fields_inputs = vc["transforms"]["transform_remove_fields"]["inputs"]
+        assert "filter_apiserver_logs" in transform_remove_fields_inputs
+
+        transform_task_log_inputs = vc["transforms"]["transform_task_log"]["inputs"]
+        assert "filter_apiserver_logs" not in transform_task_log_inputs
