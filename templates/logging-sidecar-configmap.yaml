@@ -82,6 +82,14 @@ data:
           type: "vrl"
           source: 'includes(["airflow-downgrade"], .component)'
 
+      filter_apiserver_logs:
+        type: filter
+        inputs:
+          - transform_airflow_logs
+        condition:
+          type: "vrl"
+          source: 'includes(["api-server"], .component)'
+
       transform_task_log:
         type: remap
         inputs:
@@ -114,6 +122,7 @@ data:
           - filter_gitsyncrelay_logs
           - filter_dagserver_logs
           - filter_airflow_downgrade_logs
+          - filter_apiserver_logs
         source: |
           del(.host)
           del(.file)
