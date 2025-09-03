@@ -476,6 +476,18 @@ airflow:
         name: "airflow_dagbag_size"
         labels: {}
 
+      # Accept all git-sync-relay metrics
+      - match: git_sync_relay.*
+        match_type: regex
+        name: "git_sync_relay_metric"
+        labels: {}
+      
+      # Accept all dag_deploy metrics, Adding beforehead. 
+      - match: dag_deploy.*
+        match_type: regex
+        name: "dag_deploy_metric"
+        labels: {}
+
       # drop any metric not matched
       - match: "."
         match_type: regex
@@ -647,6 +659,15 @@ gitSyncRelay:
     create: true
     annotations: {}
     name: ~
+
+  # Enable metrics for git-sync-relay
+  metricsEnabled: true
+  # Host for statsd metrics
+  statsdHost: "{{ .Release.Name }}-statsd"
+  # Port for statsd metrics
+  statsdPort: 9125
+  # Enable debug logging for git-sync-relay
+  debug: false
 
 certgenerator:
   extraAnnotations: {}
