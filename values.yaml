@@ -665,7 +665,7 @@ gitSyncRelay:
   # Host for statsd metrics
   statsdHost: "{{ .Release.Name }}-statsd"
   # Port for statsd metrics
-  statsdPort: 9125
+  statsdPort: 9102
   # Enable debug logging for git-sync-relay
   debug: false
 
