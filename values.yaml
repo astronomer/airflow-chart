@@ -477,10 +477,121 @@ airflow:
         labels: {}
 
       # Accept all git-sync-relay metrics
-      - match: git_sync_relay.*
+      # Counter Metrics
+      - match: git_sync_relay.git_sync_count
+        name: "git_sync_relay_git_sync_count"
+        labels:
+          metric_type: "counter"
+          description: "Total number of git sync operations initiated"
+      - match: git_sync_relay.git_sync_success_count
+        name: "git_sync_relay_git_sync_success_count"
+        labels:
+          metric_type: "counter"
+          description: "Total number of successful git sync operations"
+      - match: git_sync_relay.git_sync_failure_count
+        name: "git_sync_relay_git_sync_failure_count"
+        labels:
+          metric_type: "counter"
+          description: "Total number of failed git sync operations"
+      - match: git_sync_relay.git_operations_total
+        name: "git_sync_relay_git_operations_total"
+        labels:
+          metric_type: "counter"
+          description: "Total git operations (clone, fetch, clean, reset, sync)"
+      - match: git_sync_relay.rate_limit_hit_count
+        name: "git_sync_relay_rate_limit_hit_count"
+        labels:
+          metric_type: "counter"
+          description: "Number of times rate limit was encountered"
+      - match: git_sync_relay.webhook_requests_total
+        name: "git_sync_relay_webhook_requests_total"
+        labels:
+          metric_type: "counter"
+          description: "Total webhook requests received"
+      - match: git_sync_relay.webhook_errors
+        name: "git_sync_relay_webhook_errors"
+        labels:
+          metric_type: "counter"
+          description: "Total webhook errors"
+      - match: git_sync_relay.git_sync_webhook_trigger_total
+        name: "git_sync_relay_git_sync_webhook_trigger_total"
+        labels:
+          metric_type: "counter"
+          description: "Total webhook-triggered syncs"
+      - match: git_sync_relay.files_updated_total
+        name: "git_sync_relay_files_updated_total"
+        labels:
+          metric_type: "counter"
+          description: "Total files updated during sync operations"
+      # Gauge Metrics
+      - match: git_sync_relay.repo_size_bytes
+        name: "git_sync_relay_repo_size_bytes"
+        labels:
+          metric_type: "gauge"
+          description: "Size of the git repository in bytes"
+      - match: git_sync_relay.git_sync_repo_size
+        name: "git_sync_relay_git_sync_repo_size"
+        labels:
+          metric_type: "gauge"
+          description: "Git repository size in bytes"
+      - match: git_sync_relay.git_sync_duration_seconds
+        name: "git_sync_relay_git_sync_duration_seconds"
+        labels:
+          metric_type: "gauge"
+          description: "Duration of last git sync operation in seconds"
+      - match: git_sync_relay.git_sync_clone_duration
+        name: "git_sync_relay_git_sync_clone_duration"
+        labels:
+          metric_type: "gauge"
+          description: "Duration of git clone operation in seconds"
+      - match: git_sync_relay.last_sync_timestamp
+        name: "git_sync_relay_last_sync_timestamp"
+        labels:
+          metric_type: "gauge"
+          description: "Timestamp of last successful sync"
+      - match: git_sync_relay.git_sync_last_successful_sync_time-stamp
+        name: "git_sync_relay_git_sync_last_successful_sync_timestamp"
+        labels:
+          metric_type: "gauge"
+          description: "Timestamp of last successful sync operation"
+      - match: git_sync_relay.git_sync_interval_seconds
+        name: "git_sync_relay_git_sync_interval_seconds"
+        labels:
+          metric_type: "gauge"
+          description: "Git sync polling interval in seconds"
+      - match: git_sync_relay.git_sync_init_duration_seconds
+        name: "git_sync_relay_git_sync_init_duration_seconds"
+        labels:
+          metric_type: "gauge"
+          description: "Application initialization duration in seconds"
+      - match: git_sync_relay.git_sync_lag
+        name: "git_sync_relay_git_sync_lag"
+        labels:
+          metric_type: "gauge"
+          description: "Latency between commit time and sync time in seconds"
+      - match: git_sync_relay.git_sync_file_changed_count
+        name: "git_sync_relay_git_sync_file_changed_count"
+        labels:
+          metric_type: "gauge"
+          description: "Number of files changed in last sync"
+      - match: git_sync_relay.webhook_received_timestamp
+        name: "git_sync_relay_webhook_received_timestamp"
+        labels:
+          metric_type: "gauge"
+          description: "Timestamp when webhook was received"
+      # Timing Metrics (sent as timing but stored as histogram/summary)
+      - match: git_sync_relay.git_operations_duration_seconds
+        name: "git_sync_relay_git_operations_duration_seconds"
+        labels:
+          metric_type: "timing"
+          description: "Duration of individual git operations in milliseconds"
+      # Catch-all for any remaining git_sync_relay metrics
+      - match: git_sync_relay\.(.*)
         match_type: regex
-        name: "git_sync_relay_metric"
-        labels: {}
+        name: "git_sync_relay_${1}"
+        labels:
+          metric_type: "unknown"
+          description: "Unclassified git-sync-relay metric"
       
       # Accept all dag_deploy metrics, Adding beforehead. 
       - match: dag_deploy.*
@@ -665,7 +776,7 @@ gitSyncRelay:
   # Host for statsd metrics
   statsdHost: "{{ .Release.Name }}-statsd"
   # Port for statsd metrics
-  statsdPort: 9102
+  statsdPort: 9125
   # Enable debug logging for git-sync-relay
   debug: false
 
