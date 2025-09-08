@@ -198,9 +198,9 @@ airflow:
     # specific language governing permissions and limitations
     # under the License.
     ---
-    {{- $nodeSelector := or .Values.nodeSelector .Values.workers.nodeSelector }}
-    {{- $affinity := or .Values.affinity .Values.workers.affinity }}
-    {{- $tolerations := or .Values.tolerations .Values.workers.tolerations }}
+    {{- $nodeSelector := or .Values.workers.nodeSelector .Values.nodeSelector }}
+    {{- $affinity := or .Values.workers.affinity .Values.affinity }}
+    {{- $tolerations := or .Values.workers.tolerations .Values.tolerations }}
     {{- $securityContext := include "airflowPodSecurityContext" (list . .Values.workers) }}
     {{- $containerSecurityContext := include "containerSecurityContext" (list . .Values.workers) }}
     apiVersion: v1
@@ -694,6 +694,9 @@ dagDeploy:
     size: 10Gi
     storageClassName: ~
     annotations: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
 
   ports:
     dagServerHttp: 8000
@@ -730,6 +733,7 @@ gitSyncRelay:
   # webhookSecurityKey is only needed when repoFetchMode=webhook
   webhookSecretKey: ~
   securityContext: {}
+  terminationGracePeriodSeconds: 30
   gitDaemon: {}
   gitSync:
     webhookPort: 8000
@@ -770,6 +774,9 @@ gitSyncRelay:
     create: true
     annotations: {}
     name: ~
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
 
   # Enable metrics for git-sync-relay
   metricsEnabled: true
