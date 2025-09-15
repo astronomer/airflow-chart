@@ -11,7 +11,7 @@ def test_namespace_names(namespace):
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
-class TestExtraObjects:
+class TestDefaultChart:
     def test_default_chart_with_basedomain(self, kube_version):
         """Test that each template used with just baseDomain set renders."""
         docs = render_chart(kube_version=kube_version)
