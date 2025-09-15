@@ -23,6 +23,7 @@ class TestAuthSidecar:
         "templates/dag-deploy/dag-server-auth-sidecar-configmap.yaml",
         "templates/flower/flower-auth-sidecar-configmap.yaml",
         "templates/webserver/webserver-auth-sidecar-configmap.yaml",
+        "templates/api-server/api-server-auth-sidecar-configmap.yaml",
     ]
 
     def test_auth_sidecar_config_defaults(self, kube_version):
@@ -59,6 +60,48 @@ class TestAuthSidecar:
             ],
         )
         assert len(docs) == 2
+
+    def test_auth_sidecar_config_enabled_with_airflow3_apiserver(self, kube_version):
+        """Test auth sidecar config with Airflow 3.x API server"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "authSidecar": {"enabled": True},
+                "airflow": {"airflowVersion": "3.0.0"},
+            },
+            show_only=[
+                "templates/api-server/api-server-auth-sidecar-configmap.yaml",
+            ],
+        )
+        assert len(docs) == 1
+
+        doc = docs[0]
+        assert doc["kind"] == "ConfigMap"
+        assert doc["apiVersion"] == "v1"
+        assert doc["metadata"]["name"] == "release-name-api-server-nginx-conf"
+        assert doc["metadata"]["labels"]["component"] == "api-server"
+        assert "nginx.conf" in doc["data"]
+
+        nginx_conf = doc["data"]["nginx.conf"]
+        assert "upstream astro-api-server" in nginx_conf
+        assert "location ^~ /api/" in nginx_conf
+        assert "location = /auth" in nginx_conf
+        assert "location @401_auth_error" in nginx_conf
+        assert "location /healthz" in nginx_conf
+
+    def test_auth_sidecar_config_not_enabled_with_airflow2_apiserver(self, kube_version):
+        """Test auth sidecar config is not generated for Airflow 2.x"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "authSidecar": {"enabled": True},
+                "airflow": {"airflowVersion": "2.9.0"},
+            },
+            show_only=[
+                "templates/api-server/api-server-auth-sidecar-configmap.yaml",
+            ],
+        )
+        assert len(docs) == 0
 
     def test_auth_sidecar_config_with_dag_server_enabled(self, kube_version):
         """Test logging sidecar config with defaults"""
