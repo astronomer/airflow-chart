@@ -1,4 +1,4 @@
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 from . import get_containers_by_name
 

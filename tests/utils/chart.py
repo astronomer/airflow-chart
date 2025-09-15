@@ -19,7 +19,6 @@ import json
 import os
 import shlex
 import subprocess
-import sys
 from functools import cache
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -29,12 +28,15 @@ import jsonschema
 import requests
 import yaml
 from kubernetes.client.api_client import ApiClient
+from yamllint import linter
+from yamllint.config import YamlLintConfig
 
-from tests import git_root_dir, supported_k8s_versions
+from tests import supported_k8s_versions
 
 api_client = ApiClient()
 
 BASE_URL_SPEC = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master"
+git_root_dir = [x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()][-1]
 DEBUG = os.getenv("DEBUG", "").lower() in ["yes", "true", "1"]
 default_version = supported_k8s_versions[-1]
 
@@ -76,6 +78,46 @@ def validate_k8s_object(instance, kube_version=default_version):
     validate.validate(instance)
 
 
+def check_yaml(manifests: str, lines_before: int = 10, lines_after: int = 10):
+    """Lint the rendered YAML manifests."""
+
+    # Disable a bunch of rules that are not as important. We can re-enable whenever we want to improve the quality of our raw  yaml.
+    conf_yaml = """
+    extends: default
+    rules:
+      comments-indentation: disable
+      indentation:
+        spaces: 2
+        indent-sequences: whatever
+      line-length: disable
+      trailing-spaces: disable
+    """
+
+    conf = YamlLintConfig(conf_yaml)
+    if problems := list(linter.run(manifests, conf)):
+        lines = manifests.splitlines()
+        header_info = [
+            (idx, line.removeprefix("# Source: astronomer/")) for idx, line in enumerate(lines) if line.startswith("# Source:")
+        ]
+        for problem in problems:
+            header_line = next(
+                (header for idx, header in reversed(header_info) if idx < problem.line - 1),
+                "(unknown)",
+            )
+            print(f"\nProblem document source: {header_line}")
+            print(problem)
+            start = max(problem.line - lines_before, 0)
+            end = min(problem.line + lines_after, len(lines))
+            for i in range(start, end):
+                indicator = ">>" if i == problem.line - 1 else "  "
+                print(f"{indicator} {i + 1}: {lines[i]}")
+            print("-" * 40)
+
+        return False
+
+    return True
+
+
 def render_chart(
     *,  # require keyword args
     name: str = "release-name",
@@ -83,12 +125,14 @@ def render_chart(
     show_only: list | str | None = None,
     chart_dir: str | None = None,
     kube_version: str = default_version,
+    baseDomain: str = "example.com",
     namespace: str | None = None,
     validate_objects: bool = True,
-) -> list:
+    lint_yaml: bool = False,
+):
     """Render a helm chart into dictionaries."""
     values = values or {}
-    chart_dir = chart_dir or sys.path[0]
+    chart_dir = chart_dir or str(git_root_dir)
     with NamedTemporaryFile(delete=not DEBUG) as tmp_file:  # export DEBUG=true to keep
         content = yaml.dump(values)
         tmp_file.write(content.encode())
@@ -100,6 +144,8 @@ def render_chart(
             kube_version,
             name,
             chart_dir,
+            "--set",
+            f"global.baseDomain={baseDomain}",
             "--values",
             tmp_file.name,
         ]
@@ -112,10 +158,10 @@ def render_chart(
                 command.extend(["--show-only", str(file)])
 
         if DEBUG:
-            print(f"helm command:\n  {shlex.join(command)}")
+            print(f"helm command:\n\n{shlex.join(command)}\n")
 
         try:
-            manifests = subprocess.check_output(command, stderr=subprocess.PIPE)
+            manifests = subprocess.check_output(command, stderr=subprocess.PIPE).decode("utf-8")
             if not manifests:
                 return []
         except subprocess.CalledProcessError as error:
@@ -133,6 +179,8 @@ def render_chart(
                         + shlex.join(command)
                     )
             raise
+        if lint_yaml:
+            check_yaml(manifests)
         return load_and_validate_k8s_manifests(manifests, validate_objects=validate_objects, kube_version=kube_version)
 
 
