@@ -35,7 +35,7 @@ data:
             }
             proxy_pass https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/airflow/$request_uri;
           }
-        location  = /auth {
+        location = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
           proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};
           proxy_pass  https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization;
