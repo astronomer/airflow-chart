@@ -1,3 +1,8 @@
+from pathlib import Path
+
+import yaml
+
+
 def get_env_vars_dict(container_env):
     """
     Convert container environment variables list to a dictionary.
@@ -39,3 +44,7 @@ def get_containers_by_name(doc: dict, *, include_init_containers=False) -> dict:
         c_by_name.update({c["name"]: c for c in initContainers})
 
     return c_by_name
+
+
+def get_all_features():
+    return yaml.safe_load((Path(__file__).parent.parent / "enable_all_features.yaml").read_text())

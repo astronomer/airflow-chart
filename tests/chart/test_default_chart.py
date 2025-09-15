@@ -1,6 +1,7 @@
 import pytest
 
 from tests import supported_k8s_versions
+from tests.utils import get_all_features, get_containers_by_name
 from tests.utils.chart import render_chart
 
 
@@ -31,3 +32,16 @@ class TestDefaultChart:
             assert doc["metadata"]["labels"]["heritage"] == "Helm"
 
         assert all(bool(x) for x in doc["metadata"]["labels"].values())
+
+
+class TestReadOnlyRootFilesystem:
+    chart_values = get_all_features()
+    docs = render_chart(values=chart_values)
+    containers = [x for doc in docs for x in get_containers_by_name(doc, include_init_containers=True).items()]
+
+    @pytest.mark.parametrize("container_name,container", containers, ids=[x[0] for x in containers])
+    def test_read_only_root_filesystem_defaults(self, container_name, container):
+        """Test that all containers run with readOnlyRootFilesystem."""
+        assert container.get("securityContext", {}).get("readOnlyRootFilesystem"), (
+            f"Container {container_name} does not have readOnlyRootFilesystem set to true"
+        )
