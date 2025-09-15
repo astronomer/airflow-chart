@@ -1,7 +1,7 @@
 import pytest
 
 from tests.chart import get_all_features
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 POD_MANAGER_SPEC_LABEL_PATH = {
     "StatefulSet": "spec.template.metadata.labels",

@@ -2,7 +2,7 @@ import pytest
 import yaml
 
 from tests import supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 
 def common_pod_template_test(docs):

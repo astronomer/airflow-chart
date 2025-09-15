@@ -1,6 +1,6 @@
 import base64
 
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 
 class TestPgbouncerSecret:
