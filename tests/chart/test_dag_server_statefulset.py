@@ -38,7 +38,7 @@ class TestDagServerStatefulSet:
         """Test that no dag-server templates are rendered by default."""
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
         )
         assert len(docs) == 0
 
@@ -48,7 +48,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         assert len(docs) == 1
@@ -71,7 +71,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         assert len(docs) == 1
@@ -95,7 +95,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         assert len(docs) == 1
@@ -128,7 +128,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         assert len(docs) == 1
@@ -148,7 +148,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         assert len(docs) == 1
@@ -177,7 +177,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         assert len(docs) == 1
@@ -193,7 +193,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         assert len(docs) == 1
@@ -210,7 +210,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         assert len(docs) == 1
@@ -219,7 +219,7 @@ class TestDagServerStatefulSet:
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert c_by_name["dag-server"]["command"] == ["bash"]
-        c_by_name["dag-server"]["args"] == [
+        assert c_by_name["dag-server"]["args"] == [
             "-c",
             "sanic dag_deploy.server.app -H 0.0.0.0 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
         ]
@@ -235,7 +235,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         assert len(docs) == 1
@@ -246,7 +246,7 @@ class TestDagServerStatefulSet:
         assert "dag-server" in c_by_name
         assert "auth-proxy" in c_by_name
         assert c_by_name["dag-server"]["command"] == ["bash"]
-        c_by_name["dag-server"]["args"] == [
+        assert c_by_name["dag-server"]["args"] == [
             "-c",
             "sanic dag_deploy.server.app -H 0.0.0.0 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
         ]
@@ -280,7 +280,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         assert len(docs) == 1
@@ -313,7 +313,7 @@ class TestDagServerStatefulSet:
         )
         assert len(docs) == 1
         service_accounts = [sa for sa in docs if sa.get("kind") == "ServiceAccount"]
-        assert len(service_accounts) == 0
+        assert not service_accounts
         doc = docs[0]
         assert doc["kind"] == "StatefulSet"
         assert doc["metadata"]["name"] == "release-name-dag-server"
@@ -333,7 +333,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         doc = docs[0]
@@ -357,7 +357,7 @@ class TestDagServerStatefulSet:
 
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
             values=values,
         )
         doc = docs[0]
