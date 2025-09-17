@@ -225,6 +225,7 @@ def scheduler():
     pod = pods.items[0]
     yield testinfra.get_host(f"kubectl://{pod.metadata.name}?container=scheduler&namespace={namespace}")
 
+
 @pytest.fixture(scope="session")
 def triggerer():
     """triggerer pod fixture."""
@@ -236,6 +237,7 @@ def triggerer():
     assert len(pods.items) > 0, "Expected to find at least one pod with label 'component: triggerer'"
     pod = pods.items[0]
     yield testinfra.get_host(f"kubectl://{pod.metadata.name}?container=triggerer&namespace={namespace}")
+
 
 @pytest.fixture(scope="session")
 def docker_client():
