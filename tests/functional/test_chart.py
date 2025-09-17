@@ -113,7 +113,7 @@ def test_airflow_variables(scheduler):
     assert "" in scheduler.check_output("airflow variables delete test_key")
 
 
-def test_airflow_trigger_dags(scheduler):
+def test_airflow_trigger_dags(scheduler, triggerer):
     """Test Triggering of DAGs & Pausing & Unpausing Dags"""
     pause_dag_command = "airflow dags pause example_dag"
     trigger_dag_command = "airflow dags trigger -r test_run -e 2020-05-01 example_dag"
@@ -121,7 +121,7 @@ def test_airflow_trigger_dags(scheduler):
     dag_state_command = "airflow dags state example_dag 2020-05-01"
 
     assert "Dag: example_dag, paused: True" in scheduler.check_output(pause_dag_command)
-    assert "Created <DagRun example_dag @ 2020-05-01T00:00:00+00:00: test_run, state:queued >" in scheduler.check_output(
+    assert "Created <DagRun example_dag @ 2020-05-01T00:00:00+00:00: test_run, state:queued >" in triggerer.check_output(
         trigger_dag_command
     )
 
@@ -225,6 +225,17 @@ def scheduler():
     pod = pods.items[0]
     yield testinfra.get_host(f"kubectl://{pod.metadata.name}?container=scheduler&namespace={namespace}")
 
+@pytest.fixture(scope="session")
+def triggerer():
+    """triggerer pod fixture."""
+    if not (namespace := os.environ.get("NAMESPACE")):
+        print("NAMESPACE env var is not present, using 'airflow' namespace")
+        namespace = "airflow"
+    kube = create_kube_client()
+    pods = kube.list_namespaced_pod(namespace, label_selector="component=triggerer")
+    assert len(pods.items) > 0, "Expected to find at least one pod with label 'component: triggerer'"
+    pod = pods.items[0]
+    yield testinfra.get_host(f"kubectl://{pod.metadata.name}?container=triggerer&namespace={namespace}")
 
 @pytest.fixture(scope="session")
 def docker_client():
