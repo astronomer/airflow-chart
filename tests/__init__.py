@@ -17,5 +17,6 @@ def container_env_to_dict(container):
     """
     return {env["name"]: env["value"] for env in container["env"]}
 
+
 def get_all_features():
     return yaml.safe_load((Path(__file__).parent.parent / "enable_all_features.yaml").read_text())
