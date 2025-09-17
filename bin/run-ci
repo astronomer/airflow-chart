@@ -61,7 +61,9 @@ set +e
 set -x
 
 export EXECUTOR="${EXECUTOR:-CeleryExecutor}"
-
+export POSTGRESQL_REGISTRY="${POSTGRESQL_REGISTRY:-quay.io}"
+export POSTGRESQL_TAG="${POSTGRESQL_TAG:-17.5.0}"
+export POSTGRESQL_REPOSITORY="${POSTGRESQL_REPOSITORY:-astronomer/ap-postgresql}"
 # shellcheck disable=SC2086
 helm install \
   -n airflow \
@@ -75,6 +77,9 @@ helm install \
   --set airflow.images.airflow.tag=$TEST_TAG \
   --set airflow.images.airflow.pullPolicy=Never \
   --set airflow.images.flower.pullPolicy=Never \
+  --set airflow.postgresql.image.registry=$POSTGRESQL_REGISTRY \
+  --set airflow.postgresql.image.repository=$POSTGRESQL_REPOSITORY \
+  --set airflow.postgresql.image.tag=$POSTGRESQL_TAG \
   airflow \
   $HELM_CHART_PATH
 
