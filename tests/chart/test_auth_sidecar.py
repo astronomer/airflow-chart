@@ -83,7 +83,7 @@ class TestAuthSidecar:
         assert "nginx.conf" in doc["data"]
 
         nginx_conf = pathlib.Path("tests/chart/test_data/api-server-authsidecar-nginx.conf").read_text()
-        assert nginx_conf in docs[2]["data"]["nginx.conf"]
+        assert nginx_conf in docs[0]["data"]["nginx.conf"]
 
     def test_auth_sidecar_config_not_enabled_with_airflow2_apiserver(self, kube_version):
         """Test auth sidecar config is not generated for Airflow 2.x"""
