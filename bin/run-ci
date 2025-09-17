@@ -75,6 +75,9 @@ helm install \
   --set airflow.images.airflow.tag=$TEST_TAG \
   --set airflow.images.airflow.pullPolicy=Never \
   --set airflow.images.flower.pullPolicy=Never \
+  --set airflow.postgresql.image.registry=quay.io \
+  --set airflow.postgresql.image.repository=astronomer/ap-postgresql \
+  --set airflow.postgresql.image.tag=17.5.0 
   airflow \
   $HELM_CHART_PATH
 
