@@ -60,8 +60,6 @@ START=$(date +%s)
 set +e
 set -x
 
-export EXECUTOR="${EXECUTOR:-CeleryExecutor}"
-
 # shellcheck disable=SC2086
 helm install \
   -n airflow \
