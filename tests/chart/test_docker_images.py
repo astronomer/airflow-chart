@@ -5,9 +5,11 @@ import pytest
 from tests.chart.conftest import docker_daemon_present
 from tests.chart.helm_template_generator import render_chart
 
+from . import get_all_features
+
 
 def list_docker_images():
-    charts = render_chart()
+    charts = render_chart(values=get_all_features())
     search_string = "spec.template.spec.containers[*].image"
 
     # Listing docker images
