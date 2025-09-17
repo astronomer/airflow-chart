@@ -14,13 +14,13 @@ airflow:
   executor: "KubernetesExecutor"
 
   # Airflow version
-  airflowVersion: 2.0.0
+  airflowVersion: 2.11.0
 
   # Default airflow repository
   defaultAirflowRepository: quay.io/astronomer/ap-airflow
 
   # Default airflow tag to deploy
-  defaultAirflowTag: 2.0.0-buster
+  defaultAirflowTag: 2.11.0
 
   # Astronomer Airflow images
   images:
