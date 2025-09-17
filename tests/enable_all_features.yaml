@@ -2,6 +2,10 @@ airflow:
   workers:
     persistence:
       enabled: true
+  postgresql:
+    registry: quay.io
+    repository: astronomer/ap-postgresql
+    tag: 17.5.0
 authSidecar:
   enabled: true
 dagDeploy:
