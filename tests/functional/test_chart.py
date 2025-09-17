@@ -123,7 +123,8 @@ def test_airflow_trigger_dags(scheduler):
     assert "Dag: example_dag, paused: True" in scheduler.check_output(pause_dag_command)
     assert (
         "Created <DagRun example_dag @ 2020-05-01T00:00:00+00:00: "
-        "test_run, state:queued, queued_at: 2025-09-17 16:49:55.428754+00:00. externally triggered: True>" in scheduler.check_output(trigger_dag_command)
+        "test_run, state:queued, queued_at: 2025-09-17 16:49:55.428754+00:00. externally triggered: True>"
+        in scheduler.check_output(trigger_dag_command)
     )
 
     assert "Dag: example_dag, paused: False" in scheduler.check_output(unpause_dag_command)
