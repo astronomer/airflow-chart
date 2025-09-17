@@ -128,7 +128,6 @@ workflows:
             branches:
               only:
                 - '/^release-\d+\.\d+$/'
-                - "feat-authsidecar-config-api-server"
 
       - release-public:
           context:
@@ -141,7 +140,6 @@ workflows:
             branches:
               only:
                 - '/^release-\d+\.\d+$/'
-                - "feat-authsidecar-config-api-server"
 
 jobs:
   run_pre_commit:
