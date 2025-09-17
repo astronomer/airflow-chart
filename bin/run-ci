@@ -79,7 +79,7 @@ helm install \
   --set airflow.images.flower.pullPolicy=Never \
   --set airflow.postgresql.image.registry=$POSTGRESQL_REGISTRY \
   --set airflow.postgresql.image.repository=$POSTGRESQL_REPOSITORY \
-  --set airflow.postgresql.image.tag=$POSTGRESQL_TAG
+  --set airflow.postgresql.image.tag=$POSTGRESQL_TAG \
   airflow \
   $HELM_CHART_PATH
 
