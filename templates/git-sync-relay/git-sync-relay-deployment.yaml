@@ -42,7 +42,7 @@ spec:
       tolerations: {{- toYaml $tolerations | nindent 8 }}
       terminationGracePeriodSeconds: {{ .Values.gitSyncRelay.terminationGracePeriodSeconds }}
       serviceAccountName: {{ template "astro.gitSyncRelay.serviceAccountName" . }}
-      securityContext: {{ toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
+      securityContext: {{- toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
       volumes:
         - name: git-repo-contents
         {{- if eq .Values.gitSyncRelay.repoShareMode "shared_volume" }}
@@ -80,6 +80,8 @@ spec:
             - -c
             - /entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )
           {{- end }}
+          securityContext:
+            readOnlyRootFilesystem: true
           volumeMounts:
             {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: git-secret
@@ -133,16 +135,18 @@ spec:
               value: "false"
             {{- end }}
             {{- end }}
-          {{- if .Values.gitSyncRelay.gitSync.livenessProbe  }}
-          livenessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitSync.livenessProbe) . | nindent 12 }}
+          {{- if .Values.gitSyncRelay.gitSync.livenessProbe }}
+          livenessProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitSync.livenessProbe) . | nindent 12 }}
           {{- end }}
-          {{- if .Values.gitSyncRelay.gitSync.readinessProbe  }}
-          readinessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitSync.readinessProbe) . | nindent 12 }}
+          {{- if .Values.gitSyncRelay.gitSync.readinessProbe }}
+          readinessProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitSync.readinessProbe) . | nindent 12 }}
           {{- end }}
           resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
         {{- if eq .Values.gitSyncRelay.repoShareMode "git_daemon" }}
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
+          securityContext:
+            readOnlyRootFilesystem: true
           volumeMounts:
             - name: git-repo-contents
               mountPath: /git
@@ -150,8 +154,8 @@ spec:
           env:
             - name: GIT_ROOT
               value: /git
-          {{- if .Values.gitSyncRelay.gitDaemon.livenessProbe  }}
-          livenessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitDaemon.livenessProbe) . | nindent 12 }}
+          {{- if .Values.gitSyncRelay.gitDaemon.livenessProbe }}
+          livenessProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitDaemon.livenessProbe) . | nindent 12 }}
           {{- else }}
           livenessProbe:
             exec:
@@ -161,8 +165,8 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 15
           {{- end }}
-          {{- if .Values.gitSyncRelay.gitDaemon.readinessProbe  }}
-          readinessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitDaemon.readinessProbe) . | nindent 12 }}
+          {{- if .Values.gitSyncRelay.gitDaemon.readinessProbe }}
+          readinessProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitDaemon.readinessProbe) . | nindent 12 }}
           {{- end }}
           resources: {{- toYaml .Values.gitSyncRelay.gitDaemon.resources | nindent 12 }}
         {{- end }}

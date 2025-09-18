@@ -63,6 +63,14 @@ airflow:
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
 
+  securityContexts:
+    containers:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+
   triggerer:
     persistence:
       enabled: false
@@ -394,6 +402,9 @@ airflow:
   useAstroSecurityManager: False
 
   statsd:
+    securityContexts:
+      container:
+        readOnlyRootFilesystem: true
     overrideMappings:
       # Map dot separated stats to labels
       - match: airflow.operator_successes_(.*)
