@@ -5,7 +5,7 @@ help: ## Print Makefile help.
 	@grep -Eh '^[a-z.A-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[1;36m%-20s\033[0m %s\n", $$1, $$2}'
 
 venv: ## Setup venv required for unit testing the helm chart
-	uv venv venv -p 3.11 --seed || virtualenv venv -p python3
+	uv venv venv -p 3.13 --seed || virtualenv venv -p python3
 	venv/bin/pip install -r requirements/chart.txt
 
 charts: ## Update dependent charts

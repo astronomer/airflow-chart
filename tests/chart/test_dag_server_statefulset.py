@@ -115,7 +115,10 @@ class TestDagServerStatefulSet:
             "fsGroup": 2000,
             "readOnlyRootFilesystem": True,
         }
-        dag_server_container_securitycontext = {"allowPrivilegeEscalation": False}
+        dag_server_container_securitycontext = {
+            "allowPrivilegeEscalation": False,
+            "readOnlyRootFilesystem": False,  # This should not be overridable
+        }
         values = {
             "dagDeploy": {
                 "enabled": True,
@@ -135,9 +138,13 @@ class TestDagServerStatefulSet:
         doc = docs[0]
 
         common_default_tests(doc)
-        spec = doc["spec"]["template"]["spec"]
-        assert dag_server_pod_securitycontext == spec["securityContext"]
-        assert dag_server_container_securitycontext == spec["containers"][0]["securityContext"]
+        container_spec = doc["spec"]["template"]["spec"]
+        assert dag_server_pod_securitycontext == container_spec["securityContext"]
+        assert len(container_spec["containers"]) == 1
+        assert container_spec["containers"][0]["securityContext"] == {
+            "allowPrivilegeEscalation": False,
+            "readOnlyRootFilesystem": True,
+        }
 
     def test_dag_server_statefulset_with_custom_registry_secret(self, kube_version):
         """Test dag-server statefulset with custom registry secret."""

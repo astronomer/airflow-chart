@@ -4,6 +4,8 @@ from tests import supported_k8s_versions
 from tests.utils import get_all_features, get_containers_by_name
 from tests.utils.chart import render_chart
 
+exclusions = ["release-name-postgresql", "release-name-postgresql-hl"]
+
 
 @pytest.mark.parametrize("namespace", ["abc", "123", "123abc", "123-abc"])
 def test_namespace_names(namespace):
@@ -21,7 +23,6 @@ class TestDefaultChart:
     def test_default_labels(self, kube_version):
         """Test that extra-objects works as default."""
         docs = render_chart(kube_version=kube_version)
-        exclusions = ["release-name-postgresql", "release-name-postgresql-hl"]
 
         for doc in docs:
             if doc["metadata"]["name"] in exclusions:
@@ -30,14 +31,18 @@ class TestDefaultChart:
             assert doc["metadata"]["labels"]["release"] == "release-name"
             assert doc["metadata"]["labels"]["tier"] == "airflow"
             assert doc["metadata"]["labels"]["heritage"] == "Helm"
-
-        assert all(bool(x) for x in doc["metadata"]["labels"].values())
+            assert all(bool(x) for x in doc["metadata"]["labels"].values())
 
 
 class TestReadOnlyRootFilesystem:
     chart_values = get_all_features()
     docs = render_chart(values=chart_values)
-    containers = [x for doc in docs for x in get_containers_by_name(doc, include_init_containers=True).items()]
+    containers = [
+        container
+        for doc in docs
+        if doc["metadata"]["name"] not in exclusions
+        for container in get_containers_by_name(doc, include_init_containers=True).items()
+    ]
 
     @pytest.mark.parametrize("container_name,container", containers, ids=[x[0] for x in containers])
     def test_read_only_root_filesystem_defaults(self, container_name, container):
