@@ -605,7 +605,8 @@ dagDeploy:
   safeToEvict: true
 
   securityContexts:
-    pod: {}
+    pod:
+      fsGroup: 999
     container: {}
 
 gitSyncRelay:
