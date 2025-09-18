@@ -46,5 +46,6 @@ class TestDagServerRole:
         ]
 
         assert downloader["metadata"]["name"] == "release-name-dag-downloader-role"
-        assert len(downloader["rules"]) == 1
+        assert len(downloader["rules"]) == 2
         assert downloader["rules"][0]["verbs"] == ["get", "list", "watch"]
+        assert downloader["rules"][1]["verbs"] == ["create", "patch", "get", "list"]
