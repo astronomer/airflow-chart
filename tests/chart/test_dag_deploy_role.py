@@ -28,6 +28,8 @@ class TestDagServerRole:
             assert doc["apiVersion"] == "rbac.authorization.k8s.io/v1"
             assert doc["rules"][0]["apiGroups"] == [""]
             assert doc["rules"][0]["resources"] == ["configmaps"]
+            assert doc["rules"][1]["apiGroups"] == [""]
+            assert doc["rules"][1]["resources"] == ["events"]
 
         server = docs[0]
         downloader = docs[1]
