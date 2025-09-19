@@ -606,7 +606,7 @@ dagDeploy:
 
   securityContexts:
     pod:
-      fsGroup: 999
+      fsGroup: 50000
     container: {}
 
 gitSyncRelay:
