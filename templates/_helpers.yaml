@@ -376,9 +376,11 @@ Create the name of the cleanup service account to use
   {{- if .Values.authSidecar.resources }}
   resources: {{- toYaml .Values.authSidecar.resources | nindent 12 }}
   {{- end }}
+  securityContext:
   {{- if .Values.authSidecar.securityContext }}
-  securityContext: {{- toYaml .Values.authSidecar.securityContext | nindent 12 }}
+    {{- toYaml .Values.authSidecar.securityContext | nindent 12 }}
   {{- end }}
+    readOnlyRootFilesystem: true
   ports:
   - containerPort: {{ .Values.authSidecar.port }}
     name: auth-proxy

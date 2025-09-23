@@ -44,6 +44,8 @@ spec:
       serviceAccountName: {{ template "astro.gitSyncRelay.serviceAccountName" . }}
       securityContext: {{- toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
       volumes:
+        - name: git-sync-home
+          emptyDir: {}
         - name: git-repo-contents
         {{- if eq .Values.gitSyncRelay.repoShareMode "shared_volume" }}
           persistentVolumeClaim:
@@ -72,7 +74,7 @@ spec:
             name: {{ .Release.Name }}-git-sync-relay-nginx-conf
         {{- end }}
       containers:
-        - name: "git-sync"
+        - name: git-sync
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
           {{- if .Values.loggingSidecar.enabled }}
           command: ["bash"]
@@ -83,6 +85,8 @@ spec:
           securityContext:
             readOnlyRootFilesystem: true
           volumeMounts:
+            - name: git-sync-home
+              mountPath: /home/git-sync
             {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: git-secret
               mountPath: /etc/git-secret/ssh
