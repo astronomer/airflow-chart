@@ -31,7 +31,7 @@ data:
 {{ include "default_nginx_server_settings" . | indent 8 }}
         location  = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
-          proxy_set_header            Host                    houston.{{ .Values.platform.controlplaneDomain }};
+          proxy_set_header            Host                    houston.{{ .Values.platform.controlPlaneDomain }};
           proxy_pass  {{ .Values.platform.houstonAuthServiceEndpointUrl }};
         }
 
