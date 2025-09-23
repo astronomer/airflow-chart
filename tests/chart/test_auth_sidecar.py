@@ -68,7 +68,7 @@ class TestAuthSidecar:
             values={
                 "authSidecar": {"enabled": True},
                 "airflow": {"airflowVersion": "3.0.0"},
-                "platform": {"houstonAuthServiceEndpointUrl": "https://houston./v1/authorization"}
+                "platform": {"houstonAuthServiceEndpointUrl": "https://houston./v1/authorization"},
             },
             show_only=[
                 "templates/api-server/api-server-auth-sidecar-configmap.yaml",
@@ -125,7 +125,7 @@ class TestAuthSidecar:
             values={
                 "authSidecar": {"enabled": True, "resources": resources},
                 "dagDeploy": {"enabled": True},
-                "platform": {"houstonAuthServiceEndpointUrl": "https://houston./v1/authorization"}
+                "platform": {"houstonAuthServiceEndpointUrl": "https://houston./v1/authorization"},
             },
             show_only=[
                 "templates/dag-deploy/dag-server-statefulset.yaml",
