@@ -73,6 +73,16 @@ spec:
           configMap:
             name: {{ .Release.Name }}-git-sync-relay-nginx-conf
         {{- end }}
+      initContainers:
+        - name: git-config-manager
+          command: ["git", "config", "--global", "--add", "safe.directory", "/git"]
+          image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+          securityContext:
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: git-sync-home
+              mountPath: /home/git-sync
+          resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
       containers:
         - name: git-sync
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
