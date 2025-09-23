@@ -555,7 +555,7 @@ platform:
   release: ~
   namespace: ~
   houstonAuthServiceEndpointUrl: ~
-  baseDomain: ~
+  controlplaneDomain: ~
 
 astronomer:
   images:

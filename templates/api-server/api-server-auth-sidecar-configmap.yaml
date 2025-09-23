@@ -37,14 +37,14 @@ data:
           }
         location = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
-          proxy_set_header            Host                    houston.{{ .Values.platform.baseDomain }};
+          proxy_set_header            Host                    houston.{{ .Values.platform.controlplaneDomain }};
           proxy_pass  {{ .Values.platform.houstonAuthServiceEndpointUrl }};
         }
 
         location @401_auth_error {
           internal;
           add_header Set-Cookie $auth_cookie;
-          return 302 https://app.{{ .Values.platform.baseDomain }}/login?rd=https://$http_host$request_uri;
+          return 302 https://app.{{ .Values.platform.controlplaneDomain }}/login?rd=https://$http_host$request_uri;
         }
 
         location / {
