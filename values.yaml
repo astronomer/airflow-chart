@@ -554,6 +554,8 @@ ingress:
 platform:
   release: ~
   namespace: ~
+  houstonAuthServiceEndpointUrl: ~
+  baseDomain: ~ 
 
 astronomer:
   images:
