@@ -108,10 +108,10 @@ spec:
             name: sidecar-logging-consumer
           {{ end }}
 {{- if .Values.authSidecar.enabled }}
-{{- include "authsidecar_container_spec" . | nindent 8 }}
+{{- include "auth_sidecar_container_spec" . | nindent 8 }}
 {{- end }}
 {{- if .Values.loggingSidecar.enabled }}
-{{- include "sidecar_container_spec" . | nindent 8 }}
+{{- include "logging_sidecar_container_spec" . | nindent 8 }}
 {{- end }}
 {{- if .Values.dagDeploy.extraContainers }}
 {{- toYaml .Values.dagDeploy.extraContainers | nindent 8 }}

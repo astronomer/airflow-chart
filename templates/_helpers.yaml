@@ -329,7 +329,7 @@ Create the name of the cleanup service account to use
   {{- default (printf "%s-registry" .Release.Name) .Values.airflow.registry.secretName }}
 {{- end }}
 
-{{- define "sidecar_container_spec" -}}
+{{- define "logging_sidecar_container_spec" -}}
 - name: {{ .Values.loggingSidecar.name }}
   image: "{{ .Values.loggingSidecar.image }}"
   {{- if .Values.loggingSidecar.resources }}
@@ -369,7 +369,7 @@ Create the name of the cleanup service account to use
     readOnly: False
 {{- end }}
 
-{{- define "authsidecar_container_spec" -}}
+{{- define "auth_sidecar_container_spec" -}}
 - name: auth-proxy
   image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
   imagePullPolicy: {{ .Values.authSidecar.pullPolicy }}
