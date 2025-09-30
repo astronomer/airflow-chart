@@ -333,8 +333,10 @@ Create the name of the cleanup service account to use
 - name: {{ .Values.loggingSidecar.name }}
   image: "{{ .Values.loggingSidecar.image }}"
   {{- if .Values.loggingSidecar.resources }}
-  resources: {{- toYaml .Values.loggingSidecar.resources | nindent 12 }}
+  resources: {{- toYaml .Values.loggingSidecar.resources | nindent 4 }}
   {{- end }}
+  securityContext:
+    readOnlyRootFilesystem: true
   env:
   - name: VECTOR_CONFIG
     value: /etc/sidecar-logging/vector-config.yaml
