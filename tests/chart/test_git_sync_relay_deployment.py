@@ -115,25 +115,16 @@ class TestGitSyncRelayDeployment:
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-sync-home", "emptyDir": {}},
             {"name": "git-repo-contents", "emptyDir": {}},
-            {
-                "name": "git-secret",
-                "secret": {"secretName": "a-custom-secret-name"},
-            },
-            {
-                "name": "release-name-git-sync-config",
-                "configMap": {"name": "release-name-git-sync-config"},
-            },
+            {"name": "git-secret", "secret": {"secretName": "a-custom-secret-name"}},
+            {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
         ]
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-sync"]["volumeMounts"] == [
-            {
-                "name": "git-secret",
-                "mountPath": "/etc/git-secret/ssh",
-                "readOnly": True,
-                "subPath": "gitSshKey",
-            },
+            {"name": "git-sync-home", "mountPath": "/home/git-sync"},
+            {"name": "git-secret", "mountPath": "/etc/git-secret/ssh", "readOnly": True, "subPath": "gitSshKey"},
             {
                 "name": "release-name-git-sync-config",
                 "mountPath": "/etc/git-secret/known_hosts",
@@ -184,15 +175,14 @@ class TestGitSyncRelayDeployment:
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-sync-home", "emptyDir": {}},
             {"name": "git-repo-contents", "emptyDir": {}},
-            {
-                "name": "release-name-git-sync-config",
-                "configMap": {"name": "release-name-git-sync-config"},
-            },
+            {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
         ]
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-sync"]["volumeMounts"] == [
+            {"name": "git-sync-home", "mountPath": "/home/git-sync"},
             {"name": "git-repo-contents", "mountPath": "/git"},
         ]
         assert get_env_vars_dict(c_by_name["git-sync"].get("env")) == {
