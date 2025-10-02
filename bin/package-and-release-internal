@@ -36,7 +36,7 @@ else
   (cd airflow && bin/repo-state-report.sh > repo_state.log)
 fi
 
-helm package airflow --dependency-update --app-version "${app_version}" "${extra_args[@]}"
+helm package airflow --app-version "${app_version}" "${extra_args[@]}"
 
 curl -sSLo "index-orig.yaml" https://${helm_repo}/index.yaml
 helm repo index . --url "https://${helm_repo}" --merge "index-orig.yaml"
