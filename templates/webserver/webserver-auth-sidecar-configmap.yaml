@@ -1,7 +1,7 @@
 ######################################
 ## WebServer auth sidecar ConfigMap ##
 ######################################
-{{- if .Values.authSidecar.enabled  }}
+{{- if and ( semverCompare "<=3.0.0" .Values.airflow.airflowVersion )  .Values.authSidecar.enabled  }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
