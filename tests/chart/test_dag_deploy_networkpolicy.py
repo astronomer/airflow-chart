@@ -32,7 +32,11 @@ class TestDagDeployNetworkPolicy:
 
     @pytest.mark.parametrize(
         "plane_mode,ingress_name",
-        [("control", "cp-ingress-controller"), ("data", "dp-ingress-controller"), ("unified", "cp-ingress-controller")],
+        [
+            ("control", "cp-ingress-controller"),
+            ("data", "dp-ingress-controller"),
+            ("unified", "cp-ingress-controller"),
+        ],
     )
     def test_dag_deploy_networkpolicy_dag_deploy_enabled_with_dataplane_mode(self, plane_mode, ingress_name, kube_version):
         """Test that a valid networkPolicy is rendered when dag-deploy and networkPolicies are enabled."""
