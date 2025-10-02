@@ -100,6 +100,9 @@ spec:
             periodSeconds: 10
         {{ end }}
           volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+            readOnly: false
           - name: data
             mountPath: /data
             readOnly: false
@@ -117,6 +120,8 @@ spec:
 {{- toYaml .Values.dagDeploy.extraContainers | nindent 8 }}
 {{- end }}
       volumes:
+      - name: tmp
+        emptyDir: {}
 {{- if .Values.authSidecar.enabled }}
       - name: nginx-sidecar-conf
         configMap:
