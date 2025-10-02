@@ -30,8 +30,44 @@ class TestDagDeployNetworkPolicy:
         )
         assert len(docs) == 0
 
+    @pytest.mark.parametrize(
+        "plane_mode,ingress_name",
+        [
+            ("control", "cp-ingress-controller"),
+            ("data", "dp-ingress-controller"),
+            ("unified", "cp-ingress-controller"),
+        ],
+    )
+    def test_dag_deploy_networkpolicy_dag_deploy_enabled_with_dataplane_mode(self, plane_mode, ingress_name, kube_version):
+        """Test that a valid networkPolicy is rendered when dag-deploy and networkPolicies are enabled."""
+
+        values = {
+            "airflow": {"networkPolicies": {"enabled": True}},
+            "dagDeploy": {"enabled": True},
+            "platform": {"namespace": "test-ns-99", "release": "test-release-42", "mode": plane_mode},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-deploy-networkpolicy.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        spec = docs[0]["spec"]
+
+        assert {
+            "namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}},
+            "podSelector": {
+                "matchLabels": {
+                    "tier": "nginx",
+                    "component": ingress_name,
+                    "release": "test-release-42",
+                }
+            },
+        } == spec["ingress"][1]["from"][1]
+
     def test_dag_deploy_networkpolicy_dag_deploy_enabled(self, kube_version):
-        """Test that a valid networkPolicy are rendered when dag-deploy is enabled."""
+        """Test that a valid networkPolicy is rendered when dag-deploy and networkPolicies are enabled."""
 
         values = {
             "airflow": {"networkPolicies": {"enabled": True}},
@@ -76,7 +112,7 @@ class TestDagDeployNetworkPolicy:
             "podSelector": {
                 "matchLabels": {
                     "tier": "nginx",
-                    "component": "ingress-controller",
+                    "component": "cp-ingress-controller",
                     "release": "test-release-42",
                 }
             },

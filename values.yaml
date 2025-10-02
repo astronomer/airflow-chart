@@ -557,6 +557,7 @@ platform:
   houstonAuthServiceEndpointUrl: ~
   dataPlaneBaseDomain: ~
   controlPlaneBaseDomain: ~
+  mode: ~
 
 astronomer:
   images:
