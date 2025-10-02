@@ -30,6 +30,34 @@ class TestDagDeployNetworkPolicy:
         )
         assert len(docs) == 0
 
+    def test_dag_deploy_networkpolicy_dag_deploy_enabled_with_dataplane_mode(self, kube_version):
+        """Test that a valid networkPolicy are rendered when dag-deploy is enabled."""
+
+        values = {
+            "airflow": {"networkPolicies": {"enabled": True}},
+            "dagDeploy": {"enabled": True},
+            "platform": {"namespace": "test-ns-99", "release": "test-release-42", "mode": "data"},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-deploy-networkpolicy.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        spec = docs[0]["spec"]
+
+        assert {
+            "namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "test-ns-99"}},
+            "podSelector": {
+                "matchLabels": {
+                    "tier": "nginx",
+                    "component": "dp-ingress-controller",
+                    "release": "test-release-42",
+                }
+            },
+        } == spec["ingress"][1]["from"][1]
+
     def test_dag_deploy_networkpolicy_dag_deploy_enabled(self, kube_version):
         """Test that a valid networkPolicy are rendered when dag-deploy is enabled."""
 
@@ -76,7 +104,7 @@ class TestDagDeployNetworkPolicy:
             "podSelector": {
                 "matchLabels": {
                     "tier": "nginx",
-                    "component": "ingress-controller",
+                    "component": "cp-ingress-controller",
                     "release": "test-release-42",
                 }
             },
