@@ -80,7 +80,7 @@ def render_chart(
     *,  # require keyword args
     name: str = "release-name",
     values: dict | None = None,
-    show_only: list | None = None,
+    show_only: list | str | None = None,
     chart_dir: str | None = None,
     kube_version: str = default_version,
     namespace: str | None = None,
