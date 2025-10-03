@@ -54,7 +54,7 @@ class TestGitSyncRelayNetworkPolicy:
             "podSelector": {
                 "matchLabels": {
                     "tier": "nginx",
-                    "component": "ingress-controller",
+                    "component": "cp-ingress-controller",
                     "release": "test-release-42",
                 }
             },
