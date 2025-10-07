@@ -136,6 +136,9 @@ spec:
         - name: {{ template "registry_secret" . }}
       {{- end }}
       initContainers:
+        {{- if .Values.webserver.extraInitContainers }}
+          {{- tpl (toYaml .Values.webserver.extraInitContainers) . | nindent 8 }}
+        {{- end }}
         {{- if .Values.webserver.waitForMigrations.enabled }}
         - name: wait-for-airflow-migrations
           resources: {{- toYaml .Values.webserver.resources | nindent 12 }}
@@ -164,9 +167,6 @@ spec:
         {{- end }}
         {{- if and (.Values.dags.gitSync.enabled) (not .Values.dags.persistence.enabled) (semverCompare "<2.0.0" .Values.airflowVersion) }}
           {{- include "git_sync_container" (dict "Values" .Values "is_init" "true" "Template" .Template) | nindent 8 }}
-        {{- end }}
-        {{- if .Values.webserver.extraInitContainers }}
-          {{- tpl (toYaml .Values.webserver.extraInitContainers) . | nindent 8 }}
         {{- end }}
       containers:
         - name: webserver

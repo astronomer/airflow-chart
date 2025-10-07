@@ -157,6 +157,9 @@ spec:
             - name: logs
               mountPath: {{ template "airflow_logs" . }}
         {{- end }}
+        {{- if .Values.workers.extraInitContainers }}
+          {{- tpl (toYaml .Values.workers.extraInitContainers) . | nindent 8 }}
+        {{- end }}
         {{- if and (semverCompare ">=2.8.0" .Values.airflowVersion) .Values.workers.kerberosInitContainer.enabled }}
         - name: kerberos-init
           image: {{ template "airflow_image" . }}
@@ -226,9 +229,6 @@ spec:
         {{- end }}
         {{- if and (.Values.dags.gitSync.enabled) (not .Values.dags.persistence.enabled) }}
           {{- include "git_sync_container" (dict "Values" .Values "is_init" "true" "Template" .Template) | nindent 8 }}
-        {{- end }}
-        {{- if .Values.workers.extraInitContainers }}
-          {{- tpl (toYaml .Values.workers.extraInitContainers) . | nindent 8 }}
         {{- end }}
       containers:
         - name: worker
