@@ -22,7 +22,7 @@ data:
         type: file
         include:
           - "${SIDECAR_LOGS}/*.log"
-          - "${SIDECAR_LOGS}/**/*.log"
+          - ""/usr/local/airflow/logs/**/*.log""
         read_from: beginning
     transforms:
       # Parse Airflow 3 log file paths to extract metadata
@@ -31,12 +31,13 @@ data:
         inputs:
           - airflow_log_files
         source: |
-          # Try to parse Airflow 3 directory structure
-          parsed = parse_regex(.file, r'/dag_id=(?P<dagID>[0-9a-zA-Z-_]+)/run_id=(?P<runID>[^/]+)/task_id=(?P<taskID>[0-9a-zA-Z-_]+)/(?:map_index=(?P<mapIndex>-?[0-9]+)/)?attempt=(?P<attempt>[0-9]+)/(?P<tiID>[0-9a-zA-Z-]+)(?:\.log\.trigger\.[0-9]+)?\.log$')
+        {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
+          # Airflow 3.x - Parse JSON structured logs
+          parsed_log = parse_json!(.message)
+          parsed, err = parse_regex(.file, r'/dag_id=(?P<dagID>[0-9a-zA-Z-_]+)/run_id=(?P<runID>[^/]+)/task_id=(?P<taskID>[0-9a-zA-Z-_]+)/(?:map_index=(?P<mapIndex>-?[0-9]+)/)?attempt=(?P<attempt>[0-9]+)\.log$')
           
-          if parsed != null {
+          if err == null {
             # Airflow 3 structured logs
-            .tiID = parsed.tiID
             .attempt = to_int!(parsed.attempt)
             .task_id = parsed.taskID
             .run_id = parsed.runID
@@ -44,12 +45,41 @@ data:
             .map_index = if parsed.mapIndex != null { to_int!(parsed.mapIndex) } else { -1 }
             .try_number = .attempt
             .is_airflow3 = true
-            # Create log_id for consistency with Airflow 2 format
-            .log_id = join!([.dag_id, .task_id, .run_id, to_string!(.try_number)], "_")
+            
+            # Create log_id for consistency
+            .log_id = join!([.dag_id, .task_id, .run_id, to_string!(.map_index), to_string!(.try_number)], "_")
+            
+            # Extract structured log fields
+            .event = parsed_log.event
+            .timestamp = parsed_log.timestamp
+            .level = parsed_log.level
+            .logger = parsed_log.logger
+            .chan = parsed_log.chan
           } else {
-            # Fallback for non-task logs or Airflow 2 format
+            # Fallback for non-task logs
             .is_airflow3 = false
           }
+        {{- else }}
+          # Airflow 2.x - Parse traditional log file paths
+          parsed = parse_regex(.file, r'/dag_id=(?P<dagID>[0-9a-zA-Z-_]+)/run_id=(?P<runID>[^/]+)/task_id=(?P<taskID>[0-9a-zA-Z-_]+)/(?:map_index=(?P<mapIndex>-?[0-9]+)/)?attempt=(?P<attempt>[0-9]+)/(?P<tiID>[0-9a-zA-Z-]+)(?:\.log\.trigger\.[0-9]+)?\.log$')
+          
+          if parsed != null {
+            # Airflow 2 structured logs
+            .tiID = parsed.tiID
+            .attempt = to_int!(parsed.attempt)
+            .task_id = parsed.taskID
+            .run_id = parsed.runID
+            .dag_id = parsed.dagID
+            .map_index = if parsed.mapIndex != null { to_int!(parsed.mapIndex) } else { -1 }
+            .try_number = .attempt
+            .is_airflow3 = false
+            # Create log_id for consistency
+            .log_id = join!([.dag_id, .task_id, .run_id, to_string!(.try_number)], "_")
+          } else {
+            # Fallback for non-task logs
+            .is_airflow3 = false
+          }
+        {{- end }}
 
       transform_airflow_logs:
         type: remap
@@ -60,10 +90,12 @@ data:
           .workspace = "${WORKSPACE:--}"
           .release = "${RELEASE:--}"
           
-          # Parse timestamp if it exists
+        {{- if not (semverCompare ">=3.0.0" .Values.airflow.airflowVersion) }}
+          # Parse timestamp if it exists (Airflow 2.x)
           if exists(.@timestamp) {
             .date_nano = parse_timestamp!(.@timestamp, format: "%Y-%m-%dT%H:%M:%S.%f%Z")
           }
+        {{- end }}
 
       filter_common_logs:
         type: filter
@@ -133,7 +165,11 @@ data:
           }
           
           # Calculate offset for ordering
+        {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
+          .offset = to_unix_timestamp(now()) * 1000000
+        {{- else }}
           .offset = to_int(now()) * 1000000000 + to_unix_timestamp(now()) * 1000000
+        {{- end }}
 
       final_task_log:
         type: remap
@@ -144,9 +180,11 @@ data:
           .workspace = "${WORKSPACE:--}"
           .release = "${RELEASE:--}"
           
+        {{- if not (semverCompare ">=3.0.0" .Values.airflow.airflowVersion) }}
           if exists(.@timestamp) {
             .date_nano = parse_timestamp!(.@timestamp, format: "%Y-%m-%dT%H:%M:%S.%f%Z")
           }
+        {{- end }}
 
       transform_remove_fields:
         type: remap
@@ -161,6 +199,9 @@ data:
           del(.host)
           del(.file)
           del(.is_airflow3)
+        {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
+          del(.execution_date)
+        {{- end }}
 
     sinks:
       out:
