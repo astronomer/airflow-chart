@@ -35,7 +35,7 @@ data:
           # Airflow 3.x - Parse JSON structured logs
           parsed_log = parse_json!(.message)
           parsed, err = parse_regex(.file, r'/dag_id=(?P<dagID>[0-9a-zA-Z-_]+)/run_id=(?P<runID>[^/]+)/task_id=(?P<taskID>[0-9a-zA-Z-_]+)/(?:map_index=(?P<mapIndex>-?[0-9]+)/)?attempt=(?P<attempt>[0-9]+)\.log$')
-          
+
           if err == null {
             # Airflow 3 structured logs
             .attempt = to_int!(parsed.attempt)
@@ -45,10 +45,10 @@ data:
             .map_index = if parsed.mapIndex != null { to_int!(parsed.mapIndex) } else { -1 }
             .try_number = .attempt
             .is_airflow3 = true
-            
+
             # Create log_id for consistency
             .log_id = join!([.dag_id, .task_id, .run_id, to_string!(.map_index), to_string!(.try_number)], "_")
-            
+
             # Extract structured log fields
             .event = parsed_log.event
             .timestamp = parsed_log.timestamp
@@ -62,7 +62,7 @@ data:
         {{- else }}
           # Airflow 2.x - Parse traditional log file paths
           parsed = parse_regex(.file, r'/dag_id=(?P<dagID>[0-9a-zA-Z-_]+)/run_id=(?P<runID>[^/]+)/task_id=(?P<taskID>[0-9a-zA-Z-_]+)/(?:map_index=(?P<mapIndex>-?[0-9]+)/)?attempt=(?P<attempt>[0-9]+)/(?P<tiID>[0-9a-zA-Z-]+)(?:\.log\.trigger\.[0-9]+)?\.log$')
-          
+
           if parsed != null {
             # Airflow 2 structured logs
             .tiID = parsed.tiID
@@ -89,7 +89,7 @@ data:
           .component = "${COMPONENT:--}"
           .workspace = "${WORKSPACE:--}"
           .release = "${RELEASE:--}"
-          
+
         {{- if not (semverCompare ">=3.0.0" .Values.airflow.airflowVersion) }}
           # Parse timestamp if it exists (Airflow 2.x)
           if exists(.@timestamp) {
@@ -163,7 +163,7 @@ data:
           if !exists(.@timestamp) {
             .@timestamp = now()
           }
-          
+
           # Calculate offset for ordering
         {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
           .offset = to_unix_timestamp(now()) * 1000000
@@ -179,7 +179,7 @@ data:
           .component = "${COMPONENT:--}"
           .workspace = "${WORKSPACE:--}"
           .release = "${RELEASE:--}"
-          
+
         {{- if not (semverCompare ">=3.0.0" .Values.airflow.airflowVersion) }}
           if exists(.@timestamp) {
             .date_nano = parse_timestamp!(.@timestamp, format: "%Y-%m-%dT%H:%M:%S.%f%Z")
