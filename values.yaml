@@ -359,9 +359,9 @@ airflow:
       # if astroSecurity manager is disabled and the airflow version is less than 2 we want this to equal airflow.api.auth.backend.default
       auth_backend: '{{ ternary "astronomer.flask_appbuilder.current_user_backend" (ternary "airflow.api.auth.backend.deny_all" "airflow.api.auth.backend.default"  (semverCompare ">=2.0.0" .Values.airflowVersion)) (and (.Values.useAstroSecurityManager) (semverCompare ">=2.0.0" .Values.airflowVersion)) }}'
     operators:
-      default_queue: celery
+      default_queue: '{{ semverCompare ">=3.0.0" .Values.airflowVersion | ternary "default" "celery" }}'
     celery: # compat
-      default_queue: celery
+      default_queue: '{{ semverCompare ">=3.0.0" .Values.airflowVersion | ternary "default" "celery" }}'
 
       # Set Flower URL prefix to empty string
       # Remove after https://github.com/apache/airflow/issues/27402 is resolved
