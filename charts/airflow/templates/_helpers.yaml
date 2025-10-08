@@ -286,9 +286,9 @@ If release name contains chart name it will be used as a full name.
     - name: GITSYNC_LINK
       value: "repo"
     - name: GIT_SYNC_ADD_USER
-      value: "true"
+      value: {{ .Values.dags.gitSync.addUser | quote }}
     - name: GITSYNC_ADD_USER
-      value: "true"
+      value: {{ .Values.dags.gitSync.addUser | quote }}
     {{- if .Values.dags.gitSync.wait }}
     - name: GIT_SYNC_WAIT
       value: {{ .Values.dags.gitSync.wait | quote }}

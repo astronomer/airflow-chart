@@ -135,8 +135,8 @@ spec:
         - name: {{ template "registry_secret" . }}
       {{- end }}
       initContainers:
-        {{- if .Values.triggerer.extraInitContainers }}
-          {{- tpl (toYaml .Values.triggerer.extraInitContainers) . | nindent 8 }}
+        {{- if .Values.triggerer.preAirflowExtraInitContainers }}
+          {{- tpl (toYaml .Values.triggerer.preAirflowExtraInitContainers) . | nindent 8 }}
         {{- end }}
         {{- if .Values.triggerer.waitForMigrations.enabled }}
         - name: wait-for-airflow-migrations
@@ -169,6 +169,9 @@ spec:
         {{- end }}
         {{- if and (.Values.dags.gitSync.enabled) (not .Values.dags.persistence.enabled) }}
           {{- include "git_sync_container" (dict "Values" .Values "is_init" "true" "Template" .Template) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.triggerer.extraInitContainers }}
+          {{- tpl (toYaml .Values.triggerer.extraInitContainers) . | nindent 8 }}
         {{- end }}
       containers:
         - name: triggerer

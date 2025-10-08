@@ -146,8 +146,8 @@ spec:
       hostAliases: {{- toYaml .Values.scheduler.hostAliases | nindent 8 }}
       {{- end }}
       initContainers:
-        {{- if .Values.scheduler.extraInitContainers }}
-          {{- tpl (toYaml .Values.scheduler.extraInitContainers) . | nindent 8 }}
+        {{- if .Values.scheduler.preAirflowExtraInitContainers }}
+          {{- tpl (toYaml .Values.scheduler.preAirflowExtraInitContainers) . | nindent 8 }}
         {{- end }}
         {{- if .Values.scheduler.waitForMigrations.enabled }}
         - name: wait-for-airflow-migrations
@@ -182,6 +182,9 @@ spec:
         {{- end }}
         {{- if and $localOrDagProcessorDisabled .Values.dags.gitSync.enabled }}
           {{- include "git_sync_container" (dict "Values" .Values "is_init" "true" "Template" .Template) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.scheduler.extraInitContainers }}
+          {{- tpl (toYaml .Values.scheduler.extraInitContainers) . | nindent 8 }}
         {{- end }}
       containers:
         # Always run the main scheduler container.
