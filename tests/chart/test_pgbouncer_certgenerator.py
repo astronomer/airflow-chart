@@ -108,3 +108,27 @@ class TestPgbouncersslFeature:
         )
         assert len(docs) == 4
         assert docs[3]["spec"]["template"]["spec"]["affinity"] == affinity
+
+    def test_pgbouncer_certgenerator_pgbouncerssl_extra_labels_support(self, kube_version):
+        """Test that certgenerator has proper custom labels."""
+        extraLabels = {"managed-by": "astronomer"}
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "airflow": {
+                    "labels": extraLabels,
+                    "pgbouncer": {
+                        "enabled": True,
+                        "sslmode": "require",
+                    },
+                }
+            },
+            show_only="templates/generate-ssl.yaml",
+        )
+        assert len(docs) == 4
+        assert docs[3]["spec"]["template"]["metadata"]["labels"] == {
+            "component": "pgbouncer",
+            "managed-by": "astronomer",
+            "release": "release-name",
+            "tier": "airflow",
+        }
