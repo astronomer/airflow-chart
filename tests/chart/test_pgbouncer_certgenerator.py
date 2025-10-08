@@ -128,7 +128,7 @@ class TestPgbouncersslFeature:
         assert len(docs) == 4
         assert docs[3]["spec"]["template"]["metadata"]["labels"] == {
             "component": "pgbouncer",
-            "managed-by": "astronomer",
+            "snoopy": "dog",
             "release": "release-name",
             "tier": "airflow",
         }
