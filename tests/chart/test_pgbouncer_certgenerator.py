@@ -111,7 +111,6 @@ class TestPgbouncersslFeature:
 
     def test_pgbouncer_certgenerator_pgbouncerssl_extra_labels_support(self, kube_version):
         """Test that certgenerator has proper custom labels."""
-        extraLabels = {"managed-by": "astronomer"}
         docs = render_chart(
             kube_version=kube_version,
             values={
