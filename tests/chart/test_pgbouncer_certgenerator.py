@@ -116,7 +116,7 @@ class TestPgbouncersslFeature:
             kube_version=kube_version,
             values={
                 "airflow": {
-                    "labels": extraLabels,
+                    "labels": {"snoopy": "dog"},
                     "pgbouncer": {
                         "enabled": True,
                         "sslmode": "require",
