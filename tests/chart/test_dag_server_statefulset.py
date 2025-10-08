@@ -1,9 +1,8 @@
 import pytest
 
 from tests import supported_k8s_versions
+from tests.utils import get_containers_by_name
 from tests.utils.chart import render_chart
-
-from . import get_containers_by_name
 
 readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
 livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}

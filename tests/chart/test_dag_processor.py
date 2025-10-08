@@ -1,6 +1,5 @@
+from tests.utils import get_containers_by_name
 from tests.utils.chart import render_chart
-
-from . import get_containers_by_name
 
 
 class TestDagProcessor:

@@ -3,9 +3,8 @@ import pathlib
 import pytest
 
 from tests import supported_k8s_versions
+from tests.utils import get_containers_by_name
 from tests.utils.chart import render_chart
-
-from . import get_containers_by_name
 
 
 def common_pod_manager_test_cases(docs, docs_length, release_name, kind):
