@@ -45,8 +45,22 @@ class TestReadOnlyRootFilesystem:
     ]
 
     @pytest.mark.parametrize("container_name,container", containers, ids=[x[0] for x in containers])
-    def test_read_only_root_filesystem_defaults(self, container_name, container):
+    def test_container_read_only_root_filesystem(self, container_name, container):
         """Test that all containers run with readOnlyRootFilesystem."""
         assert container.get("securityContext", {}).get("readOnlyRootFilesystem"), (
             f"Container {container_name} does not have readOnlyRootFilesystem set to true"
+        )
+
+    @pytest.mark.skip(reason="Known failures. We should circle back and fix these.")
+    @pytest.mark.parametrize("container_name,container", containers, ids=[x[0] for x in containers])
+    def test_container_resources(self, container_name, container):
+        """Test that all containers have resources set by default."""
+        assert container.get("resources"), f"Container {container_name} does not have resources set by default."
+
+    @pytest.mark.skip(reason="Known failures. We should circle back and fix these.")
+    @pytest.mark.parametrize("container_name,container", containers, ids=[x[0] for x in containers])
+    def test_container_image_pull_policy(self, container_name, container):
+        """Test that all containers have imagePullPolicy set to IfNotPresent by default."""
+        assert container.get("imagePullPolicy") == "IfNotPresent", (
+            f"Container {container_name} does not have imagePullPolicy set to IfNotPresent by default."
         )
