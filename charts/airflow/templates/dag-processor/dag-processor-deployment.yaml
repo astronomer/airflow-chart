@@ -121,8 +121,8 @@ spec:
         - name: {{ template "registry_secret" . }}
       {{- end }}
       initContainers:
-        {{- if .Values.dagProcessor.preAirflowExtraInitContainers }}
-          {{- tpl (toYaml .Values.dagProcessor.preAirflowExtraInitContainers) . | nindent 8 }}
+        {{- if .Values.dagProcessor.extraInitContainers }}
+          {{- tpl (toYaml .Values.dagProcessor.extraInitContainers) . | nindent 8 }}
         {{- end }}
         {{- if .Values.dagProcessor.waitForMigrations.enabled }}
         - name: wait-for-airflow-migrations
@@ -149,9 +149,6 @@ spec:
         {{- end }}
         {{- if and (.Values.dags.gitSync.enabled) (not .Values.dags.persistence.enabled) }}
           {{- include "git_sync_container" (dict "Values" .Values "is_init" "true" "Template" .Template) | nindent 8 }}
-        {{- end }}
-        {{- if .Values.dagProcessor.extraInitContainers }}
-          {{- tpl (toYaml .Values.dagProcessor.extraInitContainers) . | nindent 8 }}
         {{- end }}
       containers:
         - name: dag-processor

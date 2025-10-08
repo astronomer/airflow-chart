@@ -846,10 +846,6 @@ workers:
   # Add additional init containers into Airflow Celery workers
   # and pods created with pod-template-file (templated).
   extraInitContainers: []
-  # Add additional init containers into Airflow Celery workers
-  # and pods created with pod-template-file (templated). These
-  # init containers will run before any airflow init containers.
-  preAirflowExtraInitContainers: []
 
   # Additional volumes and volume mounts attached to the
   # Airflow Celery workers and pods created with pod-template-file
@@ -1083,8 +1079,6 @@ scheduler:
   extraContainers: []
   # Add additional init containers into scheduler (templated).
   extraInitContainers: []
-  # Add additional init containers into scheduler (templated) that run before any airflow init containers.
-  preAirflowExtraInitContainers: []
 
   # Mount additional volumes into scheduler. It can be templated like in the following example:
   #   extraVolumes:
@@ -1254,8 +1248,6 @@ createUserJob:
 
   # Add additional init containers into user creation job (templated).
   extraInitContainers: []
-  # Add additional init containers into user creation job (templated) that run before any airflow init containers.
-  preAirflowExtraInitContainers: []
 
   # Mount additional volumes into user creation job. It can be templated like in the following example:
   #   extraVolumes:
@@ -1359,8 +1351,6 @@ migrateDatabaseJob:
 
   # Add additional init containers into migrate database job (templated).
   extraInitContainers: []
-  # Add additional init containers into migrate database job (templated) that run before any airflow init containers.
-  preAirflowExtraInitContainers: []
 
   # Mount additional volumes into database migration job. It can be templated like in the following example:
   #   extraVolumes:
@@ -1462,8 +1452,6 @@ apiServer:
   extraContainers: []
   # Add additional init containers into API server (templated).
   extraInitContainers: []
-  # Add additional init containers into API server (templated) that run before any airflow init containers.
-  preAirflowExtraInitContainers: []
 
   # Mount additional volumes into API server. It can be templated like in the following example:
   #   extraVolumes:
@@ -1698,8 +1686,6 @@ webserver:
   extraContainers: []
   # Add additional init containers into webserver (templated).
   extraInitContainers: []
-  # Add additional init containers into webserver (templated) that run before any airflow init containers.
-  preAirflowExtraInitContainers: []
 
   # Mount additional volumes into webserver. It can be templated like in the following example:
   #   extraVolumes:
@@ -1888,8 +1874,6 @@ triggerer:
   extraContainers: []
   # Add additional init containers into triggerers (templated).
   extraInitContainers: []
-  # Add additional init containers into triggerers (templated) that run before any airflow init containers.
-  preAirflowExtraInitContainers: []
 
   # Mount additional volumes into triggerer. It can be templated like in the following example:
   #   extraVolumes:
@@ -2112,8 +2096,6 @@ dagProcessor:
   extraContainers: []
   # Add additional init containers into dag processors (templated).
   extraInitContainers: []
-  # Add additional init containers into dag processors (templated) that run before any airflow init containers.
-  preAirflowExtraInitContainers: []
 
   # Mount additional volumes into dag processor. It can be templated like in the following example:
   #   extraVolumes:
@@ -3080,11 +3062,6 @@ dags:
     # envFrom: |
     #   - secretRef:
     #       name: 'proxy-config'
-
-    # Add a record to /etc/passwd for the current UID/GID. This is
-    # needed to use SSH with an arbitrary UID. This assumes that
-    # /etc/passwd is writable by the current UID.
-    addUser: true
 
     containerName: git-sync
     uid: 65533

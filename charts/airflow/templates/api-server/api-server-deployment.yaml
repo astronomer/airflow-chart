@@ -127,8 +127,8 @@ spec:
         - name: {{ template "registry_secret" . }}
       {{- end }}
       initContainers:
-        {{- if .Values.apiServer.preAirflowExtraInitContainers }}
-          {{- tpl (toYaml .Values.apiServer.preAirflowExtraInitContainers) . | nindent 8 }}
+        {{- if .Values.apiServer.extraInitContainers }}
+          {{- tpl (toYaml .Values.apiServer.extraInitContainers) . | nindent 8 }}
         {{- end }}
         {{- if .Values.apiServer.waitForMigrations.enabled }}
         - name: wait-for-airflow-migrations
@@ -152,9 +152,6 @@ spec:
             {{- if .Values.apiServer.waitForMigrations.env }}
               {{- tpl (toYaml .Values.apiServer.waitForMigrations.env) $ | nindent 12 }}
             {{- end }}
-        {{- end }}
-        {{- if .Values.apiServer.extraInitContainers }}
-          {{- tpl (toYaml .Values.apiServer.extraInitContainers) . | nindent 8 }}
         {{- end }}
       containers:
         - name: api-server
