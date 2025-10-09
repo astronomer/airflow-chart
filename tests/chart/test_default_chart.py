@@ -18,7 +18,7 @@ class TestDefaultChart:
     def test_default_chart_with_basedomain(self, kube_version):
         """Test that each template used with just baseDomain set renders."""
         docs = render_chart(kube_version=kube_version)
-        assert len(docs) == 31
+        assert len(docs) == 27
 
     def test_default_labels(self, kube_version):
         """Test that extra-objects works as default."""
