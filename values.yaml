@@ -45,7 +45,7 @@ airflow:
 
   # Airflow 3 API server settings
   apiServer:
-    extraInitContainers:
+    preAirflowExtraInitContainers:
       - command:
           - sh
           - -c
@@ -69,7 +69,7 @@ airflow:
         name: tmp
 
   createUserJob:
-    extraInitContainers:
+    preAirflowExtraInitContainers:
       - command:
           - sh
           - -c
@@ -113,7 +113,7 @@ airflow:
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
 
-    extraInitContainers:
+    preAirflowExtraInitContainers:
       - command:
           - sh
           - -c
@@ -148,7 +148,7 @@ airflow:
       enabled: false
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
-    extraInitContainers:
+    preAirflowExtraInitContainers:
       - command:
           - sh
           - -c
@@ -172,7 +172,7 @@ airflow:
         name: tmp
 
   dagProcessor:
-    extraInitContainers:
+    preAirflowExtraInitContainers:
       - command:
           - sh
           - -c
@@ -229,7 +229,7 @@ airflow:
       SECURITY_MANAGER_CLASS = AirflowAstroSecurityManager
       {{- end }}
 
-    extraInitContainers:
+    preAirflowExtraInitContainers:
       - command:
           - sh
           - -c
@@ -269,6 +269,28 @@ airflow:
       enabled: false
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
 
   # Pgbouncer settings
   pgbouncer:
@@ -513,6 +535,28 @@ airflow:
   migrateDatabaseJob:
     annotations:
       "sidecar.istio.io/inject": "false"
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
 
   config:
     api:
@@ -665,7 +709,7 @@ airflow:
       tag: 17.5.0
 
   readReplicas:
-    extraInitContainers:
+    preAirflowExtraInitContainers:
       - command:
           - sh
           - -c
@@ -810,30 +854,6 @@ dagDeploy:
     container: {}
 
   flower:
-    extraVolumeMounts:
-      - mountPath: /usr/local/airflow
-        name: usr-local-airflow
-      - mountPath: /tmp
-        name: tmp
-    extraVolumes:
-      - emptyDir: {}
-        name: usr-local-airflow
-      - emptyDir: {}
-        name: tmp
-
-  migrateDatabaseJob:
-    extraInitContainers:
-      - command:
-          - sh
-          - -c
-          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
-        image: '{{ template "airflow_image" . }}'
-        name: usr-local-airflow-copier
-        securityContext:
-          readOnlyRootFilesystem: true
-        volumeMounts:
-          - mountPath: /usr_local_airflow_copy
-            name: usr-local-airflow
     extraVolumeMounts:
       - mountPath: /usr/local/airflow
         name: usr-local-airflow
