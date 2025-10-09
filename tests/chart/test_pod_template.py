@@ -2,7 +2,7 @@ import pytest
 import yaml
 
 from tests import supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 
 def common_pod_template_test(docs):
@@ -159,18 +159,19 @@ class TestPodTemplate:
 
     def test_pod_template_worker_securitycontext_defaults(self, kube_version):
         """Test airflow pod template security context defaults."""
-        podSecurityContextDefaults = {"runAsUser": 50000, "fsGroup": 50000}
-        containerSecurityContextDefaults = {"allowPrivilegeEscalation": False, "capabilities": {"drop": ["ALL"]}}
         docs = render_chart(
             kube_version=kube_version,
             values={},
-            show_only="charts/airflow/templates/configmaps/configmap.yaml",
+            show_only=["charts/airflow/templates/configmaps/configmap.yaml"],
         )
         common_pod_template_test(docs)
-        doc = docs[0]
-        podTemplate = yaml.safe_load(doc["data"]["pod_template_file.yaml"])
-        assert podSecurityContextDefaults == podTemplate["spec"]["securityContext"]
-        assert containerSecurityContextDefaults == podTemplate["spec"]["containers"][0]["securityContext"]
+        podTemplate = yaml.safe_load(docs[0]["data"]["pod_template_file.yaml"])
+        assert podTemplate["spec"]["securityContext"] == {"runAsUser": 50000, "fsGroup": 50000}
+        assert podTemplate["spec"]["containers"][0]["securityContext"] == {
+            "allowPrivilegeEscalation": False,
+            "capabilities": {"drop": ["ALL"]},
+            "readOnlyRootFilesystem": True,
+        }
 
     def test_pod_template_worker_securitycontext_overrides(self, kube_version):
         """Test airflow pod template security context defaults."""
