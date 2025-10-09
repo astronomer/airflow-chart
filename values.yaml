@@ -709,7 +709,7 @@ airflow:
     image:
       registry: quay.io
       repository: astronomer/ap-postgresql
-      tag: 17.5.0
+      tag: 17.6.0
 
   readReplicas:
     preAirflowExtraInitContainers:
