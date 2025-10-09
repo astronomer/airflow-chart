@@ -214,7 +214,8 @@ jobs:
     machine:
       # https://circleci.com/developer/machine/image/ubuntu-2204
       image: ubuntu-2204:2024.11.1
-      resource_class: large
+      # https://circleci.com/docs/reference/configuration-reference/#docker-execution-environment
+      resource_class: xlarge # REVERT THIS TO 'large' BEFORE MERGING THIS IS ONLY FOR DEBUGGING
     parameters:
       executor:
         type: string
