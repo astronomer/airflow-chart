@@ -49,7 +49,7 @@ airflow:
       - command:
           - sh
           - -c
-          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
         image: '{{ template "airflow_image" . }}'
         name: usr-local-airflow-copier
         securityContext:
@@ -73,7 +73,7 @@ airflow:
       - command:
           - sh
           - -c
-          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
         image: '{{ template "airflow_image" . }}'
         name: usr-local-airflow-copier
         securityContext:
@@ -117,7 +117,7 @@ airflow:
       - command:
           - sh
           - -c
-          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
         image: '{{ template "airflow_image" . }}'
         name: usr-local-airflow-copier
         securityContext:
@@ -152,7 +152,7 @@ airflow:
       - command:
           - sh
           - -c
-          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
         image: '{{ template "airflow_image" . }}'
         name: usr-local-airflow-copier
         securityContext:
@@ -176,7 +176,7 @@ airflow:
       - command:
           - sh
           - -c
-          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
         image: '{{ template "airflow_image" . }}'
         name: usr-local-airflow-copier
         securityContext:
@@ -233,7 +233,7 @@ airflow:
       - command:
           - sh
           - -c
-          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
         image: '{{ template "airflow_image" . }}'
         name: usr-local-airflow-copier
         securityContext:
@@ -273,7 +273,7 @@ airflow:
       - command:
           - sh
           - -c
-          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
         image: '{{ template "airflow_image" . }}'
         name: usr-local-airflow-copier
         securityContext:
@@ -539,7 +539,7 @@ airflow:
       - command:
           - sh
           - -c
-          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
         image: '{{ template "airflow_image" . }}'
         name: usr-local-airflow-copier
         securityContext:
@@ -713,7 +713,7 @@ airflow:
       - command:
           - sh
           - -c
-          - cp -r /usr/local/airflow/ /usr_local_airflow_copy/
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
         image: '{{ template "airflow_image" . }}'
         name: usr-local-airflow-copier
         securityContext:
