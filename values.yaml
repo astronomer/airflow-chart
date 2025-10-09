@@ -416,8 +416,11 @@ airflow:
         {{- end }}
       {{- end }}
     spec:
-      {{- if or (and .Values.dags.gitSync.enabled (not .Values.dags.persistence.enabled)) .Values.workers.extraInitContainers }}
+      {{- if or (and .Values.dags.gitSync.enabled (not .Values.dags.persistence.enabled)) .Values.workers.preAirflowExtraInitContainers .Values.workers.extraInitContainers }}
       initContainers:
+        {{- if .Values.workers.preAirflowExtraInitContainers }}
+        {{- tpl (toYaml .Values.workers.preAirflowExtraInitContainers) . | nindent 4 }}
+        {{- end }}
         {{- if and .Values.dags.gitSync.enabled (not .Values.dags.persistence.enabled) }}
         {{- include "git_sync_container" (dict "Values" .Values "is_init" "true") | nindent 4 }}
         {{- end }}
