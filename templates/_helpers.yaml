@@ -329,12 +329,14 @@ Create the name of the cleanup service account to use
   {{- default (printf "%s-registry" .Release.Name) .Values.airflow.registry.secretName }}
 {{- end }}
 
-{{- define "sidecar_container_spec" -}}
+{{- define "logging_sidecar_container_spec" -}}
 - name: {{ .Values.loggingSidecar.name }}
   image: "{{ .Values.loggingSidecar.image }}"
   {{- if .Values.loggingSidecar.resources }}
-  resources: {{- toYaml .Values.loggingSidecar.resources | nindent 12 }}
+  resources: {{- toYaml .Values.loggingSidecar.resources | nindent 4 }}
   {{- end }}
+  securityContext:
+    readOnlyRootFilesystem: true
   env:
   - name: VECTOR_CONFIG
     value: /etc/sidecar-logging/vector-config.yaml
@@ -369,22 +371,25 @@ Create the name of the cleanup service account to use
     readOnly: False
 {{- end }}
 
-{{- define "authsidecar_container_spec" -}}
+{{- define "auth_sidecar_container_spec" -}}
 - name: auth-proxy
   image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
   imagePullPolicy: {{ .Values.authSidecar.pullPolicy }}
   {{- if .Values.authSidecar.resources }}
-  resources: {{- toYaml .Values.authSidecar.resources | nindent 12 }}
+  resources: {{- toYaml .Values.authSidecar.resources | nindent 4 }}
   {{- end }}
+  securityContext:
   {{- if .Values.authSidecar.securityContext }}
-  securityContext: {{- toYaml .Values.authSidecar.securityContext | nindent 12 }}
+    {{- $required := dict "readOnlyRootFilesystem" true }}
+    {{- toYaml (merge $required .Values.authSidecar.securityContext ) | nindent 4 }}
   {{- end }}
+    readOnlyRootFilesystem: true
   ports:
   - containerPort: {{ .Values.authSidecar.port }}
     name: auth-proxy
     protocol: TCP
 {{- if .Values.authSidecar.readinessProbe  }}
-  readinessProbe: {{ tpl (toYaml .Values.authSidecar.readinessProbe) . | nindent 12 }}
+  readinessProbe: {{ tpl (toYaml .Values.authSidecar.readinessProbe) . | nindent 4 }}
 {{- else }}
   readinessProbe:
     httpGet:
@@ -395,7 +400,7 @@ Create the name of the cleanup service account to use
     periodSeconds: 10
 {{- end }}
 {{- if .Values.authSidecar.livenessProbe  }}
-  livenessProbe: {{ tpl (toYaml .Values.authSidecar.livenessProbe) . | nindent 12 }}
+  livenessProbe: {{ tpl (toYaml .Values.authSidecar.livenessProbe) . | nindent 4 }}
 {{- else }}
   livenessProbe:
     httpGet:

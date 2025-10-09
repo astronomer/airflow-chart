@@ -16,3 +16,4 @@ PyYAML
 requests
 tomli # indirect, needed to satisfy hash requirement
 typing-extensions # indrect, needed to satisfy hash requirement
+yamllint
