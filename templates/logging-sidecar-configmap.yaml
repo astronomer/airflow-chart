@@ -22,7 +22,9 @@ data:
         type: file
         include:
           - "${SIDECAR_LOGS}/*.log"
+          {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
           - "/usr/local/airflow/logs/**/*.log"
+          {{- end }}
         read_from: beginning
     transforms:
       # Parse Airflow 3 log file paths to extract metadata
