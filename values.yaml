@@ -42,6 +42,56 @@ airflow:
     gitSync:
       repository: quay.io/astronomer/ap-git-sync
       tag: 4.4.1-2
+
+  # Airflow 3 API server settings
+  apiServer:
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
+
+  createUserJob:
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
+
   # Airflow scheduler settings
   scheduler:
     livenessProbe:
@@ -63,15 +113,95 @@ airflow:
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
 
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
+  securityContexts:
+    containers:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+
   triggerer:
     persistence:
       enabled: false
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
 
   dagProcessor:
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
+
+  dags:
+    gitSync:
+      securityContexts:
+        container:
+          readOnlyRootFilesystem: true
 
   # Airflow webserver settings
   webserver:
@@ -99,8 +229,34 @@ airflow:
       SECURITY_MANAGER_CLASS = AirflowAstroSecurityManager
       {{- end }}
 
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
+
   # Airflow redis settings
   redis:
+    securityContexts:
+      container:
+        readOnlyRootFilesystem: true
     securityContext:
       # Set user to redis:999
       runAsUser: 999
@@ -113,12 +269,48 @@ airflow:
       enabled: false
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
 
   # Pgbouncer settings
   pgbouncer:
     # Pool sizes
     metadataPoolSize: 3
     resultBackendPoolSize: 2
+
+    extraVolumeMounts:
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: tmp
+    metricsExporterSidecar:
+      securityContexts:
+        container:
+          readOnlyRootFilesystem: true
+    securityContexts:
+      container:
+        readOnlyRootFilesystem: true
 
   # Elasticsearch logging configuration
   elasticsearch:
@@ -224,8 +416,11 @@ airflow:
         {{- end }}
       {{- end }}
     spec:
-      {{- if or (and .Values.dags.gitSync.enabled (not .Values.dags.persistence.enabled)) .Values.workers.extraInitContainers }}
+      {{- if or (and .Values.dags.gitSync.enabled (not .Values.dags.persistence.enabled)) .Values.workers.preAirflowExtraInitContainers .Values.workers.extraInitContainers }}
       initContainers:
+        {{- if .Values.workers.preAirflowExtraInitContainers }}
+        {{- tpl (toYaml .Values.workers.preAirflowExtraInitContainers) . | nindent 4 }}
+        {{- end }}
         {{- if and .Values.dags.gitSync.enabled (not .Values.dags.persistence.enabled) }}
         {{- include "git_sync_container" (dict "Values" .Values "is_init" "true") | nindent 4 }}
         {{- end }}
@@ -343,6 +538,28 @@ airflow:
   migrateDatabaseJob:
     annotations:
       "sidecar.istio.io/inject": "false"
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
 
   config:
     api:
@@ -351,9 +568,9 @@ airflow:
       # if astroSecurity manager is disabled and the airflow version is less than 2 we want this to equal airflow.api.auth.backend.default
       auth_backend: '{{ ternary "astronomer.flask_appbuilder.current_user_backend" (ternary "airflow.api.auth.backend.deny_all" "airflow.api.auth.backend.default"  (semverCompare ">=2.0.0" .Values.airflowVersion)) (and (.Values.useAstroSecurityManager) (semverCompare ">=2.0.0" .Values.airflowVersion)) }}'
     operators:
-      default_queue: celery
+      default_queue: '{{ semverCompare ">=3.0.0" .Values.airflowVersion | ternary "default" "celery" }}'
     celery: # compat
-      default_queue: celery
+      default_queue: '{{ semverCompare ">=3.0.0" .Values.airflowVersion | ternary "default" "celery" }}'
 
       # Set Flower URL prefix to empty string
       # Remove after https://github.com/apache/airflow/issues/27402 is resolved
@@ -394,6 +611,9 @@ airflow:
   useAstroSecurityManager: False
 
   statsd:
+    securityContexts:
+      container:
+        readOnlyRootFilesystem: true
     overrideMappings:
       # Map dot separated stats to labels
       - match: airflow.operator_successes_(.*)
@@ -489,7 +709,31 @@ airflow:
     image:
       registry: quay.io
       repository: astronomer/ap-postgresql
-      tag: 17.5.0
+      tag: 17.6.0
+
+  readReplicas:
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
 
 # Enable security context constraints required for OpenShift
 sccEnabled: false
@@ -557,6 +801,7 @@ platform:
   houstonAuthServiceEndpointUrl: ~
   dataPlaneBaseDomain: ~
   controlPlaneBaseDomain: ~
+  mode: ~
 
 astronomer:
   images:
@@ -611,6 +856,18 @@ dagDeploy:
     pod: {}
     container: {}
 
+  flower:
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
+
 gitSyncRelay:
   enabled: false
   # extraAnnotations to add to the git-sync-relay ingress
@@ -632,7 +889,7 @@ gitSyncRelay:
       tag: "3.21.3-5"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync-relay"
-      tag: "0.1.9"
+      tag: "0.2.1"
   repo:
     url: ~
     branch: main

@@ -2,7 +2,7 @@ import jmespath
 import pytest
 
 from tests import supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 expected_rbac = {
     "apiGroups": [""],
@@ -108,3 +108,26 @@ class TestPgbouncersslFeature:
         )
         assert len(docs) == 4
         assert docs[3]["spec"]["template"]["spec"]["affinity"] == affinity
+
+    def test_pgbouncer_certgenerator_pgbouncerssl_extra_labels_support(self, kube_version):
+        """Test that certgenerator has proper custom labels."""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "airflow": {
+                    "labels": {"snoopy": "dog"},
+                    "pgbouncer": {
+                        "enabled": True,
+                        "sslmode": "require",
+                    },
+                }
+            },
+            show_only="templates/generate-ssl.yaml",
+        )
+        assert len(docs) == 4
+        assert docs[3]["spec"]["template"]["metadata"]["labels"] == {
+            "component": "pgbouncer",
+            "snoopy": "dog",
+            "release": "release-name",
+            "tier": "airflow",
+        }

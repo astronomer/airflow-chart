@@ -1,9 +1,8 @@
 import pytest
 
-from tests import container_env_to_dict, git_root_dir, supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
-
-from . import get_containers_by_name
+from tests import git_root_dir, supported_k8s_versions
+from tests.utils import get_containers_by_name, get_env_vars_dict
+from tests.utils.chart import render_chart
 
 readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
 livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
@@ -42,10 +41,10 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
 
-        git_dameon_env = container_env_to_dict(c_by_name["git-daemon"])
+        git_dameon_env = get_env_vars_dict(c_by_name["git-daemon"].get("env"))
         assert not git_dameon_env.get("GIT_SYNC_REPO_FETCH_MODE")
         assert not git_dameon_env.get("GIT_SYNC_WEBHOOK_SECRET")
-        git_sync_env = container_env_to_dict(c_by_name["git-sync"])
+        git_sync_env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
         assert git_sync_env.get("GIT_SYNC_REPO_FETCH_MODE") == "poll"
         assert not git_sync_env.get("GIT_SYNC_WEBHOOK_SECRET")
         spec = docs[0]["spec"]["template"]["spec"]
@@ -114,25 +113,16 @@ class TestGitSyncRelayDeployment:
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-sync-home", "emptyDir": {}},
             {"name": "git-repo-contents", "emptyDir": {}},
-            {
-                "name": "git-secret",
-                "secret": {"secretName": "a-custom-secret-name"},
-            },
-            {
-                "name": "release-name-git-sync-config",
-                "configMap": {"name": "release-name-git-sync-config"},
-            },
+            {"name": "git-secret", "secret": {"secretName": "a-custom-secret-name"}},
+            {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
         ]
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-sync"]["volumeMounts"] == [
-            {
-                "name": "git-secret",
-                "mountPath": "/etc/git-secret/ssh",
-                "readOnly": True,
-                "subPath": "gitSshKey",
-            },
+            {"name": "git-sync-home", "mountPath": "/home/git-sync"},
+            {"name": "git-secret", "mountPath": "/etc/git-secret/ssh", "readOnly": True, "subPath": "gitSshKey"},
             {
                 "name": "release-name-git-sync-config",
                 "mountPath": "/etc/git-secret/known_hosts",
@@ -141,7 +131,7 @@ class TestGitSyncRelayDeployment:
             },
             {"name": "git-repo-contents", "mountPath": "/git"},
         ]
-        assert container_env_to_dict(c_by_name["git-sync"]) == {
+        assert get_env_vars_dict(c_by_name["git-sync"].get("env")) == {
             "GIT_SYNC_ROOT": "/git",
             "GIT_SYNC_REPO": "not-the-default-url",
             "GIT_SYNC_BRANCH": "not-the-default-branch",
@@ -183,18 +173,17 @@ class TestGitSyncRelayDeployment:
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-sync-home", "emptyDir": {}},
             {"name": "git-repo-contents", "emptyDir": {}},
-            {
-                "name": "release-name-git-sync-config",
-                "configMap": {"name": "release-name-git-sync-config"},
-            },
+            {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
         ]
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-sync"]["volumeMounts"] == [
+            {"name": "git-sync-home", "mountPath": "/home/git-sync"},
             {"name": "git-repo-contents", "mountPath": "/git"},
         ]
-        assert container_env_to_dict(c_by_name["git-sync"]) == {
+        assert get_env_vars_dict(c_by_name["git-sync"].get("env")) == {
             "GIT_SYNC_ROOT": "/git",
             "GIT_SYNC_REPO": "not-the-default-url",
             "GIT_SYNC_BRANCH": "not-the-default-branch",
@@ -313,10 +302,10 @@ class TestGitSyncRelayDeployment:
         assert len(docs) == 1
         c_by_name = get_containers_by_name(docs[0])
         assert len(c_by_name) == 2
-        git_sync_env = container_env_to_dict(c_by_name["git-sync"])
+        git_sync_env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
         assert git_sync_env["GIT_SYNC_REPO_FETCH_MODE"] == "webhook"
         assert git_sync_env["GIT_SYNC_WEBHOOK_SECRET"] == "be sure to drink your ovaltine"
-        git_dameon_env = container_env_to_dict(c_by_name["git-daemon"])
+        git_dameon_env = get_env_vars_dict(c_by_name["git-daemon"].get("env"))
         assert not git_dameon_env.get("GIT_SYNC_REPO_FETCH_MODE")
         assert not git_dameon_env.get("GIT_SYNC_WEBHOOK_SECRET")
 

@@ -50,7 +50,7 @@ spec:
       tolerations: {{- toYaml $tolerations | nindent 8 }}
       terminationGracePeriodSeconds: {{ .Values.dagDeploy.terminationGracePeriodSeconds }}
       serviceAccountName: {{ template "astro.dagDeploy.serviceAccountName" . }}
-      securityContext: {{ toYaml .Values.dagDeploy.securityContexts.pod | nindent 8 }}
+      securityContext: {{- toYaml .Values.dagDeploy.securityContexts.pod | nindent 8 }}
       containers:
         - name: dag-server
           image: "{{ .Values.dagDeploy.images.dagServer.repository }}:{{ .Values.dagDeploy.images.dagServer.tag }}"
@@ -66,15 +66,17 @@ spec:
           ports:
           - name: server
             containerPort: {{ .Values.dagDeploy.ports.dagServerHttp }}
-          securityContext: {{ toYaml .Values.dagDeploy.securityContexts.container | nindent 12 }}
+          securityContext:
+            {{- $required := dict "readOnlyRootFilesystem" true }}
+            {{- toYaml (merge $required .Values.dagDeploy.securityContexts.container) | nindent 12 }}
           resources:
             {{- toYaml .Values.dagDeploy.resources | nindent 12 }}
           env:
 {{- if .Values.dagDeploy.extraEnv }}
 {{ toYaml .Values.dagDeploy.extraEnv | indent 10 }}
 {{- end }}
-        {{- if .Values.dagDeploy.livenessProbe  }}
-          livenessProbe: {{ tpl (toYaml .Values.dagDeploy.livenessProbe) . | nindent 12 }}
+        {{- if .Values.dagDeploy.livenessProbe }}
+          livenessProbe: {{- tpl (toYaml .Values.dagDeploy.livenessProbe) . | nindent 12 }}
         {{- else }}
           livenessProbe:
             failureThreshold: 5
@@ -87,8 +89,8 @@ spec:
             successThreshold: 1
             timeoutSeconds: 5
         {{- end }}
-        {{- if .Values.dagDeploy.readinessProbe  }}
-          readinessProbe: {{ tpl (toYaml .Values.dagDeploy.readinessProbe) . | nindent 12 }}
+        {{- if .Values.dagDeploy.readinessProbe }}
+          readinessProbe: {{- tpl (toYaml .Values.dagDeploy.readinessProbe) . | nindent 12 }}
         {{- else }}
           readinessProbe:
             httpGet:
@@ -98,6 +100,9 @@ spec:
             periodSeconds: 10
         {{ end }}
           volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+            readOnly: false
           - name: data
             mountPath: /data
             readOnly: false
@@ -106,15 +111,17 @@ spec:
             name: sidecar-logging-consumer
           {{ end }}
 {{- if .Values.authSidecar.enabled }}
-{{- include "authsidecar_container_spec" . | nindent 8 }}
+{{- include "auth_sidecar_container_spec" . | nindent 8 }}
 {{- end }}
 {{- if .Values.loggingSidecar.enabled }}
-{{- include "sidecar_container_spec" . | nindent 8 }}
+{{- include "logging_sidecar_container_spec" . | nindent 8 }}
 {{- end }}
 {{- if .Values.dagDeploy.extraContainers }}
 {{- toYaml .Values.dagDeploy.extraContainers | nindent 8 }}
 {{- end }}
       volumes:
+      - name: tmp
+        emptyDir: {}
 {{- if .Values.authSidecar.enabled }}
       - name: nginx-sidecar-conf
         configMap:

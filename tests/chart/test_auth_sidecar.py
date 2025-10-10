@@ -3,9 +3,8 @@ import pathlib
 import pytest
 
 from tests import supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
-
-from . import get_containers_by_name
+from tests.utils import get_containers_by_name
+from tests.utils.chart import render_chart
 
 
 def common_pod_manager_test_cases(docs, docs_length, release_name, kind):
@@ -100,6 +99,20 @@ class TestAuthSidecar:
         )
         assert len(docs) == 0
 
+    def test_webserver_auth_sidecar_config_not_enabled_with_airflow3(self, kube_version):
+        """Test webserver auth sidecar config is not generated for Airflow 3.x"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "authSidecar": {"enabled": True},
+                "airflow": {"airflowVersion": "3.0.0"},
+            },
+            show_only=[
+                "templates/webserver/webserver-auth-sidecar-configmap.yaml",
+            ],
+        )
+        assert len(docs) == 0
+
     def test_auth_sidecar_config_with_dag_server_enabled(self, kube_version):
         """Test logging sidecar config with defaults"""
         resources = {
@@ -152,6 +165,7 @@ class TestAuthSidecar:
         securityContext = {
             "allowPrivilegeEscalation": False,
             "runAsNonRoot": True,
+            "blahBlah": "kitty cat",
         }
 
         docs = render_chart(
@@ -167,7 +181,7 @@ class TestAuthSidecar:
 
         common_pod_manager_test_cases(docs, 1, "release-name-dag-server", "StatefulSet")
         c_by_name = get_containers_by_name(docs[0])
-        assert c_by_name["auth-proxy"]["securityContext"] == securityContext
+        assert c_by_name["auth-proxy"]["securityContext"] == {**securityContext, "readOnlyRootFilesystem": True}
 
     def test_auth_sidecar_resources_with_dag_server_enabled(self, kube_version):
         """Test auth sidecar resource overrides"""
