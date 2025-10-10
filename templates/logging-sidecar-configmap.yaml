@@ -22,7 +22,7 @@ data:
         type: file
         include:
           - "${SIDECAR_LOGS}/*.log"
-          - ""/usr/local/airflow/logs/**/*.log""
+          - "/usr/local/airflow/logs/**/*.log"
         read_from: beginning
     transforms:
       # Parse Airflow 3 log file paths to extract metadata
