@@ -82,7 +82,7 @@ class TestAuthSidecar:
         assert doc["metadata"]["labels"]["component"] == "api-server"
         assert "nginx.conf" in doc["data"]
 
-        nginx_conf = pathlib.Path("tests/chart/test_data/api-server-authsidecar-nginx.conf").read_text()
+        nginx_conf = pathlib.Path("tests/chart/test_data/api-server-auth-sidecar-nginx.conf").read_text()
         assert nginx_conf in docs[0]["data"]["nginx.conf"]
 
     def test_auth_sidecar_config_not_enabled_with_airflow2_apiserver(self, kube_version):
@@ -157,7 +157,7 @@ class TestAuthSidecar:
         assert docs[1]["metadata"]["name"] == "release-name-dag-server"
         assert authSidecarServicePorts in docs[1]["spec"]["ports"]
 
-        nginx_conf = pathlib.Path("tests/chart/test_data/dag-server-authsidecar-nginx.conf").read_text()
+        nginx_conf = pathlib.Path("tests/chart/test_data/dag-server-auth-sidecar-nginx.conf").read_text()
         assert nginx_conf in docs[2]["data"]["nginx.conf"]
 
     def test_auth_sidecar_security_context_with_dag_server_enabled(self, kube_version):
@@ -248,5 +248,5 @@ class TestAuthSidecar:
         assert docs[1]["metadata"]["name"] == "release-name-git-sync-relay"
         assert authSidecarServicePorts in docs[1]["spec"]["ports"]
 
-        nginx_conf = pathlib.Path("tests/chart/test_data/git-sync-relay-authsidecar-nginx.conf").read_text()
+        nginx_conf = pathlib.Path("tests/chart/test_data/git-sync-relay-auth-sidecar-nginx.conf").read_text()
         assert nginx_conf in docs[2]["data"]["nginx.conf"]
