@@ -129,3 +129,83 @@ class TestLoggingSidecar:
 
         transform_task_log_inputs = vc["transforms"]["transform_task_log"]["inputs"]
         assert "filter_apiserver_logs" not in transform_task_log_inputs
+
+    def test_logging_sidecar_airflow3_support(self, kube_version):
+        """Test logging sidecar config with Airflow 3.x changes"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "loggingSidecar": {"enabled": True},
+                "airflow": {
+                    "airflowVersion": "3.0.0",
+                },
+            },
+            show_only="templates/logging-sidecar-configmap.yaml",
+        )
+        assert len(docs) == 1
+        vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
+
+        parse_airflow3_path = vc["transforms"]["parse_airflow3_path"]
+        assert parse_airflow3_path["type"] == "remap"
+        assert "airflow_log_files" in parse_airflow3_path["inputs"]
+
+        assert "parsed_log = parse_json!(.message)" in parse_airflow3_path["source"]
+
+        assert "dag_id" in parse_airflow3_path["source"]
+        assert "task_id" in parse_airflow3_path["source"]
+        assert "run_id" in parse_airflow3_path["source"]
+        assert "map_index" in parse_airflow3_path["source"]
+        assert "try_number" in parse_airflow3_path["source"]
+
+        assert ".is_airflow3 = true" in parse_airflow3_path["source"]
+
+        transform_airflow_logs = vc["transforms"]["transform_airflow_logs"]
+        assert "parse_airflow3_path" in transform_airflow_logs["inputs"]
+
+        transform_remove_fields = vc["transforms"]["transform_remove_fields"]
+        assert "del(.is_airflow3)" in transform_remove_fields["source"]
+
+        assert "del(.execution_date)" in transform_remove_fields["source"]
+
+    """Test logging sidecar config differences between Airflow 2.x and 3.x"""
+    # Test Airflow 2.x
+    docs_v2 = render_chart(
+        kube_version=kube_version,
+        values={
+            "loggingSidecar": {"enabled": True},
+            "airflow": {
+                "airflowVersion": "2.9.0",
+            },
+        },
+        show_only="templates/logging-sidecar-configmap.yaml",
+    )
+    vc_v2 = yaml.safe_load(docs_v2[0]["data"]["vector-config.yaml"])
+
+    docs_v3 = render_chart(
+        kube_version=kube_version,
+        values={
+            "loggingSidecar": {"enabled": True},
+            "airflow": {
+                "airflowVersion": "3.0.0",
+            },
+        },
+        show_only="templates/logging-sidecar-configmap.yaml",
+    )
+    vc_v3 = yaml.safe_load(docs_v3[0]["data"]["vector-config.yaml"])
+
+    parse_airflow2_transform = vc_v2["transforms"].get("parse_airflow3_path")
+    if parse_airflow2_transform:
+        assert "execution_date" in parse_airflow2_transform["source"]
+        assert ".is_airflow3 = false" in parse_airflow2_transform["source"]
+
+    parse_airflow3_transform = vc_v3["transforms"]["parse_airflow3_path"]
+    assert "parse_json!(.message)" in parse_airflow3_transform["source"]
+    assert ".is_airflow3 = true" in parse_airflow3_transform["source"]
+
+    filter_common_logs_v2 = vc_v2["transforms"]["filter_common_logs"]
+    filter_common_logs_v3 = vc_v3["transforms"]["filter_common_logs"]
+
+    assert "if exists(.@timestamp)" in filter_common_logs_v3["source"]
+
+    remove_fields_v3 = vc_v3["transforms"]["transform_remove_fields"]
+    assert "del(.execution_date)" in remove_fields_v3["source"]
