@@ -1,5 +1,12 @@
 airflow:
   # Airflow 3 API server settings
+  securityContexts:
+    containers:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
   apiServer:
     preAirflowExtraInitContainers:
       - command:
@@ -91,13 +98,6 @@ airflow:
         name: usr-local-airflow
       - emptyDir: {}
         name: tmp
-  securityContexts:
-    containers:
-      readOnlyRootFilesystem: true
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-          - ALL
 
   triggerer:
     preAirflowExtraInitContainers:
