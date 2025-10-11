@@ -114,7 +114,6 @@ airflow:
       SECURITY_MANAGER_CLASS = AirflowAstroSecurityManager
       {{- end }}
 
-
   # Airflow redis settings
   redis:
     securityContexts:
@@ -132,7 +131,6 @@ airflow:
       enabled: false
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
-
 
   # Pgbouncer settings
   pgbouncer:
@@ -380,7 +378,6 @@ airflow:
   migrateDatabaseJob:
     annotations:
       "sidecar.istio.io/inject": "false"
-
 
   config:
     api:

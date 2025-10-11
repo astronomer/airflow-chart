@@ -171,7 +171,6 @@ airflow:
       - emptyDir: {}
         name: tmp
 
-
 authSidecar:
   enabled: true
 dagDeploy:
