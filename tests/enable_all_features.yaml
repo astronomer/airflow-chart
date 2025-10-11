@@ -1,5 +1,5 @@
 airflow:
-    # Airflow 3 API server settings
+  # Airflow 3 API server settings
   apiServer:
     preAirflowExtraInitContainers:
       - command:
