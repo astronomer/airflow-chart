@@ -126,6 +126,8 @@ spec:
       - name: nginx-sidecar-conf
         configMap:
           name: {{ .Release.Name }}-dag-server-nginx-conf
+      - emptyDir: {}
+        name: nginx-cache
 {{- end }}
 {{- if .Values.loggingSidecar.enabled }}
       - name: config-volume

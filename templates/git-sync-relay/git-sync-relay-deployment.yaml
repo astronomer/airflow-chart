@@ -72,7 +72,11 @@ spec:
         - name: nginx-sidecar-conf
           configMap:
             name: {{ .Release.Name }}-git-sync-relay-nginx-conf
+        - emptyDir: {}
+          name: nginx-cache
         {{- end }}
+        - emptyDir: {}
+          name: tmp
       initContainers:
         - name: git-config-manager
           command: ["git", "config", "--global", "--add", "safe.directory", "/git"]

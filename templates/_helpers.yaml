@@ -414,4 +414,8 @@ Create the name of the cleanup service account to use
   - mountPath: /etc/nginx/nginx.conf
     name: nginx-sidecar-conf
     subPath: nginx.conf
+  - mountPath: /var/cache/nginx
+    name: nginx-cache
+  - mountPath: /tmp
+    name: tmp
 {{- end }}
