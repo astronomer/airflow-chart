@@ -1,4 +1,11 @@
 airflow:
+  securityContexts:
+    containers:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
   migrateDatabaseJob:
     preAirflowExtraInitContainers:
       - command:

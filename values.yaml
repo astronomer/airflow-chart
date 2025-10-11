@@ -64,14 +64,6 @@ airflow:
     logGroomerSidecar:
       args: ["/usr/local/bin/clean-airflow-logs"]
 
-  securityContexts:
-    containers:
-      readOnlyRootFilesystem: true
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-          - ALL
-
   triggerer:
     persistence:
       enabled: false
