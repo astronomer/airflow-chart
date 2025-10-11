@@ -345,7 +345,7 @@ class TestGitSyncRelayDeployment:
         assert "auth-proxy" in c_by_name
         assert "sidecar-log-consumer" in c_by_name
         assert c_by_name["git-sync"]["command"] == ["bash"]
-        c_by_name["git-sync"]["args"] == [
+        assert c_by_name["git-sync"]["args"] == [
             "-c",
             "/entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
         ]
@@ -353,7 +353,7 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["auth-proxy"]["volumeMounts"] == [
             {"mountPath": "/etc/nginx/nginx.conf", "name": "nginx-sidecar-conf", "subPath": "nginx.conf"},
             {"mountPath": "/var/cache/nginx", "name": "nginx-cache"},
-            {"mountPath": "/tmp", "name": "tmp"},
+            {"mountPath": "/tmp", "name": "tmp"},  # noqa: S108
         ]
 
     def test_git_sync_service_account_with_template(self, kube_version):
