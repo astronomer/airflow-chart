@@ -1,4 +1,96 @@
 airflow:
+    # Airflow 3 API server settings
+  apiServer:
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
+
+  createUserJob:
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
+
+  # Airflow scheduler settings
+  scheduler:
+    livenessProbe:
+      timeoutSeconds: 30
+    strategy:
+      type: Recreate
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - scheduler
+              topologyKey: "kubernetes.io/hostname"
+    logGroomerSidecar:
+      args: ["/usr/local/bin/clean-airflow-logs"]
+
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
   securityContexts:
     containers:
       readOnlyRootFilesystem: true
@@ -6,6 +98,31 @@ airflow:
       capabilities:
         drop:
           - ALL
+
+  triggerer:
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
+
   migrateDatabaseJob:
     preAirflowExtraInitContainers:
       - command:
@@ -82,100 +199,6 @@ airflow:
       registry: quay.io
       repository: astronomer/ap-postgresql
       tag: 17.5.0
-  scheduler:
-    preAirflowExtraInitContainers:
-      - command:
-          - sh
-          - -c
-          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
-        image: '{{ template "airflow_image" . }}'
-        name: usr-local-airflow-copier
-        securityContext:
-          readOnlyRootFilesystem: true
-        volumeMounts:
-          - mountPath: /usr_local_airflow_copy
-            name: usr-local-airflow
-    extraVolumeMounts:
-      - mountPath: /usr/local/airflow
-        name: usr-local-airflow
-      - mountPath: /tmp
-        name: tmp
-    extraVolumes:
-      - emptyDir: {}
-        name: usr-local-airflow
-      - emptyDir: {}
-        name: tmp
-  apiServer:
-    preAirflowExtraInitContainers:
-      - command:
-          - sh
-          - -c
-          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
-        image: '{{ template "airflow_image" . }}'
-        name: usr-local-airflow-copier
-        securityContext:
-          readOnlyRootFilesystem: true
-        volumeMounts:
-          - mountPath: /usr_local_airflow_copy
-            name: usr-local-airflow
-    extraVolumeMounts:
-      - mountPath: /usr/local/airflow
-        name: usr-local-airflow
-      - mountPath: /tmp
-        name: tmp
-    extraVolumes:
-      - emptyDir: {}
-        name: usr-local-airflow
-      - emptyDir: {}
-        name: tmp
-
-  createUserJob:
-    preAirflowExtraInitContainers:
-      - command:
-          - sh
-          - -c
-          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
-        image: '{{ template "airflow_image" . }}'
-        name: usr-local-airflow-copier
-        securityContext:
-          readOnlyRootFilesystem: true
-        volumeMounts:
-          - mountPath: /usr_local_airflow_copy
-            name: usr-local-airflow
-    extraVolumeMounts:
-      - mountPath: /usr/local/airflow
-        name: usr-local-airflow
-      - mountPath: /tmp
-        name: tmp
-    extraVolumes:
-      - emptyDir: {}
-        name: usr-local-airflow
-      - emptyDir: {}
-        name: tmp
-
-  triggerer:
-    preAirflowExtraInitContainers:
-      - command:
-          - sh
-          - -c
-          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
-        image: '{{ template "airflow_image" . }}'
-        name: usr-local-airflow-copier
-        securityContext:
-          readOnlyRootFilesystem: true
-        volumeMounts:
-          - mountPath: /usr_local_airflow_copy
-            name: usr-local-airflow
-    extraVolumeMounts:
-      - mountPath: /usr/local/airflow
-        name: usr-local-airflow
-      - mountPath: /tmp
-        name: tmp
-    extraVolumes:
-      - emptyDir: {}
-        name: usr-local-airflow
-      - emptyDir: {}
-        name: tmp
 
   dagProcessor:
     preAirflowExtraInitContainers:
