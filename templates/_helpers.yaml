@@ -428,3 +428,16 @@ Create the name of the cleanup service account to use
   - mountPath: /tmp
     name: tmp
 {{- end }}
+
+{{/*
+Generate log_id_template based on Airflow version
+*/}}
+{{- define "airflow.logIdTemplate" -}}
+{{- if semverCompare ">=3.0.0" .Values.airflowVersion -}}
+{dag_id}_{task_id}_{run_id}_{map_index}_{try_number}
+{{- else if semverCompare ">=2.3.0" .Values.airflowVersion -}}
+{dag_id}-{task_id}-{run_id}-{map_index}-{try_number}
+{{- else -}}
+{dag_id}_{task_id}_{execution_date}_{try_number}
+{{- end -}}
+{{- end -}}
