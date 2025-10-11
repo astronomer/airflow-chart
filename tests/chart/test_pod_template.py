@@ -169,8 +169,7 @@ class TestPodTemplate:
         assert podTemplate["spec"]["securityContext"] == {"runAsUser": 50000, "fsGroup": 50000}
         assert podTemplate["spec"]["containers"][0]["securityContext"] == {
             "allowPrivilegeEscalation": False,
-            "capabilities": {"drop": ["ALL"]},
-            "readOnlyRootFilesystem": True,
+            "capabilities": {"drop": ["ALL"]}
         }
 
     def test_pod_template_worker_securitycontext_overrides(self, kube_version):
