@@ -292,6 +292,14 @@ class TestDagServerStatefulSet:
         assert len(docs) == 1
         doc = docs[0]
 
+        assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "tmp", "emptyDir": {}},
+            {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-dag-server-nginx-conf"}},
+            {"name": "nginx-cache", "emptyDir": {}},
+            {"name": "config-volume", "configMap": {"name": "release-name-sidecar-config"}},
+            {"name": "sidecar-logging-consumer", "emptyDir": {}},
+        ]
+
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 3
         assert "dag-server" in c_by_name
@@ -301,6 +309,12 @@ class TestDagServerStatefulSet:
         assert livenessProbe == c_by_name["auth-proxy"]["livenessProbe"]
         assert readinessProbe == c_by_name["sidecar-log-consumer"]["readinessProbe"]
         assert livenessProbe == c_by_name["sidecar-log-consumer"]["livenessProbe"]
+
+        assert c_by_name["auth-proxy"]["volumeMounts"] == [
+            {"mountPath": "/etc/nginx/nginx.conf", "name": "nginx-sidecar-conf", "subPath": "nginx.conf"},
+            {"mountPath": "/var/cache/nginx", "name": "nginx-cache"},
+            {"mountPath": "/tmp", "name": "tmp"},
+        ]
 
     def test_dag_server_service_account_with_template(self, kube_version):
         """Test dag-server service account with template."""

@@ -117,6 +117,7 @@ class TestGitSyncRelayDeployment:
             {"name": "git-repo-contents", "emptyDir": {}},
             {"name": "git-secret", "secret": {"secretName": "a-custom-secret-name"}},
             {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
+            {"name": "tmp", "emptyDir": {}},
         ]
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
@@ -176,6 +177,7 @@ class TestGitSyncRelayDeployment:
             {"name": "git-sync-home", "emptyDir": {}},
             {"name": "git-repo-contents", "emptyDir": {}},
             {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
+            {"name": "tmp", "emptyDir": {}},
         ]
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
@@ -325,6 +327,17 @@ class TestGitSyncRelayDeployment:
         assert len(docs) == 1
         doc = docs[0]
 
+        assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-sync-home", "emptyDir": {}},
+            {"name": "git-repo-contents", "emptyDir": {}},
+            {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
+            {"name": "config-volume", "configMap": {"name": "release-name-sidecar-config"}},
+            {"name": "sidecar-logging-consumer", "emptyDir": {}},
+            {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-git-sync-relay-nginx-conf"}},
+            {"name": "nginx-cache", "emptyDir": {}},
+            {"name": "tmp", "emptyDir": {}},
+        ]
+
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 4
         assert "git-sync" in c_by_name
@@ -335,6 +348,12 @@ class TestGitSyncRelayDeployment:
         c_by_name["git-sync"]["args"] == [
             "-c",
             "/entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
+        ]
+
+        assert c_by_name["auth-proxy"]["volumeMounts"] == [
+            {"mountPath": "/etc/nginx/nginx.conf", "name": "nginx-sidecar-conf", "subPath": "nginx.conf"},
+            {"mountPath": "/var/cache/nginx", "name": "nginx-cache"},
+            {"mountPath": "/tmp", "name": "tmp"},
         ]
 
     def test_git_sync_service_account_with_template(self, kube_version):
