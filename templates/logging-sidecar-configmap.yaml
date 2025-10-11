@@ -91,13 +91,10 @@ data:
           .component = "${COMPONENT:--}"
           .workspace = "${WORKSPACE:--}"
           .release = "${RELEASE:--}"
-
-        {{- if not (semverCompare ">=3.0.0" .Values.airflow.airflowVersion) }}
           # Parse timestamp if it exists (Airflow 2.x)
           if exists(.@timestamp) {
             .date_nano = parse_timestamp!(.@timestamp, format: "%Y-%m-%dT%H:%M:%S.%f%Z")
           }
-        {{- end }}
 
       filter_common_logs:
         type: filter
