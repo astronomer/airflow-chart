@@ -294,10 +294,10 @@ class TestDagServerStatefulSet:
 
         assert doc["spec"]["template"]["spec"]["volumes"] == [
             {"name": "tmp", "emptyDir": {}},
-            {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-dag-server-nginx-conf"}}, 
-            {"name": "nginx-cache", "emptyDir": {}}, 
-            {"name": "config-volume", "configMap": {"name": "release-name-sidecar-config"}}, 
-            {"name": "sidecar-logging-consumer", "emptyDir": {}}, 
+            {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-dag-server-nginx-conf"}},
+            {"name": "nginx-cache", "emptyDir": {}},
+            {"name": "config-volume", "configMap": {"name": "release-name-sidecar-config"}},
+            {"name": "sidecar-logging-consumer", "emptyDir": {}},
         ]
 
         c_by_name = get_containers_by_name(doc)

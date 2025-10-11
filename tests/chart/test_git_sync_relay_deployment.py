@@ -117,7 +117,7 @@ class TestGitSyncRelayDeployment:
             {"name": "git-repo-contents", "emptyDir": {}},
             {"name": "git-secret", "secret": {"secretName": "a-custom-secret-name"}},
             {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
-            {"name": "tmp", "emptyDir": {}}
+            {"name": "tmp", "emptyDir": {}},
         ]
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
@@ -331,11 +331,11 @@ class TestGitSyncRelayDeployment:
             {"name": "git-sync-home", "emptyDir": {}},
             {"name": "git-repo-contents", "emptyDir": {}},
             {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
-            {"name": "config-volume", "configMap": {"name": "release-name-sidecar-config"}}, 
-            {"name": "sidecar-logging-consumer", "emptyDir": {}}, 
-            {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-git-sync-relay-nginx-conf"}}, 
-            {"name": "nginx-cache", "emptyDir": {}}, 
-            {"name": "tmp", "emptyDir": {}}
+            {"name": "config-volume", "configMap": {"name": "release-name-sidecar-config"}},
+            {"name": "sidecar-logging-consumer", "emptyDir": {}},
+            {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-git-sync-relay-nginx-conf"}},
+            {"name": "nginx-cache", "emptyDir": {}},
+            {"name": "tmp", "emptyDir": {}},
         ]
 
         c_by_name = get_containers_by_name(doc)
