@@ -2,14 +2,13 @@
 exclude: '^(venv|\.vscode|tests/k8s_schema|tests/chart/test_data)' # regex
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.13.0"
+    rev: "v0.14.0"
     hooks:
       - id: ruff-check
         args:
           - "--fix"
           - "--exit-non-zero-on-fix"
           - "--unsafe-fixes"
-        exclude: "^(tests/chart/test_dag_server_statefulset.py|tests/chart/test_git_sync_relay_deployment.py)"
       - id: ruff-format
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
