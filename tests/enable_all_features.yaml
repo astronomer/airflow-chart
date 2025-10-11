@@ -1,5 +1,4 @@
 airflow:
-  # Airflow 3 API server settings
   securityContexts:
     containers:
       readOnlyRootFilesystem: true
