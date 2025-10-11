@@ -138,6 +138,15 @@ proxy_ssl_server_name       on;
 proxy_pass_request_headers  on;
 {{ end }}
 
+{{ define "default_nginx_tmp_path" }}
+proxy_temp_path /tmp/proxy_temp;
+client_body_temp_path /tmp/client_temp;
+fastcgi_temp_path /tmp/fastcgi_temp;
+uwsgi_temp_path /tmp/uwsgi_temp;
+scgi_temp_path /tmp/scgi_temp;
+{{ end }}
+
+
 {{ define "default_nginx_auth_headers" }}
 auth_request_set $authHeader0 $upstream_http_authorization;
 proxy_set_header 'authorization' $authHeader0;
@@ -414,4 +423,8 @@ Create the name of the cleanup service account to use
   - mountPath: /etc/nginx/nginx.conf
     name: nginx-sidecar-conf
     subPath: nginx.conf
+  - mountPath: /var/cache/nginx
+    name: nginx-cache
+  - mountPath: /tmp
+    name: tmp
 {{- end }}

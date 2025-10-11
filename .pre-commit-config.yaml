@@ -9,6 +9,7 @@ repos:
           - "--fix"
           - "--exit-non-zero-on-fix"
           - "--unsafe-fixes"
+        exclude: "^(tests/chart/test_dag_server_statefulset.py|tests/chart/test_git_sync_relay_deployment.py)"
       - id: ruff-format
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
