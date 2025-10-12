@@ -80,10 +80,7 @@ data:
           .component = "${COMPONENT:--}"
           .workspace = "${WORKSPACE:--}"
           .release = "${RELEASE:--}"
-          # Parse timestamp if it exists (Airflow 2.x)
-          if exists(.@timestamp) {
-            .date_nano = parse_timestamp!(.@timestamp, format: "%Y-%m-%dT%H:%M:%S.%f%Z")
-          }
+          .date_nano = parse_timestamp!(.@timestamp, format: "%Y-%m-%dT%H:%M:%S.%f%Z")
 
       filter_common_logs:
         type: filter
