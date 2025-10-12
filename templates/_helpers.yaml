@@ -183,6 +183,17 @@ proxy_redirect                          off;
 {{ end }}
 
 {{/*
+Create the name of the api-server service account to use
+*/}}
+{{- define "astro.apiServer.serviceAccountName" -}}
+{{- if .Values.apiServer.serviceAccount.create -}}
+    {{ default (printf "%s-api-server" (include "airflow.fullname" .)) .Values.apiServer.serviceAccount.name }}
+{{- else -}}
+    {{- tpl (default "default" .Values.apiServer.serviceAccount.name) . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create the name of the dag-server service account to use
 */}}
 {{- define "astro.dagDeploy.serviceAccountName" -}}
