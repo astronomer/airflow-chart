@@ -7,7 +7,7 @@ help: ## Print Makefile help.
 PHONY: venv
 venv: .venv ## Setup venv required for unit testing the helm chart
 .venv:
-	uv venv -p 3.13 --seed || python3 -m venv .venv -p python3
+	uv venv -p 3.14 --seed || python3 -m venv .venv -p python3
 	.venv/bin/pip install -r requirements/chart.txt
 
 charts: ## Update dependent charts
