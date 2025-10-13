@@ -115,3 +115,30 @@ class TestDagServerRoleBinding:
             },
             {"kind": "ServiceAccount", "name": "release-name-airflow-dag-processor", "namespace": "test-namespace"},
         ] == downloader["subjects"]
+
+    def test_dag_deploy_rolebinding_dag_server_enabled_with_airflow(self, kube_version):
+        """Test that a valid RoleBinding is rendered when dag-server is enabled with airflow3."""
+        values = {"dagDeploy": {"enabled": True}, "airflow": {"airflowVersion": "3.0.0"}}
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-deploy-rolebinding.yaml",
+            namespace="test-namespace",
+            values=values,
+        )
+        common_dag_downloader_rbac_tests(docs)
+        downloader = docs[1]
+        assert downloader["metadata"]["name"] == "release-name-dag-downloader-rolebinding"
+        assert len(downloader["subjects"]) == 5
+        assert all(sub["kind"] == "ServiceAccount" for sub in downloader["subjects"])
+        assert all(sub["namespace"] == "test-namespace" for sub in downloader["subjects"])
+        assert downloader["roleRef"]["kind"] == "Role"
+        assert downloader["roleRef"]["name"] == "release-name-dag-downloader-role"
+        assert downloader["roleRef"]["apiGroup"] == "rbac.authorization.k8s.io"
+        print(downloader["subjects"])
+        assert [
+            {"kind": "ServiceAccount", "name": "release-name-api-server", "namespace": "test-namespace"},
+            {"kind": "ServiceAccount", "name": "release-name-airflow-webserver", "namespace": "test-namespace"},
+            {"kind": "ServiceAccount", "name": "release-name-airflow-triggerer", "namespace": "test-namespace"},
+            {"kind": "ServiceAccount", "name": "release-name-airflow-worker", "namespace": "test-namespace"},
+            {"kind": "ServiceAccount", "name": "release-name-airflow-scheduler", "namespace": "test-namespace"},
+        ] == downloader["subjects"]
