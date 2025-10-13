@@ -2,7 +2,7 @@
 set -e
 
 KIND_VERSION="0.29.0" # https://github.com/kubernetes-sigs/kind/releases
-HELM_VERSION="3.18.4" # https://github.com/helm/helm/releases
+HELM_VERSION="3.19.0" # https://github.com/helm/helm/releases
 
 # Determine the platform we are running on
 OS=$(uname | tr '[:upper:]' '[:lower:]')

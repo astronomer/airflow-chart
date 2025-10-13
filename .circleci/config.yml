@@ -171,7 +171,7 @@ jobs:
 
   lint:
     docker:
-      - image: alpine/helm:3.13.3
+      - image: alpine/helm:3.19.0
     steps:
       - checkout
       - run:
