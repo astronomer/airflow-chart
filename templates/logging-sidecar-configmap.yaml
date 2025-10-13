@@ -35,7 +35,7 @@ data:
         source: |
         {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
           # Airflow 3.x - Parse JSON structured logs
-          parsed_log = parse_json!(.message)
+          parsed_log = parse_json(.message) ?? .
           parsed, err = parse_regex(.file, r'/dag_id=(?P<dagID>[0-9a-zA-Z-_]+)/run_id=(?P<runID>[^/]+)/task_id=(?P<taskID>[0-9a-zA-Z-_]+)/(?:map_index=(?P<mapIndex>-?[0-9]+)/)?attempt=(?P<attempt>[0-9]+)\.log$')
 
           if err == null {
