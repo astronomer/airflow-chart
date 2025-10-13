@@ -213,7 +213,7 @@ jobs:
   airflow-test:
     machine:
       # https://circleci.com/developer/machine/image/ubuntu-2204
-      image: ubuntu-2204:2024.11.1
+      image: ubuntu-2204:2025.09.1
       # https://circleci.com/docs/reference/configuration-reference/#docker-execution-environment
       resource_class: xlarge # REVERT THIS TO 'large' BEFORE MERGING THIS IS ONLY FOR DEBUGGING
     parameters:
