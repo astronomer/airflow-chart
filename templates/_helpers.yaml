@@ -186,10 +186,10 @@ proxy_redirect                          off;
 Create the name of the api-server service account to use
 */}}
 {{- define "astro.apiServer.serviceAccountName" -}}
-{{- if .Values.apiServer.serviceAccount.create -}}
-    {{ default (printf "%s-api-server" (include "airflow.fullname" .)) .Values.apiServer.serviceAccount.name }}
+{{- if .Values.airflow.apiServer.serviceAccount.create -}}
+    {{ default (printf "%s-api-server" (include "airflow.fullname" .)) .Values.airflow.apiServer.serviceAccount.name }}
 {{- else -}}
-    {{- tpl (default "default" .Values.apiServer.serviceAccount.name) . -}}
+    {{- tpl (default "default" .Values.airflow.apiServer.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
