@@ -52,11 +52,11 @@ data:
             .log_id = join!([.dag_id, .task_id, .run_id, to_string(.map_index), to_string(.try_number)], "_")
 
             # Extract structured log fields
-            .event = parsed_log.event ?? null
-            .timestamp = parsed_log.timestamp ?? null
-            .level = parsed_log.level ?? null
-            .logger = parsed_log.logger ?? null
-            .chan = parsed_log.chan ?? null
+            .event = parsed_log.event
+            .timestamp = parsed_log.timestamp
+            .level = parsed_log.level
+            .logger = parsed_log.logger
+            .chan = parsed_log.chan
           } else {
             # Fallback for non-task logs
             .is_airflow3 = false
