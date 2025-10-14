@@ -66,9 +66,15 @@ class TestAirflow:
         )
 
         assert len(docs) == 2
-        spec = docs[0]["spec"]
-        print(spec["ingress"][0]["from"][0])
-        assert {
+        ingress_spec = docs[0]["spec"]["ingress"]
+        assert len(ingress_spec) == 1
+        assert ingress_spec[0]["from"][0] == {
             "namespaceSelector": {},
-            "podSelector": {"matchLabels": {"component": "worker", "release": "release-name", "tier": "airflow"}},
-        } == spec["ingress"][0]["from"][0]
+            "podSelector": {
+                "matchLabels": {
+                    "component": "worker",
+                    "release": "release-name",
+                    "tier": "airflow",
+                }
+            },
+        }
