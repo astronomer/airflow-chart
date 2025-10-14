@@ -42,8 +42,39 @@ class TestAirflow:
         """Test Airflow3 apiServer defaults."""
         values = {"airflow": {"airflowVersion": "3.0.0"}}
         docs = render_chart(
-            kube_version=kube_version, show_only=["charts/airflow/templates/api-server/api-server-deployment.yaml"], values=values
+            kube_version=kube_version,
+            show_only=[
+                "charts/airflow/templates/api-server/api-server-deployment.yaml",
+                "templates/api-server/api-server-execution-networkpolicy.yaml",
+            ],
+            values=values,
         )
 
         assert len(docs) == 1
         assert docs[0]["spec"]["template"]["spec"]["serviceAccountName"] == "release-name-airflow-api-server"
+
+    def test_airflow_apiserver_with_networkpolicy(self, kube_version):
+        """Test Airflow3 apiServer defaults."""
+        values = {"airflow": {"airflowVersion": "3.0.0", "networkPolicies": {"enabled": True}}}
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=[
+                "templates/api-server/api-server-execution-networkpolicy.yaml",
+                "charts/airflow/templates/api-server/api-server-deployment.yaml",
+            ],
+            values=values,
+        )
+
+        assert len(docs) == 2
+        ingress_spec = docs[0]["spec"]["ingress"]
+        assert len(ingress_spec) == 1
+        assert ingress_spec[0]["from"][0] == {
+            "namespaceSelector": {},
+            "podSelector": {
+                "matchLabels": {
+                    "component": "worker",
+                    "release": "release-name",
+                    "tier": "airflow",
+                }
+            },
+        }
