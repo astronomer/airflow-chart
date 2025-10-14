@@ -1,11 +1,11 @@
 ##################################################
 ## Airflow API Server execution network Policy ##
 #################################################
-{{- if and .Values.airflow.networkPolicies.enabled .Values.gitSyncRelay.enabled (semverCompare ">=3.0.0" .Values.airflow.airflowVersion) }}
+{{- if and .Values.airflow.networkPolicies.enabled (semverCompare ">=3.0.0" .Values.airflow.airflowVersion) }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ .Release.Name }}-api-server-execution
+  name: {{ .Release.Name }}-api-server-execution-policy
   labels:
     tier: airflow
     component: api-server
@@ -31,5 +31,4 @@ spec:
     ports:
     - protocol: TCP
       port: {{ .Values.airflow.ports.apiServer}}
-{{- end -}}
 {{- end -}}
