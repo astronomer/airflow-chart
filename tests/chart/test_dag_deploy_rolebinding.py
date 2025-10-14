@@ -136,7 +136,7 @@ class TestDagServerRoleBinding:
         assert downloader["roleRef"]["apiGroup"] == "rbac.authorization.k8s.io"
         print(downloader["subjects"])
         assert [
-            {"kind": "ServiceAccount", "name": "release-name-api-server", "namespace": "test-namespace"},
+            {"kind": "ServiceAccount", "name": "release-name-airflow-api-server", "namespace": "test-namespace"},
             {"kind": "ServiceAccount", "name": "release-name-airflow-webserver", "namespace": "test-namespace"},
             {"kind": "ServiceAccount", "name": "release-name-airflow-triggerer", "namespace": "test-namespace"},
             {"kind": "ServiceAccount", "name": "release-name-airflow-worker", "namespace": "test-namespace"},
