@@ -1,8 +1,7 @@
 ##################################################
 ## Airflow API Server execution network Policy ##
 #################################################
-{{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
-{{- if .Values.airflow.networkPolicies.enabled }}
+{{- if and .Values.airflow.networkPolicies.enabled .Values.gitSyncRelay.enabled (semverCompare ">=3.0.0" .Values.airflow.airflowVersion) }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
