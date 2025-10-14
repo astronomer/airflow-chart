@@ -40,11 +40,7 @@ class TestAirflow:
 
     def test_airflow_apiserver_defaults(self, kube_version):
         """Test Airflow3 apiServer defaults."""
-        values = {
-            "airflow": {
-                "airflowVersion": "3.0.0"
-            }
-        }
+        values = {"airflow": {"airflowVersion": "3.0.0"}}
         docs = render_chart(
             kube_version=kube_version, show_only=["charts/airflow/templates/api-server/api-server-deployment.yaml"], values=values
         )
