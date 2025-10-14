@@ -33,3 +33,4 @@ spec:
     - protocol: TCP
       port: {{ .Values.airflow.ports.apiServer}}
 {{- end -}}
+{{- end -}}
