@@ -36,10 +36,7 @@ repos:
         args: ["-b", "master"]
       - id: requirements-txt-fixer
         args:
-          - "requirements/chart.in"
-          - "requirements/chart.txt"
-          - "requirements/functional.in"
-          - "requirements/functional.txt"
+          - "tests/requirements.txt"
       - id: sort-simple-yaml
       - id: trailing-whitespace
   - repo: https://github.com/shellcheck-py/shellcheck-py

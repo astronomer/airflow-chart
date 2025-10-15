@@ -12,7 +12,7 @@ metadata = yaml.safe_load((git_root_dir / "metadata.yaml").read_text())
 kube_versions = metadata["test_k8s_versions"]
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
-machine_image_version = "ubuntu-2204:2024.11.1"  # https://circleci.com/developer/machine/image/ubuntu-2204
+machine_image_version = "ubuntu-2204:2025.09.1"  # https://circleci.com/developer/machine/image/ubuntu-2204
 ci_runner_version = "2025-10"  # This should be the current YYYY-MM
 
 
