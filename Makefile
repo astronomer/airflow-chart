@@ -2,13 +2,13 @@
 
 .PHONY: help
 help: ## Print Makefile help.
-	@grep -Eh '^[a-z.A-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[1;36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -Eh '^[a-z.A-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[1;36m%-25s\033[0m %s\n", $$1, $$2}'
 
 PHONY: venv
-venv: .venv ## Setup venv required for unit testing the helm chart
+venv: .venv ## Setup venv required for testing
 .venv:
-	uv venv -p 3.14 --seed || python3 -m venv .venv -p python3
-	.venv/bin/pip install -r requirements/chart.txt
+	{ uv venv -p 3.13 --seed && uv sync ; } || \
+	{ python3 -m venv .venv -p python3 && .venv/bin/pip install -r tests/requirements.txt ; }
 
 charts: ## Update dependent charts
 	helm dep update
@@ -31,13 +31,21 @@ clean: ## Clean build and test artifacts
 	rm -rf test-results
 	find . -name __pycache__ -exec rm -rf {} \+
 
-.PHONY: update-requirements
-update-requirements: ## Update all python requirements files
-	for FILE in requirements/*.in ; do uv pip compile --quiet --generate-hashes --upgrade $${FILE} --output-file $${FILE%.in}.txt ; done ;
-	-pre-commit run requirements-txt-fixer --all-files --show-diff-on-failure
-
 .PHONY: show-docker-images
 show-docker-images: ## Show all docker images and versions used in the helm chart
 	@helm template . 2>/dev/null \
 		-f tests/enable_all_features.yaml \
 		| gawk '/image: / {match($$2, /(([^"]*):[^"]*)/, a) ; printf "https://%s %s\n", a[2], a[1] ;}' | sort -u | column -t
+
+.PHONY: uv-lock-upgrade
+uv-lock-upgrade: ## Upgrade dependencies in the uv.lock file.
+	uv lock --upgrade
+
+.PHONY: uv-lock-upgrade-and-sync
+uv-lock-upgrade-and-sync: uv-lock-upgrade ## Upgrade uv lockfile dependencies and sync venv
+	uv sync
+
+.PHONY: update-requirements
+update-requirements: uv-lock-upgrade ## Update requirements.txt file
+	uv export --format requirements-txt > tests/requirements.txt
+	-pre-commit run requirements-txt-fixer --all-files --show-diff-on-failure

@@ -138,6 +138,6 @@ export AIRFLOW_VERSION
 echo "Airflow Version: $AIRFLOW_VERSION"
 
 uv venv /tmp/venv --seed || python3 -m venv /tmp/venv
-/tmp/venv/bin/python -m pip install -r "$REPO_DIR/requirements/functional.txt"
+/tmp/venv/bin/python -m pip install -r "$REPO_DIR/tests/requirements.txt"
 mkdir -p "test-results"
 /tmp/venv/bin/python -m pytest -v "--junitxml=test-results/junit.xml" "$REPO_DIR/tests/functional/"
