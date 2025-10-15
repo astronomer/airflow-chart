@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-KIND_VERSION="0.29.0" # https://github.com/kubernetes-sigs/kind/releases
+KIND_VERSION="0.30.0" # https://github.com/kubernetes-sigs/kind/releases
 HELM_VERSION="3.19.0" # https://github.com/helm/helm/releases
 
 # Determine the platform we are running on
