@@ -89,6 +89,30 @@ workflows:
 
             - approve-test-all
       - airflow-test:
+          name: test-1-32-8-CeleryExecutor
+          kube_version: 1.32.8
+          executor: CeleryExecutor
+          requires:
+            - build-and-release-internal
+
+            - approve-test-all
+      - airflow-test:
+          name: test-1-32-8-LocalExecutor
+          kube_version: 1.32.8
+          executor: LocalExecutor
+          requires:
+            - build-and-release-internal
+
+            - approve-test-all
+      - airflow-test:
+          name: test-1-32-8-KubernetesExecutor
+          kube_version: 1.32.8
+          executor: KubernetesExecutor
+          requires:
+            - build-and-release-internal
+
+            - approve-test-all
+      - airflow-test:
           name: test-1-32-9-CeleryExecutor
           kube_version: 1.32.9
           executor: CeleryExecutor
@@ -169,6 +193,9 @@ workflows:
             - "test-1-31-13-CeleryExecutor"
             - "test-1-31-13-LocalExecutor"
             - "test-1-31-13-KubernetesExecutor"
+            - "test-1-32-8-CeleryExecutor"
+            - "test-1-32-8-LocalExecutor"
+            - "test-1-32-8-KubernetesExecutor"
             - "test-1-32-9-CeleryExecutor"
             - "test-1-32-9-LocalExecutor"
             - "test-1-32-9-KubernetesExecutor"
@@ -225,7 +252,7 @@ jobs:
 
   lint:
     docker:
-      - image: alpine/helm:3.13.3
+      - image: alpine/helm:3.19.0
     steps:
       - checkout
       - run:
@@ -247,7 +274,7 @@ jobs:
             make venv
             make charts
             TEST_FILES=$(circleci tests glob "tests/chart/test_*.py" | circleci tests split --split-by=timings)
-            venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml $TEST_FILES
+            .venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml $TEST_FILES
       - store_test_results:
           path: test-results
 
@@ -267,7 +294,7 @@ jobs:
   airflow-test:
     machine:
       # https://circleci.com/developer/machine/image/ubuntu-2204
-      image: ubuntu-2204:2024.11.1
+      image: ubuntu-2204:2025.09.1
       # https://circleci.com/docs/reference/configuration-reference/#docker-execution-environment
       resource_class: xlarge # REVERT THIS TO 'large' BEFORE MERGING THIS IS ONLY FOR DEBUGGING
     parameters:

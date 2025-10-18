@@ -149,7 +149,7 @@ class TestLoggingSidecar:
         assert parse_airflow3_path["type"] == "remap"
         assert "airflow_log_files" in parse_airflow3_path["inputs"]
 
-        assert "parsed_log = parse_json!(.message)" in parse_airflow3_path["source"]
+        assert "parsed_log = parse_json(.message)" in parse_airflow3_path["source"]
 
         assert "dag_id" in parse_airflow3_path["source"]
         assert "task_id" in parse_airflow3_path["source"]

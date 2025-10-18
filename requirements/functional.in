@@ -1,6 +1,0 @@
-docker
-kubernetes
-pre-commit
-pytest
-pytest-pretty
-pytest-testinfra<9.0.0 # will require refactoring pip_package tests
