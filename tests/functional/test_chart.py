@@ -55,7 +55,7 @@ def test_elasticsearch_version(webserver):
     our users to run the client code of version 5.5.3 or greater
     """
     try:
-        elasticsearch_module = webserver.pip_package.get_packages()["elasticsearch"]
+        elasticsearch_module = webserver.pip.get_packages()["elasticsearch"]
     except KeyError:
         raise Exception("elasticsearch pip module is not installed")
     version = elasticsearch_module["version"]
@@ -65,7 +65,7 @@ def test_elasticsearch_version(webserver):
 def test_redis_version(webserver):
     """Redis pip module version 3.4.0 has an issue in the Astronomer platform"""
     try:
-        redis_module = webserver.pip_package.get_packages()["redis"]
+        redis_module = webserver.pip.get_packages()["redis"]
     except KeyError:
         raise Exception("redis pip module is not installed")
     version = redis_module["version"]
@@ -75,7 +75,7 @@ def test_redis_version(webserver):
 def test_astronomer_airflow_check_version(webserver):
     """astronomer-airflow-version-check 1.0.0 has an issue in the Astronomer platform"""
     try:
-        version_check_module = webserver.pip_package.get_packages()["astronomer-airflow-version-check"]
+        version_check_module = webserver.pip.get_packages()["astronomer-airflow-version-check"]
     except KeyError:
         print("astronomer-airflow-version-check pip module is not installed")
         return
