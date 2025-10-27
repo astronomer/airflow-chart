@@ -482,6 +482,12 @@ airflow:
         action: drop
         name: "dropped"
 
+  postgresql:
+    image:
+      registry: quay.io
+      repository: astronomer/ap-postgresql
+      tag: 17.5.0
+
 # Enable security context constraints required for OpenShift
 sccEnabled: false
 
