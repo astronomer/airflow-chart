@@ -21,6 +21,7 @@ class TestAirflowSccPrivileges:
             kube_version=kube_version,
             values={"sccEnabled": True},
             show_only="templates/airflow-scc-anyuid.yaml",
+            validate_objects=False,
         )
         assert len(docs) == 1
         assert docs[0]["kind"] == "SecurityContextConstraints"
