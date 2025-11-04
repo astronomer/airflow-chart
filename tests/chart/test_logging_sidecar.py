@@ -127,8 +127,8 @@ class TestLoggingSidecar:
         map_log_level_inputs = vc["transforms"]["map_log_level"]["inputs"]
         assert "filter_apiserver_logs" in map_log_level_inputs
 
-        transform_remove_fields_inputs = vc["transforms"]["transform_remove_fields"]["inputs"]
-        assert "filter_apiserver_logs" in transform_remove_fields_inputs
+        map_log_level_inputs = vc["transforms"]["transform_remove_fields"]["inputs"]
+        assert "filter_apiserver_logs" in map_log_level_inputs
 
         transform_task_log_inputs = vc["transforms"]["transform_task_log"]["inputs"]
         assert "filter_apiserver_logs" not in transform_task_log_inputs
