@@ -166,3 +166,47 @@ class TestLoggingSidecar:
         assert "del(.is_airflow3)" in transform_remove_fields["source"]
 
         assert "del(.execution_date)" in transform_remove_fields["source"]
+
+    def test_logging_sidecar_af3_exception_handling(self, kube_version):
+        """Test logging sidecar AF3 exception detail extraction and handling"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "loggingSidecar": {"enabled": True},
+                "airflow": {
+                    "airflowVersion": "3.0.0",
+                },
+            },
+            show_only="templates/logging-sidecar-configmap.yaml",
+        )
+        assert len(docs) == 1
+        vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
+
+        parse_airflow3_path = vc["transforms"]["parse_airflow3_path"]
+        assert "if exists(parsed_log.error_detail)" in parse_airflow3_path["source"]
+        assert ".error_detail = parsed_log.error_detail" in parse_airflow3_path["source"]
+
+        assert "map_log_level" in vc["transforms"]
+        map_log_level = vc["transforms"]["map_log_level"]
+        assert map_log_level["type"] == "remap"
+
+        assert "level_map" in map_log_level["source"]
+        assert '"debug": 10' in map_log_level["source"]
+        assert '"info": 20' in map_log_level["source"]
+        assert '"warning": 30' in map_log_level["source"]
+        assert '"error": 40' in map_log_level["source"]
+        assert '"critical": 50' in map_log_level["source"]
+
+        assert "handle_error_details" in vc["transforms"]
+        handle_error_details = vc["transforms"]["handle_error_details"]
+        assert handle_error_details["type"] == "remap"
+        assert "map_log_level" in handle_error_details["inputs"]
+
+        assert "if exists(.error_detail) && is_array(.error_detail)" in handle_error_details["source"]
+        assert ".error_detail_json = encode_json(.error_detail)" in handle_error_details["source"]
+        assert 'get(error_obj, ["exc_type"])' in handle_error_details["source"]
+        assert 'get(error_obj, ["exc_value"])' in handle_error_details["source"]
+        assert ".event = .exception_summary" in handle_error_details["source"]
+
+        transform_remove_fields = vc["transforms"]["transform_remove_fields"]
+        assert "handle_error_details" in transform_remove_fields["inputs"]
