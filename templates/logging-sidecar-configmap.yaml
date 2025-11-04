@@ -57,6 +57,10 @@ data:
             .level = parsed_log.level
             .logger = parsed_log.logger
             .chan = parsed_log.chan
+            # Extract error details if present
+            if exists(parsed_log.error_detail) {
+              .error_detail = parsed_log.error_detail
+            }
           } else {
             # Fallback for non-task logs
             .is_airflow3 = false
@@ -171,7 +175,7 @@ data:
           }
         {{- end }}
 
-      transform_remove_fields:
+      map_log_level:
         type: remap
         inputs:
           - final_task_log
@@ -180,6 +184,53 @@ data:
           - filter_dagserver_logs
           - filter_airflow_downgrade_logs
           - filter_apiserver_logs
+        source: |
+          # Create level_numeric field for Elasticsearch while keeping level as string for UI
+          if exists(.level) && is_string(.level) {
+            level_lower = downcase!(.level)
+            level_map = {
+              "debug": 10,
+              "info": 20,
+              "warning": 30,
+              "warn": 30,
+              "error": 40,
+              "critical": 50,
+              "exception": 50
+            }
+            .level_numeric = get(level_map, [level_lower]) ?? 20
+          }
+
+      handle_error_details:
+        type: remap
+        inputs:
+          - map_log_level
+        source: |
+          # Extract exception details from error_detail
+          if exists(.error_detail) && is_array(.error_detail) {
+            # Store full error_detail as JSON for reference
+            .error_detail_json = encode_json(.error_detail)
+            
+            # Get first error object
+            error_obj, err = get(.error_detail, [0])
+            if err == null {
+              # Extract exception type and message
+              exc_type, _ = get(error_obj, ["exc_type"])
+              exc_value, _ = get(error_obj, ["exc_value"])
+              
+              if exc_type != null && exc_value != null {
+                # Create a new summary field with exception info
+                .exception_summary = string!(exc_type) + ": " + string!(exc_value)
+                
+                # Replace the event field with summary for UI display
+                .event = .exception_summary
+              }
+            }
+          }
+
+      transform_remove_fields:
+        type: remap
+        inputs:
+          - handle_error_details
         source: |
           del(.host)
           del(.file)
