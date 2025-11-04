@@ -124,6 +124,9 @@ class TestLoggingSidecar:
         assert "filter_apiserver_logs" in vc["transforms"]
         assert 'includes(["api-server"], .component)' in vc["transforms"]["filter_apiserver_logs"]["condition"]["source"]
 
+        map_log_level_inputs = vc["transforms"]["map_log_level"]["inputs"]
+        assert "filter_apiserver_logs" in map_log_level_inputs
+
         transform_remove_fields_inputs = vc["transforms"]["transform_remove_fields"]["inputs"]
         assert "filter_apiserver_logs" in transform_remove_fields_inputs
 
