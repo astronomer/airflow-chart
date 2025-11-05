@@ -161,16 +161,13 @@ class TestLoggingSidecar:
         assert "task_id" in parse_airflow3_path["source"]
         assert "run_id" in parse_airflow3_path["source"]
         assert "map_index" in parse_airflow3_path["source"]
-        assert "try_number" in parse_airflow3_path["source"]
-
-        assert ".is_airflow3 = true" in parse_airflow3_path["source"]
+        assert "attempt" in parse_airflow3_path["source"]
 
         transform_airflow_logs = vc["transforms"]["transform_airflow_logs"]
         assert "parse_airflow3_path" in transform_airflow_logs["inputs"]
 
         transform_remove_fields = vc["transforms"]["transform_remove_fields"]
-        assert "del(.is_airflow3)" in transform_remove_fields["source"]
-
+        assert "del(.file)" in transform_remove_fields["source"]
         assert "del(.execution_date)" in transform_remove_fields["source"]
 
     def test_logging_sidecar_af3_exception_handling(self, kube_version):
