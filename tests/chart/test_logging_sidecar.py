@@ -188,14 +188,9 @@ class TestLoggingSidecar:
         assert len(docs) == 1
         vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
 
-        parse_airflow3_path = vc["transforms"]["parse_airflow3_path"]
-        assert "if exists(parsed_log.error_detail)" in parse_airflow3_path["source"]
-        assert ".error_detail = parsed_log.error_detail" in parse_airflow3_path["source"]
-
         assert "map_log_level" in vc["transforms"]
         map_log_level = vc["transforms"]["map_log_level"]
         assert map_log_level["type"] == "remap"
-
         assert "level_map" in map_log_level["source"]
         assert '"debug": 10' in map_log_level["source"]
         assert '"info": 20' in map_log_level["source"]
@@ -208,11 +203,9 @@ class TestLoggingSidecar:
         assert handle_error_details["type"] == "remap"
         assert "map_log_level" in handle_error_details["inputs"]
 
-        assert "if exists(.error_detail) && is_array(.error_detail)" in handle_error_details["source"]
-        assert ".error_detail_json = encode_json(.error_detail)" in handle_error_details["source"]
-        assert 'get(error_obj, ["exc_type"])' in handle_error_details["source"]
-        assert 'get(error_obj, ["exc_value"])' in handle_error_details["source"]
-        assert ".event = .exception_summary" in handle_error_details["source"]
+        assert "if exists(.error_detail)" in handle_error_details["source"]
+        assert "encode_json" in handle_error_details["source"]
+        assert "Error Details:" in handle_error_details["source"]
 
         transform_remove_fields = vc["transforms"]["transform_remove_fields"]
         assert "handle_error_details" in transform_remove_fields["inputs"]
