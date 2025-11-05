@@ -15,7 +15,7 @@ metadata:
 data:
   vector-config.yaml: |
     log_schema:
-      timestamp_key : "@timestamp"
+      timestamp_key: "@timestamp"
     data_dir: "${SIDECAR_LOGS}"
     sources:
       airflow_log_files:
@@ -36,34 +36,25 @@ data:
         {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
           # Airflow 3.x - Parse JSON structured logs
           parsed_log = parse_json(.message) ?? .
-          parsed, err = parse_regex(.file, r'/dag_id=(?P<dagID>[0-9a-zA-Z-_]+)/run_id=(?P<runID>[^/]+)/task_id=(?P<taskID>[0-9a-zA-Z-_]+)/(?:map_index=(?P<mapIndex>-?[0-9]+)/)?attempt=(?P<attempt>[0-9]+)\.log$')
+          parsed, err = parse_regex(.file, r'/dag_id=(?P<dag_id>[0-9a-zA-Z-_]+)/run_id=(?P<run_id>[^/]+)/task_id=(?P<task_id>[0-9a-zA-Z-_]+)/(?:map_index=(?P<map_index>-?[0-9])/)?attempt=(?P<attempt>[0-9]+)\.log$')
 
           if err == null {
             # Airflow 3 structured logs
-            .attempt = to_int!(parsed.attempt)
-            .task_id = parsed.taskID
-            .run_id = parsed.runID
-            .dag_id = parsed.dagID
-            .map_index = if parsed.mapIndex != null { to_int!(parsed.mapIndex) } else { -1 }
-            .try_number = .attempt
-            .is_airflow3 = true
+            . = merge!(., parsed_log)
+            . = merge(., parsed)
 
             # Create log_id for consistency
-            .log_id = join!([.dag_id, .task_id, .run_id, to_string(.map_index), to_string(.try_number)], "_")
-
-            # Extract structured log fields
-            .event = parsed_log.event
-            .timestamp = parsed_log.timestamp
-            .level = parsed_log.level
-            .logger = parsed_log.logger
-            .chan = parsed_log.chan
-            # Extract error details if present
-            if exists(parsed_log.error_detail) {
-              .error_detail = parsed_log.error_detail
+            map_index = get(., ["map_index"]) ?? "-1"
+            if is_null(map_index) {
+              map_index = "-1"
             }
-          } else {
-            # Fallback for non-task logs
-            .is_airflow3 = false
+            .log_id = join!([
+                string!(get(., ["dag_id"]) ?? "-"),
+                string!(get(., ["task_id"]) ?? "-"),
+                string!(get(., ["run_id"]) ?? "-"),
+                map_index,
+                string!(get(., ["attempt"]) ?? "-")
+            ], "_")
           }
         {{- else }}
           # Airflow 2.x - Parse traditional log file paths
@@ -71,7 +62,7 @@ data:
           .@timestamp = parse_timestamp(.timestamp, "%Y-%m-%dT%H:%M:%S%Z") ?? now()
           .check_log_id = exists(.log_id)
           if .check_log_id != true {
-          .log_id = join!([to_string!(.dag_id), to_string!(.task_id), to_string!(.execution_date), to_string!(.try_number)], "_")
+            .log_id = join!([to_string!(.dag_id), to_string!(.task_id), to_string!(.execution_date), to_string!(.try_number)], "_")
           }
           .offset = to_int(now()) * 1000000000 + to_unix_timestamp(now()) * 1000000
         {{- end }}
@@ -206,24 +197,13 @@ data:
           - map_log_level
         source: |
           # Extract exception details from error_detail
-          if exists(.error_detail) && is_array(.error_detail) {
-            # Store full error_detail as JSON for reference
-            .error_detail_json = encode_json(.error_detail)
+          if exists(.error_detail) {
+            # Encode full error_detail as JSON string with pretty-printing (indentation)
+            error_detail_str = encode_json(.error_detail, pretty: true)
 
-            # Get first error object
-            error_obj, err = get(.error_detail, [0])
-            if err == null {
-              # Extract exception type and message
-              exc_type, _ = get(error_obj, ["exc_type"])
-              exc_value, _ = get(error_obj, ["exc_value"])
-
-              if exc_type != null && exc_value != null {
-                # Create a new summary field with exception info
-                .exception_summary = string!(exc_type) + ": " + string!(exc_value)
-
-                # Replace the event field with summary for UI display
-                .event = .exception_summary
-              }
+            # Append error_detail JSON to event field with newlines for better readability
+            if exists(.event) {
+              .event = string!(.event) + "\nError Details:\n" + error_detail_str
             }
           }
 
@@ -234,7 +214,6 @@ data:
         source: |
           del(.host)
           del(.file)
-          del(.is_airflow3)
         {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
           del(.execution_date)
         {{- end }}
@@ -251,7 +230,7 @@ data:
         auth:
           strategy: "basic"
           user: {{ .Values.airflow.elasticsearch.connection.user }}
-          password : {{ .Values.airflow.elasticsearch.connection.pass }}
+          password: {{ .Values.airflow.elasticsearch.connection.pass }}
       {{- end }}
         bulk:
           index: "{{ .Values.loggingSidecar.indexNamePrefix }}.${RELEASE:--}.{{ .Values.loggingSidecar.indexPattern }}"
