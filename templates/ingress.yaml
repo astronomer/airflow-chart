@@ -16,14 +16,16 @@ metadata:
 {{- with .Values.airflow.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
-  {{- if .Values.ingress.webserverAnnotations }}
+  {{- if or .Values.ingress.webserverAnnotations .Values.authSidecar.annotations }}
   annotations:
-  {{- if .Values.authSidecar.enabled  }}
-{{- toYaml .Values.authSidecar.annotations | nindent 4 }}
-  {{- else }}
     {{- range $k, $v := .Values.ingress.webserverAnnotations }}
       {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
     {{- end }}
+  {{- if .Values.authSidecar.enabled  }}
+    {{- range $k, $v := .Values.authSidecar.annotations }}
+      {{ $k | quote }}: {{ $v | quote }}
+    {{- end }}
+  {{- else }}
     {{- if and .Values.ingress.auth.enabled .Values.ingress.authCache.enabled }}
       "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
       "nginx.ingress.kubernetes.io/auth-cache-duration": {{ .Values.ingress.authCache.duration | quote }}
@@ -105,15 +107,17 @@ metadata:
 {{- with .Values.airflow.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
-  {{- if .Values.ingress.flowerAnnotations }}
+  {{- if or .Values.ingress.flowerAnnotations .Values.authSidecar.annotations }}
   {{ $ctx := . }}
   annotations:
-  {{- if .Values.authSidecar.enabled  }}
-{{- toYaml .Values.authSidecar.annotations | nindent 4 }}
-  {{- else }}
     {{- range $k, $v := .Values.ingress.flowerAnnotations }}
       {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
     {{- end }}
+  {{- if .Values.authSidecar.enabled  }}
+    {{- range $k, $v := .Values.authSidecar.annotations }}
+      {{ $k | quote }}: {{ $v | quote }}
+    {{- end }}
+  {{- else }}
     {{- if and .Values.ingress.auth.enabled .Values.ingress.authCache.enabled }}
       "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
       "nginx.ingress.kubernetes.io/auth-cache-duration": {{ .Values.ingress.authCache.duration | quote }}
@@ -181,15 +185,17 @@ metadata:
 {{- with .Values.airflow.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
-  {{- if .Values.ingress.dagServerAnnotations }}
+  {{- if or .Values.ingress.dagServerAnnotations .Values.authSidecar.annotations }}
   {{ $ctx := . }}
   annotations:
-  {{- if .Values.authSidecar.enabled  }}
-{{- toYaml .Values.authSidecar.annotations | nindent 4 }}
-  {{- else }}
     {{- range $k, $v := .Values.ingress.dagServerAnnotations }}
       {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
     {{- end }}
+  {{- if .Values.authSidecar.enabled  }}
+    {{- range $k, $v := .Values.authSidecar.annotations }}
+      {{ $k | quote }}: {{ $v | quote }}
+    {{- end }}
+  {{- else }}
     {{- if and .Values.ingress.auth.enabled .Values.ingress.authCache.enabled }}
       "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
       "nginx.ingress.kubernetes.io/auth-cache-duration": {{ .Values.ingress.authCache.duration | quote }}

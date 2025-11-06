@@ -23,6 +23,9 @@ data:
       }
     http {
 {{ include "default_nginx_tmp_path" . | indent 8 }}
+{{- if .Values.authSidecar.authCache.enabled }}
+      proxy_cache_path /tmp/nginx-auth-cache levels=1:2 keys_zone=auth_cache:10m max_size=128m inactive=15m use_temp_path=off;
+{{- end }}
 
       upstream astro-api-server {
         server 127.0.0.1:{{ .Values.airflow.ports.apiServer }} ;
@@ -39,6 +42,14 @@ data:
           }
         location = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
+{{- if .Values.authSidecar.authCache.enabled }}
+          proxy_cache auth_cache;
+          proxy_cache_key {{ .Values.authSidecar.authCache.key | quote }};
+          proxy_cache_valid {{ .Values.authSidecar.authCache.duration }};
+          proxy_cache_methods GET HEAD;
+          proxy_buffering on;
+{{- end }}
+          proxy_set_header            Cookie                  $http_cookie;
           proxy_set_header            Host                    houston.{{ .Values.platform.controlPlaneBaseDomain }};
           proxy_pass  {{ .Values.platform.houstonAuthServiceEndpointUrl }};
         }
