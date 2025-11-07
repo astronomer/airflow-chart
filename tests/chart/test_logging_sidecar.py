@@ -124,8 +124,14 @@ class TestLoggingSidecar:
         assert "filter_apiserver_logs" in vc["transforms"]
         assert 'includes(["api-server"], .component)' in vc["transforms"]["filter_apiserver_logs"]["condition"]["source"]
 
+        map_log_level_inputs = vc["transforms"]["map_log_level"]["inputs"]
+        assert "filter_apiserver_logs" in map_log_level_inputs
+
+        handle_error_details_inputs = vc["transforms"]["handle_error_details"]["inputs"]
+        assert "map_log_level" in handle_error_details_inputs
+
         transform_remove_fields_inputs = vc["transforms"]["transform_remove_fields"]["inputs"]
-        assert "filter_apiserver_logs" in transform_remove_fields_inputs
+        assert "handle_error_details" in transform_remove_fields_inputs
 
         transform_task_log_inputs = vc["transforms"]["transform_task_log"]["inputs"]
         assert "filter_apiserver_logs" not in transform_task_log_inputs
@@ -155,14 +161,48 @@ class TestLoggingSidecar:
         assert "task_id" in parse_airflow3_path["source"]
         assert "run_id" in parse_airflow3_path["source"]
         assert "map_index" in parse_airflow3_path["source"]
-        assert "try_number" in parse_airflow3_path["source"]
-
-        assert ".is_airflow3 = true" in parse_airflow3_path["source"]
+        assert "attempt" in parse_airflow3_path["source"]
 
         transform_airflow_logs = vc["transforms"]["transform_airflow_logs"]
         assert "parse_airflow3_path" in transform_airflow_logs["inputs"]
 
         transform_remove_fields = vc["transforms"]["transform_remove_fields"]
-        assert "del(.is_airflow3)" in transform_remove_fields["source"]
-
+        assert "del(.file)" in transform_remove_fields["source"]
         assert "del(.execution_date)" in transform_remove_fields["source"]
+
+    def test_logging_sidecar_af3_exception_handling(self, kube_version):
+        """Test logging sidecar AF3 exception detail extraction and handling"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "loggingSidecar": {"enabled": True},
+                "airflow": {
+                    "airflowVersion": "3.0.0",
+                },
+            },
+            show_only="templates/logging-sidecar-configmap.yaml",
+        )
+        assert len(docs) == 1
+        vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
+
+        assert "map_log_level" in vc["transforms"]
+        map_log_level = vc["transforms"]["map_log_level"]
+        assert map_log_level["type"] == "remap"
+        assert "level_map" in map_log_level["source"]
+        assert '"debug": 10' in map_log_level["source"]
+        assert '"info": 20' in map_log_level["source"]
+        assert '"warning": 30' in map_log_level["source"]
+        assert '"error": 40' in map_log_level["source"]
+        assert '"critical": 50' in map_log_level["source"]
+
+        assert "handle_error_details" in vc["transforms"]
+        handle_error_details = vc["transforms"]["handle_error_details"]
+        assert handle_error_details["type"] == "remap"
+        assert "map_log_level" in handle_error_details["inputs"]
+
+        assert "if exists(.error_detail)" in handle_error_details["source"]
+        assert "encode_json" in handle_error_details["source"]
+        assert "Error Details:" in handle_error_details["source"]
+
+        transform_remove_fields = vc["transforms"]["transform_remove_fields"]
+        assert "handle_error_details" in transform_remove_fields["inputs"]
