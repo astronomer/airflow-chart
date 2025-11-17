@@ -85,11 +85,18 @@ spec:
         - name: pgbouncer-certgenerator
           image: "{{ .Values.astronomer.images.certgenerator.repository }}:{{ .Values.astronomer.images.certgenerator.tag}}"
           imagePullPolicy: IfNotPresent
+          securityContext:
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           args: [
             "--hostname={{ .Release.Name }}-pgbouncer.{{ .Release.Name }}.svc.cluster.local",
             "--secret-name={{ .Release.Name }}-pgbouncer-client-certificates",
             "--namespace={{ .Release.Namespace }}",
             "--in-cluster=True"
           ]
-
+      volumes:
+        - name: tmp
+          emptyDir: {}
 {{ end }}
