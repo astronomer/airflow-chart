@@ -315,6 +315,7 @@ class TestDagServerStatefulSet:
             {"mountPath": "/etc/nginx/nginx.conf", "name": "nginx-sidecar-conf", "subPath": "nginx.conf"},
             {"mountPath": "/var/cache/nginx", "name": "nginx-cache"},
             {"mountPath": "/tmp", "name": "tmp"},  # noqa: S108
+            {"mountPath": "/var/lib/nginx/tmp", "name": "nginx-write-dir"},
         ]
 
     def test_dag_server_service_account_with_template(self, kube_version):
