@@ -157,7 +157,7 @@ class TestAuthSidecar:
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["resources"] == resources
         for volume_mount in volumeMounts:
-            assert volumeMounts in c_by_name["auth-proxy"]["volumeMounts"]
+            assert volume_mount in c_by_name["auth-proxy"]["volumeMounts"]
 
         assert docs[1]["kind"] == "Service"
         assert docs[1]["apiVersion"] == "v1"
@@ -255,7 +255,7 @@ class TestAuthSidecar:
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["resources"] == resources
         for volume_mount in volumeMounts:
-            assert volumeMounts in c_by_name["auth-proxy"]["volumeMounts"]
+            assert volume_mount in c_by_name["auth-proxy"]["volumeMounts"]
 
         assert docs[1]["kind"] == "Service"
         assert docs[1]["apiVersion"] == "v1"
