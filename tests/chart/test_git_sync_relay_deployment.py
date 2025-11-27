@@ -335,8 +335,8 @@ class TestGitSyncRelayDeployment:
             {"name": "sidecar-logging-consumer", "emptyDir": {}},
             {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-git-sync-relay-nginx-conf"}},
             {"name": "nginx-cache", "emptyDir": {}},
-            {"name": "tmp", "emptyDir": {}},
             {"name": "nginx-write-dir", "emptyDir": {}},
+            {"name": "tmp", "emptyDir": {}},
         ]
 
         c_by_name = get_containers_by_name(doc)
