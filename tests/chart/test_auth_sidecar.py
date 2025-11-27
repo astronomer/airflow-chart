@@ -120,11 +120,17 @@ class TestAuthSidecar:
             "limits": {"cpu": 66.6, "memory": "888Mi"},
         }
 
-        volumeMounts = {
-            "mountPath": "/etc/nginx/nginx.conf",
-            "name": "nginx-sidecar-conf",
-            "subPath": "nginx.conf",
-        }
+        volumeMounts = [
+            {
+                "mountPath": "/etc/nginx/nginx.conf",
+                "name": "nginx-sidecar-conf",
+                "subPath": "nginx.conf",
+            },
+            {
+                "mountPath": "/var/lib/nginx/tmp",
+                "name": "nginx-write-dir",
+            },
+        ]
 
         authSidecarServicePorts = {
             "name": "auth-proxy",
@@ -150,7 +156,8 @@ class TestAuthSidecar:
         common_pod_manager_test_cases(docs, 3, "release-name-dag-server", "StatefulSet")
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["resources"] == resources
-        assert volumeMounts in c_by_name["auth-proxy"]["volumeMounts"]
+        for volume_mount in volumeMounts:
+            assert volumeMounts in c_by_name["auth-proxy"]["volumeMounts"]
 
         assert docs[1]["kind"] == "Service"
         assert docs[1]["apiVersion"] == "v1"
@@ -212,11 +219,17 @@ class TestAuthSidecar:
             "limits": {"cpu": 66.6, "memory": "888Mi"},
         }
 
-        volumeMounts = {
-            "mountPath": "/etc/nginx/nginx.conf",
-            "name": "nginx-sidecar-conf",
-            "subPath": "nginx.conf",
-        }
+        volumeMounts = [
+            {
+                "mountPath": "/etc/nginx/nginx.conf",
+                "name": "nginx-sidecar-conf",
+                "subPath": "nginx.conf",
+            },
+            {
+                "mountPath": "/var/lib/nginx/tmp",
+                "name": "nginx-write-dir",
+            },
+        ]
 
         authSidecarServicePorts = {
             "name": "auth-proxy",
@@ -241,7 +254,8 @@ class TestAuthSidecar:
         common_pod_manager_test_cases(docs, 3, "release-name-git-sync-relay", "Deployment")
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["auth-proxy"]["resources"] == resources
-        assert volumeMounts in c_by_name["auth-proxy"]["volumeMounts"]
+        for volume_mount in volumeMounts:
+            assert volumeMounts in c_by_name["auth-proxy"]["volumeMounts"]
 
         assert docs[1]["kind"] == "Service"
         assert docs[1]["apiVersion"] == "v1"
