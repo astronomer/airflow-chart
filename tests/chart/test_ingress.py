@@ -103,7 +103,11 @@ class TestIngress:
     def test_airflow_ingress_with_dag_server_ingress_annotation_and_tls_secret(self, kube_version):
         """Test airflow ingress annotation and tls secret with DagServer."""
 
-        ingressAnnotation = {"kubernetes.io/ingress.class": "default"}
+        ingressAnnotations = {
+            "kubernetes.io/ingress.class": "default",
+            "nginx.ingress.kubernetes.io/auth-cache-key": "$http_cookie",
+            "nginx.ingress.kubernetes.io/auth-cache-duration": "200 15m, 401 403 1m",
+        }
         docs = render_chart(
             kube_version=kube_version,
             show_only="templates/ingress.yaml",
@@ -111,7 +115,7 @@ class TestIngress:
                 "ingress": {
                     "enabled": True,
                     "baseDomain": "example.com",
-                    "dagServerAnnotations": ingressAnnotation,
+                    "dagServerAnnotations": ingressAnnotations,
                     "tlsSecretName": tls_secret_name,
                 },
                 "dagDeploy": {"enabled": True},
@@ -125,5 +129,5 @@ class TestIngress:
         assert rule_0["http"]["paths"][0]["path"] == "/release-name/dags/(upload|downloads|healthz)(/.*)?"
         assert rule_0["host"] == "deployments.example.com"
 
-        assert ingressAnnotation == docs[1]["metadata"]["annotations"]
+        assert ingressAnnotations == docs[1]["metadata"]["annotations"]
         assert docs[1]["spec"]["tls"][0]["secretName"] == tls_secret_name
