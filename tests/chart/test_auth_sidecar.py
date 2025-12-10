@@ -128,7 +128,7 @@ class TestAuthSidecar:
             },
             {
                 "mountPath": "/var/lib/nginx/tmp",
-                "name": "nginx-write-dir",
+                "name": "nginx-tmp",
             },
         ]
 
@@ -227,7 +227,7 @@ class TestAuthSidecar:
             },
             {
                 "mountPath": "/var/lib/nginx/tmp",
-                "name": "nginx-write-dir",
+                "name": "nginx-tmp",
             },
         ]
 

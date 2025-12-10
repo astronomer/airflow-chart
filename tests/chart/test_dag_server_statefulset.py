@@ -296,7 +296,7 @@ class TestDagServerStatefulSet:
             {"name": "tmp", "emptyDir": {}},
             {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-dag-server-nginx-conf"}},
             {"name": "nginx-cache", "emptyDir": {}},
-            {"name": "nginx-write-dir", "emptyDir": {}},
+            {"name": "nginx-tmp", "emptyDir": {}},
             {"name": "config-volume", "configMap": {"name": "release-name-sidecar-config"}},
             {"name": "sidecar-logging-consumer", "emptyDir": {}},
         ]
@@ -315,7 +315,7 @@ class TestDagServerStatefulSet:
             {"mountPath": "/etc/nginx/nginx.conf", "name": "nginx-sidecar-conf", "subPath": "nginx.conf"},
             {"mountPath": "/var/cache/nginx", "name": "nginx-cache"},
             {"mountPath": "/tmp", "name": "tmp"},  # noqa: S108
-            {"mountPath": "/var/lib/nginx/tmp", "name": "nginx-write-dir"},
+            {"mountPath": "/var/lib/nginx/tmp", "name": "nginx-tmp"},
         ]
 
     def test_dag_server_service_account_with_template(self, kube_version):
