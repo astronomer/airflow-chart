@@ -129,7 +129,7 @@ spec:
       - emptyDir: {}
         name: nginx-cache
       - emptyDir: {}
-        name: nginx-write-dir
+        name: nginx-tmp
 {{- end }}
 {{- if .Values.loggingSidecar.enabled }}
       - name: config-volume

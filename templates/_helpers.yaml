@@ -439,7 +439,7 @@ Create the name of the cleanup service account to use
   - mountPath: /tmp
     name: tmp
   - mountPath: /var/lib/nginx/tmp
-    name: nginx-write-dir
+    name: nginx-tmp
 {{- end }}
 
 {{/*

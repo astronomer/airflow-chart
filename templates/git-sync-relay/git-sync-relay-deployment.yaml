@@ -75,7 +75,7 @@ spec:
         - emptyDir: {}
           name: nginx-cache
         - emptyDir: {}
-          name: nginx-write-dir
+          name: nginx-tmp
         {{- end }}
         - emptyDir: {}
           name: tmp
