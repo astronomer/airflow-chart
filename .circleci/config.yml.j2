@@ -117,12 +117,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Debug - Check GCP_TOKEN
-          command: |
-            echo "Checking for GCP_TOKEN..."
-            env | grep -i gcp || echo "No GCP variables found"
-            echo "GCP_TOKEN value: ${GCP_TOKEN:-'NOT SET'}"
-      - run:
           name: Package and release to internal
           command: bin/package-and-release-internal
       - persist_to_workspace:
