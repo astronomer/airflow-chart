@@ -118,7 +118,7 @@ metadata:
       {{ $k | quote }}: {{ $v | quote }}
     {{- end }}
   {{- else }}
-    {{- if and .Values.ingress.auth.enabled .Values.ingress.authCache.enabled }}
+    {{- if .Values.ingress.authCache.enabled }}
       "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
       "nginx.ingress.kubernetes.io/auth-cache-duration": {{ .Values.ingress.authCache.duration | quote }}
     {{- end }}
