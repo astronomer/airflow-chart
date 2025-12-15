@@ -24,7 +24,6 @@ data:
     http {
 {{ include "default_nginx_tmp_path" . | indent 8 }}
 {{ include "airflow.nginx_auth_cache_path" . | indent 8 }}
-
       upstream astro-api-server {
         server 127.0.0.1:{{ .Values.airflow.ports.apiServer }} ;
       }

@@ -28,7 +28,6 @@ data:
       uwsgi_temp_path /tmp/uwsgi_temp;
       scgi_temp_path /tmp/scgi_temp;
 {{ include "airflow.nginx_auth_cache_path" . | indent 8 }}
-
       upstream astro-flower {
         server 127.0.0.1:{{ .Values.airflow.ports.flowerUI }} ;
       }
