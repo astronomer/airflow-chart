@@ -74,6 +74,8 @@ spec:
             name: {{ .Release.Name }}-git-sync-relay-nginx-conf
         - emptyDir: {}
           name: nginx-cache
+        - emptyDir: {}
+          name: nginx-tmp
         {{- end }}
         - emptyDir: {}
           name: tmp
