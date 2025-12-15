@@ -112,8 +112,6 @@ jobs:
           path: test-results
 
   build-and-release-internal:
-    context:
-      - gcp-astronomer-prod
     docker:
       - image: quay.io/astronomer/ci-helm-release:{{ ci_runner_version }}
     steps:
