@@ -23,7 +23,8 @@ data:
       }
     http {
 {{ include "default_nginx_tmp_path" . | indent 8 }}
-{{- include "airflow.nginx_auth_cache_path" . | indent 8 }}
+{{ include "airflow.nginx_auth_cache_path" . | indent 6 }}
+
       upstream astro-gitsync-server {
         server 127.0.0.1:{{ .Values.gitSyncRelay.gitSync.webhookPort }} ;
       }
