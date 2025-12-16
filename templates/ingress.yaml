@@ -21,11 +21,13 @@ metadata:
     {{- if .Values.authSidecar.enabled }}
     {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
     {{- else }}
+    {{- if .Values.ingress.authCache.enabled }}
     "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
     "nginx.ingress.kubernetes.io/auth-cache-duration": {{ .Values.ingress.authCache.duration | quote }}
+    {{- end }}
+    {{- end }}
     {{- range $k, $v := .Values.ingress.webserverAnnotations }}
     {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
-    {{- end }}
     {{- end }}
   {{- end }}
 spec:
@@ -109,11 +111,13 @@ metadata:
     {{- if .Values.authSidecar.enabled }}
     {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
     {{- else }}
+    {{- if .Values.ingress.authCache.enabled }}
     "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
     "nginx.ingress.kubernetes.io/auth-cache-duration": {{ .Values.ingress.authCache.duration | quote }}
+    {{- end }}
+    {{- end }}
     {{- range $k, $v := .Values.ingress.flowerAnnotations }}
     {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
-    {{- end }}
     {{- end }}
   {{- end }}
 spec:
@@ -182,12 +186,12 @@ metadata:
   annotations:
     {{- if .Values.authSidecar.enabled }}
     {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
-    {{- else }}
+    {{- else if .Values.ingress.authCache.enabled }}
     "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
     "nginx.ingress.kubernetes.io/auth-cache-duration": {{ .Values.ingress.authCache.duration | quote }}
+    {{- end }}
     {{- range $k, $v := .Values.ingress.dagServerAnnotations }}
     {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
-    {{- end }}
     {{- end }}
   {{- end }}
 spec:
