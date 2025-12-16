@@ -475,4 +475,5 @@ proxy_cache_valid {{ .Values.authSidecar.authCache.duration }};
 proxy_cache_methods GET HEAD;
 proxy_buffering on;
 {{- end -}}
+proxy_set_header            Cookie                  $http_cookie;
 {{- end -}}
