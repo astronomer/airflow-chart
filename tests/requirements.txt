@@ -64,9 +64,9 @@ execnet==2.1.1 \
     --hash=sha256:26dee51f1b80cebd6d0ca8e74dd8745419761d3bef34163928cbebbdc4749fdc \
     --hash=sha256:5189b52c6121c24feae288166ab41b32549c7e2348652736540b9e6e7d4e72e3
     # via pytest-xdist
-filelock==3.20.0 \
-    --hash=sha256:339b4732ffda5cd79b13f4e2711a31b0365ce445d95d243bb996273d072546a2 \
-    --hash=sha256:711e943b4ec6be42e1d4e6690b48dc175c822967466bb31c0c293f34334c13f4
+filelock==3.20.1 \
+    --hash=sha256:15d9e9a67306188a44baa72f569d2bfd803076269365fdea0934385da4dc361a \
+    --hash=sha256:b8360948b351b80f420878d8516519a2204b07aefcdcfd24912a5d33127f188c
     # via
     #   airflow-chart-dev-env
     #   virtualenv
