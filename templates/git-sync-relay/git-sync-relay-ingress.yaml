@@ -26,7 +26,7 @@ metadata:
 {{- end }}
 spec:
   tls:
-    secretName: {{ .Values.ingress.tlsSecretName | default "~" }}
+    - secretName: {{ .Values.ingress.tlsSecretName | default "~" }}
       hosts:
         - {{ include "deployments_subdomain" . }}
   rules:
