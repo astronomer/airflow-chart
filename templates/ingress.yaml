@@ -18,7 +18,7 @@ metadata:
 {{- end }}
   {{- if or .Values.ingress.webserverAnnotations .Values.authSidecar.annotations }}
   annotations:
-    {{- if .Values.authSidecar.enabled }}
+    {{- if and .Values.authSidecar.enabled .Values.authSidecar.annotations }}
     {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
     {{- else }}
     {{- if .Values.ingress.authCache.enabled }}
@@ -108,7 +108,7 @@ metadata:
   {{- if or .Values.ingress.flowerAnnotations .Values.authSidecar.annotations }}
   {{ $ctx := . }}
   annotations:
-    {{- if .Values.authSidecar.enabled }}
+    {{- if and .Values.authSidecar.enabled .Values.authSidecar.annotations }}
     {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
     {{- else }}
     {{- if .Values.ingress.authCache.enabled }}
@@ -184,7 +184,7 @@ metadata:
   {{- if or .Values.ingress.dagServerAnnotations .Values.authSidecar.annotations }}
   {{ $ctx := . }}
   annotations:
-    {{- if .Values.authSidecar.enabled }}
+    {{- if and .Values.authSidecar.enabled .Values.authSidecar.annotations }}
     {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
     {{- else if .Values.ingress.authCache.enabled }}
     "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
