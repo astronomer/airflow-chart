@@ -27,7 +27,7 @@ data:
       fastcgi_temp_path /tmp/fastcgi_temp;
       uwsgi_temp_path /tmp/uwsgi_temp;
       scgi_temp_path /tmp/scgi_temp;
-
+{{- include "airflow.nginx_auth_cache_path" . | indent 8 }}
       upstream astro-flower {
         server 127.0.0.1:{{ .Values.airflow.ports.flowerUI }} ;
       }
@@ -37,6 +37,7 @@ data:
 {{ include "default_nginx_server_settings" . | indent 8 }}
         location  = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
+{{ include "airflow.nginx_auth_cache" . | indent 8 }}
           proxy_set_header            Host                    houston.{{ .Values.platform.controlPlaneBaseDomain }};
           proxy_pass  {{ .Values.platform.houstonAuthServiceEndpointUrl }};
         }

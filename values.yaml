@@ -563,6 +563,28 @@ authSidecar:
   livenessProbe: {}
   readinessProbe: {}
   ingressAllowedNamespaces: ~
+  annotations: {}
+
+  # Auth request caching for authSidecar deployments
+  # Reduces load on Houston by caching /v1/authorization responses
+  # Only applies when using authSidecar (authSidecar.enabled: true)
+  authCache:
+    # Enable auth response caching
+    enabled: true
+
+    # Cache key - identifies unique users for caching
+    # Default uses session cookies to uniquely identify users
+    key: "$http_cookie"
+
+    # Cache duration per HTTP response code
+    # Format: "code1 duration1, code2 duration2, ..."
+    # Success responses (200) cached for 15 minutes
+    # Auth failures (401, 403) cached for 1 minute to allow quick retry
+    # Note: Cached credentials may remain valid for the duration specified,
+    # even if revoked in Houston. This is a trade-off between performance
+    # and immediate revocation. The default JWT validity is 24 hours, so
+    # 15 minute caching is more conservative.
+    duration: "200 15m, 401 403 1m"
 
 loggingSidecar:
   enabled: false
@@ -601,6 +623,27 @@ ingress:
   # Enable platform authentication
   auth:
     enabled: true
+
+  # Auth request caching for NGINX Ingress Controller
+  # Reduces load on Houston by caching /v1/authorization responses
+  # Only applies when using NGINX Ingress Controller (authSidecar.enabled: false)
+  authCache:
+    # Enable auth response caching
+    enabled: true
+
+    # Cache key - identifies unique users for caching
+    # Default uses session cookies to uniquely identify users
+    key: "$http_cookie"
+
+    # Cache duration per HTTP response code
+    # Format: "code1 duration1, code2 duration2, ..."
+    # Success responses (200) cached for 15 minutes
+    # Auth failures (401, 403) cached for 1 minute to allow quick retry
+    # Note: Cached credentials may remain valid for the duration specified,
+    # even if revoked in Houston. This is a trade-off between performance
+    # and immediate revocation. The default JWT validity is 24 hours, so
+    # 15 minute caching is more conservative.
+    duration: "200 15m, 401 403 1m"
 
 # This section describes the astronomer platform, and is used to share values
 # from astronomer that are useful here, like networkPolicies that need to know

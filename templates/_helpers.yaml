@@ -144,7 +144,7 @@ client_body_temp_path /tmp/client_temp;
 fastcgi_temp_path /tmp/fastcgi_temp;
 uwsgi_temp_path /tmp/uwsgi_temp;
 scgi_temp_path /tmp/scgi_temp;
-{{ end }}
+{{- end }}
 
 
 {{ define "default_nginx_auth_headers" }}
@@ -453,4 +453,27 @@ Generate log_id_template based on Airflow version
 {{- else -}}
 {dag_id}_{task_id}_{execution_date}_{try_number}
 {{- end -}}
+{{- end -}}
+
+{{/*
+Auth cache path configuration for nginx http block
+*/}}
+{{- define "airflow.nginx_auth_cache_path" -}}
+{{- if .Values.authSidecar.authCache.enabled }}
+proxy_cache_path /tmp/nginx-auth-cache levels=1:2 keys_zone=auth_cache:10m max_size=128m inactive=15m use_temp_path=off;
+{{- end }}
+{{- end }}
+
+{{/*
+Auth cache settings for nginx auth location block
+*/}}
+{{- define "airflow.nginx_auth_cache" -}}
+{{- if .Values.authSidecar.authCache.enabled }}
+proxy_cache auth_cache;
+proxy_cache_key {{ .Values.authSidecar.authCache.key | quote }};
+proxy_cache_valid {{ .Values.authSidecar.authCache.duration }};
+proxy_cache_methods GET HEAD;
+proxy_buffering on;
+{{- end }}
+proxy_set_header            Cookie                  $http_cookie;
 {{- end -}}

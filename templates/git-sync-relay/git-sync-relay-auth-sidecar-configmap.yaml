@@ -23,6 +23,7 @@ data:
       }
     http {
 {{ include "default_nginx_tmp_path" . | indent 8 }}
+{{ include "airflow.nginx_auth_cache_path" . | indent 6 }}
 
       upstream astro-gitsync-server {
         server 127.0.0.1:{{ .Values.gitSyncRelay.gitSync.webhookPort }} ;
@@ -31,6 +32,7 @@ data:
         server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
         listen {{ .Values.authSidecar.port }}  ;
 {{ include "default_nginx_server_settings" . | indent 8 }}
+{{- include "airflow.nginx_auth_cache" . | indent 8 }}
         location ~ ^/{{ .Release.Name }}/git_sync/(webhook|healthz) {
 
           #proxy_set_header X-Original-URI        $request_uri;

@@ -23,6 +23,7 @@ data:
       }
     http {
 {{ include "default_nginx_tmp_path" . | indent 8 }}
+{{ include "airflow.nginx_auth_cache_path" . | indent 6 }}
 
       upstream astro-dag-server {
         server 127.0.0.1:{{ .Values.dagDeploy.ports.dagServerHttp }} ;
@@ -33,6 +34,7 @@ data:
 {{ include "default_nginx_server_settings" . | indent 8 }}
         location  = /auth {
 {{ include "default_nginx_settings" . | indent 8 }}
+{{- include "airflow.nginx_auth_cache" . | indent 8 }}
           proxy_set_header            Host                    houston.{{ .Values.platform.controlPlaneBaseDomain }};
           proxy_pass  {{ .Values.platform.houstonAuthServiceEndpointUrl }};
         }
