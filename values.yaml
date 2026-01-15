@@ -116,6 +116,13 @@ airflow:
       runAsUser: 999
       fsGroup: 999
 
+    # persistence:
+    #   enabled: true
+    #
+    # The below settings are for reference only and do not indicate defaults.
+    #   persistentVolumeClaimRetentionPolicy:
+    #     whenDeleted: Delete
+
   # Airflow worker settings
   workers:
     persistence:
