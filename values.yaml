@@ -80,10 +80,17 @@ airflow:
         container:
           readOnlyRootFilesystem: true
 
+  # Airflow api server settings
+  apiServer:
+    startupProbe:
+      initialDelaySeconds: 30
+
   # Airflow webserver settings
   webserver:
     allowPodLogReading: false
     args: ["airflow", "webserver"]
+    startupProbe:
+      initialDelaySeconds: 30
     webserverConfig: |
       import os
       from airflow import configuration as conf
