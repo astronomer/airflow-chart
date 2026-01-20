@@ -123,6 +123,11 @@ airflow:
       runAsUser: 999
       fsGroup: 999
 
+    persistence:
+      enabled: true
+      persistentVolumeClaimRetentionPolicy:
+        whenDeleted: Delete
+
   # Airflow worker settings
   workers:
     persistence:
