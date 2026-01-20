@@ -78,3 +78,24 @@ class TestAirflow:
                 }
             },
         }
+
+    def test_webserver_startup_initialDelaySeconds_defaults(self, kube_version):
+        """Test initialDelaySeconds defaults."""
+        docs = render_chart(
+            kube_version=kube_version, show_only=["charts/airflow/templates/webserver/webserver-deployment.yaml"], values={}
+        )
+
+        assert len(docs) == 1
+        c_by_name = get_containers_by_name(docs[0])
+        assert c_by_name["webserver"]["startupProbe"]["initialDelaySeconds"] == 30
+
+    def test_apiServer_startup_initialDelaySeconds_defaults(self, kube_version):
+        """Test initialDelaySeconds defaults."""
+        values = {"airflow": {"airflowVersion": "3.0.0"}}
+        docs = render_chart(
+            kube_version=kube_version, show_only=["charts/airflow/templates/api-server/api-server-deployment.yaml"], values=values
+        )
+
+        assert len(docs) == 1
+        c_by_name = get_containers_by_name(docs[0])
+        assert c_by_name["api-server"]["startupProbe"]["initialDelaySeconds"] == 30
