@@ -3,7 +3,7 @@ import base64
 from tests.chart.helm_template_generator import render_chart
 
 
-class TestPgbouncerSecret:
+class TestPgbouncer:
     def test_pgbouncer_secret_defaults(self):
         """Test pgbouncer defaults with pgbouncer enabled."""
         doc = render_chart(
@@ -53,3 +53,22 @@ class TestPgbouncerSecret:
 
         assert len(docs) == 1
         assert "release-name-airflow-pgbouncer" == docs[0]["spec"]["template"]["spec"]["serviceAccountName"]
+
+    def test_pgbouncer_with_custom_labels(self):
+        """Test pgbouncer with custom labels."""
+        labels = {
+            "custom_key": "custom_value",
+        }
+        doc = render_chart(
+            values={
+                "airflow": {
+                    "pgbouncer": {
+                        "enabled": True,
+                        "labels": labels,
+                    },
+                },
+            },
+            show_only=["charts/airflow/templates/pgbouncer/pgbouncer-deployment.yaml"],
+        )[0]
+
+        assert doc["spec"]["template"]["metadata"]["labels"]["custom_key"] == "custom_value"
