@@ -56,7 +56,7 @@ class TestIngress:
         doc = docs[1]
         assert "Ingress" == doc["kind"]
         assert "networking.k8s.io/v1" == doc["apiVersion"]
-        assert "/release-name/flower(/|$)(.*)" == doc["spec"]["rules"][0]["http"]["paths"][0]["path"]
+        assert "/release-name/flower/" == doc["spec"]["rules"][0]["http"]["paths"][0]["path"]
 
     def test_airflow_ingress_with_celery_executor_with_tls_overides(self, kube_version):
         """Test airflow ingress and tls secret overrides with CeleryExecutor."""
@@ -79,7 +79,7 @@ class TestIngress:
         doc = docs[1]
         assert "Ingress" == doc["kind"]
         assert "networking.k8s.io/v1" == doc["apiVersion"]
-        assert "/release-name/flower(/|$)(.*)" == doc["spec"]["rules"][0]["http"]["paths"][0]["path"]
+        assert "/release-name/flower/" == doc["spec"]["rules"][0]["http"]["paths"][0]["path"]
         assert tls_secret_name == doc["spec"]["tls"][0]["secretName"]
 
     def test_airflow_ingress_with_dag_server(self, kube_version):
