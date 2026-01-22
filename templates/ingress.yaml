@@ -135,7 +135,7 @@ spec:
                 port:
                   name: auth-proxy
           {{- else }}
-          - path: /{{ .Release.Name }}/flower(/|$)(.*)
+          - path: /{{ .Release.Name }}/flower/
             pathType: Prefix
             backend:
               service:
