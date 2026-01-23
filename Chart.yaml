@@ -1,6 +1,5 @@
 # apiVersion v2 is Helm 3
 apiVersion: v2
-appVersion: 1.17.18
 name: airflow
 version: 1.17.18
 description: Helm chart to deploy the Astronomer Platform Airflow module
