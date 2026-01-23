@@ -1,3 +1,4 @@
+from importlib import resources
 import pathlib
 
 import pytest
@@ -167,7 +168,7 @@ class TestAuthSidecar:
         docs = render_chart(
             kube_version=kube_version,
             values={
-                "authSidecar": {"enabled": True, "authCache": {"enabled": True}, "resources": resources},
+                "authSidecar": {"enabled": True, "resources": resources},
                 "dagDeploy": {"enabled": True},
                 "platform": {"houstonAuthServiceEndpointUrl": "https://houston./v1/authorization"},
             },
@@ -189,8 +190,26 @@ class TestAuthSidecar:
         assert docs[1]["metadata"]["name"] == "release-name-dag-server"
         assert authSidecarServicePorts in docs[1]["spec"]["ports"]
 
-        nginx_conf = pathlib.Path("tests/chart/test_data/dag-server-auth-sidecar-nginx-cache.conf").read_text()
+        nginx_conf = pathlib.Path("tests/chart/test_data/dag-server-auth-sidecar-nginx.conf").read_text()
         assert nginx_conf in docs[2]["data"]["nginx.conf"]
+
+    def test_auth_sidecar_config_with_dag_server_enabled_with_auth_cache(self, kube_version):
+        """Test logging sidecar config with auth cache enabled"""
+
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "authSidecar": {"enabled": True, "authCache": {"enabled": True}},
+                "dagDeploy": {"enabled": True},
+                "platform": {"houstonAuthServiceEndpointUrl": "https://houston./v1/authorization"},
+            },
+            show_only=[
+                "templates/dag-deploy/dag-server-auth-sidecar-configmap.yaml",
+            ],
+        )
+
+        nginx_conf = pathlib.Path("tests/chart/test_data/dag-server-auth-sidecar-nginx-cache.conf").read_text()
+        assert nginx_conf in docs[0]["data"]["nginx.conf"]
 
     def test_auth_sidecar_security_context_with_dag_server_enabled(self, kube_version):
         """Test auth sidecar security context overrides"""
