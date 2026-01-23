@@ -115,7 +115,7 @@ class TestAuthSidecar:
         docs = render_chart(
             kube_version=kube_version,
             values={
-                "authSidecar": {"enabled": True, "authCache": {"enabled": True}},
+                "authSidecar": {"enabled": True},
                 "airflow": {"airflowVersion": "2.9.0"},
             },
             show_only=[
@@ -129,7 +129,7 @@ class TestAuthSidecar:
         docs = render_chart(
             kube_version=kube_version,
             values={
-                "authSidecar": {"enabled": True, "authCache": {"enabled": True}},
+                "authSidecar": {"enabled": True},
                 "airflow": {"airflowVersion": "3.0.0"},
             },
             show_only=[
