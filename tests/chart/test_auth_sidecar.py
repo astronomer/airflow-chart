@@ -65,7 +65,7 @@ class TestAuthSidecar:
         docs = render_chart(
             kube_version=kube_version,
             values={
-                "authSidecar": {"enabled": True},
+                "authSidecar": {"enabled": True, "authCache": {"enabled": True}},
                 "airflow": {"airflowVersion": "3.0.0"},
                 "platform": {"houstonAuthServiceEndpointUrl": "https://houston./v1/authorization"},
             },
@@ -90,7 +90,7 @@ class TestAuthSidecar:
         docs = render_chart(
             kube_version=kube_version,
             values={
-                "authSidecar": {"enabled": True},
+                "authSidecar": {"enabled": True, "authCache": {"enabled": True}},
                 "airflow": {"airflowVersion": "2.9.0"},
             },
             show_only=[
@@ -104,7 +104,7 @@ class TestAuthSidecar:
         docs = render_chart(
             kube_version=kube_version,
             values={
-                "authSidecar": {"enabled": True},
+                "authSidecar": {"enabled": True, "authCache": {"enabled": True}},
                 "airflow": {"airflowVersion": "3.0.0"},
             },
             show_only=[
@@ -142,7 +142,7 @@ class TestAuthSidecar:
         docs = render_chart(
             kube_version=kube_version,
             values={
-                "authSidecar": {"enabled": True, "resources": resources},
+                "authSidecar": {"enabled": True, "authCache": {"enabled": True}, "resources": resources},
                 "dagDeploy": {"enabled": True},
                 "platform": {"houstonAuthServiceEndpointUrl": "https://houston./v1/authorization"},
             },
@@ -242,7 +242,7 @@ class TestAuthSidecar:
             kube_version=kube_version,
             values={
                 "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
-                "authSidecar": {"enabled": True, "resources": resources},
+                "authSidecar": {"enabled": True, "resources": resources,"authCache": {"enabled": True}},
             },
             show_only=[
                 "templates/git-sync-relay/git-sync-relay-deployment.yaml",

@@ -225,8 +225,6 @@ airflow:
 
 authSidecar:
   enabled: true
-  authCache:
-    enabled: true
 dagDeploy:
   enabled: true
 gitSyncRelay:
