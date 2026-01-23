@@ -87,7 +87,7 @@ airflow:
 
   # Airflow webserver settings
   webserver:
-    allowPodLogReading: false
+    allowPodLogReading: true
     args: ["airflow", "webserver"]
     startupProbe:
       initialDelaySeconds: 30
