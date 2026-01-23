@@ -60,7 +60,7 @@ class TestAuthSidecar:
         )
         assert len(docs) == 2
 
-    def test_auth_sidecar_config_enabled_with_airflow3_apiserver(self, kube_version):
+    def test_auth_sidecar_config_enabled_with_airflow3_apiserver_defaults(self, kube_version):
         """Test auth sidecar config with Airflow 3.x API server"""
         docs = render_chart(
             kube_version=kube_version,
@@ -83,6 +83,31 @@ class TestAuthSidecar:
         assert "nginx.conf" in doc["data"]
 
         nginx_conf = pathlib.Path("tests/chart/test_data/api-server-auth-sidecar-nginx.conf").read_text()
+        assert nginx_conf in docs[0]["data"]["nginx.conf"]
+
+    def test_auth_sidecar_config_enabled_with_airflow3_apiserver_with_auth_cache(self, kube_version):
+        """Test auth sidecar config with Airflow 3.x API server"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "authSidecar": {"enabled": True, "authCache": {"enabled": True}},
+                "airflow": {"airflowVersion": "3.0.0"},
+                "platform": {"houstonAuthServiceEndpointUrl": "https://houston./v1/authorization"},
+            },
+            show_only=[
+                "templates/api-server/api-server-auth-sidecar-configmap.yaml",
+            ],
+        )
+        assert len(docs) == 1
+
+        doc = docs[0]
+        assert doc["kind"] == "ConfigMap"
+        assert doc["apiVersion"] == "v1"
+        assert doc["metadata"]["name"] == "release-name-api-server-nginx-conf"
+        assert doc["metadata"]["labels"]["component"] == "api-server"
+        assert "nginx.conf" in doc["data"]
+
+        nginx_conf = pathlib.Path("tests/chart/test_data/api-server-auth-sidecar-nginx-cache.conf").read_text()
         assert nginx_conf in docs[0]["data"]["nginx.conf"]
 
     def test_auth_sidecar_config_not_enabled_with_airflow2_apiserver(self, kube_version):
@@ -167,6 +192,24 @@ class TestAuthSidecar:
         nginx_conf = pathlib.Path("tests/chart/test_data/dag-server-auth-sidecar-nginx.conf").read_text()
         assert nginx_conf in docs[2]["data"]["nginx.conf"]
 
+    def test_auth_sidecar_config_with_dag_server_enabled_with_auth_cache(self, kube_version):
+        """Test logging sidecar config with auth cache enabled"""
+
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "authSidecar": {"enabled": True, "authCache": {"enabled": True}},
+                "dagDeploy": {"enabled": True},
+                "platform": {"houstonAuthServiceEndpointUrl": "https://houston./v1/authorization"},
+            },
+            show_only=[
+                "templates/dag-deploy/dag-server-auth-sidecar-configmap.yaml",
+            ],
+        )
+
+        nginx_conf = pathlib.Path("tests/chart/test_data/dag-server-auth-sidecar-nginx-cache.conf").read_text()
+        assert nginx_conf in docs[0]["data"]["nginx.conf"]
+
     def test_auth_sidecar_security_context_with_dag_server_enabled(self, kube_version):
         """Test auth sidecar security context overrides"""
         securityContext = {
@@ -242,7 +285,7 @@ class TestAuthSidecar:
             kube_version=kube_version,
             values={
                 "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
-                "authSidecar": {"enabled": True, "resources": resources},
+                "authSidecar": {"enabled": True, "resources": resources, "authCache": {"enabled": True}},
             },
             show_only=[
                 "templates/git-sync-relay/git-sync-relay-deployment.yaml",
@@ -262,5 +305,5 @@ class TestAuthSidecar:
         assert docs[1]["metadata"]["name"] == "release-name-git-sync-relay"
         assert authSidecarServicePorts in docs[1]["spec"]["ports"]
 
-        nginx_conf = pathlib.Path("tests/chart/test_data/git-sync-relay-auth-sidecar-nginx.conf").read_text()
+        nginx_conf = pathlib.Path("tests/chart/test_data/git-sync-relay-auth-sidecar-nginx-cache.conf").read_text()
         assert nginx_conf in docs[2]["data"]["nginx.conf"]

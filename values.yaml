@@ -582,7 +582,7 @@ authSidecar:
   # Only applies when using authSidecar (authSidecar.enabled: true)
   authCache:
     # Enable auth response caching
-    enabled: true
+    enabled: false
 
     # Cache key - identifies unique users for caching
     # Default uses session cookies to uniquely identify users
@@ -641,7 +641,7 @@ ingress:
   # Only applies when using NGINX Ingress Controller (authSidecar.enabled: false)
   authCache:
     # Enable auth response caching
-    enabled: true
+    enabled: false
 
     # Cache key - identifies unique users for caching
     # Default uses session cookies to uniquely identify users
