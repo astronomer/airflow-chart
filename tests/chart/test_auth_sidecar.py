@@ -1,4 +1,3 @@
-from importlib import resources
 import pathlib
 
 import pytest
