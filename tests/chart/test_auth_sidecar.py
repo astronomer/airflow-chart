@@ -242,7 +242,7 @@ class TestAuthSidecar:
             kube_version=kube_version,
             values={
                 "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
-                "authSidecar": {"enabled": True, "resources": resources,"authCache": {"enabled": True}},
+                "authSidecar": {"enabled": True, "resources": resources, "authCache": {"enabled": True}},
             },
             show_only=[
                 "templates/git-sync-relay/git-sync-relay-deployment.yaml",
