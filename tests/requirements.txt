@@ -340,9 +340,9 @@ urllib3==2.3.0 \
     #   docker
     #   kubernetes
     #   requests
-virtualenv==20.35.3 \
-    --hash=sha256:4f1a845d131133bdff10590489610c98c168ff99dc75d6c96853801f7f67af44 \
-    --hash=sha256:63d106565078d8c8d0b206d48080f938a8b25361e19432d2c9db40d2899c810a
+virtualenv==20.36.1 \
+    --hash=sha256:575a8d6b124ef88f6f51d56d656132389f961062a9177016a50e4f507bbcc19f \
+    --hash=sha256:8befb5c81842c641f8ee658481e42641c68b5eab3521d8e092d18320902466ba
     # via pre-commit
 websocket-client==1.9.0 \
     --hash=sha256:9e813624b6eb619999a97dc7958469217c3176312b3a16a4bd1bc7e08a46ec98 \
