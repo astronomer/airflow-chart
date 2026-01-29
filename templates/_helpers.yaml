@@ -431,6 +431,8 @@ Create the name of the cleanup service account to use
     periodSeconds: 10
 {{- end }}
   volumeMounts:
+  - mountPath: /var/lib/nginx/logs
+    name: nginx-access-logs
   - mountPath: /etc/nginx/nginx.conf
     name: nginx-sidecar-conf
     subPath: nginx.conf

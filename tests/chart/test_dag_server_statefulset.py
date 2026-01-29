@@ -312,6 +312,7 @@ class TestDagServerStatefulSet:
         assert livenessProbe == c_by_name["sidecar-log-consumer"]["livenessProbe"]
 
         assert c_by_name["auth-proxy"]["volumeMounts"] == [
+            {"mountPath": "/var/lib/nginx/logs", "name": "nginx-access-logs"},
             {"mountPath": "/etc/nginx/nginx.conf", "name": "nginx-sidecar-conf", "subPath": "nginx.conf"},
             {"mountPath": "/var/cache/nginx", "name": "nginx-cache"},
             {"mountPath": "/tmp", "name": "tmp"},  # noqa: S108
