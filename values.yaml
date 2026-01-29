@@ -393,7 +393,7 @@ airflow:
       - "-c"
       - >-
         exec \
-  
+
         airflow {{ semverCompare ">=2.7.0" .Values.airflowVersion
         | ternary "db migrate" (semverCompare ">=2.0.0" .Values.airflowVersion
         | ternary "db upgrade" "upgradedb") }}
