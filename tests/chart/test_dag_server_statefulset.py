@@ -297,6 +297,7 @@ class TestDagServerStatefulSet:
             {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-dag-server-nginx-conf"}},
             {"name": "nginx-cache", "emptyDir": {}},
             {"name": "nginx-tmp", "emptyDir": {}},
+            {"name": "nginx-access-logs", "emptyDir": {}},
             {"name": "config-volume", "configMap": {"name": "release-name-sidecar-config"}},
             {"name": "sidecar-logging-consumer", "emptyDir": {}},
         ]
@@ -312,6 +313,7 @@ class TestDagServerStatefulSet:
         assert livenessProbe == c_by_name["sidecar-log-consumer"]["livenessProbe"]
 
         assert c_by_name["auth-proxy"]["volumeMounts"] == [
+            {"mountPath": "/var/lib/nginx/logs", "name": "nginx-access-logs"},
             {"mountPath": "/etc/nginx/nginx.conf", "name": "nginx-sidecar-conf", "subPath": "nginx.conf"},
             {"mountPath": "/var/cache/nginx", "name": "nginx-cache"},
             {"mountPath": "/tmp", "name": "tmp"},  # noqa: S108

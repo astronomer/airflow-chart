@@ -333,6 +333,7 @@ class TestGitSyncRelayDeployment:
             {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
             {"name": "config-volume", "configMap": {"name": "release-name-sidecar-config"}},
             {"name": "sidecar-logging-consumer", "emptyDir": {}},
+            {"name": "nginx-access-logs", "emptyDir": {}},
             {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-git-sync-relay-nginx-conf"}},
             {"name": "nginx-cache", "emptyDir": {}},
             {"name": "nginx-tmp", "emptyDir": {}},
@@ -352,6 +353,7 @@ class TestGitSyncRelayDeployment:
         ]
 
         assert c_by_name["auth-proxy"]["volumeMounts"] == [
+            {"mountPath": "/var/lib/nginx/logs", "name": "nginx-access-logs"},
             {"mountPath": "/etc/nginx/nginx.conf", "name": "nginx-sidecar-conf", "subPath": "nginx.conf"},
             {"mountPath": "/var/cache/nginx", "name": "nginx-cache"},
             {"mountPath": "/tmp", "name": "tmp"},  # noqa: S108
