@@ -69,6 +69,8 @@ spec:
           name: sidecar-logging-consumer
         {{- end }}
         {{- if and .Values.authSidecar.enabled (eq .Values.gitSyncRelay.repoFetchMode "webhook") }}
+        - name: nginx-access-logs
+          emptyDir: {}
         - name: nginx-sidecar-conf
           configMap:
             name: {{ .Release.Name }}-git-sync-relay-nginx-conf
