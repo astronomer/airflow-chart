@@ -334,8 +334,6 @@ class TestGitSyncRelayDeployment:
             {"name": "config-volume", "configMap": {"name": "release-name-sidecar-config"}},
             {"name": "sidecar-logging-consumer", "emptyDir": {}},
             {"name": "nginx-access-logs", "emptyDir": {}},
-            {"name": "nginx-access-logs", "emptyDir": {}},
-            {"name": "nginx-access-logs", "emptyDir": {}},
             {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-git-sync-relay-nginx-conf"}},
             {"name": "nginx-cache", "emptyDir": {}},
             {"name": "nginx-tmp", "emptyDir": {}},
