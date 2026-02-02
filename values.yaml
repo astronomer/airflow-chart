@@ -291,7 +291,7 @@ airflow:
           resources: {{- toYaml .Values.workers.resources | nindent 8 }}
           volumeMounts:
             - mountPath: {{ template "airflow_logs" . }}
-              name: logs
+              name: logs-{{ .Release.Name }}
             - name: config
               mountPath: {{ template "airflow_config_path" . }}
               subPath: airflow.cfg
@@ -341,12 +341,12 @@ airflow:
         emptyDir: {}
       {{- end }}
       {{- if .Values.logs.persistence.enabled }}
-      - name: logs
+      - name: logs-{{ .Release.Name }}
         persistentVolumeClaim:
           claimName: {{ template "airflow_logs_volume_claim" . }}
       {{- else }}
       - emptyDir: {}
-        name: logs
+        name: logs-{{ .Release.Name }}
       {{- end }}
       {{- if and .Values.dags.gitSync.enabled .Values.dags.gitSync.sshKeySecret }}
       {{- include "git_sync_ssh_key_volume" . | nindent 2 }}
