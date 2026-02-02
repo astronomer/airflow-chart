@@ -22,20 +22,20 @@ max_age=300
 echo "${GCP_TOKEN}" > /tmp/gcs_token.json
 gcloud auth activate-service-account --key-file=/tmp/gcs_token.json
 
-if gsutil -q stat "gs://${prod_repo}/${filename}" ; then
+if gcloud storage objects describe "gs://${prod_repo}/${filename}" >/dev/null 2>&1 ; then
   echo "ABORT: destination file ${filename} already exists. Did you forget to bump the chart version number in Chart.yaml?"
   exit 1
 fi
 
 curl -sSLO "https://${dev_repo}/${filename}"
 
-curl -sSLo "index-orig.yaml" "https://${prod_repo}/index.yaml"
+gcloud storage cp "gs://${prod_repo}/index.yaml" "index-orig.yaml"
 helm repo index . --url "https://${prod_repo}" --merge index-orig.yaml
 
 echo "Copying version ${version} from ${dev_repo} to ${prod_repo} and updating index"
 
-gsutil cp "${filename}" "gs://${prod_repo}/"
-gsutil -h "Cache-Control: public, max-age=${max_age}" cp ./index.yaml "gs://${prod_repo}/"
+gcloud storage cp "${filename}" "gs://${prod_repo}/"
+gcloud storage cp --cache-control "public, max-age=${max_age}" ./index.yaml "gs://${prod_repo}/"
 
 echo "Success! All indexes should be updated by:"
 for TZ in Asia/Kolkata Europe/Kiev Europe/London US/Eastern US/Central US/Pacific ; do
