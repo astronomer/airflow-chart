@@ -48,7 +48,7 @@ data:
           return 302 https://app.{{ .Values.platform.controlPlaneBaseDomain }}/login?rd=https://$http_host$request_uri;
         }
 
-        location ~* "^/{{ .Release.Name }}/flower(/|$)(.*)"  {
+        location ~* "^/{{ .Release.Name }}/flower/"  {
 {{ include "default_nginx_settings_location" . | indent 8  }}
 {{ include "default_nginx_auth_headers" . | indent 8 }}
 
@@ -56,11 +56,6 @@ data:
             rewrite ^ https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/flower permanent;
           }
           proxy_cookie_path                       / /{{ .Release.Name }}/;
-          sub_filter_types *;
-          sub_filter '="/' '="/{{ .Release.Name }}/flower/';
-          sub_filter_last_modified on;
-          sub_filter_once off;
-          rewrite "(?i)/{{ .Release.Name }}/flower(/|$)(.*)" /$2; break;
           # Custom headers to proxied server
           proxy_set_header  Host  deployments.{{ .Values.ingress.baseDomain}};
           #proxy_set_header  X-Forwarded-Proto https;
