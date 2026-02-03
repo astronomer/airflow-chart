@@ -23,7 +23,7 @@ if [[ "${CIRCLE_BRANCH}" =~ ^release-[0-9]+\.[0-9]+$ ]] ; then
   version=$(awk '$0 ~ /^version/ {printf $2}' airflow/Chart.yaml)
   echo "Doing internal release for CIRCLE_BRANCH ${CIRCLE_BRANCH} version ${version}"
   filename="airflow-${version}.tgz"
-  if gsutil -q stat "gs://${helm_repo}/${filename}" ; then
+  if gcloud storage objects describe "gs://${helm_repo}/${filename}" >/dev/null 2>&1 ; then
     echo "ABORT: destination file ${filename} already exists. Did you forget to bump the chart version number in Chart.yaml?"
     exit 1
   fi
@@ -38,8 +38,8 @@ fi
 
 helm package airflow --dependency-update --app-version "${app_version}" "${extra_args[@]}"
 
-curl -sSLo "index-orig.yaml" https://${helm_repo}/index.yaml
+gcloud storage cp gs://${helm_repo}/index.yaml "index-orig.yaml"
 helm repo index . --url "https://${helm_repo}" --merge "index-orig.yaml"
 
-gsutil cp "${filename}" "gs://${helm_repo}/"
-gsutil -h "Cache-Control: public, max-age=60" cp index.yaml "gs://${helm_repo}/"
+gcloud storage cp "${filename}" "gs://${helm_repo}/"
+gcloud storage cp --cache-control "public, max-age=60" index.yaml "gs://${helm_repo}/"
