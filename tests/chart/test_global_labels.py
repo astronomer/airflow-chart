@@ -27,7 +27,7 @@ def get_labels_from_object(obj) -> str | None:
         for key in keys:
             current = current[key]
         return current
-    except (KeyError, TypeError):
+    except KeyError, TypeError:
         return None
 
 

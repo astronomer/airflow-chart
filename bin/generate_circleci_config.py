@@ -2,6 +2,7 @@
 """This script is used to create the circle config file so that we can stay
 DRY."""
 
+import datetime
 from pathlib import Path
 
 import yaml
@@ -13,7 +14,9 @@ kube_versions = metadata["test_k8s_versions"]
 
 executors = ["CeleryExecutor", "LocalExecutor", "KubernetesExecutor"]
 machine_image_version = "ubuntu-2204:2025.09.1"  # https://circleci.com/developer/machine/image/ubuntu-2204
-ci_runner_version = "2025-10"  # This should be the current YYYY-MM
+ci_runner_version = (datetime.datetime.now() + datetime.timedelta(days=7)).strftime(
+    "%Y-%m"
+)  # ci-images tags %Y-%m as today and also 8 days ahead
 
 
 def main():
