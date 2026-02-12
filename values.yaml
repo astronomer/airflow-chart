@@ -687,6 +687,8 @@ dagDeploy:
   podAnnotations: {}
   extraEnv: []
   extraContainers: []
+  extraVolumeMounts: []
+  extraVolumes: []
   persistence:
     enabled: true
     persistentVolumeClaimRetentionPolicy: ~

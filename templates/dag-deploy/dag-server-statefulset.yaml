@@ -106,6 +106,9 @@ spec:
           - name: data
             mountPath: /data
             readOnly: false
+          {{- if .Values.dagDeploy.extraVolumeMounts }}
+              {{- tpl (toYaml .Values.dagDeploy.extraVolumeMounts) . | nindent 10 }}
+          {{- end }}
           {{- if .Values.loggingSidecar.enabled }}
           - mountPath: /var/log/sidecar-logging-consumer
             name: sidecar-logging-consumer
@@ -122,6 +125,9 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
+      {{- if .Values.dagDeploy.extraVolumes }}
+          {{- tpl (toYaml .Values.dagDeploy.extraVolumes) . | nindent 6 }}
+      {{- end }}
 {{- if .Values.authSidecar.enabled }}
       - name: nginx-sidecar-conf
         configMap:
