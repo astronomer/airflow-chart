@@ -3,7 +3,7 @@
 import pytest
 
 from tests import supported_k8s_versions
-from tests.utils import get_containers_by_name
+from tests.utils import get_all_features, get_containers_by_name
 from tests.utils.chart import render_chart
 
 
@@ -37,6 +37,20 @@ class TestAirflow:
         c_by_name = get_containers_by_name(docs[0])
         assert {"name": "PYTHONUNBUFFERED", "value": "1"} in c_by_name["run-airflow-migrations"]["env"]
         assert {"name": "ENABLE_AUTH_TYPE", "value": "SHA256"} in c_by_name["run-airflow-migrations"]["env"]
+
+    def test_migrate_database_job_with_preAirflowExtraInitContainers(self, kube_version):
+        """Test migrate database job behaviors with preAirflowExtraInitContainers."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["charts/airflow/templates/jobs/migrate-database-job.yaml"],
+            values=get_all_features(),
+        )
+
+        assert len(docs) == 1
+        assert "initContainers" in docs[0]["spec"]["template"]["spec"]
+        c_by_name = get_containers_by_name(docs[0], include_init_containers=True)
+        assert "usr-local-airflow-copier" in c_by_name
+        assert c_by_name["usr-local-airflow-copier"]["securityContext"]["readOnlyRootFilesystem"] is True
 
     def test_airflow_apiserver_defaults(self, kube_version):
         """Test Airflow3 apiServer defaults."""
