@@ -310,6 +310,7 @@ class TestGitSyncRelayDeployment:
         git_dameon_env = get_env_vars_dict(c_by_name["git-daemon"].get("env"))
         assert not git_dameon_env.get("GIT_SYNC_REPO_FETCH_MODE")
         assert not git_dameon_env.get("GIT_SYNC_WEBHOOK_SECRET")
+        assert {"mountPath": "/tmp", "name": "tmp"} in c_by_name["git-sync"]["volumeMounts"]  # noqa: S108
 
     def test_git_sync_server_deployment_with_sidecar_and_authproxy_enabled(self, kube_version):
         """Test git sync server deployment with sidecar components."""
