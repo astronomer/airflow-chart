@@ -123,7 +123,7 @@ spec:
             - mountPath: /var/log/sidecar-logging-consumer
               name: sidecar-logging-consumer
             {{- end }}
-            {{- if eq .Values.gitSyncRelay.repoShareMode "webhook" }}
+            {{- if eq .Values.gitSyncRelay.repoFetchMode "webhook" }}
             - name: tmp
               mountPath: /tmp
             {{- end }}
