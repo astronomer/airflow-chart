@@ -344,10 +344,12 @@ airflow:
         emptyDir: {}
       {{- end }}
       {{- if .Values.logs.persistence.enabled }}
-      - name: logs-{{ .Release.Name }}
+      - name: logs
         persistentVolumeClaim:
           claimName: {{ template "airflow_logs_volume_claim" . }}
       {{- else }}
+      - emptyDir: {}
+        name: logs
       - emptyDir: {}
         name: logs-{{ .Release.Name }}
       {{- end }}
