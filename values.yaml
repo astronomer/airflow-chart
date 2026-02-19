@@ -290,12 +290,15 @@ airflow:
           ports: []
           resources: {{- toYaml .Values.workers.resources | nindent 8 }}
           volumeMounts:
-            - mountPath: {{ template "airflow_logs" . }}
-              name: logs-{{ .Release.Name }}
+            # - mountPath: {{ template "airflow_logs" . }}
+            #   name: logs-{{ .Release.Name }}
             - name: config
               mountPath: {{ template "airflow_config_path" . }}
               subPath: airflow.cfg
               readOnly: true
+    {{- if .Values.volumeMounts }}
+    {{- toYaml .Values.volumeMounts | indent 8 }}
+    {{- end }}
     {{- if .Values.airflowLocalSettings }}
             - name: config
               mountPath: {{ template "airflow_local_setting_path" . }}
@@ -341,10 +344,12 @@ airflow:
         emptyDir: {}
       {{- end }}
       {{- if .Values.logs.persistence.enabled }}
-      - name: logs-{{ .Release.Name }}
+      - name: logs
         persistentVolumeClaim:
           claimName: {{ template "airflow_logs_volume_claim" . }}
       {{- else }}
+      - emptyDir: {}
+        name: logs
       - emptyDir: {}
         name: logs-{{ .Release.Name }}
       {{- end }}
