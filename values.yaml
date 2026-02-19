@@ -296,9 +296,9 @@ airflow:
               mountPath: {{ template "airflow_config_path" . }}
               subPath: airflow.cfg
               readOnly: true
-            {{- if .Values.volumeMounts }}
-              {{- toYaml .Values.volumeMounts | indent 8 }}
-            {{- end }}
+    {{- if .Values.volumeMounts }}
+    {{- toYaml .Values.volumeMounts | indent 8 }}
+    {{- end }}
     {{- if .Values.airflowLocalSettings }}
             - name: config
               mountPath: {{ template "airflow_local_setting_path" . }}
