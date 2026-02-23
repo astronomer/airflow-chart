@@ -350,8 +350,6 @@ airflow:
       {{- else }}
       - emptyDir: {}
         name: logs
-      - emptyDir: {}
-        name: logs-{{ .Release.Name }}
       {{- end }}
       {{- if and .Values.dags.gitSync.enabled .Values.dags.gitSync.sshKeySecret }}
       {{- include "git_sync_ssh_key_volume" . | nindent 2 }}
