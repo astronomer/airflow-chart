@@ -31,6 +31,9 @@ metadata:
   {{- end }}
   {{- end }}
 spec:
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- end }}
   tls:
     - secretName: {{ .Values.ingress.tlsSecretName | default "~" }}
       hosts:
@@ -117,6 +120,9 @@ metadata:
   {{- end }}
   {{- end }}
 spec:
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- end }}
   tls:
     - secretName: {{ .Values.ingress.tlsSecretName | default "~" }}
       hosts:
@@ -189,6 +195,9 @@ metadata:
   {{- end }}
   {{- end }}
 spec:
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- end }}
   tls:
     - secretName: {{ .Values.ingress.tlsSecretName | default "~" }}
       hosts:

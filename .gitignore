@@ -18,3 +18,8 @@ letsencrypt*
 repo_state.log
 repository
 test*.yaml
+
+# Python packaging metadata
+*.egg-info/
+build/
+dist/
