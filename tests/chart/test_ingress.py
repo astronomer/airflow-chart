@@ -165,11 +165,11 @@ class TestIngress:
             },
         )
         assert len(docs) == 2
-        
+
         # Airflow ingress
         assert "Ingress" == docs[0]["kind"]
         assert "nginx-internal" == docs[0]["spec"]["ingressClassName"]
-        
+
         # Flower ingress
         assert "Ingress" == docs[1]["kind"]
         assert "nginx-internal" == docs[1]["spec"]["ingressClassName"]
@@ -187,7 +187,7 @@ class TestIngress:
                 "dagDeploy": {"enabled": True},
             },
         )
-        
+
         assert len(docs) == 1
         assert docs[0]["metadata"]["name"] == "release-name-dag-server-ingress"
         assert "custom-ingress" == docs[0]["spec"]["ingressClassName"]
