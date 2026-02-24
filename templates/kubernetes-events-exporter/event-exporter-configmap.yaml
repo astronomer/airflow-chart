@@ -6,6 +6,12 @@ kind: ConfigMap
 metadata:
   name: event-exporter-cfg
   namespace: astronomer-galactian-battery-8069
+  labels:
+    component: event-exporter
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
 data:
   config.yaml: |
     namespace: astronomer-galactian-battery-8069
