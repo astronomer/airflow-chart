@@ -356,6 +356,10 @@ airflow:
       {{- else }}
       - emptyDir: {}
         name: logs
+      {{- if semverCompare ">=3.0.0" .Values.airflowVersion }}
+      - emptyDir: {}
+        name: logs-{{ .Release.Name }}
+      {{- end }}
       {{- end }}
       {{- if and .Values.dags.gitSync.enabled .Values.dags.gitSync.sshKeySecret }}
       {{- include "git_sync_ssh_key_volume" . | nindent 2 }}
