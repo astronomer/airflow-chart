@@ -1,6 +1,9 @@
 ############################
 ## dag-server StatefulSet ##
 ############################
+{{- $nodeSelector := or .Values.eventExporter.nodeSelector .Values.airflow.nodeSelector }}
+{{- $affinity := or .Values.eventExporter.affinity .Values.airflow.affinity }}
+{{- $tolerations := or .Values.eventExporter.tolerations .Values.airflow.tolerations }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,16 +17,33 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      component: event-exporter
+      tier: airflow
   template:
     metadata:
       labels:
-        app: "{{ .Release.Name }}-event-exporter"
-        version: v1
+        component: event-exporter
+        tier: airflow
+        release: {{ .Release.Name }}
+        chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+        heritage: {{ .Release.Service }}
+        {{- if .Values.labels }}
+        {{- .Values.labels | toYaml | nindent 8 }}
+        {{- end }}
       annotations:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '2112'
         prometheus.io/path: '/metrics'
     spec:
+      {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
+      imagePullSecrets:
+        - name: {{ template "astro.registry_secret" . }}
+      {{- end }}
+      nodeSelector: {{- toYaml $nodeSelector | nindent 8 }}
+      affinity: {{- toYaml $affinity | nindent 8 }}
+      tolerations: {{- toYaml $tolerations | nindent 8 }}
       serviceAccountName: {{ template "astro.eventExporter.serviceAccountName" . }}
       securityContext:
         runAsNonRoot: true
@@ -46,7 +66,3 @@ spec:
         - name: cfg
           configMap:
             name: event-exporter-cfg
-  selector:
-    matchLabels:
-      app: event-exporter
-      version: v1
