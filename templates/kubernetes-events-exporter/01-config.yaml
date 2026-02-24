@@ -1,3 +1,6 @@
+###########################################
+## Event Exporter ConfigMap              ##
+###########################################
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -6,6 +6,12 @@ kind: RoleBinding
 metadata:
   name: "{{ .Release.Name }}-event-exporter-rolebinding"
   namespace: "{{ .Release.Namespace }}"
+  labels:
+    component: event-exporter
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

@@ -6,6 +6,12 @@ kind: Deployment
 metadata:
   name: "{{ .Release.Name }}-event-exporter"
   namespace: "{{ .Release.Namespace }}"
+  labels:
+    component: event-exporter
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
 spec:
   replicas: 1
   template:
