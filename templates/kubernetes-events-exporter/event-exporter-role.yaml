@@ -1,0 +1,27 @@
+##############################
+## Event Exporter  Role     ##
+##############################
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: "{{ .Release.Name }}-event-exporter-role"
+  namespace: "{{ .Release.Namespace }}"
+rules:
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["*"]
+- apiGroups: [""] # The core API group for events
+  resources: ["events"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["", "events.k8s.io"]
+  resources: ["events"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: [ "get"]
+- apiGroups: ["apps"]
+  resources: ["statefulsets","replicasets","deployments"]
+  verbs: [ "get"]
+- apiGroups: ["batch"]
+  resources: ["cronjobs","jobs"]
+  verbs: [ "get"]

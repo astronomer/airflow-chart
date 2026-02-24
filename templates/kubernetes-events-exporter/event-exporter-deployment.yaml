@@ -1,0 +1,46 @@
+############################
+## dag-server StatefulSet ##
+############################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}-event-exporter"
+  namespace: "{{ .Release.Namespace }}"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "{{ .Release.Name }}-event-exporter"
+        version: v1
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '2112'
+        prometheus.io/path: '/metrics'
+    spec:
+      serviceAccountName: {{ template "astro.eventExporter.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: event-exporter
+          image: "{{ .Values.eventExporter.images.eventServer.repository }}:{{ .Values.eventExporter.images.eventServer.tag }}"
+          imagePullPolicy: "{{ .Values.eventExporter.images.eventServer.imagePullPolicy }}"
+          args:
+            - -conf=/data/config.yaml
+          volumeMounts:
+            - mountPath: /data
+              name: cfg
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+      volumes:
+        - name: cfg
+          configMap:
+            name: event-exporter-cfg
+  selector:
+    matchLabels:
+      app: event-exporter
+      version: v1

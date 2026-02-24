@@ -650,6 +650,27 @@ astronomer:
       repository: quay.io/astronomer/ap-certgenerator
       tag: 0.1.12
 
+eventExporter:
+  enabled: false
+  images:
+    eventServer:
+      repository: ghcr.io/resmoio/kubernetes-event-exporter
+      tag: latest
+      imagePullPolicy: IfNotPresent
+  livenessProbe: {}
+  readinessProbe: {}
+  terminationGracePeriodSeconds: 30
+  podAnnotations: {}
+  extraEnv: []
+  extraContainers: []
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  serviceAccount:
+    annotations: {}
+    name: ~
+    create: true
+
 dagDeploy:
   enabled: false
   images:

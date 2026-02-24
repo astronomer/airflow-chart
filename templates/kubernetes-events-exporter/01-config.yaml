@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: event-exporter-cfg
+  namespace: astronomer-galactian-battery-8069
+data:
+  config.yaml: |
+    namespace: astronomer-galactian-battery-8069
+    logLevel: warn
+    logFormat: json
+    metricsNamePrefix: event_exporter_
+    route:
+      routes:
+        - match:
+            - receiver: "dump"
+          drop:
+            - type: "Normal"
+      #drop:
+      #  - type: "Normal"
+      #  # This a final route for user messages
+      #- match:
+      #    - kind: "Pod|Deployment|ReplicaSet|StatefulSet"
+      #      receiver: "dump"
+    receivers:
+      - name: "dump"
+        stdout: {}
