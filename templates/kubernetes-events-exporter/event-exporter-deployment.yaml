@@ -65,4 +65,4 @@ spec:
       volumes:
         - name: cfg
           configMap:
-            name: event-exporter-cfg
+            name: "{{ .Release.Name }}-event-exporter-config"

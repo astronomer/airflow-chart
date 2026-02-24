@@ -4,8 +4,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: event-exporter-cfg
-  namespace: astronomer-galactian-battery-8069
+  name: "{{ .Release.Name }}-event-exporter-config"
+  namespace: "{{ .Release.Namespace }}"
   labels:
     component: event-exporter
     tier: airflow
@@ -14,7 +14,7 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   config.yaml: |
-    namespace: astronomer-galactian-battery-8069
+    namespace: "{{ .Release.Namespace }}"
     logLevel: warn
     logFormat: json
     metricsNamePrefix: event_exporter_
