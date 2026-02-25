@@ -16,9 +16,6 @@ rules:
 - apiGroups: ["coordination.k8s.io"]
   resources: ["leases"]
   verbs: ["*"]
-- apiGroups: [""] # The core API group for events
-  resources: ["events"]
-  verbs: ["get", "list", "watch"]
 - apiGroups: ["", "events.k8s.io"]
   resources: ["events"]
   verbs: ["get", "list", "watch"]

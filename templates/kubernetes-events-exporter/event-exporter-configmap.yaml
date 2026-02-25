@@ -15,7 +15,7 @@ metadata:
 data:
   config.yaml: |-
     namespace: "{{ .Release.Namespace }}"
-    logLevel: debug
+    logLevel: info
     logFormat: json
     # To address client-side throttling errors
     kubeQPS: 100
