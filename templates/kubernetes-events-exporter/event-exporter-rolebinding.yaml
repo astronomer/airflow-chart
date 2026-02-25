@@ -19,4 +19,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     namespace: "{{ .Release.Namespace }}"
-    name: "{{ .Release.Name }}-event-exporter"
+    name: {{ template "astro.eventExporter.serviceAccountName" . }}
