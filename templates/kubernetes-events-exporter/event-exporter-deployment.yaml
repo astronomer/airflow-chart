@@ -33,6 +33,7 @@ spec:
         {{- .Values.labels | toYaml | nindent 8 }}
         {{- end }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/kubernetes-events-exporter/event-exporter-configmap.yaml") . | sha256sum }}
         prometheus.io/scrape: 'true'
         prometheus.io/port: '2112'
         prometheus.io/path: '/metrics'
