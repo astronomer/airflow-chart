@@ -68,11 +68,11 @@ class TestAirflow:
         assert docs[0]["spec"]["template"]["spec"]["serviceAccountName"] == "release-name-airflow-api-server"
 
     @pytest.mark.parametrize(
-    "executor, expected_components",
-    [
-        (None, ["worker"]),  # default executor
-        ("LocalExecutor", ["scheduler", "worker"]),
-    ],
+        "executor, expected_components",
+        [
+            (None, ["worker"]),  # default executor
+            ("LocalExecutor", ["scheduler", "worker"]),
+        ],
     )
     def test_airflow_apiserver_with_networkpolicy(self, kube_version, executor, expected_components):
         """Test Airflow3 apiServer network policy with different executors."""
