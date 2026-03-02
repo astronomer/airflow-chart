@@ -771,3 +771,88 @@ certgenerator:
 
 # Labels that are attached to all pods created by the airflow-chart, but not the sub-charts.
 labels: {}
+
+externalSecrets:
+  # Enable creation of ESO related objects
+  enabled: true
+
+  # Values that apply to the SecretStore or ClusterSecretStore
+  secretStore:
+    # The kind of SecretStore (SecretStore or ClusterSecretStore)
+    kind: ClusterSecretStore
+    # The name of the SecretStore or ClusterSecretStore
+    name: ~
+
+  # Values that apply to all ExternalSecret objects
+  externalSecret:
+    refreshInterval: 1h
+
+  # Values that apply to all PushSecret objects
+  pushSecret:
+    refreshInterval: 1h
+
+  # The default list of objects
+  objects:
+    broker-url:
+      secretType: Opqaue
+      labels:
+        component: redis
+        platform: astronomer
+        release: "{{ .Release.Name }}"
+        tier: airflow
+        workspace: "TODO: fill in the workspace name"
+    elasticsearch:
+      secretType: Opaque
+      annotations:
+        meta.helm.sh/release-name: "{{ .Release.Name }}"
+        meta.helm.sh/release-namespace: "{{ .Release.Namespace }}"
+      labels:
+        app.kubernetes.io/managed-by: Helm
+        platform: astronomer
+        release: "{{ .Release.Name }}"
+        tier: airflow
+        workspace: "TODO: fill in the workspace name"
+    env:
+      secretType: Opaque
+      labels:
+        component: airflow-secret
+        release: "{{ .Release.Name }}"
+        tier: airflow
+    fernet-key:
+      secretType: Opaque
+      labels:
+        platform: astronomer
+        release: "{{ .Release.Name }}"
+        tier: airflow
+        workspace: "TODO: fill in the workspace name"
+    pgbouncer-config:
+      secretType: Opaque
+      annotations:
+        meta.helm.sh/release-name: "{{ .Release.Name }}"
+        meta.helm.sh/release-namespace: "{{ .Release.Namespace }}"
+      labels:
+        app.kubernetes.io/managed-by: Helm
+        component: pgbouncer
+        platform: astronomer
+        release: "{{ .Release.Name }}"
+        tier: airflow
+        workspace: "TODO: fill in the workspace name"
+    redis-password:
+      secretType: Opaque
+      labels:
+        component: redis
+        platform: astronomer
+        release: "{{ .Release.Name }}"
+        tier: airflow
+        workspace: "TODO: fill in the workspace name"
+    registry:
+      secretType: kubernetes.io/dockerconfigjson
+      annotations:
+        meta.helm.sh/release-name: "{{ .Release.Name }}"
+        meta.helm.sh/release-namespace: "{{ .Release.Namespace }}"
+      labels:
+        app.kubernetes.io/managed-by: Helm
+        platform: astronomer
+        release: "{{ .Release.Name }}"
+        tier: airflow
+        workspace: "TODO: fill in the workspace name"
