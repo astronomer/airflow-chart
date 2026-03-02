@@ -85,15 +85,15 @@ class TestAirflow:
         from_rules = ingress_spec[0]["from"]
         assert len(from_rules) == 2
         expected_scheduler = {
-        "namespaceSelector": {},
-        "podSelector": {
-            "matchLabels": {
-                "component": "scheduler",
-                "release": "release-name",
-                "tier": "airflow",
-                            }
-                        },
+            "namespaceSelector": {},
+            "podSelector": {
+                "matchLabels": {
+                    "component": "scheduler",
+                    "release": "release-name",
+                    "tier": "airflow",
                 }
+            },
+        }
         expected_worker = {
             "namespaceSelector": {},
             "podSelector": {
@@ -101,9 +101,9 @@ class TestAirflow:
                     "component": "worker",
                     "release": "release-name",
                     "tier": "airflow",
-                                }
-                        },
                 }
+            },
+        }
         assert ingress_spec[0]["from"][0] == expected_scheduler
         assert ingress_spec[0]["from"][1] == expected_worker
 
