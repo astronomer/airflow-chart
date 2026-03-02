@@ -82,16 +82,30 @@ class TestAirflow:
         assert len(docs) == 2
         ingress_spec = docs[0]["spec"]["ingress"]
         assert len(ingress_spec) == 1
-        assert ingress_spec[0]["from"][0] == {
+        from_rules = ingress_spec[0]["from"]
+        assert len(from_rules) == 2
+        expected_scheduler = {
+        "namespaceSelector": {},
+        "podSelector": {
+            "matchLabels": {
+                "component": "scheduler",
+                "release": "release-name",
+                "tier": "airflow",
+                            }
+                        },
+                }
+        expected_worker = {
             "namespaceSelector": {},
             "podSelector": {
                 "matchLabels": {
                     "component": "worker",
                     "release": "release-name",
                     "tier": "airflow",
+                                }
+                        },
                 }
-            },
-        }
+        assert ingress_spec[0]["from"][0] == expected_scheduler
+        assert ingress_spec[0]["from"][1] == expected_worker
 
     def test_webserver_startup_initialDelaySeconds_defaults(self, kube_version):
         """Test initialDelaySeconds defaults."""
