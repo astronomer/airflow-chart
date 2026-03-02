@@ -67,10 +67,25 @@ class TestAirflow:
         assert len(docs) == 1
         assert docs[0]["spec"]["template"]["spec"]["serviceAccountName"] == "release-name-airflow-api-server"
 
-    
-    def test_airflow_apiserver_with_networkpolicy_with_localexecutor(self, kube_version):
-        """Test Airflow3 apiServer defaults."""
-        values = {"airflow": {"airflowVersion": "3.0.0", "networkPolicies": {"enabled": True}, "executor": "LocalExecutor"}}
+    @pytest.mark.parametrize(
+    "executor, expected_components",
+    [
+        (None, ["worker"]),  # default executor
+        ("LocalExecutor", ["scheduler", "worker"]),
+    ],
+    )
+    def test_airflow_apiserver_with_networkpolicy(self, kube_version, executor, expected_components):
+        """Test Airflow3 apiServer network policy with different executors."""
+        values = {
+            "airflow": {
+                "airflowVersion": "3.0.0",
+                "networkPolicies": {"enabled": True},
+            }
+        }
+
+        if executor:
+            values["airflow"]["executor"] = executor
+
         docs = render_chart(
             kube_version=kube_version,
             show_only=[
@@ -81,32 +96,24 @@ class TestAirflow:
         )
 
         assert len(docs) == 2
+
         ingress_spec = docs[0]["spec"]["ingress"]
         assert len(ingress_spec) == 1
+
         from_rules = ingress_spec[0]["from"]
-        assert len(from_rules) == 2
-        expected_scheduler = {
-            "namespaceSelector": {},
-            "podSelector": {
-                "matchLabels": {
-                    "component": "scheduler",
-                    "release": "release-name",
-                    "tier": "airflow",
-                }
-            },
-        }
-        expected_worker = {
-            "namespaceSelector": {},
-            "podSelector": {
-                "matchLabels": {
-                    "component": "worker",
-                    "release": "release-name",
-                    "tier": "airflow",
-                }
-            },
-        }
-        assert ingress_spec[0]["from"][0] == expected_scheduler
-        assert ingress_spec[0]["from"][1] == expected_worker
+        assert len(from_rules) == len(expected_components)
+
+        for idx, component in enumerate(expected_components):
+            assert from_rules[idx] == {
+                "namespaceSelector": {},
+                "podSelector": {
+                    "matchLabels": {
+                        "component": component,
+                        "release": "release-name",
+                        "tier": "airflow",
+                    }
+                },
+            }
 
     def test_webserver_startup_initialDelaySeconds_defaults(self, kube_version):
         """Test initialDelaySeconds defaults."""
