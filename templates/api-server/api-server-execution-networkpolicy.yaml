@@ -22,12 +22,14 @@ spec:
   - Ingress
   ingress:
   - from:
+{{- if eq .Values.airflow.executor "LocalExecutor"}}
     - namespaceSelector: {}
       podSelector:
         matchLabels:
           component: scheduler
           release: {{ .Release.Name }}
           tier: airflow
+{{- end}}
     - namespaceSelector: {}
       podSelector:
         matchLabels:
