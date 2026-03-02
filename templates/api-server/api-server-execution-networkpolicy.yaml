@@ -25,6 +25,12 @@ spec:
     - namespaceSelector: {}
       podSelector:
         matchLabels:
+          component: scheduler
+          release: {{ .Release.Name }}
+          tier: airflow
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
           component: worker
           release: {{ .Release.Name }}
           tier: airflow
