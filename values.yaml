@@ -651,7 +651,7 @@ astronomer:
   images:
     certgenerator:
       repository: quay.io/astronomer/ap-certgenerator
-      tag: 0.1.12
+      tag: 0.1.14
 
 dagDeploy:
   enabled: false
