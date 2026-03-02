@@ -67,9 +67,10 @@ class TestAirflow:
         assert len(docs) == 1
         assert docs[0]["spec"]["template"]["spec"]["serviceAccountName"] == "release-name-airflow-api-server"
 
-    def test_airflow_apiserver_with_networkpolicy(self, kube_version):
+    
+    def test_airflow_apiserver_with_networkpolicy_with_localexecutor(self, kube_version):
         """Test Airflow3 apiServer defaults."""
-        values = {"airflow": {"airflowVersion": "3.0.0", "networkPolicies": {"enabled": True}}}
+        values = {"airflow": {"airflowVersion": "3.0.0", "networkPolicies": {"enabled": True}, "executor": "LocalExecutor"}}
         docs = render_chart(
             kube_version=kube_version,
             show_only=[
