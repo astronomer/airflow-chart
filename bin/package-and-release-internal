@@ -37,9 +37,14 @@ else
 fi
 
 helm package airflow --dependency-update --app-version "${app_version}" "${extra_args[@]}"
-
-gcloud storage cp gs://${helm_repo}/index.yaml "index-orig.yaml"
-helm repo index . --url "https://${helm_repo}" --merge "index-orig.yaml"
-
 gcloud storage cp "${filename}" "gs://${helm_repo}/"
-gcloud storage cp --cache-control "public, max-age=60" index.yaml "gs://${helm_repo}/"
+
+rm -f index-orig.yaml
+gcloud storage cp gs://${helm_repo}/index.yaml "index-orig.yaml"
+sha256sum index-orig.yaml
+helm repo index . --url "https://${helm_repo}" --merge "index-orig.yaml"
+sha256sum index.yaml
+gcloud storage cp --cache-control "public" index.yaml "gs://${helm_repo}/"
+set +e
+diff index-orig.yaml index.yaml
+echo "$(date -Iseconds) Finished."
