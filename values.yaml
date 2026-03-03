@@ -781,7 +781,7 @@ externalSecrets:
     # The kind of SecretStore (SecretStore or ClusterSecretStore)
     kind: ClusterSecretStore
     # The name of the SecretStore or ClusterSecretStore
-    name: ~
+    name: dho-test
 
   # Values that apply to all ExternalSecret objects
   externalSecret:
@@ -794,15 +794,17 @@ externalSecrets:
   # The default list of objects
   objects:
     broker-url:
-      secretType: Opqaue
+      secretType: Opaque
+      secretKey: connection
       labels:
         component: redis
         platform: astronomer
         release: "{{ .Release.Name }}"
         tier: airflow
-        workspace: "TODO: fill in the workspace name"
+        workspace: foo # TODO: fill in the workspace name
     elasticsearch:
       secretType: Opaque
+      secretKey: connection
       annotations:
         meta.helm.sh/release-name: "{{ .Release.Name }}"
         meta.helm.sh/release-namespace: "{{ .Release.Namespace }}"
@@ -811,22 +813,26 @@ externalSecrets:
         platform: astronomer
         release: "{{ .Release.Name }}"
         tier: airflow
-        workspace: "TODO: fill in the workspace name"
+        workspace: foo # TODO: fill in the workspace name
+    # TODO: make sure env is working
     env:
       secretType: Opaque
+      # secretKey is left out, which causes all keys to be copied through the PushSecret and ExternalSecret.
       labels:
         component: airflow-secret
         release: "{{ .Release.Name }}"
         tier: airflow
     fernet-key:
       secretType: Opaque
+      secretKey: fernet-key
       labels:
         platform: astronomer
         release: "{{ .Release.Name }}"
         tier: airflow
-        workspace: "TODO: fill in the workspace name"
+        workspace: foo # TODO: fill in the workspace name
     pgbouncer-config:
       secretType: Opaque
+      secretKey: pgbouncer.ini
       annotations:
         meta.helm.sh/release-name: "{{ .Release.Name }}"
         meta.helm.sh/release-namespace: "{{ .Release.Namespace }}"
@@ -836,17 +842,19 @@ externalSecrets:
         platform: astronomer
         release: "{{ .Release.Name }}"
         tier: airflow
-        workspace: "TODO: fill in the workspace name"
+        workspace: foo # TODO: fill in the workspace name
     redis-password:
       secretType: Opaque
+      secretKey: password
       labels:
         component: redis
         platform: astronomer
         release: "{{ .Release.Name }}"
         tier: airflow
-        workspace: "TODO: fill in the workspace name"
+        workspace: foo # TODO: fill in the workspace name
     registry:
       secretType: kubernetes.io/dockerconfigjson
+      secretKey: .dockerconfigjson
       annotations:
         meta.helm.sh/release-name: "{{ .Release.Name }}"
         meta.helm.sh/release-namespace: "{{ .Release.Namespace }}"
@@ -855,4 +863,4 @@ externalSecrets:
         platform: astronomer
         release: "{{ .Release.Name }}"
         tier: airflow
-        workspace: "TODO: fill in the workspace name"
+        workspace: foo # TODO: fill in the workspace name
