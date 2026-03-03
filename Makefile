@@ -8,9 +8,10 @@ PHONY: venv
 venv: .venv ## Setup venv required for testing
 .venv:
 	{ uv venv -p 3.13 --seed && uv sync ; } || \
-	{ python3 -m venv .venv -p python3 && .venv/bin/pip install -r tests/requirements.txt ; }
+	{ python3 -m venv .venv && .venv/bin/pip install -r tests/requirements.txt ; }
 
-charts: ## Update dependent charts
+.PHONY: charts
+charts: ## Update and install chart dependencies
 	helm dep update
 
 .PHONY: test
