@@ -52,6 +52,7 @@ if [[ -f /tmp/bin/uv ]]; then
   echo "Already installed in /tmp/bin. Skipping!"
 else
   curl --proto '=https' --tlsv1.2 -LsSf https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-installer.sh | sh
+  mv "$HOME/.local/bin/uv" /tmp/bin/
 fi
 
 cd "$CURRENT_DIR"
