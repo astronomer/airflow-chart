@@ -1,6 +1,5 @@
 **kubeconfig**
 **pycache**
-*.egg-info/
 *.swp
 *.tgz
 .DS_Store
@@ -11,11 +10,9 @@
 /secrets
 /test-results
 backup
-build/
 certs
 charts
 dev-account.json
-dist/
 kubeconfig
 letsencrypt*
 repo_state.log
