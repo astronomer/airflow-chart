@@ -98,7 +98,15 @@ spec:
           command: ["bash"]
           args:
             - -c
-            - /entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )
+            - sanic git_sync_relay.server.app -H 0.0.0.0 -p 8000 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )
+          {{- else }}
+          command: ["sanic"]
+          args:
+            - "git_sync_relay.server.app"
+            - "-H"
+            - "0.0.0.0"
+            - "-p"
+            - "8000"
           {{- end }}
           securityContext:
             readOnlyRootFilesystem: true
@@ -161,6 +169,15 @@ spec:
               value: "false"
             {{- end }}
             {{- end }}
+            {{- if .Values.gitSyncRelay.metricsEnabled}}
+            - name: METRICS_ENABLED
+              value: "{{ .Values.gitSyncRelay.metricsEnabled }}"
+            - name: STATSD_HOST
+              value: {{ tpl .Values.gitSyncRelay.statsdHost . }}
+            - name: STATSD_PORT
+              value: "{{ .Values.gitSyncRelay.statsdPort }}"
+            - name: DEBUG
+              value: "{{ .Values.gitSyncRelay.debug }}"
           {{- if .Values.gitSyncRelay.gitSync.livenessProbe }}
           livenessProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitSync.livenessProbe) . | nindent 12 }}
           {{- end }}
