@@ -178,6 +178,7 @@ spec:
               value: "{{ .Values.gitSyncRelay.statsdPort }}"
             - name: DEBUG
               value: "{{ .Values.gitSyncRelay.debug }}"
+            {{- end }}
           {{- if .Values.gitSyncRelay.gitSync.livenessProbe }}
           livenessProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitSync.livenessProbe) . | nindent 12 }}
           {{- end }}
