@@ -637,8 +637,8 @@ airflow:
         labels:
           metric_type: "unknown"
           description: "Unclassified git-sync-relay metric"
-      
-      # Accept all dag_deploy metrics, Adding beforehead. 
+
+      # Accept all dag_deploy metrics, Adding beforehead.
       - match: dag_deploy.*
         match_type: regex
         name: "dag_deploy_metric"
