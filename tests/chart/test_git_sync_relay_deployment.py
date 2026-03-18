@@ -192,6 +192,10 @@ class TestGitSyncRelayDeployment:
             "GIT_SYNC_DEPTH": "22",
             "GIT_SYNC_WAIT": "333",
             "GIT_SYNC_REPO_FETCH_MODE": "poll",
+            "METRICS_ENABLED": "true",
+            "STATSD_HOST": "release-name-statsd",
+            "STATSD_PORT": "9125",
+            "DEBUG": "false",
         }
         assert c_by_name["git-daemon"]["livenessProbe"]
 
@@ -350,7 +354,7 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-sync"]["command"] == ["bash"]
         assert c_by_name["git-sync"]["args"] == [
             "-c",
-            "/entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
+            "sanic git_sync_relay.server.app -H 0.0.0.0 -p 8000 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
         ]
 
         assert c_by_name["auth-proxy"]["volumeMounts"] == [
