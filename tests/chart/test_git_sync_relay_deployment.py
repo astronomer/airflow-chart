@@ -133,6 +133,7 @@ class TestGitSyncRelayDeployment:
             {"name": "git-repo-contents", "mountPath": "/git"},
         ]
         assert get_env_vars_dict(c_by_name["git-sync"].get("env")) == {
+            "DEBUG": "false",
             "GIT_SYNC_ROOT": "/git",
             "GIT_SYNC_REPO": "not-the-default-url",
             "GIT_SYNC_BRANCH": "not-the-default-branch",
@@ -143,6 +144,9 @@ class TestGitSyncRelayDeployment:
             "GIT_KNOWN_HOSTS": "true",
             "GIT_SSH_KNOWN_HOSTS_FILE": "/etc/git-secret/known_hosts",
             "GIT_SYNC_REPO_FETCH_MODE": "poll",
+            "METRICS_ENABLED": "true",
+            "STATSD_HOST": "release-name-statsd",
+            "STATSD_PORT": "9125",
         }
         assert c_by_name["git-daemon"]["livenessProbe"]
 
