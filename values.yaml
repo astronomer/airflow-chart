@@ -97,9 +97,6 @@ airflow:
       from flask_appbuilder.security.manager import AUTH_REMOTE_USER
       basedir = os.path.abspath(os.path.dirname(__file__))
 
-      # The SQLAlchemy connection string.
-      SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
-
       # Flask-WTF flag for CSRF
       CSRF_ENABLED = True
 
@@ -421,7 +418,6 @@ airflow:
       component: worker
       release: "{{ .Release.Name }}"
     kubernetes_secrets:
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: '{{ printf "%s=connection" (include "airflow_metadata_secret" .) }}'
       AIRFLOW_CONN_AIRFLOW_DB: '{{ printf "%s=connection" (include "airflow_metadata_secret" .) }}'
       AIRFLOW__CORE__FERNET_KEY: '{{ printf "%s=fernet-key" (include "fernet_key_secret" .) }}'
       AIRFLOW__API_AUTH__JWT_SECRET: '{{ printf "%s=fernet-key" (include "fernet_key_secret" .) }}'
