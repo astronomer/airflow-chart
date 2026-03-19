@@ -29,6 +29,10 @@ class TestLoggingSidecar:
         assert "ConfigMap" == doc["kind"]
         assert "v1" == doc["apiVersion"]
         vc = yaml.safe_load(doc["data"]["vector-config.yaml"])
+        assert vc["sources"]["airflow_log_files"]["include"] == [
+            "${SIDECAR_LOGS}/*.log",
+            "/usr/local/airflow/logs/**/*.log",
+        ]
         assert vc["sinks"]["out"]["auth"] == {
             "strategy": "basic",
             "user": "testuser",
