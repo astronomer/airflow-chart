@@ -126,12 +126,9 @@ class TestAirflow:
         assert c_by_name["webserver"]["startupProbe"]["initialDelaySeconds"] == 30
 
     def test_webserver_expose_config(self, kube_version):
-        """Test that expose_config can be set to non-sensitive-only."""
+        """Test that expose_config is set to non-sensitive-only."""
         values = {
             "airflow": {
-                "webserver": {
-                    "defaultUser": {"enabled": False},
-                },
                 "config": {
                     "webserver": {
                         "expose_config": "non-sensitive-only",
@@ -141,13 +138,13 @@ class TestAirflow:
         }
         docs = render_chart(
             kube_version=kube_version,
-            show_only=["charts/airflow/templates/webserver/webserver-deployment.yaml"],
+            show_only=["charts/airflow/templates/configmaps/configmap.yaml"],
             values=values,
         )
 
         assert len(docs) == 1
-        c_by_name = get_containers_by_name(docs[0])
-        assert {"name": "AIRFLOW__WEBSERVER__EXPOSE_CONFIG", "value": "non-sensitive-only"} in c_by_name["webserver"]["env"]
+        airflow_cfg = docs[0]["data"]["airflow.cfg"]
+        assert "expose_config = non-sensitive-only" in airflow_cfg
 
     def test_apiServer_startup_initialDelaySeconds_defaults(self, kube_version):
         """Test initialDelaySeconds defaults."""
