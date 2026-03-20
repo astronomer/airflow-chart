@@ -3,6 +3,7 @@ set -e
 
 KIND_VERSION="0.31.0" # https://github.com/kubernetes-sigs/kind/releases
 HELM_VERSION="3.20.0" # https://github.com/helm/helm/releases
+UV_VERSION="0.10.7" # https://github.com/astral-sh/uv/releases
 
 # Determine the platform we are running on
 OS=$(uname | tr '[:upper:]' '[:lower:]')
@@ -44,6 +45,14 @@ else
   cd /tmp/bin
   curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/${OS}/amd64/kubectl" > /dev/null 2>&1
   chmod +x ./kubectl
+fi
+
+echo "Installing uv version ${UV_VERSION}..."
+if [[ -f /tmp/bin/uv ]]; then
+  echo "Already installed in /tmp/bin. Skipping!"
+else
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-installer.sh | sh
+  mv "$HOME/.local/bin/uv" /tmp/bin/
 fi
 
 cd "$CURRENT_DIR"

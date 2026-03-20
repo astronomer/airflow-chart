@@ -131,3 +131,80 @@ class TestIngress:
 
         assert ingressAnnotations == docs[1]["metadata"]["annotations"]
         assert docs[1]["spec"]["tls"][0]["secretName"] == tls_secret_name
+
+    def test_airflow_ingress_class_name(self, kube_version):
+        """Test airflow ingress with ingressClassName."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/ingress.yaml",
+            values={
+                "ingress": {
+                    "enabled": True,
+                    "baseDomain": "example.com",
+                    "ingressClassName": "nginx",
+                }
+            },
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert "Ingress" == doc["kind"]
+        assert "nginx" == doc["spec"]["ingressClassName"]
+
+    def test_airflow_ingress_class_name_with_celery_executor(self, kube_version):
+        """Test airflow and flower ingress with ingressClassName and CeleryExecutor."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/ingress.yaml",
+            values={
+                "airflow": {"executor": "CeleryExecutor"},
+                "ingress": {
+                    "enabled": True,
+                    "baseDomain": "example.com",
+                    "ingressClassName": "nginx-internal",
+                },
+            },
+        )
+        assert len(docs) == 2
+
+        # Airflow ingress
+        assert "Ingress" == docs[0]["kind"]
+        assert "nginx-internal" == docs[0]["spec"]["ingressClassName"]
+
+        # Flower ingress
+        assert "Ingress" == docs[1]["kind"]
+        assert "nginx-internal" == docs[1]["spec"]["ingressClassName"]
+
+    def test_airflow_ingress_class_name_with_dag_server(self, kube_version):
+        """Test dag server ingress with ingressClassName."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/ingress.yaml",
+            values={
+                "ingress": {
+                    "baseDomain": "example.com",
+                    "ingressClassName": "custom-ingress",
+                },
+                "dagDeploy": {"enabled": True},
+            },
+        )
+
+        assert len(docs) == 1
+        assert docs[0]["metadata"]["name"] == "release-name-dag-server-ingress"
+        assert "custom-ingress" == docs[0]["spec"]["ingressClassName"]
+
+    def test_airflow_ingress_class_name_not_set(self, kube_version):
+        """Test airflow ingress without ingressClassName (default behavior)."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/ingress.yaml",
+            values={
+                "ingress": {
+                    "enabled": True,
+                    "baseDomain": "example.com",
+                }
+            },
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert "Ingress" == doc["kind"]
+        assert "ingressClassName" not in doc["spec"]
