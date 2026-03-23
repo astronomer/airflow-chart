@@ -398,7 +398,7 @@ airflow:
       execution_api_server_url: '{{ (printf "http://%s-api-server:%d/%s/airflow/execution/" (include "airflow.fullname" .) (int .Values.ports.apiServer) .Release.Name )  -}}'
 
     webserver:
-      expose_config: True
+      expose_config: non-sensitive-only
     elasticsearch:
       write_stdout: True
       elasticsearch_write_stdout: True
