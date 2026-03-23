@@ -169,9 +169,9 @@ spec:
               value: "false"
             {{- end }}
             {{- end }}
-            {{- if .Values.gitSyncRelay.metricsEnabled}}
+            {{- if .Values.gitSyncRelay.metrics.enabled}}
             - name: METRICS_ENABLED
-              value: "{{ .Values.gitSyncRelay.metricsEnabled }}"
+              value: "{{ .Values.gitSyncRelay.metrics.enabled }}"
             - name: STATSD_HOST
               value: {{ .Release.Name }}-statsd
             - name: STATSD_PORT
