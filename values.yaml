@@ -885,7 +885,8 @@ gitSyncRelay:
   tolerations: []
 
   # Enable metrics for git-sync-relay
-  metricsEnabled: true
+  metrics:
+    enabled: true
   # Host for statsd metrics
   statsdHost: "{{ .Release.Name }}-statsd"
   # Port for statsd metrics
