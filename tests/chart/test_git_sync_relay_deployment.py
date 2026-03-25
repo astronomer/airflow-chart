@@ -133,7 +133,6 @@ class TestGitSyncRelayDeployment:
             {"name": "git-repo-contents", "mountPath": "/git"},
         ]
         assert get_env_vars_dict(c_by_name["git-sync"].get("env")) == {
-            "DEBUG": "false",
             "GIT_SYNC_ROOT": "/git",
             "GIT_SYNC_REPO": "not-the-default-url",
             "GIT_SYNC_BRANCH": "not-the-default-branch",
@@ -144,9 +143,6 @@ class TestGitSyncRelayDeployment:
             "GIT_KNOWN_HOSTS": "true",
             "GIT_SSH_KNOWN_HOSTS_FILE": "/etc/git-secret/known_hosts",
             "GIT_SYNC_REPO_FETCH_MODE": "poll",
-            "METRICS_ENABLED": "true",
-            "STATSD_HOST": "release-name-statsd",
-            "STATSD_PORT": "9125",
         }
         assert c_by_name["git-daemon"]["livenessProbe"]
 
@@ -196,12 +192,70 @@ class TestGitSyncRelayDeployment:
             "GIT_SYNC_DEPTH": "22",
             "GIT_SYNC_WAIT": "333",
             "GIT_SYNC_REPO_FETCH_MODE": "poll",
-            "METRICS_ENABLED": "true",
-            "STATSD_HOST": "release-name-statsd",
-            "STATSD_PORT": "9125",
-            "DEBUG": "false",
         }
         assert c_by_name["git-daemon"]["livenessProbe"]
+
+    def test_gsr_deployment_with_metrics_enabled(self, kube_version):
+        """Test that metrics env vars are set when gitSyncRelay.metrics.enabled is true."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "metrics": {"enabled": True},
+                "repo": {
+                    "url": "not-the-default-url",
+                    "branch": "not-the-default-branch",
+                    "depth": 22,
+                    "wait": 333,
+                    "subPath": "not-the-default-subPath",
+                },
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        c_by_name = get_containers_by_name(doc)
+        git_sync_env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert git_sync_env["METRICS_ENABLED"] == "true"
+        assert git_sync_env["STATSD_HOST"] == "release-name-statsd"
+        assert git_sync_env["STATSD_PORT"] == "9125"
+        assert git_sync_env["DEBUG"] == "false"
+
+    def test_gsr_deployment_with_metrics_disabled(self, kube_version):
+        """Test that metrics env vars are absent when gitSyncRelay.metrics.enabled is false (default)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "not-the-default-url",
+                    "branch": "not-the-default-branch",
+                    "depth": 22,
+                    "wait": 333,
+                    "subPath": "not-the-default-subPath",
+                },
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        c_by_name = get_containers_by_name(doc)
+        git_sync_env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert "METRICS_ENABLED" not in git_sync_env
+        assert "STATSD_HOST" not in git_sync_env
+        assert "STATSD_PORT" not in git_sync_env
+        assert "DEBUG" not in git_sync_env
 
     def test_gsr_deployment_with_resource_overrides(self, kube_version):
         """Test that gitsync relay deployment are configurable with custom resource limits."""

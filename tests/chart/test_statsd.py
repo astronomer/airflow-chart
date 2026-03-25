@@ -18,7 +18,7 @@ class TestStatsdConfigMap:
         assert doc["kind"] == "ConfigMap"
         assert doc["apiVersion"] == "v1"
         yml = yaml.safe_load(doc["data"]["mappings.yml"])
-        assert len(yml["mappings"]) == 42
+        assert len(yml["mappings"]) == 19
         assert yml["mappings"][-1] == {
             "action": "drop",
             "match": ".",
