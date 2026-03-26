@@ -412,7 +412,7 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-sync"]["command"] == ["bash"]
         assert c_by_name["git-sync"]["args"] == [
             "-c",
-            "sanic git_sync_relay.server.app -H 0.0.0.0 -p 8000 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
+            "/entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
         ]
 
         assert c_by_name["auth-proxy"]["volumeMounts"] == [
