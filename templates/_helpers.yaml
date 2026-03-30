@@ -451,6 +451,13 @@ Generate log_id_template based on Airflow version
 {{- end -}}
 
 {{/*
+Get the statsd ingest port from the airflow subchart configuration
+*/}}
+{{- define "astro.statsd.port" -}}
+{{ .Values.airflow.ports.statsdIngest }}
+{{- end -}}
+
+{{/*
 Auth cache path configuration for nginx http block
 */}}
 {{- define "airflow.nginx_auth_cache_path" -}}

@@ -161,6 +161,16 @@ spec:
               value: "false"
             {{- end }}
             {{- end }}
+            {{- if .Values.gitSyncRelay.metrics.enabled}}
+            - name: METRICS_ENABLED
+              value: "{{ .Values.gitSyncRelay.metrics.enabled }}"
+            - name: STATSD_HOST
+              value: {{ .Release.Name }}-statsd
+            - name: STATSD_PORT
+              value: "{{ include "astro.statsd.port" . }}"
+            - name: DEBUG
+              value: "{{ .Values.gitSyncRelay.debug }}"
+            {{- end }}
           {{- if .Values.gitSyncRelay.gitSync.livenessProbe }}
           livenessProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitSync.livenessProbe) . | nindent 12 }}
           {{- end }}
