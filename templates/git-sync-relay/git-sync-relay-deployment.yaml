@@ -167,7 +167,7 @@ spec:
             - name: STATSD_HOST
               value: {{ .Release.Name }}-statsd
             - name: STATSD_PORT
-              value: "{{ .Values.gitSyncRelay.statsdPort }}"
+              value: "{{ include "astro.statsd.port" . }}"
             - name: DEBUG
               value: "{{ .Values.gitSyncRelay.debug }}"
             {{- end }}
