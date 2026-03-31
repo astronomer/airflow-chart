@@ -208,6 +208,76 @@ extraObjects:
               restartPolicy: OnFailure
 ```
 
+## Local Development
+
+### Prerequisites
+
+- **[uv](https://docs.astral.sh/uv/)**: Fast Python package installer and resolver
+- **Docker**: Required for running Kubernetes in Docker (kind) during local testing
+- **helm**: Required for chart dependencies and templating
+
+### Setting Up Your Development Environment
+
+1. Install uv and python
+
+```bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install the Python version specified in .python-version
+uv python install
+```
+
+2. Create and activate a virtual environment:
+
+```bash
+uv venv
+source .venv/bin/activate
+```
+
+3. Install dependencies:
+
+```bash
+uv sync
+```
+
+4. Install pre-commit hooks:
+
+```bash
+pre-commit install
+```
+
+5. Update Helm chart dependencies:
+
+```bash
+helm dep update
+```
+
+### Running Tests
+
+The project uses `pytest` for testing the Helm chart. Tests are located in the `tests/` directory.
+
+#### Run pytests:
+
+```bash
+
+# Run specific test file
+pytest tests/chart/test_ingress.py
+
+# Run tests matching a pattern
+pytest "tests/chart/test_ingress.py::TestIngress::test_airflow_ingress_class_name_with_dag_server[1.31.0]"
+```
+
+#### Run pre-commit hooks manually:
+
+```bash
+# Run on all files
+pre-commit run --all-files
+
+# Run specific hook
+pre-commit run ruff-check --all-files
+```
+
 ## Contributing
 
 Check out [our contributing guide!](CONTRIBUTING.md)
