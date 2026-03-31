@@ -10,4 +10,4 @@ keywords:
 dependencies:
   - name: airflow
     version: 1.17.7-astro
-    repository: https://github.com/astronomer/apc-airflow/releases/download/oss-helm-chart/1.17.7-astro
+    repository: https://pgvishnuram.github.io/airflow_sidecar_release
