@@ -131,6 +131,7 @@ class TestGitSyncRelayDeployment:
                 "subPath": "known_hosts",
             },
             {"name": "git-repo-contents", "mountPath": "/git"},
+            {"name": "tmp", "mountPath": "/tmp"},  # noqa: S108
         ]
         assert get_env_vars_dict(c_by_name["git-sync"].get("env")) == {
             "GIT_SYNC_ROOT": "/git",
@@ -184,6 +185,7 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-sync"]["volumeMounts"] == [
             {"name": "git-sync-home", "mountPath": "/home/git-sync"},
             {"name": "git-repo-contents", "mountPath": "/git"},
+            {"name": "tmp", "mountPath": "/tmp"},  # noqa: S108
         ]
         assert get_env_vars_dict(c_by_name["git-sync"].get("env")) == {
             "GIT_SYNC_ROOT": "/git",
@@ -287,7 +289,7 @@ class TestGitSyncRelayDeployment:
 
     def test_gsr_deployment_with_securitycontext_overrides(self, kube_version):
         """Test that gitsync  deployment are configurable with custom securitycontext."""
-        gsrsecuritycontext = {"runAsUser": 12345, "privileged": True}
+        gsrsecuritycontext = {"fsGroup": 65533, "runAsUser": 12345, "privileged": True}
         values = {"gitSyncRelay": {"enabled": True, "securityContext": gsrsecuritycontext}}
 
         docs = render_chart(
