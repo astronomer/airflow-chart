@@ -131,7 +131,7 @@ class TestGitSyncRelayDeployment:
                 "subPath": "known_hosts",
             },
             {"name": "git-repo-contents", "mountPath": "/git"},
-            {"name": "tmp", "mountPath": "/tmp"}, # noqa: S108
+            {"name": "tmp", "mountPath": "/tmp"},  # noqa: S108
         ]
         assert get_env_vars_dict(c_by_name["git-sync"].get("env")) == {
             "GIT_SYNC_ROOT": "/git",
@@ -185,7 +185,7 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-sync"]["volumeMounts"] == [
             {"name": "git-sync-home", "mountPath": "/home/git-sync"},
             {"name": "git-repo-contents", "mountPath": "/git"},
-            {"name": "tmp", "mountPath": "/tmp"}, # noqa: S108
+            {"name": "tmp", "mountPath": "/tmp"},  # noqa: S108
         ]
         assert get_env_vars_dict(c_by_name["git-sync"].get("env")) == {
             "GIT_SYNC_ROOT": "/git",
