@@ -838,7 +838,8 @@ gitSyncRelay:
   repoFetchMode: poll
   # webhookSecurityKey is only needed when repoFetchMode=webhook
   webhookSecretKey: ~
-  securityContext: {}
+  securityContext:
+    fsGroup: 65533
   terminationGracePeriodSeconds: 30
   gitDaemon: {}
   gitSync:
