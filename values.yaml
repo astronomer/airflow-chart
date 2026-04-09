@@ -840,6 +840,7 @@ gitSyncRelay:
   webhookSecretKey: ~
   securityContext:
     fsGroup: 65533
+    runAsUser: 50000
   terminationGracePeriodSeconds: 30
   gitDaemon: {}
   gitSync:
