@@ -146,6 +146,15 @@ airflow:
       - emptyDir: {}
         name: tmp
     metricsExporterSidecar:
+      livenessProbe:
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+      readinessProbe:
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        timeoutSeconds: 5
+        
       securityContexts:
         container:
           readOnlyRootFilesystem: true
