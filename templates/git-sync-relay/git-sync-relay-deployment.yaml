@@ -85,8 +85,7 @@ spec:
         - name: git-config-manager
           command: ["git", "config", "--global", "--add", "safe.directory", "/git"]
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
-          securityContext:
-            readOnlyRootFilesystem: true
+          securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 12 }}
           volumeMounts:
             - name: git-sync-home
               mountPath: /home/git-sync
@@ -100,8 +99,7 @@ spec:
             - -c
             - /entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )
           {{- end }}
-          securityContext:
-            readOnlyRootFilesystem: true
+          securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 12 }}
           volumeMounts:
             - name: git-sync-home
               mountPath: /home/git-sync
@@ -179,8 +177,7 @@ spec:
         {{- if eq .Values.gitSyncRelay.repoShareMode "git_daemon" }}
         - name: git-daemon
           image: "{{ .Values.gitSyncRelay.images.gitDaemon.repository }}:{{ .Values.gitSyncRelay.images.gitDaemon.tag }}"
-          securityContext:
-            readOnlyRootFilesystem: true
+          securityContext: {{- toYaml .Values.gitSyncRelay.gitDaemon.securityContext | nindent 12 }}
           volumeMounts:
             - name: git-repo-contents
               mountPath: /git
