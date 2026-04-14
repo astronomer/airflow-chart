@@ -849,10 +849,15 @@ gitSyncRelay:
   webhookSecretKey: ~
   securityContext:
     fsGroup: 65533
+    runAsUser: 50000
   terminationGracePeriodSeconds: 30
-  gitDaemon: {}
+  gitDaemon:
+    securityContext:
+      readOnlyRootFilesystem: true
   gitSync:
     webhookPort: 8000
+    securityContext:
+      readOnlyRootFilesystem: true
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
