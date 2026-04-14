@@ -20,7 +20,7 @@ class TestIngress:
         assert "Ingress" == doc["kind"]
         assert "networking.k8s.io/v1" == doc["apiVersion"]
         assert "/release-name/airflow" == docs[0]["spec"]["rules"][0]["http"]["paths"][0]["path"]
-        assert doc["spec"]["tls"][0]["secretName"] is None
+        assert "tls" not in doc["spec"]
 
     def test_airflow_ingress_tls_secret_overrides(self, kube_version):
         """Test airflow ingress and tls secret overrides with KubernetesExecutor."""
@@ -52,11 +52,13 @@ class TestIngress:
         assert "Ingress" == doc["kind"]
         assert "networking.k8s.io/v1" == doc["apiVersion"]
         assert "/release-name/airflow" == doc["spec"]["rules"][0]["http"]["paths"][0]["path"]
+        assert "tls" not in doc["spec"]
 
         doc = docs[1]
         assert "Ingress" == doc["kind"]
         assert "networking.k8s.io/v1" == doc["apiVersion"]
         assert "/release-name/flower/" == doc["spec"]["rules"][0]["http"]["paths"][0]["path"]
+        assert "tls" not in doc["spec"]
 
     def test_airflow_ingress_with_celery_executor_with_tls_overides(self, kube_version):
         """Test airflow ingress and tls secret overrides with CeleryExecutor."""
@@ -98,7 +100,7 @@ class TestIngress:
         rule_0 = docs[0]["spec"]["rules"][0]
         assert rule_0["http"]["paths"][0]["path"] == "/release-name/dags/(upload|downloads|healthz)(/.*)?"
         assert rule_0["host"] == "deployments.example.com"
-        assert docs[0]["spec"]["tls"][0]["secretName"] is None
+        assert "tls" not in docs[0]["spec"]
 
     def test_airflow_ingress_with_dag_server_ingress_annotation_and_tls_secret(self, kube_version):
         """Test airflow ingress annotation and tls secret with DagServer."""
@@ -131,3 +133,36 @@ class TestIngress:
 
         assert ingressAnnotations == docs[1]["metadata"]["annotations"]
         assert docs[1]["spec"]["tls"][0]["secretName"] == tls_secret_name
+
+    def test_git_sync_relay_ingress_without_tls(self, kube_version):
+        """Test git-sync-relay ingress has no TLS block when tlsSecretName is not set."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-ingress.yaml",
+            values={
+                "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
+                "ingress": {"baseDomain": "example.com"},
+            },
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert "Ingress" == doc["kind"]
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay-ingress"
+        assert "tls" not in doc["spec"]
+
+    def test_git_sync_relay_ingress_with_tls(self, kube_version):
+        """Test git-sync-relay ingress has TLS block when tlsSecretName is set."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-ingress.yaml",
+            values={
+                "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
+                "ingress": {"baseDomain": "example.com", "tlsSecretName": tls_secret_name},
+            },
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert "Ingress" == doc["kind"]
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay-ingress"
+        assert doc["spec"]["tls"][0]["secretName"] == tls_secret_name
+        assert "deployments.example.com" in doc["spec"]["tls"][0]["hosts"]

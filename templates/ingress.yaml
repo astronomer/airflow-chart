@@ -31,11 +31,13 @@ metadata:
   {{- end }}
   {{- end }}
 spec:
+  {{- if .Values.ingress.tlsSecretName }}
   tls:
-    - secretName: {{ .Values.ingress.tlsSecretName | default "~" }}
+    - secretName: {{ .Values.ingress.tlsSecretName }}
       hosts:
         - {{- include "deployments_subdomain" . | indent 1 }}
         - {{- include "airflow_subdomain" . | indent 1 }}
+  {{- end }}
   rules:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
@@ -117,11 +119,13 @@ metadata:
   {{- end }}
   {{- end }}
 spec:
+  {{- if .Values.ingress.tlsSecretName }}
   tls:
-    - secretName: {{ .Values.ingress.tlsSecretName | default "~" }}
+    - secretName: {{ .Values.ingress.tlsSecretName }}
       hosts:
         - {{- include "deployments_subdomain" . | indent 1 }}
         - {{- include "flower_subdomain" . | indent 1 }}
+  {{- end }}
   rules:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
@@ -189,10 +193,12 @@ metadata:
   {{- end }}
   {{- end }}
 spec:
+  {{- if .Values.ingress.tlsSecretName }}
   tls:
-    - secretName: {{ .Values.ingress.tlsSecretName | default "~" }}
+    - secretName: {{ .Values.ingress.tlsSecretName }}
       hosts:
         - {{- include "deployments_subdomain" . | indent 1 }}
+  {{- end }}
   rules:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
