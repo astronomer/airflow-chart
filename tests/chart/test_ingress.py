@@ -52,6 +52,7 @@ class TestIngress:
         assert "Ingress" == doc["kind"]
         assert "networking.k8s.io/v1" == doc["apiVersion"]
         assert "/release-name/airflow" == doc["spec"]["rules"][0]["http"]["paths"][0]["path"]
+        assert "tls" not in doc["spec"]
 
         doc = docs[1]
         assert "Ingress" == doc["kind"]
