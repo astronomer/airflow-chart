@@ -20,7 +20,7 @@ class TestIngress:
         assert "Ingress" == doc["kind"]
         assert "networking.k8s.io/v1" == doc["apiVersion"]
         assert "/release-name/airflow" == docs[0]["spec"]["rules"][0]["http"]["paths"][0]["path"]
-        assert doc["spec"]["tls"][0]["secretName"] is None
+        assert "tls" not in doc["spec"]
 
     def test_airflow_ingress_tls_secret_overrides(self, kube_version):
         """Test airflow ingress and tls secret overrides with KubernetesExecutor."""
@@ -98,7 +98,7 @@ class TestIngress:
         rule_0 = docs[0]["spec"]["rules"][0]
         assert rule_0["http"]["paths"][0]["path"] == "/release-name/dags/(upload|downloads|healthz)(/.*)?"
         assert rule_0["host"] == "deployments.example.com"
-        assert docs[0]["spec"]["tls"][0]["secretName"] is None
+        assert "tls" not in docs[0]["spec"]
 
     def test_airflow_ingress_with_dag_server_ingress_annotation_and_tls_secret(self, kube_version):
         """Test airflow ingress annotation and tls secret with DagServer."""
