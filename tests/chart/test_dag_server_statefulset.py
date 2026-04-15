@@ -392,7 +392,7 @@ class TestDagServerStatefulSet:
         assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
         assert spec["tolerations"] == airflow_node_pool_config["tolerations"]
 
-    def test_dag_server_volume_and_volume_mounts(self, kube_version, airflow_node_pool_config):
+    def test_dag_server_volume_and_volume_mounts(self, kube_version):
         """Test that dagserver volume and volume mounts are correctly configured."""
         values = {
             "dagDeploy": {
@@ -415,5 +415,5 @@ class TestDagServerStatefulSet:
         common_default_tests(doc)
         assert len(docs) == 1
         spec = docs[0]["spec"]["template"]["spec"]
-        assert values["dagDeploy"]["extraVolumes"][0] in  spec["volumes"]
+        assert values["dagDeploy"]["extraVolumes"][0] in spec["volumes"]
         assert values["dagDeploy"]["extraVolumeMounts"][0] in spec["containers"][0]["volumeMounts"]
