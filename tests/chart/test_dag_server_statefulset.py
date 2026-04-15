@@ -391,3 +391,29 @@ class TestDagServerStatefulSet:
         assert spec["affinity"] == airflow_node_pool_config["affinity"]
         assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
         assert spec["tolerations"] == airflow_node_pool_config["tolerations"]
+
+    def test_dag_server_volume_and_volume_mounts(self, kube_version, airflow_node_pool_config):
+        """Test that dagserver volume and volume mounts are correctly configured."""
+        values = {
+            "dagDeploy": {
+                "enabled": True,
+                "extraVolumes": [
+                    {"name": "dags-volume", "emptyDir": {}},
+                ],
+                "extraVolumeMounts": [
+                    {"name": "dags-volume", "mountPath": "/dags"},
+                ],
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
+            values=values,
+        )
+        doc = docs[0]
+        common_default_tests(doc)
+        assert len(docs) == 1
+        spec = docs[0]["spec"]["template"]["spec"]
+        assert values["dagDeploy"]["extraVolumes"][0] in  spec["volumes"]
+        assert values["dagDeploy"]["extraVolumeMounts"][0] in spec["containers"][0]["volumeMounts"]
