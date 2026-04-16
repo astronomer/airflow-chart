@@ -17,6 +17,7 @@
 .project
 .pytest_cache
 .svn/
+.venv
 CODEOWNERS
 CONTRIBUTING.md
 Makefile
@@ -27,5 +28,7 @@ bin
 configs
 dev
 docs
+kind-config.yaml
 tests
+uv.lock
 venv

@@ -2,9 +2,9 @@
 exclude: '^(venv|\.vscode|tests/k8s_schema|tests/chart/test_data)' # regex
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.11.7"
+    rev: "v0.15.9"
     hooks:
-      - id: ruff
+      - id: ruff-check
         args:
           - "--fix"
           - "--exit-non-zero-on-fix"
@@ -27,8 +27,9 @@ repos:
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: file-contents-sorter
-        args: ["--ignore-case", "--unique"]
-        files: '^\.gitignore$'
+        args:
+          - "--unique"
+        files: '^\..*ignore$'
       - id: mixed-line-ending
         args: ["--fix=lf"]
       - id: no-commit-to-branch
