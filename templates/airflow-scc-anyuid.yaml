@@ -21,6 +21,9 @@ supplementalGroups:
   type: RunAsAny
 users:
 - system:serviceaccount:{{ .Release.Namespace }}:default
+{{- if ( semverCompare ">=3.0.0" .Values.airflow.airflowVersion )  }}
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.apiServer.serviceAccountName" . }}
+{{- end }}
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.webserver.serviceAccountName" . }}
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.redis.serviceAccountName" . }}
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "astro.flower.serviceAccountName" . }}

@@ -16,13 +16,12 @@
 # under the License.
 
 import subprocess
-from pathlib import Path
 
 import docker
 import pytest
 from filelock import FileLock
 
-git_root_dir = [x for x in Path(__file__).resolve().parents if (x / ".git").is_dir()][-1]
+from tests import git_root_dir
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -74,3 +73,34 @@ def docker_client():
         client = docker.from_env()
         yield client
         client.close()
+
+
+@pytest.fixture(scope="function")
+def airflow_node_pool_config():
+    yield {
+        "nodeSelector": {"role": "airflow"},
+        "affinity": {
+            "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                    "nodeSelectorTerms": [
+                        {
+                            "matchExpressions": [
+                                {
+                                    "key": "astronomer.io/multi-tenant",
+                                    "operator": "In",
+                                    "values": ["false"],
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "tolerations": [
+            {
+                "effect": "NoSchedule",
+                "key": "airflow",
+                "operator": "Exists",
+            }
+        ],
+    }

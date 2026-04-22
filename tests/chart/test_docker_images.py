@@ -3,7 +3,7 @@ import jmespath
 import pytest
 
 from tests.chart.conftest import docker_daemon_present
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 
 def list_docker_images():

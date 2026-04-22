@@ -25,16 +25,12 @@ metadata:
   {{ toYaml .Values.ingress.gitSyncRelayAnnotations | nindent 4 }}
 {{- end }}
 spec:
+  {{- if .Values.ingress.tlsSecretName }}
   tls:
-  {{- if .Values.ingress.acme }}
-    - secretName: {{ .Release.Name }}-airflow-tls
-  {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
-  {{ else }}
-    - secretName: ~
-  {{- end }}
       hosts:
         - {{ include "deployments_subdomain" . }}
+  {{- end }}
   rules:
     - host: {{ include "deployments_subdomain" . }}
       http:

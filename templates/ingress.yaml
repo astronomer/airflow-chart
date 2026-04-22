@@ -16,28 +16,28 @@ metadata:
 {{- with .Values.airflow.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
-  {{- if .Values.ingress.webserverAnnotations }}
+  {{- if or .Values.ingress.webserverAnnotations .Values.authSidecar.annotations }}
   annotations:
   {{- if .Values.authSidecar.enabled  }}
 {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
   {{- else }}
+    {{- if .Values.ingress.authCache.enabled }}
+      "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
+      "nginx.ingress.kubernetes.io/auth-cache-duration": {{ .Values.ingress.authCache.duration | quote }}
+    {{- end }}
     {{- range $k, $v := .Values.ingress.webserverAnnotations }}
       {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
     {{- end }}
   {{- end }}
   {{- end }}
 spec:
+  {{- if .Values.ingress.tlsSecretName }}
   tls:
-  {{- if .Values.ingress.acme }}
-    - secretName: {{ .Release.Name }}-airflow-tls
-  {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
-  {{ else }}
-    - secretName: ~
-  {{- end }}
       hosts:
         - {{- include "deployments_subdomain" . | indent 1 }}
         - {{- include "airflow_subdomain" . | indent 1 }}
+  {{- end }}
   rules:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
@@ -46,6 +46,15 @@ spec:
             pathType: Prefix
             backend:
               service:
+              {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
+                name: {{ .Release.Name }}-api-server
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: api-server
+                  {{- end }}
+              {{- else }}
                 name: {{ .Release.Name }}-webserver
                 port:
                   {{- if .Values.authSidecar.enabled  }}
@@ -53,6 +62,7 @@ spec:
                   {{- else }}
                   name: airflow-ui
                   {{- end }}
+              {{- end }}
     - host: {{- include "airflow_subdomain" . | indent 1 }}
       http:
         paths:
@@ -60,6 +70,15 @@ spec:
             pathType: Prefix
             backend:
               service:
+              {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
+                name: {{ .Release.Name }}-api-server
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: api-server
+                  {{- end }}
+              {{- else }}
                 name: {{ .Release.Name }}-webserver
                 port:
                   {{- if .Values.authSidecar.enabled  }}
@@ -67,6 +86,7 @@ spec:
                   {{- else }}
                   name: airflow-ui
                   {{- end }}
+              {{- end }}
 {{- end }}
 {{- if and .Values.ingress.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
 ---
@@ -83,29 +103,29 @@ metadata:
 {{- with .Values.airflow.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
-  {{- if .Values.ingress.flowerAnnotations }}
+  {{- if or .Values.ingress.flowerAnnotations .Values.authSidecar.annotations }}
   {{ $ctx := . }}
   annotations:
   {{- if .Values.authSidecar.enabled  }}
-{{- toYaml .Values.authSidecar.annotations | nindent 4 }}
+    {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
   {{- else }}
+    {{- if .Values.ingress.authCache.enabled }}
+      "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
+      "nginx.ingress.kubernetes.io/auth-cache-duration": {{ .Values.ingress.authCache.duration | quote }}
+    {{- end }}
     {{- range $k, $v := .Values.ingress.flowerAnnotations }}
       {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
     {{- end }}
   {{- end }}
   {{- end }}
 spec:
+  {{- if .Values.ingress.tlsSecretName }}
   tls:
-  {{- if .Values.ingress.acme }}
-    - secretName: {{ .Release.Name }}-airflow-tls
-  {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
-  {{ else }}
-    - secretName: ~
-  {{- end }}
       hosts:
         - {{- include "deployments_subdomain" . | indent 1 }}
         - {{- include "flower_subdomain" . | indent 1 }}
+  {{- end }}
   rules:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:
@@ -119,7 +139,7 @@ spec:
                 port:
                   name: auth-proxy
           {{- else }}
-          - path: /{{ .Release.Name }}/flower(/|$)(.*)
+          - path: /{{ .Release.Name }}/flower/
             pathType: Prefix
             backend:
               service:
@@ -157,28 +177,28 @@ metadata:
 {{- with .Values.airflow.labels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
-  {{- if .Values.ingress.dagServerAnnotations }}
+  {{- if or .Values.ingress.dagServerAnnotations .Values.authSidecar.annotations }}
   {{ $ctx := . }}
   annotations:
   {{- if .Values.authSidecar.enabled  }}
 {{- toYaml .Values.authSidecar.annotations | nindent 4 }}
   {{- else }}
+    {{- if .Values.ingress.authCache.enabled }}
+      "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
+      "nginx.ingress.kubernetes.io/auth-cache-duration": {{ .Values.ingress.authCache.duration | quote }}
+    {{- end }}
     {{- range $k, $v := .Values.ingress.dagServerAnnotations }}
       {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
     {{- end }}
   {{- end }}
   {{- end }}
 spec:
+  {{- if .Values.ingress.tlsSecretName }}
   tls:
-  {{- if .Values.ingress.acme }}
-    - secretName: {{ .Release.Name }}-airflow-tls
-  {{- else if .Values.ingress.tlsSecretName }}
     - secretName: {{ .Values.ingress.tlsSecretName }}
-  {{ else }}
-    - secretName: ~
-  {{- end }}
       hosts:
         - {{- include "deployments_subdomain" . | indent 1 }}
+  {{- end }}
   rules:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
       http:

@@ -18,13 +18,6 @@
         key: fernet-key
   {{- end }}
   # For Airflow <2.3, backward compatibility; moved to [database] in 2.3
-  {{- if .Values.enableBuiltInSecretEnvVars.AIRFLOW__CORE__SQL_ALCHEMY_CONN }}
-  - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
-    valueFrom:
-      secretKeyRef:
-        name: {{ template "airflow_metadata_secret" . }}
-        key: connection
-  {{- end }}
   {{- if .Values.enableBuiltInSecretEnvVars.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN }}
   - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
     valueFrom:
@@ -90,6 +83,15 @@
         key: connection
     {{- end }}
   {{- end }}
+  {{- if semverCompare ">=3.0.0" .Values.airflowVersion }}
+  - name: AIRFLOW__API_AUTH__JWT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "fernet_key_secret" . }}
+        key: fernet-key
+  - name: AIRFLOW__CORE__AUTH_MANAGER
+    value: astronomer.runtime.auth_managers.astro.AstroAuthManager
+  {{- end }}
 {{- end }}
 
 {{ define "deployments_subdomain" -}}
@@ -129,6 +131,15 @@ proxy_ssl_server_name       on;
 proxy_pass_request_headers  on;
 {{ end }}
 
+{{ define "default_nginx_tmp_path" }}
+proxy_temp_path /tmp/proxy_temp;
+client_body_temp_path /tmp/client_temp;
+fastcgi_temp_path /tmp/fastcgi_temp;
+uwsgi_temp_path /tmp/uwsgi_temp;
+scgi_temp_path /tmp/scgi_temp;
+{{- end }}
+
+
 {{ define "default_nginx_auth_headers" }}
 auth_request_set $authHeader0 $upstream_http_authorization;
 proxy_set_header 'authorization' $authHeader0;
@@ -165,13 +176,24 @@ proxy_redirect                          off;
 {{ end }}
 
 {{/*
+Create the name of the api-server service account to use
+*/}}
+{{- define "astro.apiServer.serviceAccountName" -}}
+{{- if .Values.airflow.apiServer.serviceAccount.create -}}
+    {{ default (printf "%s-api-server" (include "airflow.serviceAccountName" .)) .Values.airflow.apiServer.serviceAccount.name }}
+{{- else -}}
+    {{- tpl (default "default" .Values.airflow.apiServer.serviceAccount.name) . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create the name of the dag-server service account to use
 */}}
 {{- define "astro.dagDeploy.serviceAccountName" -}}
 {{- if .Values.dagDeploy.serviceAccount.create -}}
     {{ default (printf "%s-dag-server" (include "airflow.fullname" .)) .Values.dagDeploy.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.dagDeploy.serviceAccount.name }}
+    {{- tpl (default "default" .Values.dagDeploy.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -182,7 +204,7 @@ Create the name of the git-sync-relay service account to use
 {{- if .Values.gitSyncRelay.serviceAccount.create -}}
     {{ default (printf "%s-git-sync-relay" (include "airflow.fullname" .)) .Values.gitSyncRelay.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.gitSyncRelay.serviceAccount.name }}
+    {{- tpl (default "default" .Values.gitSyncRelay.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -193,7 +215,7 @@ Create the name of the webserver service account to use
 {{- if .Values.airflow.webserver.serviceAccount.create -}}
     {{ default (printf "%s-webserver" (include "airflow.serviceAccountName" .)) .Values.airflow.webserver.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.webserver.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.webserver.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -204,7 +226,7 @@ Create the name of the redis service account to use
 {{- if .Values.airflow.redis.serviceAccount.create -}}
     {{ default (printf "%s-redis" (include "airflow.serviceAccountName" .)) .Values.airflow.redis.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.redis.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.redis.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -215,7 +237,7 @@ Create the name of the flower service account to use
 {{- if .Values.airflow.flower.serviceAccount.create -}}
     {{ default (printf "%s-flower" (include "airflow.serviceAccountName" .)) .Values.airflow.flower.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.flower.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.flower.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -226,7 +248,7 @@ Create the name of the scheduler service account to use
 {{- if .Values.airflow.scheduler.serviceAccount.create -}}
     {{ default (printf "%s-scheduler" (include "airflow.serviceAccountName" .)) .Values.airflow.scheduler.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.scheduler.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.scheduler.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -237,7 +259,7 @@ Create the name of the statsd service account to use
 {{- if .Values.airflow.statsd.serviceAccount.create -}}
     {{ default (printf "%s-statsd" (include "airflow.serviceAccountName" .)) .Values.airflow.statsd.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.statsd.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.statsd.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -248,7 +270,7 @@ Create the name of the create user job service account to use
 {{- if .Values.airflow.createUserJob.serviceAccount.create -}}
     {{ default (printf "%s-create-user-job" (include "airflow.serviceAccountName" .)) .Values.airflow.createUserJob.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.createUserJob.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.createUserJob.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -259,7 +281,7 @@ Create the name of the migrate database job service account to use
 {{- if .Values.airflow.migrateDatabaseJob.serviceAccount.create -}}
     {{ default (printf "%s-migrate-database-job" (include "airflow.serviceAccountName" .)) .Values.airflow.migrateDatabaseJob.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.migrateDatabaseJob.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.migrateDatabaseJob.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -270,7 +292,7 @@ Create the name of the worker service account to use
 {{- if .Values.airflow.workers.serviceAccount.create -}}
     {{ default (printf "%s-worker" (include "airflow.serviceAccountName" .)) .Values.airflow.workers.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.workers.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.workers.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -281,7 +303,7 @@ Create the name of the triggerer service account to use
 {{- if .Values.airflow.triggerer.serviceAccount.create -}}
     {{ default (printf "%s-triggerer" (include "airflow.serviceAccountName" .)) .Values.airflow.triggerer.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.triggerer.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.triggerer.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -292,7 +314,7 @@ Create the name of the pgbouncer service account to use
 {{- if .Values.airflow.pgbouncer.serviceAccount.create -}}
     {{ default (printf "%s-pgbouncer" (include "airflow.serviceAccountName" .)) .Values.airflow.pgbouncer.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.pgbouncer.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.pgbouncer.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -303,7 +325,7 @@ Create the name of the cleanup service account to use
 {{- if .Values.airflow.cleanup.serviceAccount.create -}}
     {{ default (printf "%s-cleanup" (include "airflow.serviceAccountName" .)) .Values.airflow.cleanup.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.airflow.cleanup.serviceAccount.name }}
+    {{- tpl (default "default" .Values.airflow.cleanup.serviceAccount.name) . -}}
 {{- end -}}
 {{- end -}}
 
@@ -312,7 +334,7 @@ Create the name of the cleanup service account to use
 {{- if .Values.airflow.dagProcessor.serviceAccount.create }}
   {{- default (printf "%s-dag-processor" (include "airflow.serviceAccountName" .)) .Values.airflow.dagProcessor.serviceAccount.name }}
 {{- else }}
-  {{- default "default" .Values.airflow.dagProcessor.serviceAccount.name }}
+  {{- tpl (default "default" .Values.airflow.dagProcessor.serviceAccount.name) . -}}
 {{- end }}
 {{- end }}
 
@@ -320,12 +342,14 @@ Create the name of the cleanup service account to use
   {{- default (printf "%s-registry" .Release.Name) .Values.airflow.registry.secretName }}
 {{- end }}
 
-{{- define "sidecar_container_spec" -}}
+{{- define "logging_sidecar_container_spec" -}}
 - name: {{ .Values.loggingSidecar.name }}
   image: "{{ .Values.loggingSidecar.image }}"
   {{- if .Values.loggingSidecar.resources }}
-  resources: {{- toYaml .Values.loggingSidecar.resources | nindent 12 }}
+  resources: {{- toYaml .Values.loggingSidecar.resources | nindent 4 }}
   {{- end }}
+  securityContext:
+    readOnlyRootFilesystem: true
   env:
   - name: VECTOR_CONFIG
     value: /etc/sidecar-logging/vector-config.yaml
@@ -360,22 +384,25 @@ Create the name of the cleanup service account to use
     readOnly: False
 {{- end }}
 
-{{- define "authsidecar_container_spec" -}}
+{{- define "auth_sidecar_container_spec" -}}
 - name: auth-proxy
   image: "{{ .Values.authSidecar.repository }}:{{ .Values.authSidecar.tag }}"
   imagePullPolicy: {{ .Values.authSidecar.pullPolicy }}
   {{- if .Values.authSidecar.resources }}
-  resources: {{- toYaml .Values.authSidecar.resources | nindent 12 }}
+  resources: {{- toYaml .Values.authSidecar.resources | nindent 4 }}
   {{- end }}
+  securityContext:
   {{- if .Values.authSidecar.securityContext }}
-  securityContext: {{- toYaml .Values.authSidecar.securityContext | nindent 12 }}
+    {{- $required := dict "readOnlyRootFilesystem" true }}
+    {{- toYaml (merge $required .Values.authSidecar.securityContext ) | nindent 4 }}
   {{- end }}
+    readOnlyRootFilesystem: true
   ports:
   - containerPort: {{ .Values.authSidecar.port }}
     name: auth-proxy
     protocol: TCP
 {{- if .Values.authSidecar.readinessProbe  }}
-  readinessProbe: {{ tpl (toYaml .Values.authSidecar.readinessProbe) . | nindent 12 }}
+  readinessProbe: {{ tpl (toYaml .Values.authSidecar.readinessProbe) . | nindent 4 }}
 {{- else }}
   readinessProbe:
     httpGet:
@@ -386,7 +413,7 @@ Create the name of the cleanup service account to use
     periodSeconds: 10
 {{- end }}
 {{- if .Values.authSidecar.livenessProbe  }}
-  livenessProbe: {{ tpl (toYaml .Values.authSidecar.livenessProbe) . | nindent 12 }}
+  livenessProbe: {{ tpl (toYaml .Values.authSidecar.livenessProbe) . | nindent 4 }}
 {{- else }}
   livenessProbe:
     httpGet:
@@ -397,7 +424,58 @@ Create the name of the cleanup service account to use
     periodSeconds: 10
 {{- end }}
   volumeMounts:
+  - mountPath: /var/lib/nginx/logs
+    name: nginx-access-logs
   - mountPath: /etc/nginx/nginx.conf
     name: nginx-sidecar-conf
     subPath: nginx.conf
+  - mountPath: /var/cache/nginx
+    name: nginx-cache
+  - mountPath: /tmp
+    name: tmp
+  - mountPath: /var/lib/nginx/tmp
+    name: nginx-tmp
 {{- end }}
+
+{{/*
+Generate log_id_template based on Airflow version
+*/}}
+{{- define "airflow.logIdTemplate" -}}
+{{- if semverCompare ">=3.0.0" .Values.airflowVersion -}}
+{dag_id}_{task_id}_{run_id}_{map_index}_{try_number}
+{{- else if semverCompare ">=2.3.0" .Values.airflowVersion -}}
+{dag_id}-{task_id}-{run_id}-{map_index}-{try_number}
+{{- else -}}
+{dag_id}_{task_id}_{execution_date}_{try_number}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the statsd ingest port from the airflow subchart configuration
+*/}}
+{{- define "astro.statsd.port" -}}
+{{ .Values.airflow.ports.statsdIngest }}
+{{- end -}}
+
+{{/*
+Auth cache path configuration for nginx http block
+*/}}
+{{- define "airflow.nginx_auth_cache_path" -}}
+{{- if .Values.authSidecar.authCache.enabled }}
+proxy_cache_path /tmp/nginx-auth-cache levels=1:2 keys_zone=auth_cache:10m max_size=128m inactive=15m use_temp_path=off;
+{{- end }}
+{{- end }}
+
+{{/*
+Auth cache settings for nginx auth location block
+*/}}
+{{- define "airflow.nginx_auth_cache" -}}
+{{- if .Values.authSidecar.authCache.enabled }}
+proxy_cache auth_cache;
+proxy_cache_key {{ .Values.authSidecar.authCache.key | quote }};
+proxy_cache_valid {{ .Values.authSidecar.authCache.duration }};
+proxy_cache_methods GET HEAD;
+proxy_buffering on;
+{{- end }}
+proxy_set_header            Cookie                  $http_cookie;
+{{- end -}}

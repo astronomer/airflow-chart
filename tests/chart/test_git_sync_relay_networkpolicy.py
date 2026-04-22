@@ -1,7 +1,7 @@
 import pytest
 
 from tests import supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
@@ -54,7 +54,7 @@ class TestGitSyncRelayNetworkPolicy:
             "podSelector": {
                 "matchLabels": {
                     "tier": "nginx",
-                    "component": "ingress-controller",
+                    "component": "cp-ingress-controller",
                     "release": "test-release-42",
                 }
             },

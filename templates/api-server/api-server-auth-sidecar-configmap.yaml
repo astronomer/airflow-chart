@@ -1,0 +1,77 @@
+######################################
+## APIServer auth sidecar ConfigMap ##
+######################################
+{{- if and ( semverCompare ">=3.0.0" .Values.airflow.airflowVersion )  .Values.authSidecar.enabled  }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-api-server-nginx-conf
+  labels:
+    tier: airflow
+    component: api-server
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+data:
+  nginx.conf: |
+    pid /tmp/nginx.pid;
+    worker_processes 1;
+    events {
+      multi_accept        on;
+      worker_connections  3072;
+      use                 epoll;
+      }
+    http {
+{{ include "default_nginx_tmp_path" . | indent 8 }}
+{{ include "airflow.nginx_auth_cache_path" . | indent 6 }}
+
+      upstream astro-api-server {
+        server 127.0.0.1:{{ .Values.airflow.ports.apiServer }} ;
+      }
+      server {
+        server_name {{ .Release.Name }}.{{ .Values.ingress.baseDomain }} ;
+        listen {{ .Values.authSidecar.port }}  ;
+{{ include "default_nginx_server_settings" . | indent 8 }}
+        location ^~ /api/ {
+          if ($host = 'deployments.{{ .Values.ingress.baseDomain }}' ) {
+            return 404;
+            }
+            proxy_pass https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/airflow/$request_uri;
+          }
+        location = /auth {
+{{ include "default_nginx_settings" . | indent 8  }}
+{{ include "airflow.nginx_auth_cache" . | indent 8 }}
+          proxy_set_header            Host                    houston.{{ .Values.platform.controlPlaneBaseDomain }};
+          proxy_pass  {{ .Values.platform.houstonAuthServiceEndpointUrl }};
+        }
+
+        location @401_auth_error {
+          internal;
+          add_header Set-Cookie $auth_cookie;
+          return 302 https://app.{{ .Values.platform.controlPlaneBaseDomain }}/login?rd=https://$http_host$request_uri;
+        }
+
+        location / {
+{{ include "default_nginx_settings_location" . | indent 8  }}
+{{ include "default_nginx_auth_headers" . | indent 8 }}
+
+          #proxy_set_header X-Original-URI        $request_uri;
+          if ($host = '{{ .Values.platform.release }}-airflow.{{ .Values.ingress.baseDomain }}' ) {
+            return 308 https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/airflow/$request_uri;
+          }
+
+          # Custom headers to proxied server
+          proxy_set_header  Host  deployments.{{ .Values.ingress.baseDomain}};
+          #proxy_set_header  X-Forwarded-Proto https;
+          proxy_cookie_path                       off;
+          proxy_pass http://astro-api-server;
+
+        }
+
+        location /healthz {
+          return 200;
+        }
+
+      }
+    }
+{{- end }}

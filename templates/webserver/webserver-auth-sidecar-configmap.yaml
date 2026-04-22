@@ -1,7 +1,7 @@
 ######################################
 ## WebServer auth sidecar ConfigMap ##
 ######################################
-{{- if .Values.authSidecar.enabled  }}
+{{- if and ( semverCompare "<3.0.0" .Values.airflow.airflowVersion )  .Values.authSidecar.enabled  }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -22,6 +22,9 @@ data:
       use                 epoll;
       }
     http {
+{{ include "default_nginx_tmp_path" . | indent 8 }}
+{{ include "airflow.nginx_auth_cache_path" . | indent 6 }}
+
       upstream astro-webserver {
         server 127.0.0.1:{{ .Values.airflow.ports.airflowUI }} ;
       }
@@ -37,14 +40,15 @@ data:
           }
         location  = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
-          proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};
-          proxy_pass  https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization;
+{{ include "airflow.nginx_auth_cache" . | indent 10 }}
+          proxy_set_header            Host                    houston.{{ .Values.platform.controlPlaneBaseDomain }};
+          proxy_pass  {{ .Values.platform.houstonAuthServiceEndpointUrl }};
         }
 
         location @401_auth_error {
           internal;
           add_header Set-Cookie $auth_cookie;
-          return 302 https://app.{{ .Values.ingress.baseDomain }}/login?rd=https://$http_host$request_uri;
+          return 302 https://app.{{ .Values.platform.controlPlaneBaseDomain }}/login?rd=https://$http_host$request_uri;
         }
 
         location / {

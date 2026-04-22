@@ -2,7 +2,7 @@ import jmespath
 import pytest
 
 from tests import supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 expected_rbac = {
     "apiGroups": [""],
@@ -35,6 +35,7 @@ class TestPgbouncersslFeature:
         assert expected_rbac in docs[1]["rules"]
         assert "RoleBinding" == jmespath.search("kind", docs[2])
         assert docs[3]["spec"]["template"]["spec"]["affinity"] == {}
+        assert docs[3]["spec"]["template"]["spec"]["containers"][0]["securityContext"]["readOnlyRootFilesystem"] is True
 
     def test_pgbouncer_certgenerator_with_custom_registry_secret(self, kube_version):
         """Test pgbouncer certgenerator sslmode opts result."""
@@ -50,6 +51,7 @@ class TestPgbouncersslFeature:
         )
         assert len(docs) == 4
         assert [{"name": "gscsecret"}] == docs[3]["spec"]["template"]["spec"]["imagePullSecrets"]
+        assert docs[3]["spec"]["template"]["spec"]["containers"][0]["securityContext"]["readOnlyRootFilesystem"] is True
 
     def test_pgbouncer_certgenerator_pgbouncerssl_extraannotations(self, kube_version):
         """Test that certgenerator.extraAnnotations correctly inserts the annotations."""
@@ -71,6 +73,7 @@ class TestPgbouncersslFeature:
         )
         assert len(docs) == 4
         assert docs[3]["spec"]["template"]["metadata"]["annotations"] == extraAnnotations
+        assert docs[3]["spec"]["template"]["spec"]["containers"][0]["securityContext"]["readOnlyRootFilesystem"] is True
 
     def test_pgbouncer_certgenerator_pgbouncerssl_affinity(self, kube_version):
         """Test that certgenerator.affinity correctly inserts the affinity."""
@@ -108,3 +111,27 @@ class TestPgbouncersslFeature:
         )
         assert len(docs) == 4
         assert docs[3]["spec"]["template"]["spec"]["affinity"] == affinity
+        assert docs[3]["spec"]["template"]["spec"]["containers"][0]["securityContext"]["readOnlyRootFilesystem"] is True
+
+    def test_pgbouncer_certgenerator_pgbouncerssl_extra_labels_support(self, kube_version):
+        """Test that certgenerator has proper custom labels."""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "airflow": {
+                    "labels": {"snoopy": "dog"},
+                    "pgbouncer": {
+                        "enabled": True,
+                        "sslmode": "require",
+                    },
+                }
+            },
+            show_only="templates/generate-ssl.yaml",
+        )
+        assert len(docs) == 4
+        assert docs[3]["spec"]["template"]["metadata"]["labels"] == {
+            "component": "pgbouncer",
+            "snoopy": "dog",
+            "release": "release-name",
+            "tier": "airflow",
+        }

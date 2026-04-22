@@ -3,9 +3,8 @@
 import pytest
 
 from tests import supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
-
-from . import get_containers_by_name
+from tests.utils import get_containers_by_name
+from tests.utils.chart import render_chart
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
@@ -35,6 +34,7 @@ class TestAirflowScheduler:
         """Test Scheduler  Log Groomer defaults."""
         default_env_vars = [
             {"name": "AIRFLOW__LOG_RETENTION_DAYS", "value": "15"},
+            {"name": "AIRFLOW__LOG_CLEANUP_FREQUENCY_MINUTES", "value": "15"},
             {"name": "AIRFLOW_HOME", "value": "/usr/local/airflow"},
         ]
         docs = render_chart(

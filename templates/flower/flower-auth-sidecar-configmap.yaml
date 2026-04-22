@@ -22,6 +22,12 @@ data:
       use                 epoll;
       }
     http {
+      proxy_temp_path /tmp/proxy_temp;
+      client_body_temp_path /tmp/client_temp;
+      fastcgi_temp_path /tmp/fastcgi_temp;
+      uwsgi_temp_path /tmp/uwsgi_temp;
+      scgi_temp_path /tmp/scgi_temp;
+{{- include "airflow.nginx_auth_cache_path" . | indent 8 }}
       upstream astro-flower {
         server 127.0.0.1:{{ .Values.airflow.ports.flowerUI }} ;
       }
@@ -31,17 +37,18 @@ data:
 {{ include "default_nginx_server_settings" . | indent 8 }}
         location  = /auth {
 {{ include "default_nginx_settings" . | indent 8  }}
-          proxy_set_header            Host                    houston.{{ .Values.ingress.baseDomain }};
-          proxy_pass  https://houston.{{ .Values.ingress.baseDomain }}/v1/authorization;
+{{ include "airflow.nginx_auth_cache" . | indent 8 }}
+          proxy_set_header            Host                    houston.{{ .Values.platform.controlPlaneBaseDomain }};
+          proxy_pass  {{ .Values.platform.houstonAuthServiceEndpointUrl }};
         }
 
         location @401_auth_error {
           internal;
           add_header Set-Cookie $auth_cookie;
-          return 302 https://app.{{ .Values.ingress.baseDomain }}/login?rd=https://$http_host$request_uri;
+          return 302 https://app.{{ .Values.platform.controlPlaneBaseDomain }}/login?rd=https://$http_host$request_uri;
         }
 
-        location ~* "^/{{ .Release.Name }}/flower(/|$)(.*)"  {
+        location ~* "^/{{ .Release.Name }}/flower/"  {
 {{ include "default_nginx_settings_location" . | indent 8  }}
 {{ include "default_nginx_auth_headers" . | indent 8 }}
 
@@ -49,11 +56,6 @@ data:
             rewrite ^ https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/flower permanent;
           }
           proxy_cookie_path                       / /{{ .Release.Name }}/;
-          sub_filter_types *;
-          sub_filter '="/' '="/{{ .Release.Name }}/flower/';
-          sub_filter_last_modified on;
-          sub_filter_once off;
-          rewrite "(?i)/{{ .Release.Name }}/flower(/|$)(.*)" /$2; break;
           # Custom headers to proxied server
           proxy_set_header  Host  deployments.{{ .Values.ingress.baseDomain}};
           #proxy_set_header  X-Forwarded-Proto https;

@@ -3,9 +3,8 @@
 import pytest
 
 from tests import supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
-
-from . import get_containers_by_name
+from tests.utils import get_all_features, get_containers_by_name
+from tests.utils.chart import render_chart
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
@@ -38,3 +37,122 @@ class TestAirflow:
         c_by_name = get_containers_by_name(docs[0])
         assert {"name": "PYTHONUNBUFFERED", "value": "1"} in c_by_name["run-airflow-migrations"]["env"]
         assert {"name": "ENABLE_AUTH_TYPE", "value": "SHA256"} in c_by_name["run-airflow-migrations"]["env"]
+
+    def test_migrate_database_job_with_preAirflowExtraInitContainers(self, kube_version):
+        """Test migrate database job behaviors with preAirflowExtraInitContainers."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["charts/airflow/templates/jobs/migrate-database-job.yaml"],
+            values=get_all_features(),
+        )
+
+        assert len(docs) == 1
+        assert "initContainers" in docs[0]["spec"]["template"]["spec"]
+        c_by_name = get_containers_by_name(docs[0], include_init_containers=True)
+        assert "usr-local-airflow-copier" in c_by_name
+        assert c_by_name["usr-local-airflow-copier"]["securityContext"]["readOnlyRootFilesystem"] is True
+
+    def test_airflow_apiserver_defaults(self, kube_version):
+        """Test Airflow3 apiServer defaults."""
+        values = {"airflow": {"airflowVersion": "3.0.0"}}
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=[
+                "charts/airflow/templates/api-server/api-server-deployment.yaml",
+                "templates/api-server/api-server-execution-networkpolicy.yaml",
+            ],
+            values=values,
+        )
+
+        assert len(docs) == 1
+        assert docs[0]["spec"]["template"]["spec"]["serviceAccountName"] == "release-name-airflow-api-server"
+
+    @pytest.mark.parametrize(
+        "executor, expected_components",
+        [
+            (None, ["worker"]),  # default executor
+            ("LocalExecutor", ["scheduler", "worker"]),
+        ],
+    )
+    def test_airflow_apiserver_with_networkpolicy(self, kube_version, executor, expected_components):
+        """Test Airflow3 apiServer network policy with different executors."""
+        values = {
+            "airflow": {
+                "airflowVersion": "3.0.0",
+                "networkPolicies": {"enabled": True},
+            }
+        }
+
+        if executor:
+            values["airflow"]["executor"] = executor
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=[
+                "templates/api-server/api-server-execution-networkpolicy.yaml",
+                "charts/airflow/templates/api-server/api-server-deployment.yaml",
+            ],
+            values=values,
+        )
+
+        assert len(docs) == 2
+
+        ingress_spec = docs[0]["spec"]["ingress"]
+        assert len(ingress_spec) == 1
+
+        from_rules = ingress_spec[0]["from"]
+        assert len(from_rules) == len(expected_components)
+
+        for idx, component in enumerate(expected_components):
+            assert from_rules[idx] == {
+                "namespaceSelector": {},
+                "podSelector": {
+                    "matchLabels": {
+                        "component": component,
+                        "release": "release-name",
+                        "tier": "airflow",
+                    }
+                },
+            }
+
+    def test_webserver_startup_initialDelaySeconds_defaults(self, kube_version):
+        """Test initialDelaySeconds defaults."""
+        docs = render_chart(
+            kube_version=kube_version, show_only=["charts/airflow/templates/webserver/webserver-deployment.yaml"], values={}
+        )
+
+        assert len(docs) == 1
+        c_by_name = get_containers_by_name(docs[0])
+        assert c_by_name["webserver"]["startupProbe"]["initialDelaySeconds"] == 30
+
+    def test_webserver_expose_config(self, kube_version):
+        """Test that expose_config is set to non-sensitive-only."""
+        values = {
+            "airflow": {
+                "config": {
+                    "webserver": {
+                        "expose_config": "non-sensitive-only",
+                    }
+                },
+            }
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["charts/airflow/templates/configmaps/configmap.yaml"],
+            values=values,
+        )
+
+        assert len(docs) == 1
+        airflow_cfg = docs[0]["data"]["airflow.cfg"]
+        assert "expose_config = non-sensitive-only" in airflow_cfg
+
+    def test_apiServer_startup_initialDelaySeconds_defaults(self, kube_version):
+        """Test initialDelaySeconds defaults."""
+        values = {"airflow": {"airflowVersion": "3.0.0"}}
+        docs = render_chart(
+            kube_version=kube_version, show_only=["charts/airflow/templates/api-server/api-server-deployment.yaml"], values=values
+        )
+
+        assert len(docs) == 1
+        c_by_name = get_containers_by_name(docs[0])
+        assert c_by_name["api-server"]["startupProbe"]["initialDelaySeconds"] == 30

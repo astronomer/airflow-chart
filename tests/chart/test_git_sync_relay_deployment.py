@@ -1,9 +1,8 @@
 import pytest
 
-from tests import container_env_to_dict, git_root_dir, supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
-
-from . import get_containers_by_name
+from tests import git_root_dir, supported_k8s_versions
+from tests.utils import get_containers_by_name, get_env_vars_dict
+from tests.utils.chart import render_chart
 
 readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
 livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
@@ -42,12 +41,16 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
 
-        git_dameon_env = container_env_to_dict(c_by_name["git-daemon"])
+        git_dameon_env = get_env_vars_dict(c_by_name["git-daemon"].get("env"))
         assert not git_dameon_env.get("GIT_SYNC_REPO_FETCH_MODE")
         assert not git_dameon_env.get("GIT_SYNC_WEBHOOK_SECRET")
-        git_sync_env = container_env_to_dict(c_by_name["git-sync"])
+        git_sync_env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
         assert git_sync_env.get("GIT_SYNC_REPO_FETCH_MODE") == "poll"
         assert not git_sync_env.get("GIT_SYNC_WEBHOOK_SECRET")
+        spec = docs[0]["spec"]["template"]["spec"]
+        assert spec["nodeSelector"] == {}
+        assert spec["affinity"] == {}
+        assert spec["tolerations"] == []
 
     def test_gsr_deployment_gsr_repo_share_mode_volume(self, kube_version):
         """Test that a valid deployment is rendered when git-sync-relay is enabled with repoShareMode=shared_volume."""
@@ -110,25 +113,17 @@ class TestGitSyncRelayDeployment:
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-sync-home", "emptyDir": {}},
             {"name": "git-repo-contents", "emptyDir": {}},
-            {
-                "name": "git-secret",
-                "secret": {"secretName": "a-custom-secret-name"},
-            },
-            {
-                "name": "release-name-git-sync-config",
-                "configMap": {"name": "release-name-git-sync-config"},
-            },
+            {"name": "git-secret", "secret": {"secretName": "a-custom-secret-name"}},
+            {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
+            {"name": "tmp", "emptyDir": {}},
         ]
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-sync"]["volumeMounts"] == [
-            {
-                "name": "git-secret",
-                "mountPath": "/etc/git-secret/ssh",
-                "readOnly": True,
-                "subPath": "gitSshKey",
-            },
+            {"name": "git-sync-home", "mountPath": "/home/git-sync"},
+            {"name": "git-secret", "mountPath": "/etc/git-secret/ssh", "readOnly": True, "subPath": "gitSshKey"},
             {
                 "name": "release-name-git-sync-config",
                 "mountPath": "/etc/git-secret/known_hosts",
@@ -136,8 +131,9 @@ class TestGitSyncRelayDeployment:
                 "subPath": "known_hosts",
             },
             {"name": "git-repo-contents", "mountPath": "/git"},
+            {"name": "tmp", "mountPath": "/tmp"},  # noqa: S108
         ]
-        assert container_env_to_dict(c_by_name["git-sync"]) == {
+        assert get_env_vars_dict(c_by_name["git-sync"].get("env")) == {
             "GIT_SYNC_ROOT": "/git",
             "GIT_SYNC_REPO": "not-the-default-url",
             "GIT_SYNC_BRANCH": "not-the-default-branch",
@@ -179,18 +175,19 @@ class TestGitSyncRelayDeployment:
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 2
         assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-sync-home", "emptyDir": {}},
             {"name": "git-repo-contents", "emptyDir": {}},
-            {
-                "name": "release-name-git-sync-config",
-                "configMap": {"name": "release-name-git-sync-config"},
-            },
+            {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
+            {"name": "tmp", "emptyDir": {}},
         ]
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-sync"]["volumeMounts"] == [
+            {"name": "git-sync-home", "mountPath": "/home/git-sync"},
             {"name": "git-repo-contents", "mountPath": "/git"},
+            {"name": "tmp", "mountPath": "/tmp"},  # noqa: S108
         ]
-        assert container_env_to_dict(c_by_name["git-sync"]) == {
+        assert get_env_vars_dict(c_by_name["git-sync"].get("env")) == {
             "GIT_SYNC_ROOT": "/git",
             "GIT_SYNC_REPO": "not-the-default-url",
             "GIT_SYNC_BRANCH": "not-the-default-branch",
@@ -199,6 +196,68 @@ class TestGitSyncRelayDeployment:
             "GIT_SYNC_REPO_FETCH_MODE": "poll",
         }
         assert c_by_name["git-daemon"]["livenessProbe"]
+
+    def test_gsr_deployment_with_metrics_enabled(self, kube_version):
+        """Test that metrics env vars are set when gitSyncRelay.metrics.enabled is true."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "metrics": {"enabled": True},
+                "repo": {
+                    "url": "not-the-default-url",
+                    "branch": "not-the-default-branch",
+                    "depth": 22,
+                    "wait": 333,
+                    "subPath": "not-the-default-subPath",
+                },
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["apiVersion"] == "apps/v1"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        c_by_name = get_containers_by_name(doc)
+        git_sync_env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert git_sync_env["METRICS_ENABLED"] == "true"
+        assert git_sync_env["STATSD_HOST"] == "release-name-statsd"
+        assert git_sync_env["STATSD_PORT"] == "9125"
+        assert git_sync_env["DEBUG"] == "false"
+
+    def test_gsr_deployment_with_metrics_disabled(self, kube_version):
+        """Test that metrics env vars are absent when gitSyncRelay.metrics.enabled is false (default)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "not-the-default-url",
+                    "branch": "not-the-default-branch",
+                    "depth": 22,
+                    "wait": 333,
+                    "subPath": "not-the-default-subPath",
+                },
+            }
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        c_by_name = get_containers_by_name(doc)
+        git_sync_env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert "METRICS_ENABLED" not in git_sync_env
+        assert "STATSD_HOST" not in git_sync_env
+        assert "STATSD_PORT" not in git_sync_env
+        assert "DEBUG" not in git_sync_env
 
     def test_gsr_deployment_with_resource_overrides(self, kube_version):
         """Test that gitsync relay deployment are configurable with custom resource limits."""
@@ -230,7 +289,7 @@ class TestGitSyncRelayDeployment:
 
     def test_gsr_deployment_with_securitycontext_overrides(self, kube_version):
         """Test that gitsync  deployment are configurable with custom securitycontext."""
-        gsrsecuritycontext = {"runAsUser": 12345, "privileged": True}
+        gsrsecuritycontext = {"fsGroup": 65533, "runAsUser": 12345, "privileged": True}
         values = {"gitSyncRelay": {"enabled": True, "securityContext": gsrsecuritycontext}}
 
         docs = render_chart(
@@ -309,12 +368,13 @@ class TestGitSyncRelayDeployment:
         assert len(docs) == 1
         c_by_name = get_containers_by_name(docs[0])
         assert len(c_by_name) == 2
-        git_sync_env = container_env_to_dict(c_by_name["git-sync"])
+        git_sync_env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
         assert git_sync_env["GIT_SYNC_REPO_FETCH_MODE"] == "webhook"
         assert git_sync_env["GIT_SYNC_WEBHOOK_SECRET"] == "be sure to drink your ovaltine"
-        git_dameon_env = container_env_to_dict(c_by_name["git-daemon"])
+        git_dameon_env = get_env_vars_dict(c_by_name["git-daemon"].get("env"))
         assert not git_dameon_env.get("GIT_SYNC_REPO_FETCH_MODE")
         assert not git_dameon_env.get("GIT_SYNC_WEBHOOK_SECRET")
+        assert {"mountPath": "/tmp", "name": "tmp"} in c_by_name["git-sync"]["volumeMounts"]  # noqa: S108
 
     def test_git_sync_server_deployment_with_sidecar_and_authproxy_enabled(self, kube_version):
         """Test git sync server deployment with sidecar components."""
@@ -332,6 +392,19 @@ class TestGitSyncRelayDeployment:
         assert len(docs) == 1
         doc = docs[0]
 
+        assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-sync-home", "emptyDir": {}},
+            {"name": "git-repo-contents", "emptyDir": {}},
+            {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
+            {"name": "config-volume", "configMap": {"name": "release-name-sidecar-config"}},
+            {"name": "sidecar-logging-consumer", "emptyDir": {}},
+            {"name": "nginx-access-logs", "emptyDir": {}},
+            {"name": "nginx-sidecar-conf", "configMap": {"name": "release-name-git-sync-relay-nginx-conf"}},
+            {"name": "nginx-cache", "emptyDir": {}},
+            {"name": "nginx-tmp", "emptyDir": {}},
+            {"name": "tmp", "emptyDir": {}},
+        ]
+
         c_by_name = get_containers_by_name(doc)
         assert len(c_by_name) == 4
         assert "git-sync" in c_by_name
@@ -339,7 +412,84 @@ class TestGitSyncRelayDeployment:
         assert "auth-proxy" in c_by_name
         assert "sidecar-log-consumer" in c_by_name
         assert c_by_name["git-sync"]["command"] == ["bash"]
-        c_by_name["git-sync"]["args"] == [
+        assert c_by_name["git-sync"]["args"] == [
             "-c",
             "/entrypoint.sh 1> >( tee -a /var/log/sidecar-logging-consumer/out.log ) 2> >( tee -a /var/log/sidecar-logging-consumer/err.log >&2 )",
         ]
+
+        assert c_by_name["auth-proxy"]["volumeMounts"] == [
+            {"mountPath": "/var/lib/nginx/logs", "name": "nginx-access-logs"},
+            {"mountPath": "/etc/nginx/nginx.conf", "name": "nginx-sidecar-conf", "subPath": "nginx.conf"},
+            {"mountPath": "/var/cache/nginx", "name": "nginx-cache"},
+            {"mountPath": "/tmp", "name": "tmp"},  # noqa: S108
+            {"mountPath": "/var/lib/nginx/tmp", "name": "nginx-tmp"},
+        ]
+
+    def test_git_sync_service_account_with_template(self, kube_version):
+        """Test git-sync-relay service account with template."""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "gitSyncRelay": {
+                    "enabled": True,
+                    "serviceAccount": {
+                        "create": False,
+                        "name": "custom-{{ .Release.Name }}-dag-processor",
+                    },
+                },
+            },
+            show_only=[
+                "templates/git-sync-relay/git-sync-relay-deployment.yaml",
+                "templates/git-sync-relay/git-sync-relay-serviceaccount.yaml",
+            ],
+        )
+        assert len(docs) == 1
+        service_accounts = [sa for sa in docs if sa.get("kind") == "ServiceAccount"]
+        assert len(service_accounts) == 0
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+
+    def test_git_sync_relay_airflow_affinity(self, kube_version, airflow_node_pool_config):
+        """Test that git sync relay global airflow affinity, node pool and toleration configs."""
+        values = {
+            "airflow": {
+                "nodeSelector": airflow_node_pool_config["nodeSelector"],
+                "affinity": airflow_node_pool_config["affinity"],
+                "tolerations": airflow_node_pool_config["tolerations"],
+            },
+            "gitSyncRelay": {"enabled": True},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        spec = docs[0]["spec"]["template"]["spec"]
+        assert spec["affinity"] == airflow_node_pool_config["affinity"]
+        assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
+        assert spec["tolerations"] == airflow_node_pool_config["tolerations"]
+
+    def test_git_sync_relay_affinity(self, kube_version, airflow_node_pool_config):
+        """Test that git sync relay affinity, node pool and toleration configs."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "nodeSelector": airflow_node_pool_config["nodeSelector"],
+                "affinity": airflow_node_pool_config["affinity"],
+                "tolerations": airflow_node_pool_config["tolerations"],
+            },
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        spec = docs[0]["spec"]["template"]["spec"]
+        assert spec["affinity"] == airflow_node_pool_config["affinity"]
+        assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
+        assert spec["tolerations"] == airflow_node_pool_config["tolerations"]

@@ -2,7 +2,7 @@ import pytest
 import yaml
 
 from tests import supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
@@ -18,7 +18,7 @@ class TestStatsdConfigMap:
         assert doc["kind"] == "ConfigMap"
         assert doc["apiVersion"] == "v1"
         yml = yaml.safe_load(doc["data"]["mappings.yml"])
-        assert len(yml["mappings"]) == 19
+        assert len(yml["mappings"]) == 42
         assert yml["mappings"][-1] == {
             "action": "drop",
             "match": ".",

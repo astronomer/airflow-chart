@@ -1,0 +1,42 @@
+##################################################
+## Airflow API Server execution network Policy ##
+#################################################
+{{- if and .Values.airflow.networkPolicies.enabled (semverCompare ">=3.0.0" .Values.airflow.airflowVersion) }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-api-server-execution-policy
+  labels:
+    tier: airflow
+    component: api-server
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  podSelector:
+    matchLabels:
+      tier: airflow
+      component: api-server
+      release: {{ .Release.Name }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+{{- if eq .Values.airflow.executor "LocalExecutor"}}
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          component: scheduler
+          release: {{ .Release.Name }}
+          tier: airflow
+{{- end}}
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          component: worker
+          release: {{ .Release.Name }}
+          tier: airflow
+    ports:
+    - protocol: TCP
+      port: {{ .Values.airflow.ports.apiServer}}
+{{- end -}}

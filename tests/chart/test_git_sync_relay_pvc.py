@@ -1,5 +1,5 @@
 from tests import git_root_dir
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 
 def test_gsr_pvc_defaults():

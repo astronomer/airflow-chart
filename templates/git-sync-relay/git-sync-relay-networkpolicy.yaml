@@ -65,7 +65,7 @@ spec:
           "kubernetes.io/metadata.name": {{ .Values.platform.namespace }}
       podSelector:
         matchLabels:
-          component: ingress-controller
+          component: {{ ternary "dp-ingress-controller" "cp-ingress-controller" (eq .Values.platform.mode "data") }}
           release: {{ .Values.platform.release }}
           tier: nginx
     {{ end }}

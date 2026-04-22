@@ -4,7 +4,7 @@ from subprocess import CalledProcessError
 import pytest
 
 from tests import supported_k8s_versions
-from tests.chart.helm_template_generator import render_chart
+from tests.utils.chart import render_chart
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)

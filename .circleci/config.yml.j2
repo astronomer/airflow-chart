@@ -85,7 +85,7 @@ jobs:
 
   lint:
     docker:
-      - image: alpine/helm:3.13.3
+      - image: alpine/helm:3.19.0
     steps:
       - checkout
       - run:
@@ -107,7 +107,7 @@ jobs:
             make venv
             make charts
             TEST_FILES=$(circleci tests glob "tests/chart/test_*.py" | circleci tests split --split-by=timings)
-            venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml $TEST_FILES
+            .venv/bin/python -m pytest -n auto -v --junitxml=test-results/junit.xml $TEST_FILES
       - store_test_results:
           path: test-results
 
@@ -128,6 +128,7 @@ jobs:
     machine:
       # https://circleci.com/developer/machine/image/ubuntu-2204
       image: {{ machine_image_version }}
+      # https://circleci.com/docs/reference/configuration-reference/#docker-execution-environment
       resource_class: large
     parameters:
       executor:
