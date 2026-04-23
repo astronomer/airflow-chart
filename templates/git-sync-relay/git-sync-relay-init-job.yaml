@@ -3,6 +3,21 @@
 ###################################################
 {{- if and .Values.gitSyncRelay.enabled (eq .Values.gitSyncRelay.repoShareMode "shared_volume") }}
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-git-sync-relay-init
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook-weight": "3"
+  labels:
+    component: git-sync-relay
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -30,7 +45,7 @@ spec:
         - name: {{ template "astro.registry_secret" . }}
       {{- end }}
       restartPolicy: Never
-      serviceAccountName: {{ template "astro.gitSyncRelay.serviceAccountName" . }}
+      serviceAccountName: {{ .Release.Name }}-git-sync-relay-init
       securityContext: {{- toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
       volumes:
         - name: git-sync-home
