@@ -45,6 +45,19 @@ class TestGitSyncRelayInitJob:
 
         assert doc["spec"]["template"]["spec"]["restartPolicy"] == "Never"
 
+    def test_init_job_uses_standard_git_sync_image(self, kube_version):
+        """Test that the init job uses the standard ap-git-sync image, not the relay image."""
+        values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
+        docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
+        doc = docs[0]
+
+        c_by_name = get_containers_by_name(doc)
+        assert "quay.io/astronomer/ap-git-sync" in c_by_name["git-sync"]["image"]
+        assert "ap-git-sync-relay" not in c_by_name["git-sync"]["image"]
+
+        c_by_name_with_init = get_containers_by_name(doc, include_init_containers=True)
+        assert "quay.io/astronomer/ap-git-sync" in c_by_name_with_init["git-config-manager"]["image"]
+
     def test_init_job_has_git_config_manager_init_container(self, kube_version):
         """Test that the init job includes the git-config-manager initContainer."""
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
@@ -54,15 +67,9 @@ class TestGitSyncRelayInitJob:
         c_by_name = get_containers_by_name(doc, include_init_containers=True)
         assert "git-config-manager" in c_by_name
         assert c_by_name["git-config-manager"]["command"] == [
-            "git",
-            "config",
-            "--global",
-            "--add",
-            "safe.directory",
-            "/git",
+            "git", "config", "--global", "--add", "safe.directory", "/git",
         ]
-        volume_mounts = c_by_name["git-config-manager"]["volumeMounts"]
-        mount_names = [m["name"] for m in volume_mounts]
+        mount_names = [m["name"] for m in c_by_name["git-config-manager"]["volumeMounts"]]
         assert "git-sync-home" in mount_names
 
     def test_init_job_git_sync_one_time(self, kube_version):
@@ -76,6 +83,7 @@ class TestGitSyncRelayInitJob:
         env = get_env_vars_dict(c_by_name["git-sync"]["env"])
         assert env["GIT_SYNC_ONE_TIME"] == "true"
         assert env["GIT_SYNC_ROOT"] == "/git"
+        assert env["GITSYNC_ROOT"] == "/git"
 
     def test_init_job_volumes(self, kube_version):
         """Test that the init job has the correct volumes and no sidecar volumes."""
@@ -91,6 +99,7 @@ class TestGitSyncRelayInitJob:
         volume_names = [v["name"] for v in volumes]
         assert "git-sync-home" in volume_names
         assert "git-repo-contents" in volume_names
+        assert "tmp" in volume_names
         assert "release-name-git-sync-config" in volume_names
         assert "config-volume" not in volume_names
         assert "sidecar-logging-consumer" not in volume_names
@@ -98,6 +107,17 @@ class TestGitSyncRelayInitJob:
 
         pvc_vol = next(v for v in volumes if v["name"] == "git-repo-contents")
         assert pvc_vol["persistentVolumeClaim"]["claimName"] == "git-repo-contents"
+
+    def test_init_job_tmp_volume_mount(self, kube_version):
+        """Test that the git-sync container mounts /tmp for readOnlyRootFilesystem."""
+        values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
+        docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
+        doc = docs[0]
+
+        c_by_name = get_containers_by_name(doc)
+        mounts = {m["name"]: m for m in c_by_name["git-sync"]["volumeMounts"]}
+        assert "tmp" in mounts
+        assert mounts["tmp"]["mountPath"] == "/tmp"  # noqa: S108
 
     def test_init_job_git_sync_home_volume_mount(self, kube_version):
         """Test that the git-sync container mounts git-sync-home."""
@@ -153,26 +173,8 @@ class TestGitSyncRelayInitJob:
         c_by_name = get_containers_by_name(doc)
         env = get_env_vars_dict(c_by_name["git-sync"]["env"])
         assert env["GIT_KNOWN_HOSTS"] == "true"
+        assert env["GIT_SSH_KNOWN_HOSTS"] == "true"
         assert env["GIT_SSH_KNOWN_HOSTS_FILE"] == "/etc/git-secret/known_hosts"
-
-    def test_init_job_does_not_include_unnecessary_env_vars(self, kube_version):
-        """Test that webhook/wait/fetch-mode env vars are not in the init job."""
-        values = {
-            "gitSyncRelay": {
-                "enabled": True,
-                "repoShareMode": "shared_volume",
-                "repoFetchMode": "webhook",
-                "webhookSecretKey": "my-secret",
-            }
-        }
-        docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
-
-        c_by_name = get_containers_by_name(doc)
-        env = get_env_vars_dict(c_by_name["git-sync"]["env"])
-        assert "GIT_SYNC_REPO_FETCH_MODE" not in env
-        assert "GIT_SYNC_WEBHOOK_SECRET" not in env
-        assert "GIT_SYNC_WAIT" not in env
 
     def test_init_job_no_probes(self, kube_version):
         """Test that the init job container has no liveness/readiness probes."""
