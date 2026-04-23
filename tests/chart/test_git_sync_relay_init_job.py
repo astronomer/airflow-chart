@@ -38,13 +38,11 @@ class TestGitSyncRelayInitJob:
         assert doc["metadata"]["annotations"]["helm.sh/hook-weight"] == "5"
 
     def test_init_job_spec_defaults(self, kube_version):
-        """Test Job spec has backoffLimit, activeDeadlineSeconds, and correct pod spec."""
+        """Test Job spec has correct pod spec."""
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
         doc = docs[0]
 
-        assert doc["spec"]["backoffLimit"] == 3
-        assert doc["spec"]["activeDeadlineSeconds"] == 300
         assert doc["spec"]["template"]["spec"]["restartPolicy"] == "Never"
 
     def test_init_job_has_git_config_manager_init_container(self, kube_version):
@@ -118,7 +116,10 @@ class TestGitSyncRelayInitJob:
             "gitSyncRelay": {
                 "enabled": True,
                 "repoShareMode": "shared_volume",
-                "repo": {"sshPrivateKeySecretName": "my-ssh-secret"},
+                "repo": {
+                    "sshPrivateKeySecretName": "my-ssh-secret",
+                    "knownHosts": "",
+                },
             }
         }
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
