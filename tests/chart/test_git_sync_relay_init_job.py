@@ -27,8 +27,8 @@ class TestGitSyncRelayInitJob:
         """Test that the init job is rendered when gitSyncRelay is enabled with shared_volume mode."""
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        assert len(docs) == 1
-        doc = docs[0]
+        assert len(docs) == 2
+        doc = docs[1]
 
         assert doc["kind"] == "Job"
         assert doc["apiVersion"] == "batch/v1"
@@ -41,7 +41,7 @@ class TestGitSyncRelayInitJob:
         """Test Job spec has correct pod spec."""
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
+        doc = docs[1]
 
         assert doc["spec"]["template"]["spec"]["restartPolicy"] == "Never"
 
@@ -49,7 +49,7 @@ class TestGitSyncRelayInitJob:
         """Test that the init job uses the standard ap-git-sync image, not the relay image."""
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
+        doc = docs[1]
 
         c_by_name = get_containers_by_name(doc)
         assert "quay.io/astronomer/ap-git-sync" in c_by_name["git-sync"]["image"]
@@ -62,7 +62,7 @@ class TestGitSyncRelayInitJob:
         """Test that the init job includes the git-config-manager initContainer."""
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
+        doc = docs[1]
 
         c_by_name = get_containers_by_name(doc, include_init_containers=True)
         assert "git-config-manager" in c_by_name
@@ -81,7 +81,7 @@ class TestGitSyncRelayInitJob:
         """Test that GIT_SYNC_ONE_TIME is set so the job terminates after one sync."""
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
+        doc = docs[1]
 
         c_by_name = get_containers_by_name(doc)
         assert "git-sync" in c_by_name
@@ -97,7 +97,7 @@ class TestGitSyncRelayInitJob:
             "authSidecar": {"enabled": True},
         }
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
+        doc = docs[1]
 
         volumes = doc["spec"]["template"]["spec"]["volumes"]
         volume_names = [v["name"] for v in volumes]
@@ -116,7 +116,7 @@ class TestGitSyncRelayInitJob:
         """Test that the git-sync container mounts /tmp for readOnlyRootFilesystem."""
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
+        doc = docs[1]
 
         c_by_name = get_containers_by_name(doc)
         mounts = {m["name"]: m for m in c_by_name["git-sync"]["volumeMounts"]}
@@ -127,7 +127,7 @@ class TestGitSyncRelayInitJob:
         """Test that the git-sync container mounts git-sync-home."""
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
+        doc = docs[1]
 
         c_by_name = get_containers_by_name(doc)
         mount_names = [m["name"] for m in c_by_name["git-sync"]["volumeMounts"]]
@@ -147,7 +147,7 @@ class TestGitSyncRelayInitJob:
             }
         }
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
+        doc = docs[1]
 
         volumes = doc["spec"]["template"]["spec"]["volumes"]
         volume_names = [v["name"] for v in volumes]
@@ -172,7 +172,7 @@ class TestGitSyncRelayInitJob:
             }
         }
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
+        doc = docs[1]
 
         c_by_name = get_containers_by_name(doc)
         env = get_env_vars_dict(c_by_name["git-sync"]["env"])
@@ -183,17 +183,24 @@ class TestGitSyncRelayInitJob:
         """Test that the init job container has no liveness/readiness probes."""
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
+        doc = docs[1]
 
         c_by_name = get_containers_by_name(doc)
         assert "livenessProbe" not in c_by_name["git-sync"]
         assert "readinessProbe" not in c_by_name["git-sync"]
 
-    def test_init_job_uses_service_account_template(self, kube_version):
-        """Test that the init job uses the gitSyncRelay serviceAccountName template."""
+    def test_init_job_has_dedicated_hook_service_account(self, kube_version):
+        """Test that a hook SA is created before the Job and the Job references it."""
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
-        doc = docs[0]
+        assert len(docs) == 2
 
-        sa_name = doc["spec"]["template"]["spec"]["serviceAccountName"]
-        assert sa_name == "release-name-git-sync-relay"
+        sa_doc = docs[0]
+        assert sa_doc["kind"] == "ServiceAccount"
+        assert sa_doc["metadata"]["name"] == "release-name-git-sync-relay-init"
+        assert sa_doc["metadata"]["annotations"]["helm.sh/hook"] == "pre-install,pre-upgrade"
+        assert sa_doc["metadata"]["annotations"]["helm.sh/hook-weight"] == "3"
+
+        job_doc = docs[1]
+        assert job_doc["kind"] == "Job"
+        assert job_doc["spec"]["template"]["spec"]["serviceAccountName"] == "release-name-git-sync-relay-init"
