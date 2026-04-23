@@ -67,7 +67,12 @@ class TestGitSyncRelayInitJob:
         c_by_name = get_containers_by_name(doc, include_init_containers=True)
         assert "git-config-manager" in c_by_name
         assert c_by_name["git-config-manager"]["command"] == [
-            "git", "config", "--global", "--add", "safe.directory", "/git",
+            "git",
+            "config",
+            "--global",
+            "--add",
+            "safe.directory",
+            "/git",
         ]
         mount_names = [m["name"] for m in c_by_name["git-config-manager"]["volumeMounts"]]
         assert "git-sync-home" in mount_names
