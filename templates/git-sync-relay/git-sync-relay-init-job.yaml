@@ -38,6 +38,8 @@ spec:
         - name: git-repo-contents
           persistentVolumeClaim:
             claimName: git-repo-contents
+        - name: tmp
+          emptyDir: {}
         {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
         - name: git-secret
           secret:
@@ -49,19 +51,23 @@ spec:
       initContainers:
         - name: git-config-manager
           command: ["git", "config", "--global", "--add", "safe.directory", "/git"]
-          image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
-          securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 12 }}
+          image: "{{ .Values.airflow.images.gitSync.repository }}:{{ .Values.airflow.images.gitSync.tag }}"
+          securityContext:
+            readOnlyRootFilesystem: true
           volumeMounts:
             - name: git-sync-home
               mountPath: /home/git-sync
           resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
       containers:
         - name: git-sync
-          image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
-          securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 12 }}
+          image: "{{ .Values.airflow.images.gitSync.repository }}:{{ .Values.airflow.images.gitSync.tag }}"
+          securityContext:
+            readOnlyRootFilesystem: true
           volumeMounts:
             - name: git-sync-home
               mountPath: /home/git-sync
+            - name: tmp
+              mountPath: /tmp
             {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: git-secret
               mountPath: /etc/git-secret/ssh
