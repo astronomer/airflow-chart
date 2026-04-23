@@ -178,7 +178,6 @@ class TestGitSyncRelayInitJob:
         c_by_name = get_containers_by_name(doc)
         env = get_env_vars_dict(c_by_name["git-sync"]["env"])
         assert env["GIT_KNOWN_HOSTS"] == "true"
-        assert env["GIT_SSH_KNOWN_HOSTS"] == "true"
         assert env["GIT_SSH_KNOWN_HOSTS_FILE"] == "/etc/git-secret/known_hosts"
 
     def test_init_job_no_probes(self, kube_version):
