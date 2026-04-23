@@ -1,12 +1,12 @@
-###########################################
-## Pgbouncer SSL Pre install/update Hook ##
-###########################################
-{{- if and .Values.gitSyncRelay.enabled ( eq .Values.gitSyncRelay.repoShareMode "shared_volume" ) }}
+###################################################
+## git-sync-relay Pre install/upgrade Init Hook  ##
+###################################################
+{{- if and .Values.gitSyncRelay.enabled (eq .Values.gitSyncRelay.repoShareMode "shared_volume") }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-git-sync-relay-job
+  name: {{ .Release.Name }}-git-sync-relay-init
   labels:
     component: git-sync-relay
     tier: airflow
@@ -24,22 +24,20 @@ spec:
         component: git-sync-relay
         tier: airflow
         release: {{ .Release.Name }}
-        chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
-        heritage: {{ .Release.Service }}
     spec:
       {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
       imagePullSecrets:
         - name: {{ template "astro.registry_secret" . }}
       {{- end }}
       restartPolicy: Never
-      serviceAccountName: "default"
-      securityContext: {{ toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
+      serviceAccountName: {{ template "astro.gitSyncRelay.serviceAccountName" . }}
+      securityContext: {{- toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
       volumes:
+        - name: git-sync-home
+          emptyDir: {}
         - name: git-repo-contents
-        {{- if eq .Values.gitSyncRelay.repoShareMode "shared_volume" }}
           persistentVolumeClaim:
             claimName: git-repo-contents
-        {{- end }}
         {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
         - name: git-secret
           secret:
@@ -48,22 +46,22 @@ spec:
         - name: {{ .Release.Name }}-git-sync-config
           configMap:
             name: {{ .Release.Name }}-git-sync-config
-        {{- if .Values.loggingSidecar.enabled }}
-        - name: config-volume
-          configMap:
-            name: {{ .Release.Name }}-sidecar-config
-        - emptyDir: {}
-          name: sidecar-logging-consumer
-        {{- end }}
-        {{- if and .Values.authSidecar.enabled (eq .Values.gitSyncRelay.repoFetchMode "webhook") }}
-        - name: nginx-sidecar-conf
-          configMap:
-            name: {{ .Release.Name }}-git-sync-relay-nginx-conf
-        {{- end }}
-      containers:
-        - name: "git-sync"
+      initContainers:
+        - name: git-config-manager
+          command: ["git", "config", "--global", "--add", "safe.directory", "/git"]
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+          securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 12 }}
           volumeMounts:
+            - name: git-sync-home
+              mountPath: /home/git-sync
+          resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
+      containers:
+        - name: git-sync
+          image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+          securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: git-sync-home
+              mountPath: /home/git-sync
             {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: git-secret
               mountPath: /etc/git-secret/ssh
@@ -79,6 +77,8 @@ spec:
             - name: git-repo-contents
               mountPath: /git
           env:
+            - name: GIT_SYNC_ONE_TIME
+              value: "true"
             - name: GIT_SYNC_ROOT
               value: "/git"
             - name: GIT_SYNC_REPO
@@ -87,16 +87,6 @@ spec:
               value: "{{ .Values.gitSyncRelay.repo.branch }}"
             - name: GIT_SYNC_DEPTH
               value: "{{ .Values.gitSyncRelay.repo.depth }}"
-            - name: GIT_SYNC_WAIT
-              value: "{{ .Values.gitSyncRelay.repo.wait }}"
-            {{- if .Values.gitSyncRelay.repoFetchMode }}
-            - name: GIT_SYNC_REPO_FETCH_MODE
-              value: "{{ .Values.gitSyncRelay.repoFetchMode }}"
-            {{- end }}
-            {{- if .Values.gitSyncRelay.webhookSecretKey }}
-            - name: GIT_SYNC_WEBHOOK_SECRET
-              value: "{{ .Values.gitSyncRelay.webhookSecretKey }}"
-            {{- end }}
             {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: GIT_SYNC_SSH
               value: "true"
@@ -112,12 +102,5 @@ spec:
               value: "false"
             {{- end }}
             {{- end }}
-          {{- if .Values.gitSyncRelay.gitSync.livenessProbe  }}
-          livenessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitSync.livenessProbe) . | nindent 12 }}
-          {{- end }}
-          {{- if .Values.gitSyncRelay.gitSync.readinessProbe  }}
-          readinessProbe: {{ tpl (toYaml .Values.gitSyncRelay.gitSync.readinessProbe) . | nindent 12 }}
-          {{- end }}
           resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
-
-{{ end }}
+{{- end }}
