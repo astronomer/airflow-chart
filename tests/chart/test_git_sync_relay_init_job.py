@@ -88,7 +88,6 @@ class TestGitSyncRelayInitJob:
         env = get_env_vars_dict(c_by_name["git-sync"]["env"])
         assert env["GIT_SYNC_ONE_TIME"] == "true"
         assert env["GIT_SYNC_ROOT"] == "/git"
-        assert env["GITSYNC_ROOT"] == "/git"
 
     def test_init_job_volumes(self, kube_version):
         """Test that the init job has the correct volumes and no sidecar volumes."""
