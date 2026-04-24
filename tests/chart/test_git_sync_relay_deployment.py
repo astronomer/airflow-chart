@@ -66,17 +66,18 @@ class TestGitSyncRelayDeployment:
             kube_version=kube_version,
             show_only=[
                 "templates/git-sync-relay/git-sync-relay-deployment.yaml",
-                "templates/git-sync-relay/git-sync-relay-pvc.yaml",
+                "templates/git-sync-relay/git-sync-relay-init-job.yaml",
             ],
             values=values,
         )
-        assert len(docs) == 2
-        deployment, pvc = docs if docs[0]["kind"] == "Deployment" else docs[::-1]
-        assert deployment["kind"] == "Deployment"
+        deployment_docs = [d for d in docs if d["kind"] == "Deployment"]
+        pvc_docs = [d for d in docs if d["kind"] == "PersistentVolumeClaim"]
+        assert len(deployment_docs) == 1
+        assert len(pvc_docs) == 1
+        deployment = deployment_docs[0]
+        pvc = pvc_docs[0]
         assert deployment["apiVersion"] == "apps/v1"
         assert deployment["metadata"]["name"] == "release-name-git-sync-relay"
-        assert pvc["kind"] == "PersistentVolumeClaim"
-        assert pvc["kind"] == "PersistentVolumeClaim"
         assert pvc["spec"]["storageClassName"] == "my-usb-thumb-drive"
         c_by_name = get_containers_by_name(deployment)
         assert not c_by_name.get("git-daemon")
