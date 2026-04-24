@@ -135,6 +135,8 @@ spec:
               value: "{{ .Values.gitSyncRelay.repo.branch }}"
             - name: GIT_SYNC_DEPTH
               value: "{{ .Values.gitSyncRelay.repo.depth }}"
+            - name: GIT_SYNC_SYNC_TIMEOUT
+              value: "{{ .Values.gitSyncRelay.repo.gitSyncTimeout }}"
             {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: GIT_SYNC_SSH
               value: "true"
