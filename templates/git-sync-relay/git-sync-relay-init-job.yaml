@@ -4,6 +4,28 @@
 {{- if and .Values.gitSyncRelay.enabled (eq .Values.gitSyncRelay.repoShareMode "shared_volume") }}
 ---
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: git-repo-contents
+  annotations:
+    "helm.sh/hook": "pre-install"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook-weight": "1"
+  labels:
+    component: git-sync-relay
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.gitSyncRelay.volumeSync.volumeSize }}
+  storageClassName: {{ .Values.gitSyncRelay.volumeSync.storageClassName }}
+---
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .Release.Name }}-git-sync-relay-init
@@ -60,9 +82,11 @@ spec:
           secret:
             secretName: {{ .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
         {{- end }}
+        {{- if .Values.gitSyncRelay.repo.knownHosts }}
         - name: {{ .Release.Name }}-git-sync-config
           configMap:
             name: {{ .Release.Name }}-git-sync-config
+        {{- end }}
       initContainers:
         - name: git-config-manager
           command: ["git", "config", "--global", "--add", "safe.directory", "/git"]
