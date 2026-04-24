@@ -93,6 +93,9 @@ spec:
           image: "{{ .Values.airflow.images.gitSync.repository }}:{{ .Values.airflow.images.gitSync.tag }}"
           securityContext:
             readOnlyRootFilesystem: true
+          env:
+            - name: HOME
+              value: /home/git-sync
           volumeMounts:
             - name: git-sync-home
               mountPath: /home/git-sync
