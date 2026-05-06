@@ -479,3 +479,16 @@ proxy_buffering on;
 {{- end }}
 proxy_set_header            Cookie                  $http_cookie;
 {{- end -}}
+
+{{/*
+git-sync-relay pod-level securityContext
+Strips fsGroup and runAsUser on OpenShift to comply with restricted-v2 SCC.
+*/}}
+{{- define "gitSyncRelay.podSecurityContext" -}}
+{{- if .Values.global.openshiftEnabled }}
+{{- $required := dict "runAsNonRoot" true }}
+{{- merge $required (omit (.Values.gitSyncRelay.securityContext | default dict) "runAsUser" "fsGroup") | toYaml }}
+{{- else }}
+{{- toYaml (.Values.gitSyncRelay.securityContext | default dict) }}
+{{- end -}}
+{{- end }}
