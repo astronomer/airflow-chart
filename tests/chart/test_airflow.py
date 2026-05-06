@@ -77,12 +77,10 @@ class TestAirflow:
             values=values,
         )
         assert len(docs) == 1
-        #assert "initContainers" in docs[0]["spec"]["template"]["spec"]
-        print(docs[0]["spec"]["template"])
-        assert True
-        #c_by_name = get_containers_by_name(docs[0], include_init_containers=True)
-        #assert "usr-local-airflow-copier" in c_by_name
-        #assert c_by_name["usr-local-airflow-copier"]["securityContext"]["readOnlyRootFilesystem"] is True
+        assert "initContainers" in docs[0]["spec"]["template"]["spec"]
+        c_by_name = get_containers_by_name(docs[0], include_init_containers=True)
+        assert "usr-local-airflow-copier" in c_by_name
+        assert c_by_name["usr-local-airflow-copier"]["securityContext"]["readOnlyRootFilesystem"] is True
 
     @pytest.mark.parametrize(
         "executor, expected_components",

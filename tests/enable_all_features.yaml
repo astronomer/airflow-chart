@@ -8,7 +8,7 @@ airflow:
           - ALL
   flower:
     enabled: true
-    preAirflowExtraInitContainers: 
+    preAirflowExtraInitContainers:
       - command:
           - sh
           - -c
