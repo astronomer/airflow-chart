@@ -308,7 +308,7 @@ class TestGitSyncRelayDeployment:
         """Test that fsGroup and runAsUser are stripped from pod securityContext when OpenShift is enabled,
         even if a customer explicitly sets them."""
         values = {
-            "global": {"openshiftEnabled": True},
+            "openshift": {"enabled": True},
             "gitSyncRelay": {
                 "enabled": True,
                 "securityContext": {
@@ -340,7 +340,7 @@ class TestGitSyncRelayDeployment:
         """Test that fsGroup and runAsUser are preserved in pod securityContext when OpenShift is disabled."""
         gsrsecuritycontext = {"fsGroup": 65533, "runAsUser": 50000, "runAsNonRoot": True}
         values = {
-            "global": {"openshiftEnabled": False},
+            "openshift": {"enabled": False},
             "gitSyncRelay": {
                 "enabled": True,
                 "securityContext": gsrsecuritycontext,
