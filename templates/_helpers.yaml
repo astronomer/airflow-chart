@@ -485,7 +485,7 @@ git-sync-relay pod-level securityContext
 Strips fsGroup and runAsUser on OpenShift to comply with restricted-v2 SCC.
 */}}
 {{- define "gitSyncRelay.podSecurityContext" -}}
-{{- if .Values.global.openshiftEnabled }}
+{{- if .Values.openshift.enabled }}
 {{- $required := dict "runAsNonRoot" true }}
 {{- merge $required (omit (.Values.gitSyncRelay.securityContext | default dict) "runAsUser" "fsGroup") | toYaml }}
 {{- else }}
