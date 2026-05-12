@@ -655,6 +655,9 @@ airflow:
 # Enable security context constraints required for OpenShift
 sccEnabled: false
 
+openshift:
+  enabled: false
+
 # Extra objects to deploy (these are passed through `tpl`)
 extraObjects: []
 
