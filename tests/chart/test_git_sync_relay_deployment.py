@@ -304,6 +304,62 @@ class TestGitSyncRelayDeployment:
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
         assert gsrsecuritycontext == doc["spec"]["template"]["spec"]["securityContext"]
 
+    def test_gsr_deployment_openshift_strips_incompatible_security_context(self, kube_version):
+        """Test that fsGroup and runAsUser are stripped from pod securityContext when OpenShift is enabled,
+        even if a customer explicitly sets them."""
+        values = {
+            "openshift": {"enabled": True},
+            "gitSyncRelay": {
+                "enabled": True,
+                "securityContext": {
+                    "fsGroup": 65533,
+                    "runAsUser": 50000,
+                    "runAsNonRoot": True,
+                },
+            },
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        pod_security_context = doc["spec"]["template"]["spec"]["securityContext"]
+
+        # fsGroup and runAsUser must be absent on OpenShift
+        assert "fsGroup" not in pod_security_context
+        assert "runAsUser" not in pod_security_context
+
+        # runAsNonRoot must be preserved/enforced
+        assert pod_security_context["runAsNonRoot"] is True
+
+    def test_gsr_deployment_non_openshift_preserves_security_context(self, kube_version):
+        """Test that fsGroup and runAsUser are preserved in pod securityContext when OpenShift is disabled."""
+        gsrsecuritycontext = {"fsGroup": 65533, "runAsUser": 50000, "runAsNonRoot": True}
+        values = {
+            "openshift": {"enabled": False},
+            "gitSyncRelay": {
+                "enabled": True,
+                "securityContext": gsrsecuritycontext,
+            },
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        pod_security_context = doc["spec"]["template"]["spec"]["securityContext"]
+
+        assert pod_security_context["fsGroup"] == 65533
+        assert pod_security_context["runAsUser"] == 50000
+        assert pod_security_context["runAsNonRoot"] is True
+
     def test_gsr_deployment_with_custom_registry_secret(self, kube_version):
         """Test git-sync-relay deployment with custom registry secret."""
         values = {

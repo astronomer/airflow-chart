@@ -42,7 +42,7 @@ spec:
       tolerations: {{- toYaml $tolerations | nindent 8 }}
       terminationGracePeriodSeconds: {{ .Values.gitSyncRelay.terminationGracePeriodSeconds }}
       serviceAccountName: {{ template "astro.gitSyncRelay.serviceAccountName" . }}
-      securityContext: {{- toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
+      securityContext: {{- include "gitSyncRelay.podSecurityContext" . | nindent 8 }}
       volumes:
         - name: git-sync-home
           emptyDir: {}
