@@ -492,3 +492,16 @@ Strips fsGroup and runAsUser on OpenShift to comply with restricted-v2 SCC.
 {{- toYaml (.Values.gitSyncRelay.securityContext | default dict) }}
 {{- end -}}
 {{- end }}
+
+{{/*
+dag-deploy pod-level securityContext
+Strips fsGroup and runAsUser on OpenShift to comply with restricted-v2 SCC.
+*/}}
+{{- define "dagDeploy.podSecurityContext" -}}
+{{- if .Values.openshift.enabled }}
+{{- $required := dict "runAsNonRoot" true }}
+{{- merge $required (omit (.Values.dagDeploy.securityContexts.pod | default dict) "runAsUser" "fsGroup") | toYaml }}
+{{- else }}
+{{- toYaml (.Values.dagDeploy.securityContexts.pod | default dict) }}
+{{- end -}}
+{{- end }}
