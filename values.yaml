@@ -818,7 +818,8 @@ dagDeploy:
   safeToEvict: true
 
   securityContexts:
-    pod: {}
+    pod:
+      runAsUser: 50000
     container: {}
 
   flower:
