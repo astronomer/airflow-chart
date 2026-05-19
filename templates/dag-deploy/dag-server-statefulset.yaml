@@ -18,6 +18,9 @@ metadata:
     {{- with .Values.labels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
+  {{- if .Values.dagDeploy.annotations }}
+  annotations: {{- toYaml .Values.dagDeploy.annotations | nindent 4 }}
+  {{- end }}
 spec:
   {{- if and .Values.dagDeploy.persistence.enabled .Values.dagDeploy.persistence.persistentVolumeClaimRetentionPolicy }}
   persistentVolumeClaimRetentionPolicy: {{- toYaml .Values.dagDeploy.persistence.persistentVolumeClaimRetentionPolicy  | nindent 4 }}
@@ -40,6 +43,9 @@ spec:
         {{- with .Values.labels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- if .Values.dagDeploy.podAnnotations }}
+      annotations: {{- toYaml .Values.dagDeploy.podAnnotations | nindent 8 }}
+      {{- end }}
     spec:
       {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
       imagePullSecrets:
