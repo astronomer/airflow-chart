@@ -56,7 +56,7 @@ spec:
       tolerations: {{- toYaml $tolerations | nindent 8 }}
       terminationGracePeriodSeconds: {{ .Values.dagDeploy.terminationGracePeriodSeconds }}
       serviceAccountName: {{ template "astro.dagDeploy.serviceAccountName" . }}
-      securityContext: {{- toYaml .Values.dagDeploy.securityContexts.pod | nindent 8 }}
+      securityContext: {{- include "dagDeploy.podSecurityContext" . | nindent 8 }}
       containers:
         - name: dag-server
           image: "{{ .Values.dagDeploy.images.dagServer.repository }}:{{ .Values.dagDeploy.images.dagServer.tag }}"
