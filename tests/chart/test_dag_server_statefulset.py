@@ -56,6 +56,8 @@ class TestDagServerStatefulSet:
         common_default_tests(doc)
 
         assert "persistentVolumeClaimRetentionPolicy" not in doc["spec"]
+        assert "annotations" not in doc["metadata"]
+        assert "annotations" not in doc["spec"]["template"]["metadata"]
         spec = docs[0]["spec"]["template"]["spec"]
         assert spec["nodeSelector"] == {}
         assert spec["affinity"] == {}
@@ -417,3 +419,23 @@ class TestDagServerStatefulSet:
         spec = docs[0]["spec"]["template"]["spec"]
         assert values["dagDeploy"]["extraVolumes"][0] in spec["volumes"]
         assert values["dagDeploy"]["extraVolumeMounts"][0] in spec["containers"][0]["volumeMounts"]
+
+    def test_dag_server_annotations_overrides(self, kube_version):
+        """Test that dagDeploy annotations are set when dagDeploy.annotations when passed."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
+            values={"dagDeploy": {"enabled": True, "annotations": {"example.com/owner": "platform"}}},
+        )
+        assert len(docs) == 1
+        assert docs[0]["metadata"]["annotations"] == {"example.com/owner": "platform"}
+
+    def test_dag_server_pod_annotations_overrides(self, kube_version):
+        """Test that dagDeploy podAnnotations are set when dagDeploy.podAnnotations when passed."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
+            values={"dagDeploy": {"enabled": True, "podAnnotations": {"sidecar.istio.io/inject": "false"}}},
+        )
+        assert len(docs) == 1
+        assert docs[0]["spec"]["template"]["metadata"]["annotations"] == {"sidecar.istio.io/inject": "false"}
