@@ -783,6 +783,7 @@ dagDeploy:
   readinessProbe: {}
   terminationGracePeriodSeconds: 30
   podAnnotations: {}
+  annotations: {}
   extraEnv: []
   extraContainers: []
   extraVolumeMounts: []
@@ -895,6 +896,8 @@ gitSyncRelay:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  podAnnotations: {}
+  annotations: {}
 
   # Enable metrics for git-sync-relay
   metrics:

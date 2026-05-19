@@ -15,6 +15,9 @@ metadata:
     release: {{ .Release.Name }}
     chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
+  {{- if .Values.gitSyncRelay.annotations }}
+  annotations: {{- toYaml .Values.gitSyncRelay.annotations | nindent 4 }}
+  {{- end }}
 spec:
   replicas: 1
   selector:
@@ -30,8 +33,11 @@ spec:
         chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
         heritage: {{ .Release.Service }}
         {{- if .Values.labels }}
-        {{- .Values.labels | toYaml | nindent 8 }}
+        {{- toYaml .Values.labels | nindent 8 }}
         {{- end }}
+      {{- if .Values.gitSyncRelay.podAnnotations }}
+      annotations: {{- toYaml .Values.gitSyncRelay.podAnnotations | nindent 8 }}
+      {{- end }}
     spec:
       {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
       imagePullSecrets:
