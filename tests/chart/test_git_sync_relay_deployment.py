@@ -40,6 +40,8 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
+        assert "annotations" not in doc["metadata"]
+        assert "annotations" not in doc["spec"]["template"]["metadata"]
 
         git_dameon_env = get_env_vars_dict(c_by_name["git-daemon"].get("env"))
         assert not git_dameon_env.get("GIT_SYNC_REPO_FETCH_MODE")
@@ -549,3 +551,23 @@ class TestGitSyncRelayDeployment:
         assert spec["affinity"] == airflow_node_pool_config["affinity"]
         assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
         assert spec["tolerations"] == airflow_node_pool_config["tolerations"]
+
+    def test_gsr_annotations_overrides(self, kube_version):
+        """Test that gitSyncRelay annotations are set when gitSyncRelay.annotations when passed."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values={"gitSyncRelay": {"enabled": True, "annotations": {"example.com/owner": "platform"}}},
+        )
+        assert len(docs) == 1
+        assert docs[0]["metadata"]["annotations"] == {"example.com/owner": "platform"}
+
+    def test_gsr_pod_annotations_overrides(self, kube_version):
+        """Test that gitSyncRelay podAnnotations are set when gitSyncRelay.podAnnotations when passed."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values={"gitSyncRelay": {"enabled": True, "podAnnotations": {"sidecar.istio.io/inject": "false"}}},
+        )
+        assert len(docs) == 1
+        assert docs[0]["spec"]["template"]["metadata"]["annotations"] == {"sidecar.istio.io/inject": "false"}
