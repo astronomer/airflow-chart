@@ -79,8 +79,8 @@ class TestAirflow:
         assert len(docs) == 1
         c_by_name = get_containers_by_name(docs[0])
         liveness_probe_command = c_by_name["worker"]["livenessProbe"]["exec"]["command"][-1]
+        assert 'version("apache-airflow")' in liveness_probe_command
         assert "socket.gethostname()" in liveness_probe_command
-        assert "$(hostname)" not in liveness_probe_command
 
     def test_airflow_flower_with_preAirflowExtraInitContainers(self, kube_version):
         """Test flower deployment behaviors with preAirflowExtraInitContainers."""

@@ -134,7 +134,7 @@ airflow:
         - -c
         - >-
           CONNECTION_CHECK_MAX_COUNT=0 exec /entrypoint python -m celery --app
-          $(python -c 'import airflow, re; version = getattr(airflow, "__version__", "0.0"); major, minor = map(int, re.match(r"(\d+)\.(\d+)", version).groups()); print("airflow.providers.celery.executors.celery_executor.app" if (major, minor) >= (2, 7) else "airflow.executors.celery_executor.app")')
+          $(python -c 'import re; from importlib.metadata import version; airflow_version = version("apache-airflow"); major, minor = map(int, re.match(r"(\d+)\.(\d+)", airflow_version).groups()); print("airflow.providers.celery.executors.celery_executor.app" if (major, minor) >= (2, 7) else "airflow.executors.celery_executor.app")')
           inspect ping -d celery@$(python -c 'import socket; print(socket.gethostname())')
     persistence:
       # Enable persistent volumes
