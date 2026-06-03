@@ -35,19 +35,19 @@ metadata:
     {{- with .Values.labels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
-  {{- with .Values.webserver.labels }}
+  {{- with .Values.airflow.webserver.labels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- if .Values.webserver.annotations }}
-  annotations: {{- toYaml .Values.webserver.annotations | nindent 4 }}
+  {{- if .Values.airflow.webserver.annotations }}
+  annotations: {{- toYaml .Values.airflow.webserver.annotations | nindent 4 }}
   {{- end }}
 spec:
   hosts:
-  {{- range .Values.istio.hosts }}
+  {{- range .Values.airflow.istio.hosts }}
   - {{ . | quote }}
   {{- end }}
   gateways:
-  - {{ .Values.istio.gateway }}
+  - {{ .Values.airflow.istio.gateway }}
   http:
   # Webserver routes
   - match:
@@ -59,12 +59,12 @@ spec:
     - destination:
         host: {{ $fullname }}-webserver.{{ .Release.Namespace }}.svc.cluster.local
         port:
-          number: {{ .Values.ports.airflowUI }}
-    {{- if .Values.istio.virtualService.timeout }}
-    timeout: {{ .Values.istio.virtualService.timeout }}
+          number: {{ .Values.airflow.ports.airflowUI }}
+    {{- if .Values.airflow.istio.virtualService.timeout }}
+    timeout: {{ .Values.airflow.istio.virtualService.timeout }}
     {{- end }}
-    {{- if .Values.istio.virtualService.retries }}
+    {{- if .Values.airflow.istio.virtualService.retries }}
     retries:
-      {{- toYaml .Values.istio.virtualService.retries | nindent 6 }}
+      {{- toYaml .Values.airflow.istio.virtualService.retries | nindent 6 }}
     {{- end }}
 {{- end }}
