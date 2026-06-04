@@ -43,11 +43,15 @@ metadata:
   {{- end }}
 spec:
   hosts:
+  {{- if hasKey .Values.airflow.istio "hosts" }}
   {{- range .Values.airflow.istio.hosts }}
   - {{ . | quote }}
   {{- end }}
+  {{- end }}
+  {{- if hasKey .Values.airflow.istio "gateway" }}
   gateways:
   - {{ .Values.airflow.istio.gateway }}
+  {{- end }}
   http:
   # Webserver routes
   - match:
