@@ -53,13 +53,15 @@ spec:
   - match:
     - uri:
         prefix: "/{{ .Release.Name }}/airflow"
-    rewrite:
-      uri: "/airflow"
     route:
     - destination:
         host: {{ $fullname }}-webserver.{{ .Release.Namespace }}.svc.cluster.local
         port:
+        {{- if .Values.authSidecar.enabled  }}
+          number: {{ .Values.authSidecar.port }}
+        {{- else }}
           number: {{ .Values.airflow.ports.airflowUI }}
+        {{- end }}
     {{- if hasKey .Values.airflow.istio "virtualService" }}
     {{- if hasKey .Values.airflow.istio.virtualService "timeout" }}
     timeout: {{ .Values.airflow.istio.virtualService.timeout }}
