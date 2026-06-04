@@ -60,10 +60,10 @@ spec:
         host: {{ $fullname }}-webserver.{{ .Release.Namespace }}.svc.cluster.local
         port:
           number: {{ .Values.airflow.ports.airflowUI }}
-    {{- if .Values.airflow.istio.virtualService.timeout }}
+    {{- if hasKey .Values.airflow.istio.virtualService "timeout" }}
     timeout: {{ .Values.airflow.istio.virtualService.timeout }}
     {{- end }}
-    {{- if .Values.airflow.istio.virtualService.retries }}
+    {{- if hasKey .Values.airflow.istio.virtualService "retries" }}
     retries:
       {{- toYaml .Values.airflow.istio.virtualService.retries | nindent 6 }}
     {{- end }}
