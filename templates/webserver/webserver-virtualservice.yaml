@@ -20,7 +20,7 @@
 ################################
 ## Airflow Webserver VirtualService
 #################################
-{{- if and .Values.airflow.istio.enabled (semverCompare "<3.0.0" .Values.airflow.airflowVersion) }}
+{{- if .Values.airflow.istio.enabled }}
 {{- $fullname := include "airflow.fullname" . }}
 apiVersion: networking.istio.io/v1
 kind: VirtualService
