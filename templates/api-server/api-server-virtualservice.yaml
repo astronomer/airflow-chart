@@ -52,7 +52,7 @@ spec:
   # API Server routes
   - match:
     - uri:
-        prefix: "/{{ .Release.Name }}/api"
+        prefix: "/{{ .Release.Name }}/airflow"
     route:
     - destination:
         host: {{ $fullname }}-api-server.{{ .Release.Namespace }}.svc.cluster.local
