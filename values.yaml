@@ -79,6 +79,9 @@ airflow:
       securityContexts:
         container:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
 
   # Airflow api server settings
   apiServer:
@@ -115,6 +118,9 @@ airflow:
     securityContexts:
       container:
         readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
     securityContext:
       # Set user to redis:999
       runAsUser: 999
@@ -149,9 +155,15 @@ airflow:
       securityContexts:
         container:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
     securityContexts:
       container:
         readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
 
   # Elasticsearch logging configuration
   elasticsearch:
@@ -432,6 +444,9 @@ airflow:
     securityContexts:
       container:
         readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
     overrideMappings:
       # Map dot separated stats to labels
       - match: airflow.operator_successes_(.*)
