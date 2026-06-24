@@ -395,9 +395,7 @@ Create the name of the cleanup service account to use
   {{- if .Values.authSidecar.resources }}
   resources: {{- toYaml .Values.authSidecar.resources | nindent 4 }}
   {{- end }}
-  securityContext:
-    {{- $required := dict "readOnlyRootFilesystem" true "allowPrivilegeEscalation" false "capabilities" (dict "drop" (list "ALL")) }}
-    {{- toYaml (merge $required (.Values.authSidecar.securityContext | default dict)) | nindent 4 }}
+  securityContext: {{- toYaml .Values.authSidecar.securityContext | nindent 4 }}
   ports:
   - containerPort: {{ .Values.authSidecar.port }}
     name: auth-proxy

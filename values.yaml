@@ -683,7 +683,12 @@ authSidecar:
   tag: 1.27.4-1
   pullPolicy: IfNotPresent
   port: 8084
-  securityContext: {}
+  # Hardened defaults; override individual fields here if your environment needs it.
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: [ALL]
   resources: {}
   livenessProbe: {}
   readinessProbe: {}
