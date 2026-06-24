@@ -836,7 +836,11 @@ dagDeploy:
   securityContexts:
     pod:
       runAsUser: 50000
-    container: {}
+    container:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
 
   flower:
     extraVolumeMounts:
@@ -867,10 +871,16 @@ gitSyncRelay:
   gitDaemon:
     securityContext:
       readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
   gitSync:
     webhookPort: 8000
     securityContext:
       readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
