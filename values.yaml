@@ -872,13 +872,22 @@ gitSyncRelay:
   securityContext:
     fsGroup: 65533
     runAsUser: 50000
+    # PSS-Restricted requires run-as-non-root at the pod level. The
+    # gitSyncRelay.podSecurityContext helper keeps this on OpenShift while
+    # stripping runAsUser/fsGroup for the restricted-v2 SCC (PINF-559).
+    runAsNonRoot: true
   terminationGracePeriodSeconds: 30
+  # git-sync-relay is not processed by houston's securityHardeningConfig, so these
+  # container securityContexts are the only place the full PSS-Restricted set
+  # (incl. seccompProfile) can be applied.
   gitDaemon:
     securityContext:
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
       capabilities:
         drop: [ALL]
+      seccompProfile:
+        type: RuntimeDefault
   gitSync:
     webhookPort: 8000
     securityContext:
@@ -886,6 +895,8 @@ gitSyncRelay:
       allowPrivilegeEscalation: false
       capabilities:
         drop: [ALL]
+      seccompProfile:
+        type: RuntimeDefault
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"

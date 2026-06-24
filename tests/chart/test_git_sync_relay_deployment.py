@@ -304,7 +304,8 @@ class TestGitSyncRelayDeployment:
         assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
-        assert gsrsecuritycontext == doc["spec"]["template"]["spec"]["securityContext"]
+        # runAsNonRoot: true is a chart default (PSS-Restricted) and merges in alongside overrides.
+        assert doc["spec"]["template"]["spec"]["securityContext"] == {**gsrsecuritycontext, "runAsNonRoot": True}
 
     def test_gsr_deployment_openshift_strips_incompatible_security_context(self, kube_version):
         """Test that fsGroup and runAsUser are stripped from pod securityContext when OpenShift is enabled,
