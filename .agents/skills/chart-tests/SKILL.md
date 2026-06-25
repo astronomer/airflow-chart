@@ -8,7 +8,7 @@ description: Use when writing, editing, reviewing, or running Helm chart tests f
 ## Critical Rules
 
 1. **Run tests through the project's managed environment** — `make unittest-chart`, `uv run pytest`, `.venv/bin/python -m pytest`, and `.venv/bin/pytest` are all valid. Don't hand-roll a separate venv with `pip install`.
-2. **Wrapper values are top-level; sub-chart values MUST be nested under `airflow`** (see [Wrapper values vs. sub-chart values](#wrapper-values-vs-sub-chart-values--critical))
+2. **Parent-chart values are top-level; sub-chart values MUST be nested under `airflow`** (see [Parent-chart values vs. sub-chart values](#parent-chart-values-vs-sub-chart-values--critical))
 3. **No `helm unittest` plugin** — all tests are pytest-based using `render_chart()`
 
 ---
@@ -57,11 +57,11 @@ def test_some_feature(kube_version):
     assert docs[0]["kind"] == "StatefulSet"
 ```
 
-### Wrapper values vs. sub-chart values — CRITICAL
+### Parent-chart values vs. sub-chart values — CRITICAL
 
-This is a wrapper chart. There are two kinds of values:
+This is an umbrella (parent) chart. There are two kinds of values:
 
-**1. The wrapper's own values** — used by templates under top-level `templates/`. These are set at the top level of `values.yaml`: `dagDeploy`, `gitSyncRelay`, `authSidecar`, `loggingSidecar`, `extraObjects`, `ingress`, `sccEnabled`, `platform`, etc. Set them directly:
+**1. The parent chart's own values** — used by templates under top-level `templates/`. These are set at the top level of `values.yaml`: `dagDeploy`, `gitSyncRelay`, `authSidecar`, `loggingSidecar`, `extraObjects`, `ingress`, `sccEnabled`, `platform`, etc. Set them directly:
 
 ```python
 values = {"dagDeploy": {"enabled": True}}
@@ -87,7 +87,7 @@ docs = render_chart(
 
 ### Using `show_only`
 
-Always use `show_only` to target the specific template being tested. Wrapper templates use the `templates/` prefix; sub-chart templates use the `charts/airflow/templates/` prefix:
+Always use `show_only` to target the specific template being tested. Parent-chart templates use the `templates/` prefix; sub-chart templates use the `charts/airflow/templates/` prefix:
 
 ```python
 docs = render_chart(

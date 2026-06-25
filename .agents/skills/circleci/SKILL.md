@@ -59,6 +59,8 @@ The generator injects a small set of computed variables into the template at ren
 
 Always edit `.circleci/config.yml.j2` (or `bin/generate_circleci_config.py` for the injected values), then regenerate and commit both the template and the generated `config.yml`. The chart's K8s test matrix is driven entirely by `metadata.yaml`, so adding/removing a tested Kubernetes version is a `metadata.yaml` edit followed by a regenerate.
 
+> **CI runs only on kind (vanilla Kubernetes), never OpenShift.** The matrix is `kube_versions` × `executors` on kind. OpenShift-specific behavior (e.g. `openshift.enabled=true` SCC / UID-range handling, PINF-559) is **not** exercised in CI and must be verified manually — a change can be green in CI and still break only on OpenShift. See `CLAUDE.md`.
+
 ---
 
 ## Version Pinning
