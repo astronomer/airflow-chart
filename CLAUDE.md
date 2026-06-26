@@ -41,11 +41,7 @@ that subchart. Because the subchart is named `airflow`:
 - Functional / e2e tests run in CircleCI against **kind** clusters, across the
   `CeleryExecutor`, `LocalExecutor`, and `KubernetesExecutor`.
 
-> [!IMPORTANT] > **OpenShift is NOT exercised in CI.** CI runs only on kind (vanilla Kubernetes).
-> OpenShift-specific behavior — e.g. the restricted-v2 SCC UID-range stripping in the
-> `gitSyncRelay.podSecurityContext` helper (PINF-559), and anything gated on
-> `openshift.enabled=true` — must be verified manually. **A change can be fully green in CI
-> and still break only on OpenShift.**
+**Important — OpenShift is NOT exercised in CI.** CI runs only on kind (vanilla Kubernetes). OpenShift-specific behavior — e.g. the restricted-v2 SCC UID-range stripping in the `gitSyncRelay.podSecurityContext` helper (PINF-559), and anything gated on `openshift.enabled=true` — must be verified manually. A change can be fully green in CI and still break only on OpenShift.
 
 ## CI config
 
