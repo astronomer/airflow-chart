@@ -726,6 +726,12 @@ loggingSidecar:
   resources: {}
   livenessProbe: {}
   readinessProbe: {}
+  # Hardened defaults (PSS-Restricted); override individual fields here if your environment needs it.
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: [ALL]
 
 # Ingress configuration
 ingress:
@@ -872,22 +878,22 @@ gitSyncRelay:
   securityContext:
     fsGroup: 65533
     runAsUser: 50000
-    # PSS-Restricted requires run-as-non-root at the pod level. The
-    # gitSyncRelay.podSecurityContext helper keeps this on OpenShift while
-    # stripping runAsUser/fsGroup for the restricted-v2 SCC (PINF-559).
+    # PSS-Restricted requires run-as-non-root and a seccomp profile. Both are set at the
+    # pod level (seccomp pod-level matches the platform chart convention and covers every
+    # container in the pod). The gitSyncRelay.podSecurityContext helper preserves these on
+    # OpenShift while stripping runAsUser/fsGroup for the restricted-v2 SCC (PINF-559).
     runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
   terminationGracePeriodSeconds: 30
   # git-sync-relay is not processed by houston's securityHardeningConfig, so these
-  # container securityContexts are the only place the full PSS-Restricted set
-  # (incl. seccompProfile) can be applied.
+  # container securityContexts are the only place the restricted container set is applied.
   gitDaemon:
     securityContext:
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
       capabilities:
         drop: [ALL]
-      seccompProfile:
-        type: RuntimeDefault
   gitSync:
     webhookPort: 8000
     securityContext:
@@ -895,8 +901,6 @@ gitSyncRelay:
       allowPrivilegeEscalation: false
       capabilities:
         drop: [ALL]
-      seccompProfile:
-        type: RuntimeDefault
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"

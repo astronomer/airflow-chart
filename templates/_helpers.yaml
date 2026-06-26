@@ -348,12 +348,7 @@ Create the name of the cleanup service account to use
   {{- if .Values.loggingSidecar.resources }}
   resources: {{- toYaml .Values.loggingSidecar.resources | nindent 4 }}
   {{- end }}
-  securityContext:
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
+  securityContext: {{- toYaml .Values.loggingSidecar.securityContext | nindent 4 }}
   env:
   - name: VECTOR_CONFIG
     value: /etc/sidecar-logging/vector-config.yaml

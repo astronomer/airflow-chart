@@ -47,14 +47,18 @@ def test_all_containers_have_hardened_security_context(kube_version):
     docs = render_chart(kube_version=kube_version, values=get_all_features())
 
     offenders = {}
+    checked = 0
     for doc in docs:
         if doc.get("metadata", {}).get("name") in EXCLUDED_DOCS:
             continue
         owner = f"{doc['kind']}/{doc['metadata']['name']}"
         for name, container in get_containers_by_name(doc, include_init_containers=True).items():
+            checked += 1
             if problems := hardening_problems(container):
                 offenders[f"{owner}:{name}"] = problems
 
+    # Guard against a render/enumeration regression that would make the assertion vacuous.
+    assert checked, "No containers were rendered; cannot validate securityContext hardening"
     assert not offenders, "Containers without a hardened securityContext (field: actual value):\n" + "\n".join(
         f"  {key}: {value}" for key, value in sorted(offenders.items())
     )
@@ -63,19 +67,19 @@ def test_all_containers_have_hardened_security_context(kube_version):
 # --- git-sync-relay PSS-Restricted conformance (PINF-585 follow-up) -----------------
 #
 # git-sync-relay is not processed by houston's securityHardeningConfig, so unlike
-# redis/statsd/pgbouncer/gitSync its full restricted container set must come from the
-# chart values. The cross-cutting test above only enforces the universal three-field
-# floor; these tests additionally pin seccompProfile and the pod-level run-as-non-root
-# behavior across both vanilla and OpenShift (PINF-559) modes.
+# redis/statsd/pgbouncer/gitSync its restricted set must come from the chart values. The
+# cross-cutting test above only enforces the universal three-field container floor; these
+# tests additionally pin the pod-level securityContext — runAsNonRoot and the seccompProfile
+# (set pod-level to match the platform chart) — across both vanilla and OpenShift (PINF-559).
 
 GIT_SYNC_RELAY_DEPLOYMENT = "templates/git-sync-relay/git-sync-relay-deployment.yaml"
 
-# Every git-sync-relay container must carry the full PSS-Restricted container securityContext.
+# Every git-sync-relay container carries the restricted container securityContext.
+# seccompProfile is set once at the pod level (not per-container) — see the pod tests below.
 RESTRICTED_CONTAINER_SECURITY_CONTEXT = {
     "readOnlyRootFilesystem": True,
     "allowPrivilegeEscalation": False,
     "capabilities": {"drop": ["ALL"]},
-    "seccompProfile": {"type": "RuntimeDefault"},
 }
 
 
@@ -102,24 +106,32 @@ def test_git_sync_relay_containers_are_pss_restricted(kube_version, openshift_en
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
 def test_git_sync_relay_pod_security_context_vanilla(kube_version):
-    """Vanilla: the pod runs as non-root with the chart's UID/fsGroup."""
+    """Vanilla: the pod runs as non-root with the chart's UID/fsGroup and a seccomp profile."""
     docs = render_chart(
         kube_version=kube_version,
         values={"gitSyncRelay": {"enabled": True}, "openshift": {"enabled": False}},
         show_only=[GIT_SYNC_RELAY_DEPLOYMENT],
     )
     pod_security_context = docs[0]["spec"]["template"]["spec"]["securityContext"]
-    assert pod_security_context == {"fsGroup": 65533, "runAsUser": 50000, "runAsNonRoot": True}
+    assert pod_security_context == {
+        "fsGroup": 65533,
+        "runAsUser": 50000,
+        "runAsNonRoot": True,
+        "seccompProfile": {"type": "RuntimeDefault"},
+    }
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
 def test_git_sync_relay_pod_security_context_openshift(kube_version):
     """OpenShift (PINF-559): runAsUser/fsGroup are stripped for the restricted-v2 SCC,
-    but runAsNonRoot is preserved."""
+    but runAsNonRoot and the seccomp profile are preserved."""
     docs = render_chart(
         kube_version=kube_version,
         values={"gitSyncRelay": {"enabled": True}, "openshift": {"enabled": True}},
         show_only=[GIT_SYNC_RELAY_DEPLOYMENT],
     )
     pod_security_context = docs[0]["spec"]["template"]["spec"]["securityContext"]
-    assert pod_security_context == {"runAsNonRoot": True}
+    assert pod_security_context == {
+        "runAsNonRoot": True,
+        "seccompProfile": {"type": "RuntimeDefault"},
+    }
