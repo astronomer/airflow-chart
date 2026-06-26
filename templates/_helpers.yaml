@@ -348,7 +348,9 @@ Create the name of the cleanup service account to use
   {{- if .Values.loggingSidecar.resources }}
   resources: {{- toYaml .Values.loggingSidecar.resources | nindent 4 }}
   {{- end }}
-  securityContext: {{- toYaml (.Values.loggingSidecar.securityContext | default dict) | nindent 4 }}
+  securityContext:
+    {{- $required := dict "readOnlyRootFilesystem" true }}
+    {{- toYaml (merge $required (.Values.loggingSidecar.securityContext | default dict)) | nindent 4 }}
   env:
   - name: VECTOR_CONFIG
     value: /etc/sidecar-logging/vector-config.yaml
@@ -390,7 +392,9 @@ Create the name of the cleanup service account to use
   {{- if .Values.authSidecar.resources }}
   resources: {{- toYaml .Values.authSidecar.resources | nindent 4 }}
   {{- end }}
-  securityContext: {{- toYaml (.Values.authSidecar.securityContext | default dict) | nindent 4 }}
+  securityContext:
+    {{- $required := dict "readOnlyRootFilesystem" true }}
+    {{- toYaml (merge $required (.Values.authSidecar.securityContext | default dict)) | nindent 4 }}
   ports:
   - containerPort: {{ .Values.authSidecar.port }}
     name: auth-proxy

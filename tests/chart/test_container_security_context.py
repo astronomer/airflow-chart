@@ -137,19 +137,22 @@ def test_git_sync_relay_pod_security_context_openshift(kube_version):
     }
 
 
-# --- Overridable sidecar securityContext null-safety --------------------------------
+# --- Sidecar securityContext: enforced readOnlyRootFilesystem floor + null-safety --------
 #
 # auth_sidecar_container_spec and logging_sidecar_container_spec render their securityContext
-# from values via `toYaml (... | default dict)`. If a user sets the value to null (or unsets
-# it), that guard must yield `securityContext: {}` — never the invalid `securityContext: null`.
+# as `merge $required (.Values.<sidecar>.securityContext | default dict)`, where
+# $required forces `readOnlyRootFilesystem: true`. Even when a user sets the override to null
+# (or unsets it), the result must be the enforced `{readOnlyRootFilesystem: true}` floor —
+# never `securityContext: null` and never dropping readOnlyRootFilesystem.
 # Both containers render into the dag-server StatefulSet when their feature is enabled.
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
 @pytest.mark.parametrize(
     "component,container",
     [("authSidecar", "auth-proxy"), ("loggingSidecar", "sidecar-log-consumer")],
 )
-def test_sidecar_security_context_null_renders_empty_map(kube_version, component, container):
-    """A null/unset sidecar securityContext override renders `{}`, not `null`."""
+def test_sidecar_security_context_null_keeps_enforced_floor(kube_version, component, container):
+    """A null/unset sidecar securityContext override still renders the enforced
+    readOnlyRootFilesystem floor, not `null` and not an empty map."""
     docs = render_chart(
         kube_version=kube_version,
         values={"dagDeploy": {"enabled": True}, component: {"enabled": True, "securityContext": None}},
@@ -159,7 +162,7 @@ def test_sidecar_security_context_null_renders_empty_map(kube_version, component
     containers = get_containers_by_name(docs[0])
     assert container in containers, f"expected '{container}' container in the dag-server pod"
     security_context = containers[container]["securityContext"]
-    # `securityContext: null` would parse to None; the `| default dict` guard makes it {}.
-    assert security_context == {}, (
-        f"{container} securityContext should be an empty map when the override is null, got {security_context!r}"
+    assert security_context == {"readOnlyRootFilesystem": True}, (
+        f"{container} securityContext should keep the enforced readOnlyRootFilesystem floor "
+        f"when the override is null, got {security_context!r}"
     )

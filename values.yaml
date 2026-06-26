@@ -683,7 +683,8 @@ authSidecar:
   tag: 1.27.4-1
   pullPolicy: IfNotPresent
   port: 8084
-  # Hardened defaults; override individual fields here if your environment needs it.
+  # Hardened container securityContext. allowPrivilegeEscalation and capabilities are
+  # overridable here; readOnlyRootFilesystem is enforced by the chart (see _helpers.yaml).
   securityContext:
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
@@ -726,7 +727,8 @@ loggingSidecar:
   resources: {}
   livenessProbe: {}
   readinessProbe: {}
-  # Hardened defaults (PSS-Restricted); override individual fields here if your environment needs it.
+  # Hardened container securityContext. allowPrivilegeEscalation and capabilities are
+  # overridable here; readOnlyRootFilesystem is enforced by the chart (see _helpers.yaml).
   securityContext:
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
