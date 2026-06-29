@@ -264,6 +264,60 @@ class TestGitSyncRelayDeployment:
                 values=values,
             )
 
+    def test_gsr_deployment_https_pat_requires_secret(self, kube_version):
+        """auth.type=https-pat without credentialsSecretName must fail the render (PINF-425)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "https://github.com/example/dags.git",
+                    "auth": {"type": "https-pat"},
+                },
+            }
+        }
+        with pytest.raises(CalledProcessError):
+            render_chart(
+                kube_version=kube_version,
+                show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+                values=values,
+            )
+
+    def test_gsr_deployment_https_secret_requires_https_pat(self, kube_version):
+        """Setting credentialsSecretName without auth.type=https-pat must fail (PINF-425)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "https://github.com/example/dags.git",
+                    "auth": {"https": {"credentialsSecretName": "release-name-git-sync"}},
+                },
+            }
+        }
+        with pytest.raises(CalledProcessError):
+            render_chart(
+                kube_version=kube_version,
+                show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+                values=values,
+            )
+
+    def test_gsr_deployment_invalid_auth_type(self, kube_version):
+        """An unrecognized auth.type value must fail the render (PINF-425)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "https://github.com/example/dags.git",
+                    "auth": {"type": "https-token"},
+                },
+            }
+        }
+        with pytest.raises(CalledProcessError):
+            render_chart(
+                kube_version=kube_version,
+                show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+                values=values,
+            )
+
     def test_gsr_deployment_without_ssh_credentials_and_known_hosts(self, kube_version):
         """Test that a valid deployment is rendered when enabling git-sync without ssh credentials."""
         values = {
