@@ -4,7 +4,7 @@ auto_update:
   cooldown_days: 7
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.15.9"
+    rev: "v0.15.18"
     hooks:
       - id: ruff-check
         args:
