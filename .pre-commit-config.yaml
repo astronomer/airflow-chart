@@ -1,5 +1,7 @@
 ---
 exclude: '^(venv|\.vscode|tests/k8s_schema|tests/chart/test_data)' # regex
+auto_update:
+  cooldown_days: 7
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: "v0.15.9"
