@@ -917,6 +917,22 @@ gitSyncRelay:
     wait: 60 # seconds between synchronizations with upstream git repo
     subPath: ~ # if your dags dir is not the repo root, specify the path relative to the repo root
     sshPrivateKeySecretName: ~ # The name of a secret that holds the private key. This secret is not maintained by this chart.
+    # auth selects the git-sync authentication method. Leave unset for backward
+    # compatibility: a repo with sshPrivateKeySecretName and no auth.type is
+    # treated as SSH. SSH and HTTPS auth are mutually exclusive per deployment.
+    auth:
+      # type: one of ssh | https-pat | https-none. Unset implies ssh when
+      # sshPrivateKeySecretName is set (back-compat), otherwise no auth.
+      type: ~
+      https:
+        # Name of an existing Secret holding the HTTPS credentials. Not maintained
+        # by this chart — houston creates the per-deployment ${releaseName}-git-sync
+        # Secret via Commander (the same Secret used for SSH).
+        credentialsSecretName: ~
+        # Secret keys the relay reads from the mounted credentials directory.
+        credentialsSecretKey:
+          token: gitHttpsToken
+          username: gitHttpsUsername
     gitSyncTimeout: 300 # How long to wait for the clone or fetch to take before aborting
     # knownHosts can be generated with: ssh-keyscan -t ed25519 github.com 2>/dev/null
     knownHosts: |
