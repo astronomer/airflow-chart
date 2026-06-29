@@ -928,11 +928,12 @@ gitSyncRelay:
         # Name of an existing Secret holding the HTTPS credentials. Not maintained
         # by this chart — houston creates the per-deployment ${releaseName}-git-sync
         # Secret via Commander (the same Secret used for SSH).
+        #
+        # The Secret must contain the keys `gitHttpsToken` and `gitHttpsUsername`.
+        # These names are a fixed contract, not configurable: git-sync-relay reads
+        # them as filenames from the mounted directory (PINF-426) and houston writes
+        # them (PINF-427), mirroring the fixed `gitSshKey` name used for SSH.
         credentialsSecretName: ~
-        # Secret keys the relay reads from the mounted credentials directory.
-        credentialsSecretKey:
-          token: gitHttpsToken
-          username: gitHttpsUsername
     gitSyncTimeout: 300 # How long to wait for the clone or fetch to take before aborting
     # knownHosts can be generated with: ssh-keyscan -t ed25519 github.com 2>/dev/null
     knownHosts: |
