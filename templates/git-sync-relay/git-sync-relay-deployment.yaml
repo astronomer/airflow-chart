@@ -5,6 +5,24 @@
 {{- $nodeSelector := or .Values.gitSyncRelay.nodeSelector .Values.airflow.nodeSelector }}
 {{- $affinity := or .Values.gitSyncRelay.affinity .Values.airflow.affinity }}
 {{- $tolerations := or .Values.gitSyncRelay.tolerations .Values.airflow.tolerations }}
+{{- /* Resolve the git-sync auth method. repo.auth.type is the selector; an SSH key
+       with no explicit type stays SSH for back-compat. Wiring degrades gracefully
+       the same way the SSH path does: the HTTPS credentials Secret is mounted only
+       when credentialsSecretName is present, and a missing/unused Secret renders
+       nothing rather than failing (the relay starts and retries). The only hard
+       failures are an unknown auth.type and the SSH+HTTPS contradiction. */}}
+{{- $authType := "" }}
+{{- $httpsSecret := "" }}
+{{- with .Values.gitSyncRelay.repo.auth }}
+{{- $authType = .type | default "" }}
+{{- with .https }}{{- $httpsSecret = .credentialsSecretName | default "" }}{{- end }}
+{{- end }}
+{{- if not (has $authType (list "" "ssh" "https-pat" "https-none")) }}
+{{- fail (printf "gitSyncRelay.repo.auth.type: %q is invalid; must be one of ssh, https-pat, https-none." $authType) }}
+{{- end }}
+{{- if and .Values.gitSyncRelay.repo.sshPrivateKeySecretName (or (eq $authType "https-pat") (eq $authType "https-none") (ne $httpsSecret "")) }}
+{{- fail "gitSyncRelay.repo: SSH and HTTPS auth are mutually exclusive. repo.sshPrivateKeySecretName cannot be combined with HTTPS auth (repo.auth.type of https-pat/https-none, or repo.auth.https.credentialsSecretName)." }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -64,6 +82,11 @@ spec:
           secret:
             secretName: {{ .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
         {{- end }}
+        {{- if and (eq $authType "https-pat") (ne $httpsSecret "") }}
+        - name: git-https-secret
+          secret:
+            secretName: {{ $httpsSecret }}
+        {{- end }}
         - name: {{ .Release.Name }}-git-sync-config
           configMap:
             name: {{ .Release.Name }}-git-sync-config
@@ -121,6 +144,13 @@ spec:
               subPath: known_hosts
             {{- end }}
             {{- end }}
+            {{- if and (eq $authType "https-pat") (ne $httpsSecret "") }}
+            {{- /* Mount as a directory (no subPath) so kubelet propagates rotated
+                   credentials without a pod restart (FR2.2). */}}
+            - name: git-https-secret
+              mountPath: /etc/git-secret/https
+              readOnly: true
+            {{- end }}
             - name: git-repo-contents
               mountPath: /git
             {{- if .Values.loggingSidecar.enabled }}
@@ -162,6 +192,14 @@ spec:
             - name: GIT_KNOWN_HOSTS
               value: "false"
             {{- end }}
+            {{- end }}
+            {{- if or (eq $authType "https-pat") (eq $authType "https-none") }}
+            - name: GIT_SYNC_AUTH_TYPE
+              value: "{{ $authType }}"
+            {{- end }}
+            {{- if and (eq $authType "https-pat") (ne $httpsSecret "") }}
+            - name: GIT_SYNC_HTTPS_SECRET_DIR
+              value: "/etc/git-secret/https"
             {{- end }}
             {{- if .Values.gitSyncRelay.metrics.enabled}}
             - name: METRICS_ENABLED
