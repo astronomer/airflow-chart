@@ -257,12 +257,48 @@ class TestGitSyncRelayDeployment:
                 },
             }
         }
-        with pytest.raises(CalledProcessError):
+        with pytest.raises(CalledProcessError) as excinfo:
             render_chart(
                 kube_version=kube_version,
                 show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
                 values=values,
             )
+        # The message must point at the actually-conflicting fields, not imply that
+        # repo.auth is HTTPS-only (repo.auth.type: ssh is valid and pairs with
+        # sshPrivateKeySecretName on every SSH deployment).
+        stderr = excinfo.value.stderr.decode("utf-8")
+        assert "repo.sshPrivateKeySecretName cannot be combined with HTTPS auth" in stderr
+
+    def test_gsr_deployment_ssh_secret_with_explicit_ssh_auth_type_renders(self, kube_version):
+        """sshPrivateKeySecretName combined with auth.type: ssh is a valid SSH config and must
+        render, not trip the SSH/HTTPS mutual-exclusivity check — this is the shape houston
+        emits for SSH (auth.type=ssh alongside the key Secret) (PINF-425)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "git@github.com:example/dags.git",
+                    "sshPrivateKeySecretName": "an-ssh-secret",
+                    "auth": {"type": "ssh"},
+                },
+            }
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        c_by_name = get_containers_by_name(doc)
+        # SSH wiring is present and no HTTPS credentials are mounted.
+        volumes = doc["spec"]["template"]["spec"]["volumes"]
+        assert any(v["name"] == "git-secret" for v in volumes)
+        assert not any(v["name"] == "git-https-secret" for v in volumes)
+        env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert env["GIT_SYNC_SSH"] == "true"
+        assert env["GIT_SSH_KEY_FILE"] == "/etc/git-secret/ssh"
+        assert "GIT_SYNC_HTTPS_SECRET_DIR" not in env
 
     def test_gsr_deployment_https_pat_without_secret_degrades(self, kube_version):
         """https-pat without credentialsSecretName degrades like SSH-without-key: it renders
