@@ -4,6 +4,7 @@
 {{- if and
   .Values.gitSyncRelay.enabled
   (eq .Values.gitSyncRelay.repoFetchMode "webhook")
+  (not .Values.airflow.istio.enabled)
 }}
 kind: Ingress
 apiVersion: "networking.k8s.io/v1"

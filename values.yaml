@@ -3,6 +3,9 @@
 # Declare variables to be passed into your templates.
 
 airflow:
+  # istio config section
+  istio:
+    enabled: false
   # group of airflow user
   gid: 50000
 
