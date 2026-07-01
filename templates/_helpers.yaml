@@ -106,6 +106,24 @@
 {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }}
 {{- end }}
 
+{{/*
+Global-parent (CP HA) variants of the deployment host helpers. Templated from
+ingress.globalBaseDomain, the shared customer-facing parent. Only rendered by the
+ingress template when ingress.globalBaseDomain is set, so non-HA installs are
+unchanged.
+*/}}
+{{ define "deployments_subdomain_global" -}}
+{{ printf "deployments.%s" .Values.ingress.globalBaseDomain }}
+{{- end }}
+
+{{ define "airflow_subdomain_global" -}}
+{{ .Release.Name }}-airflow.{{ .Values.ingress.globalBaseDomain }}
+{{- end }}
+
+{{ define "flower_subdomain_global" -}}
+{{ .Release.Name }}-flower.{{ .Values.ingress.globalBaseDomain }}
+{{- end }}
+
 {{ define "default_nginx_server_settings" }}
 # Disable Nginx Server version
 server_tokens off;
