@@ -3,11 +3,7 @@
 *.swp
 *.tgz
 .DS_Store
-.agents
-.circleci
-.claude
 .claude/settings.local.json
-.github
 .vscode
 /.idea/
 /.vscode/

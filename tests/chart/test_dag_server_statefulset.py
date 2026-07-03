@@ -145,6 +145,7 @@ class TestDagServerStatefulSet:
         assert container_spec["containers"][0]["securityContext"] == {
             "allowPrivilegeEscalation": False,
             "readOnlyRootFilesystem": True,
+            "capabilities": {"drop": ["ALL"]},
         }
 
     def test_dag_server_openshift_strips_incompatible_security_context(self, kube_version):
