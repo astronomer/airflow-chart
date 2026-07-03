@@ -6,6 +6,34 @@ airflow:
       capabilities:
         drop:
           - ALL
+  flower:
+    enabled: true
+    preAirflowExtraInitContainers:
+      - command:
+          - sh
+          - -c
+          - cp -rvx /usr/local/airflow/. /usr_local_airflow_copy/
+        image: '{{ template "airflow_image" . }}'
+        name: usr-local-airflow-copier
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+          - mountPath: /usr_local_airflow_copy
+            name: usr-local-airflow
+    extraVolumeMounts:
+      - mountPath: /usr/local/airflow
+        name: usr-local-airflow
+      - mountPath: /tmp
+        name: tmp
+    extraVolumes:
+      - emptyDir: {}
+        name: usr-local-airflow
+      - emptyDir: {}
+        name: tmp
   apiServer:
     preAirflowExtraInitContainers:
       - command:
@@ -16,6 +44,10 @@ airflow:
         name: usr-local-airflow-copier
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         volumeMounts:
           - mountPath: /usr_local_airflow_copy
             name: usr-local-airflow
@@ -40,6 +72,10 @@ airflow:
         name: usr-local-airflow-copier
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         volumeMounts:
           - mountPath: /usr_local_airflow_copy
             name: usr-local-airflow
@@ -84,6 +120,10 @@ airflow:
         name: usr-local-airflow-copier
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         volumeMounts:
           - mountPath: /usr_local_airflow_copy
             name: usr-local-airflow
@@ -108,6 +148,10 @@ airflow:
         name: usr-local-airflow-copier
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         volumeMounts:
           - mountPath: /usr_local_airflow_copy
             name: usr-local-airflow
@@ -132,6 +176,10 @@ airflow:
         name: usr-local-airflow-copier
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         volumeMounts:
           - mountPath: /usr_local_airflow_copy
             name: usr-local-airflow
@@ -155,6 +203,10 @@ airflow:
         name: usr-local-airflow-copier
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         volumeMounts:
           - mountPath: /usr_local_airflow_copy
             name: usr-local-airflow
@@ -180,6 +232,10 @@ airflow:
         name: usr-local-airflow-copier
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         volumeMounts:
           - mountPath: /usr_local_airflow_copy
             name: usr-local-airflow
@@ -209,6 +265,10 @@ airflow:
         name: usr-local-airflow-copier
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         volumeMounts:
           - mountPath: /usr_local_airflow_copy
             name: usr-local-airflow

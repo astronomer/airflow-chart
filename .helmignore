@@ -4,9 +4,12 @@
 *.tmproj
 *~
 .DS_Store
+.agents/
 .bzr/
 .bzrignore
 .circleci
+.claude/
+.devcontainer/
 .git/
 .github
 .gitignore
@@ -17,6 +20,7 @@
 .project
 .pytest_cache
 .svn/
+.venv
 CODEOWNERS
 CONTRIBUTING.md
 Makefile
@@ -27,5 +31,7 @@ bin
 configs
 dev
 docs
+kind-config.yaml
 tests
+uv.lock
 venv

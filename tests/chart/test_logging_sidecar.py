@@ -31,7 +31,6 @@ class TestLoggingSidecar:
         vc = yaml.safe_load(doc["data"]["vector-config.yaml"])
         assert vc["sources"]["airflow_log_files"]["include"] == [
             "${SIDECAR_LOGS}/*.log",
-            "/usr/local/airflow/logs/**/*.log",
         ]
         assert vc["sinks"]["out"]["auth"] == {
             "strategy": "basic",
@@ -154,6 +153,11 @@ class TestLoggingSidecar:
         )
         assert len(docs) == 1
         vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
+
+        assert vc["sources"]["airflow_log_files"]["include"] == [
+            "${SIDECAR_LOGS}/*.log",
+            "/usr/local/airflow/logs/**/*.log",
+        ]
 
         parse_airflow3_path = vc["transforms"]["parse_airflow3_path"]
         assert parse_airflow3_path["type"] == "remap"

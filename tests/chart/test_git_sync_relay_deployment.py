@@ -1,3 +1,5 @@
+from subprocess import CalledProcessError
+
 import pytest
 
 from tests import git_root_dir, supported_k8s_versions
@@ -40,6 +42,8 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
+        assert "annotations" not in doc["metadata"]
+        assert "annotations" not in doc["spec"]["template"]["metadata"]
 
         git_dameon_env = get_env_vars_dict(c_by_name["git-daemon"].get("env"))
         assert not git_dameon_env.get("GIT_SYNC_REPO_FETCH_MODE")
@@ -146,6 +150,251 @@ class TestGitSyncRelayDeployment:
             "GIT_SYNC_REPO_FETCH_MODE": "poll",
         }
         assert c_by_name["git-daemon"]["livenessProbe"]
+
+    def test_gsr_deployment_https_pat(self, kube_version):
+        """HTTPS+PAT auth: GIT_SYNC_AUTH_TYPE is set, the credentials Secret mounts as a
+        directory at /etc/git-secret/https, and no SSH env/mounts are present (PINF-425)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "https://github.com/example/dags.git",
+                    "auth": {
+                        "type": "https-pat",
+                        "https": {"credentialsSecretName": "release-name-git-sync"},
+                    },
+                },
+            }
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        c_by_name = get_containers_by_name(doc)
+
+        volumes = doc["spec"]["template"]["spec"]["volumes"]
+        https_vol = next(v for v in volumes if v["name"] == "git-https-secret")
+        assert https_vol["secret"]["secretName"] == "release-name-git-sync"
+        # The SSH secret volume must not be present in HTTPS mode.
+        assert not any(v["name"] == "git-secret" for v in volumes)
+
+        mounts = c_by_name["git-sync"]["volumeMounts"]
+        https_mount = next(m for m in mounts if m["name"] == "git-https-secret")
+        assert https_mount["mountPath"] == "/etc/git-secret/https"
+        assert https_mount["readOnly"] is True
+
+        env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert env["GIT_SYNC_AUTH_TYPE"] == "https-pat"
+        assert env["GIT_SYNC_HTTPS_SECRET_DIR"] == "/etc/git-secret/https"
+        assert "GIT_SYNC_SSH" not in env
+        assert "GIT_SSH_KEY_FILE" not in env
+
+    def test_gsr_deployment_https_pat_mount_has_no_subpath(self, kube_version):
+        """Regression guard (FR2.2): the HTTPS credentials mount must NOT use subPath, so
+        kubelet propagates rotated credentials without a pod restart."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "https://github.com/example/dags.git",
+                    "auth": {
+                        "type": "https-pat",
+                        "https": {"credentialsSecretName": "release-name-git-sync"},
+                    },
+                },
+            }
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        c_by_name = get_containers_by_name(docs[0])
+        https_mount = next(m for m in c_by_name["git-sync"]["volumeMounts"] if m["name"] == "git-https-secret")
+        assert "subPath" not in https_mount
+
+    def test_gsr_deployment_https_none(self, kube_version):
+        """https-none (public repo): GIT_SYNC_AUTH_TYPE is set but no credentials are mounted."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "https://github.com/example/public-dags.git",
+                    "auth": {"type": "https-none"},
+                },
+            }
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        doc = docs[0]
+        c_by_name = get_containers_by_name(doc)
+        volumes = doc["spec"]["template"]["spec"]["volumes"]
+        assert not any(v["name"] == "git-https-secret" for v in volumes)
+
+        env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert env["GIT_SYNC_AUTH_TYPE"] == "https-none"
+        assert "GIT_SYNC_HTTPS_SECRET_DIR" not in env
+        assert "GIT_SYNC_SSH" not in env
+
+    def test_gsr_deployment_ssh_and_https_mutually_exclusive(self, kube_version):
+        """Configuring both SSH and HTTPS auth must fail the render (PINF-425)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "https://github.com/example/dags.git",
+                    "sshPrivateKeySecretName": "an-ssh-secret",
+                    "auth": {
+                        "type": "https-pat",
+                        "https": {"credentialsSecretName": "release-name-git-sync"},
+                    },
+                },
+            }
+        }
+        with pytest.raises(CalledProcessError) as excinfo:
+            render_chart(
+                kube_version=kube_version,
+                show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+                values=values,
+            )
+        # The message must point at the actually-conflicting fields, not imply that
+        # repo.auth is HTTPS-only (repo.auth.type: ssh is valid and pairs with
+        # sshPrivateKeySecretName on every SSH deployment).
+        stderr = excinfo.value.stderr.decode("utf-8")
+        assert "repo.sshPrivateKeySecretName cannot be combined with HTTPS auth" in stderr
+
+    def test_gsr_deployment_ssh_secret_with_explicit_ssh_auth_type_renders(self, kube_version):
+        """sshPrivateKeySecretName combined with auth.type: ssh is a valid SSH config and must
+        render, not trip the SSH/HTTPS mutual-exclusivity check — this is the shape houston
+        emits for SSH (auth.type=ssh alongside the key Secret) (PINF-425)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "git@github.com:example/dags.git",
+                    "sshPrivateKeySecretName": "an-ssh-secret",
+                    "auth": {"type": "ssh"},
+                },
+            }
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        c_by_name = get_containers_by_name(doc)
+        # SSH wiring is present and no HTTPS credentials are mounted.
+        volumes = doc["spec"]["template"]["spec"]["volumes"]
+        assert any(v["name"] == "git-secret" for v in volumes)
+        assert not any(v["name"] == "git-https-secret" for v in volumes)
+        env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert env["GIT_SYNC_SSH"] == "true"
+        assert env["GIT_SSH_KEY_FILE"] == "/etc/git-secret/ssh"
+        assert "GIT_SYNC_HTTPS_SECRET_DIR" not in env
+
+    def test_gsr_deployment_https_pat_without_secret_degrades(self, kube_version):
+        """https-pat without credentialsSecretName degrades like SSH-without-key: it renders
+        GIT_SYNC_AUTH_TYPE=https-pat with no credentials mount (relay starts and retries),
+        rather than failing the render (PINF-425)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "https://github.com/example/dags.git",
+                    "auth": {"type": "https-pat"},
+                },
+            }
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        c_by_name = get_containers_by_name(doc)
+        assert not any(v["name"] == "git-https-secret" for v in doc["spec"]["template"]["spec"]["volumes"])
+        assert not any(m["name"] == "git-https-secret" for m in c_by_name["git-sync"]["volumeMounts"])
+        env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert env["GIT_SYNC_AUTH_TYPE"] == "https-pat"
+        assert "GIT_SYNC_HTTPS_SECRET_DIR" not in env
+
+    def test_gsr_deployment_secret_without_auth_type_is_ignored(self, kube_version):
+        """A credentialsSecretName with no auth.type renders without wiring HTTPS (the secret
+        is ignored, no failure) — SSH likewise never rejects a secret (PINF-425)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "https://github.com/example/dags.git",
+                    "auth": {"https": {"credentialsSecretName": "release-name-git-sync"}},
+                },
+            }
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        c_by_name = get_containers_by_name(doc)
+        assert not any(v["name"] == "git-https-secret" for v in doc["spec"]["template"]["spec"]["volumes"])
+        env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert "GIT_SYNC_AUTH_TYPE" not in env
+
+    def test_gsr_deployment_invalid_auth_type(self, kube_version):
+        """An unrecognized auth.type value must fail the render (PINF-425)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "https://github.com/example/dags.git",
+                    "auth": {"type": "https-token"},
+                },
+            }
+        }
+        with pytest.raises(CalledProcessError):
+            render_chart(
+                kube_version=kube_version,
+                show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+                values=values,
+            )
+
+    def test_gsr_deployment_https_none_with_secret_is_ignored(self, kube_version):
+        """https-none with a credentialsSecretName renders as https-none with no credentials
+        mounted (the secret is ignored, no failure) — public-repo mode (PINF-425)."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repo": {
+                    "url": "https://github.com/example/public-dags.git",
+                    "auth": {
+                        "type": "https-none",
+                        "https": {"credentialsSecretName": "release-name-git-sync"},
+                    },
+                },
+            }
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        c_by_name = get_containers_by_name(doc)
+        assert not any(v["name"] == "git-https-secret" for v in doc["spec"]["template"]["spec"]["volumes"])
+        env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert env["GIT_SYNC_AUTH_TYPE"] == "https-none"
 
     def test_gsr_deployment_without_ssh_credentials_and_known_hosts(self, kube_version):
         """Test that a valid deployment is rendered when enabling git-sync without ssh credentials."""
@@ -302,7 +551,69 @@ class TestGitSyncRelayDeployment:
         assert doc["kind"] == "Deployment"
         assert doc["apiVersion"] == "apps/v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
-        assert gsrsecuritycontext == doc["spec"]["template"]["spec"]["securityContext"]
+        # runAsNonRoot: true and seccompProfile are PSS-Restricted chart defaults that merge in
+        # alongside overrides (pod-level securityContext).
+        assert doc["spec"]["template"]["spec"]["securityContext"] == {
+            **gsrsecuritycontext,
+            "runAsNonRoot": True,
+            "seccompProfile": {"type": "RuntimeDefault"},
+        }
+
+    def test_gsr_deployment_openshift_strips_incompatible_security_context(self, kube_version):
+        """Test that fsGroup and runAsUser are stripped from pod securityContext when OpenShift is enabled,
+        even if a customer explicitly sets them."""
+        values = {
+            "openshift": {"enabled": True},
+            "gitSyncRelay": {
+                "enabled": True,
+                "securityContext": {
+                    "fsGroup": 65533,
+                    "runAsUser": 50000,
+                    "runAsNonRoot": True,
+                },
+            },
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "Deployment"
+        pod_security_context = doc["spec"]["template"]["spec"]["securityContext"]
+
+        # fsGroup and runAsUser must be absent on OpenShift
+        assert "fsGroup" not in pod_security_context
+        assert "runAsUser" not in pod_security_context
+
+        # runAsNonRoot must be preserved/enforced
+        assert pod_security_context["runAsNonRoot"] is True
+
+    def test_gsr_deployment_non_openshift_preserves_security_context(self, kube_version):
+        """Test that fsGroup and runAsUser are preserved in pod securityContext when OpenShift is disabled."""
+        gsrsecuritycontext = {"fsGroup": 65533, "runAsUser": 50000, "runAsNonRoot": True}
+        values = {
+            "openshift": {"enabled": False},
+            "gitSyncRelay": {
+                "enabled": True,
+                "securityContext": gsrsecuritycontext,
+            },
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        pod_security_context = doc["spec"]["template"]["spec"]["securityContext"]
+
+        assert pod_security_context["fsGroup"] == 65533
+        assert pod_security_context["runAsUser"] == 50000
+        assert pod_security_context["runAsNonRoot"] is True
 
     def test_gsr_deployment_with_custom_registry_secret(self, kube_version):
         """Test git-sync-relay deployment with custom registry secret."""
@@ -493,3 +804,23 @@ class TestGitSyncRelayDeployment:
         assert spec["affinity"] == airflow_node_pool_config["affinity"]
         assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
         assert spec["tolerations"] == airflow_node_pool_config["tolerations"]
+
+    def test_gsr_annotations_overrides(self, kube_version):
+        """Test that gitSyncRelay annotations are set when gitSyncRelay.annotations when passed."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values={"gitSyncRelay": {"enabled": True, "annotations": {"example.com/owner": "platform"}}},
+        )
+        assert len(docs) == 1
+        assert docs[0]["metadata"]["annotations"] == {"example.com/owner": "platform"}
+
+    def test_gsr_pod_annotations_overrides(self, kube_version):
+        """Test that gitSyncRelay podAnnotations are set when gitSyncRelay.podAnnotations when passed."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values={"gitSyncRelay": {"enabled": True, "podAnnotations": {"sidecar.istio.io/inject": "false"}}},
+        )
+        assert len(docs) == 1
+        assert docs[0]["spec"]["template"]["metadata"]["annotations"] == {"sidecar.istio.io/inject": "false"}
