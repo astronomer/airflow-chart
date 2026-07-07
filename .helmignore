@@ -4,9 +4,12 @@
 *.tmproj
 *~
 .DS_Store
+.agents/
 .bzr/
 .bzrignore
 .circleci
+.claude/
+.devcontainer/
 .git/
 .github
 .gitignore

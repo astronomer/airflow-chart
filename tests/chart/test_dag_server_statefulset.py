@@ -56,6 +56,8 @@ class TestDagServerStatefulSet:
         common_default_tests(doc)
 
         assert "persistentVolumeClaimRetentionPolicy" not in doc["spec"]
+        assert "annotations" not in doc["metadata"]
+        assert "annotations" not in doc["spec"]["template"]["metadata"]
         spec = docs[0]["spec"]["template"]["spec"]
         assert spec["nodeSelector"] == {}
         assert spec["affinity"] == {}
@@ -143,7 +145,66 @@ class TestDagServerStatefulSet:
         assert container_spec["containers"][0]["securityContext"] == {
             "allowPrivilegeEscalation": False,
             "readOnlyRootFilesystem": True,
+            "capabilities": {"drop": ["ALL"]},
         }
+
+    def test_dag_server_openshift_strips_incompatible_security_context(self, kube_version):
+        """Test that fsGroup and runAsUser are stripped from pod securityContext when OpenShift is enabled,
+        even if a customer explicitly sets them."""
+        values = {
+            "openshift": {"enabled": True},
+            "dagDeploy": {
+                "enabled": True,
+                "securityContexts": {
+                    "pod": {
+                        "fsGroup": 65533,
+                        "runAsUser": 50000,
+                        "runAsNonRoot": True,
+                    },
+                },
+            },
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        assert doc["kind"] == "StatefulSet"
+        pod_security_context = doc["spec"]["template"]["spec"]["securityContext"]
+
+        assert "fsGroup" not in pod_security_context
+        assert "runAsUser" not in pod_security_context
+
+        assert pod_security_context["runAsNonRoot"] is True
+
+    def test_dag_server_non_openshift_preserves_security_context(self, kube_version):
+        """Test that fsGroup and runAsUser are preserved in pod securityContext when OpenShift is disabled."""
+        dag_server_pod_securitycontext = {"fsGroup": 65533, "runAsUser": 50000, "runAsNonRoot": True}
+        values = {
+            "openshift": {"enabled": False},
+            "dagDeploy": {
+                "enabled": True,
+                "securityContexts": {
+                    "pod": dag_server_pod_securitycontext,
+                },
+            },
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/dag-deploy/dag-server-statefulset.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+        pod_security_context = doc["spec"]["template"]["spec"]["securityContext"]
+
+        assert pod_security_context["fsGroup"] == 65533
+        assert pod_security_context["runAsUser"] == 50000
+        assert pod_security_context["runAsNonRoot"] is True
 
     def test_dag_server_statefulset_with_custom_registry_secret(self, kube_version):
         """Test dag-server statefulset with custom registry secret."""
@@ -417,3 +478,23 @@ class TestDagServerStatefulSet:
         spec = docs[0]["spec"]["template"]["spec"]
         assert values["dagDeploy"]["extraVolumes"][0] in spec["volumes"]
         assert values["dagDeploy"]["extraVolumeMounts"][0] in spec["containers"][0]["volumeMounts"]
+
+    def test_dag_server_annotations_overrides(self, kube_version):
+        """Test that dagDeploy annotations are set when dagDeploy.annotations when passed."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
+            values={"dagDeploy": {"enabled": True, "annotations": {"example.com/owner": "platform"}}},
+        )
+        assert len(docs) == 1
+        assert docs[0]["metadata"]["annotations"] == {"example.com/owner": "platform"}
+
+    def test_dag_server_pod_annotations_overrides(self, kube_version):
+        """Test that dagDeploy podAnnotations are set when dagDeploy.podAnnotations when passed."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
+            values={"dagDeploy": {"enabled": True, "podAnnotations": {"sidecar.istio.io/inject": "false"}}},
+        )
+        assert len(docs) == 1
+        assert docs[0]["spec"]["template"]["metadata"]["annotations"] == {"sidecar.istio.io/inject": "false"}
