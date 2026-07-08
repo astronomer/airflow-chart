@@ -1,0 +1,74 @@
+{{/*
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+*/}}
+
+################################
+## Airflow Flower VirtualService
+#################################
+{{- if and .Values.airflow.istio.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
+{{- $fullname := include "airflow.fullname" . }}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ $fullname }}-flower-virtualservice
+  labels:
+    tier: airflow
+    component: flower-virtualservice
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+    {{- with .Values.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.airflow.flower.labels }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if .Values.airflow.flower.annotations }}
+  annotations: {{- toYaml .Values.airflow.flower.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  hosts:
+    - {{- include "deployments_subdomain" . | indent 1 }}
+  {{- if hasKey .Values.airflow.istio "gateway" }}
+  gateways:
+    - {{ .Values.airflow.istio.gateway }}
+  {{- end }}
+  http:
+    # Flower routes
+    - match:
+        - uri:
+            prefix: "/{{ .Release.Name }}/flower"
+      route:
+        - destination:
+            host: {{ $fullname }}-flower.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+            {{- if .Values.authSidecar.enabled  }}
+              number: {{ .Values.authSidecar.port }}
+            {{- else }}
+              number: {{ .Values.airflow.ports.flowerUI }}
+            {{- end }}
+      {{- if hasKey .Values.airflow.istio "virtualService" }}
+      {{- if hasKey .Values.airflow.istio.virtualService "timeout" }}
+      timeout: {{ .Values.airflow.istio.virtualService.timeout }}
+      {{- end }}
+      {{- if hasKey .Values.airflow.istio.virtualService "retries" }}
+      retries:
+        {{- toYaml .Values.airflow.istio.virtualService.retries | nindent 8 }}
+      {{- end }}
+      {{- end }}
+{{- end }}
