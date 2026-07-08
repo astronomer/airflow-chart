@@ -46,29 +46,29 @@ spec:
     - {{- include "deployments_subdomain" . | indent 1 }}
   {{- if hasKey .Values.airflow.istio "gateway" }}
   gateways:
-  - {{ .Values.airflow.istio.gateway }}
+    - {{ .Values.airflow.istio.gateway }}
   {{- end }}
   http:
-  # Webserver routes
-  - match:
-    - uri:
-        prefix: "/{{ .Release.Name }}/airflow"
-    route:
-    - destination:
-        host: {{ $fullname }}-webserver.{{ .Release.Namespace }}.svc.cluster.local
-        port:
-        {{- if .Values.authSidecar.enabled  }}
-          number: {{ .Values.authSidecar.port }}
-        {{- else }}
-          number: {{ .Values.airflow.ports.airflowUI }}
-        {{- end }}
-    {{- if hasKey .Values.airflow.istio "virtualService" }}
-    {{- if hasKey .Values.airflow.istio.virtualService "timeout" }}
-    timeout: {{ .Values.airflow.istio.virtualService.timeout }}
-    {{- end }}
-    {{- if hasKey .Values.airflow.istio.virtualService "retries" }}
-    retries:
-      {{- toYaml .Values.airflow.istio.virtualService.retries | nindent 6 }}
-    {{- end }}
-    {{- end }}
+    # Webserver routes
+    - match:
+        - uri:
+            prefix: "/{{ .Release.Name }}/airflow"
+      route:
+        - destination:
+            host: {{ $fullname }}-webserver.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+            {{- if .Values.authSidecar.enabled  }}
+              number: {{ .Values.authSidecar.port }}
+            {{- else }}
+              number: {{ .Values.airflow.ports.airflowUI }}
+            {{- end }}
+      {{- if hasKey .Values.airflow.istio "virtualService" }}
+      {{- if hasKey .Values.airflow.istio.virtualService "timeout" }}
+      timeout: {{ .Values.airflow.istio.virtualService.timeout }}
+      {{- end }}
+      {{- if hasKey .Values.airflow.istio.virtualService "retries" }}
+      retries:
+        {{- toYaml .Values.airflow.istio.virtualService.retries | nindent 8 }}
+      {{- end }}
+      {{- end }}
 {{- end }}
