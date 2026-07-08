@@ -162,7 +162,7 @@ spec:
                   name: flower-ui
                   {{- end }}
 {{- end }}
-{{- if and .Values.dagDeploy.enabled  }}
+{{- if .Values.dagDeploy.enabled  }}
 ---
 kind: Ingress
 apiVersion: networking.k8s.io/v1
