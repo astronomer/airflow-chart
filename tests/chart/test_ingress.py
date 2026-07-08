@@ -134,6 +134,63 @@ class TestIngress:
         assert ingressAnnotations == docs[1]["metadata"]["annotations"]
         assert docs[1]["spec"]["tls"][0]["secretName"] == tls_secret_name
 
+    def test_airflow_ingress_global_base_domain_dual_hosts(self, kube_version):
+        """CP HA: globalBaseDomain adds a parallel host rule + TLS SAN per component."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/ingress.yaml",
+            values={
+                "airflow": {"executor": "CeleryExecutor"},
+                "ingress": {
+                    "enabled": True,
+                    "baseDomain": "dp1.cp1.example.com",
+                    "globalBaseDomain": "dp1.cp.example.com",
+                    "tlsSecretName": tls_secret_name,
+                },
+                "dagDeploy": {"enabled": True},
+            },
+        )
+        # webserver, flower, dag-server
+        assert len(docs) == 3
+
+        webserver = docs[0]
+        assert [r["host"] for r in webserver["spec"]["rules"]] == [
+            "deployments.dp1.cp1.example.com",
+            "release-name-airflow.dp1.cp1.example.com",
+            "deployments.dp1.cp.example.com",
+            "release-name-airflow.dp1.cp.example.com",
+        ]
+        assert "deployments.dp1.cp.example.com" in webserver["spec"]["tls"][0]["hosts"]
+        assert "release-name-airflow.dp1.cp.example.com" in webserver["spec"]["tls"][0]["hosts"]
+
+        flower = docs[1]
+        flower_hosts = [r["host"] for r in flower["spec"]["rules"]]
+        assert "deployments.dp1.cp.example.com" in flower_hosts
+        assert "release-name-flower.dp1.cp.example.com" in flower_hosts
+        assert "release-name-flower.dp1.cp.example.com" in flower["spec"]["tls"][0]["hosts"]
+
+        dag_server = docs[2]
+        assert [r["host"] for r in dag_server["spec"]["rules"]] == [
+            "deployments.dp1.cp1.example.com",
+            "deployments.dp1.cp.example.com",
+        ]
+        assert "deployments.dp1.cp.example.com" in dag_server["spec"]["tls"][0]["hosts"]
+
+    def test_airflow_ingress_no_global_base_domain_single_host(self, kube_version):
+        """Without globalBaseDomain, only the per-CP hosts are emitted (unchanged)."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/ingress.yaml",
+            values={"ingress": {"enabled": True, "baseDomain": "dp1.cp1.example.com"}},
+        )
+        assert len(docs) == 1
+        hosts = [r["host"] for r in docs[0]["spec"]["rules"]]
+        assert hosts == [
+            "deployments.dp1.cp1.example.com",
+            "release-name-airflow.dp1.cp1.example.com",
+        ]
+        assert all("dp1.cp.example.com" not in h for h in hosts)
+
     def test_git_sync_relay_ingress_without_tls(self, kube_version):
         """Test git-sync-relay ingress has no TLS block when tlsSecretName is not set."""
         docs = render_chart(

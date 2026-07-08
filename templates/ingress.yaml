@@ -37,6 +37,10 @@ spec:
       hosts:
         - {{- include "deployments_subdomain" . | indent 1 }}
         - {{- include "airflow_subdomain" . | indent 1 }}
+        {{- if .Values.ingress.globalBaseDomain }}
+        - {{- include "deployments_subdomain_global" . | indent 1 }}
+        - {{- include "airflow_subdomain_global" . | indent 1 }}
+        {{- end }}
   {{- end }}
   rules:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
@@ -87,6 +91,56 @@ spec:
                   name: airflow-ui
                   {{- end }}
               {{- end }}
+    {{- if .Values.ingress.globalBaseDomain }}
+    - host: {{- include "deployments_subdomain_global" . | indent 1 }}
+      http:
+        paths:
+          - path: /{{ .Release.Name }}/airflow
+            pathType: Prefix
+            backend:
+              service:
+              {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
+                name: {{ .Release.Name }}-api-server
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: api-server
+                  {{- end }}
+              {{- else }}
+                name: {{ .Release.Name }}-webserver
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: airflow-ui
+                  {{- end }}
+              {{- end }}
+    - host: {{- include "airflow_subdomain_global" . | indent 1 }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+              {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
+                name: {{ .Release.Name }}-api-server
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: api-server
+                  {{- end }}
+              {{- else }}
+                name: {{ .Release.Name }}-webserver
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: airflow-ui
+                  {{- end }}
+              {{- end }}
+    {{- end }}
 {{- end }}
 {{- if and .Values.ingress.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
 ---
@@ -125,6 +179,10 @@ spec:
       hosts:
         - {{- include "deployments_subdomain" . | indent 1 }}
         - {{- include "flower_subdomain" . | indent 1 }}
+        {{- if .Values.ingress.globalBaseDomain }}
+        - {{- include "deployments_subdomain_global" . | indent 1 }}
+        - {{- include "flower_subdomain_global" . | indent 1 }}
+        {{- end }}
   {{- end }}
   rules:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
@@ -161,6 +219,42 @@ spec:
                   {{- else }}
                   name: flower-ui
                   {{- end }}
+    {{- if .Values.ingress.globalBaseDomain }}
+    - host: {{- include "deployments_subdomain_global" . | indent 1 }}
+      http:
+        paths:
+          {{- if .Values.authSidecar.enabled  }}
+          - path: /{{ .Release.Name }}/flower
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-flower
+                port:
+                  name: auth-proxy
+          {{- else }}
+          - path: /{{ .Release.Name }}/flower/
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-flower
+                port:
+                  name: flower-ui
+          {{ end }}
+    - host: {{- include "flower_subdomain_global" . | indent 1 }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-flower
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: flower-ui
+                  {{- end }}
+    {{- end }}
 {{- end }}
 {{- if and .Values.dagDeploy.enabled (not .Values.airflow.istio.enabled) }}
 ---
@@ -198,6 +292,9 @@ spec:
     - secretName: {{ .Values.ingress.tlsSecretName }}
       hosts:
         - {{- include "deployments_subdomain" . | indent 1 }}
+        {{- if .Values.ingress.globalBaseDomain }}
+        - {{- include "deployments_subdomain_global" . | indent 1 }}
+        {{- end }}
   {{- end }}
   rules:
     - host: {{- include "deployments_subdomain" . | indent 1 }}
@@ -218,4 +315,24 @@ spec:
                   {{- else }}
                   name: http
                   {{- end }}
+    {{- if .Values.ingress.globalBaseDomain }}
+    - host: {{- include "deployments_subdomain_global" . | indent 1 }}
+      http:
+        paths:
+          {{- if .Values.authSidecar.enabled  }}
+          - path: /{{ .Release.Name }}/dags
+          {{- else }}
+          - path: /{{ .Release.Name }}/dags/(upload|downloads|healthz)(/.*)?
+          {{- end }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-dag-server
+                port:
+                  {{- if .Values.authSidecar.enabled  }}
+                  name: auth-proxy
+                  {{- else }}
+                  name: http
+                  {{- end }}
+    {{- end }}
 {{- end }}

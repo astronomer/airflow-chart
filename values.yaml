@@ -761,6 +761,12 @@ ingress:
   # Base domain for ingress vhosts
   baseDomain: ~
 
+  # Global customer-facing parent domain for CP HA deployment URL aliases. When
+  # set, the deployment Ingress emits a second host rule + TLS SAN under this
+  # parent alongside the per-CP baseDomain rules. Left unset (~) for non-HA
+  # installs, which keeps output unchanged.
+  globalBaseDomain: ~
+
   # Enable platform authentication
   auth:
     enabled: true
