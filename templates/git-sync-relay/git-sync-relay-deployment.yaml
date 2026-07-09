@@ -110,7 +110,33 @@ spec:
         {{- end }}
         - emptyDir: {}
           name: tmp
+        {{- if .Values.global.privateCaCerts }}
+        {{- /* Writable overlay for the read-only image trust store, seeded by the
+               etc-ssl-certs-copier initContainer, so update-ca-certificates can run
+               as the non-root relay user (readOnlyRootFilesystem is enforced). */}}
+        - name: etc-ssl-certs
+          emptyDir: {}
+        {{- include "gitSyncRelay.customCaVolumes" . | nindent 8 }}
+        {{- end }}
       initContainers:
+        {{- if .Values.global.privateCaCerts }}
+        - name: etc-ssl-certs-copier
+          image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+          securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              if [ -d /etc/ssl/certs ]; then
+                cp -r /etc/ssl/certs/* /etc/ssl/certs_copy/
+              else
+                echo "No /etc/ssl/certs directory found, skipping copy."
+              fi
+          volumeMounts:
+            - name: etc-ssl-certs
+              mountPath: /etc/ssl/certs_copy
+          resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
+        {{- end }}
         - name: git-config-manager
           command: ["git", "config", "--global", "--add", "safe.directory", "/git"]
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
@@ -159,7 +185,16 @@ spec:
             {{- end }}
             - name: tmp
               mountPath: /tmp
+            {{- if .Values.global.privateCaCerts }}
+            - name: etc-ssl-certs
+              mountPath: /etc/ssl/certs
+            {{- include "gitSyncRelay.customCaVolumeMounts" . | nindent 12 }}
+            {{- end }}
           env:
+            {{- if .Values.global.privateCaCerts }}
+            - name: UPDATE_CA_CERTS
+              value: "true"
+            {{- end }}
             - name: GIT_SYNC_ROOT
               value: "/git"
             - name: GIT_SYNC_REPO

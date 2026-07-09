@@ -2,6 +2,15 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+global:
+  # Names of Secrets (each with a `cert.pem` key) holding customer private CA
+  # bundles to trust. Houston/commander populate this per deployment with the
+  # names of the CA Secrets synced into the deployment namespace (via the
+  # astronomer.io/commander-sync annotation). When set, the git-sync container
+  # trusts them via update-ca-certificates (see the git-sync-relay deployment).
+  # Mirrors the astronomer chart's global.privateCaCerts.
+  privateCaCerts: []
+
 airflow:
   # group of airflow user
   gid: 50000
