@@ -79,6 +79,9 @@ airflow:
       securityContexts:
         container:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
 
   # Airflow api server settings
   apiServer:
@@ -115,6 +118,9 @@ airflow:
     securityContexts:
       container:
         readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
     securityContext:
       # Set user to redis:999
       runAsUser: 999
@@ -149,9 +155,15 @@ airflow:
       securityContexts:
         container:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
     securityContexts:
       container:
         readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
 
   # Elasticsearch logging configuration
   elasticsearch:
@@ -432,6 +444,9 @@ airflow:
     securityContexts:
       container:
         readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
     overrideMappings:
       # Map dot separated stats to labels
       - match: airflow.operator_successes_(.*)
@@ -668,7 +683,13 @@ authSidecar:
   tag: 1.27.4-1
   pullPolicy: IfNotPresent
   port: 8084
-  securityContext: {}
+  # Hardened container securityContext. allowPrivilegeEscalation and capabilities are
+  # overridable here; readOnlyRootFilesystem is enforced by the chart (see _helpers.yaml).
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: [ALL]
   resources: {}
   livenessProbe: {}
   readinessProbe: {}
@@ -706,6 +727,13 @@ loggingSidecar:
   resources: {}
   livenessProbe: {}
   readinessProbe: {}
+  # Hardened container securityContext. allowPrivilegeEscalation and capabilities are
+  # overridable here; readOnlyRootFilesystem is enforced by the chart (see _helpers.yaml).
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: [ALL]
 
 # Ingress configuration
 ingress:
@@ -821,7 +849,11 @@ dagDeploy:
   securityContexts:
     pod:
       runAsUser: 50000
-    container: {}
+    container:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
 
   flower:
     extraVolumeMounts:
@@ -848,14 +880,29 @@ gitSyncRelay:
   securityContext:
     fsGroup: 65533
     runAsUser: 50000
+    # PSS-Restricted requires run-as-non-root and a seccomp profile. Both are set at the
+    # pod level (seccomp pod-level matches the platform chart convention and covers every
+    # container in the pod). The gitSyncRelay.podSecurityContext helper preserves these on
+    # OpenShift while stripping runAsUser/fsGroup for the restricted-v2 SCC (PINF-559).
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
   terminationGracePeriodSeconds: 30
+  # git-sync-relay is not processed by houston's securityHardeningConfig, so these
+  # container securityContexts are the only place the restricted container set is applied.
   gitDaemon:
     securityContext:
       readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
   gitSync:
     webhookPort: 8000
     securityContext:
       readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"

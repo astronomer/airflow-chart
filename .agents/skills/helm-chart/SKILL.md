@@ -1,6 +1,6 @@
 ---
 name: helm-chart
-description: Use for Helm chart work - creating charts, modifying existing charts, values design, testing. For the Astronomer airflow-chart repository, this is the wrapper chart around the upstream Apache Airflow chart.
+description: Use for Helm chart work - creating charts, modifying existing charts, values design, testing. For the Astronomer airflow-chart repository, this is the umbrella chart whose single dependency is the upstream Apache Airflow chart.
 ---
 
 # Helm Chart Work Guide
@@ -9,16 +9,16 @@ description: Use for Helm chart work - creating charts, modifying existing chart
 
 This repository (`astronomer/airflow-chart`) is **Astronomer's Helm chart for Apache Airflow**. The chart is named `airflow` (see `Chart.yaml`), but the repo and the packaged release are `airflow-chart`.
 
-It is a **wrapper chart**: it declares the upstream Astronomer Airflow chart as a dependency (`dependencies:` in `Chart.yaml`, pinned to a `*-astro` version) and layers Astronomer-specific resources on top. A single `values.yaml` controls both the wrapper's own resources and the bundled `airflow` sub-chart.
+It is an **umbrella (parent) chart**: it declares the upstream Astronomer Airflow chart as a dependency (`dependencies:` in `Chart.yaml`, pinned to a `*-astro` version) and layers Astronomer-specific resources on top. A single `values.yaml` controls both the parent chart's own resources and the bundled `airflow` sub-chart.
 
-- The bundled sub-chart is downloaded to `charts/airflow/` by `helm dep update` (run `make charts`). Sub-chart values are nested under the `airflow:` key in `values.yaml`.
-- The wrapper's own resources live at the top-level `templates/` directory and add things like the DAG-deploy server, git-sync relay, auth sidecars, OpenShift SCC, logging sidecar, and ingress.
+- The sub-chart is downloaded to `charts/airflow/` by `helm dep update` (run `make charts`). Sub-chart values are nested under the `airflow:` key in `values.yaml`.
+- The parent chart's own resources live at the top-level `templates/` directory and add things like the DAG-deploy server, git-sync relay, auth sidecars, OpenShift SCC, logging sidecar, and ingress.
 
 For testing, use the [chart-tests skill](../chart-tests/SKILL.md) — it covers `render_chart()`, sub-chart values nesting under `airflow`, parametrized tests, and `uv run pytest` usage.
 
 ### Template layout
 
-The wrapper's templates live under top-level `templates/`. Two patterns coexist — follow whichever the surrounding code already uses; we do not retroactively rename files.
+The parent chart's templates live under top-level `templates/`. Two patterns coexist — follow whichever the surrounding code already uses; we do not retroactively rename files.
 
 **Component subdirectories.** Multi-file components get their own subdirectory, and the component name is repeated in the filename so the file is identifiable from its basename alone: `api-server/`, `dag-deploy/`, `flower/`, `git-sync-relay/`, `webserver/`.
 

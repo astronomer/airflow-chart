@@ -231,7 +231,11 @@ class TestAuthSidecar:
 
         common_pod_manager_test_cases(docs, 1, "release-name-dag-server", "StatefulSet")
         c_by_name = get_containers_by_name(docs[0])
-        assert c_by_name["auth-proxy"]["securityContext"] == {**securityContext, "readOnlyRootFilesystem": True}
+        assert c_by_name["auth-proxy"]["securityContext"] == {
+            **securityContext,
+            "readOnlyRootFilesystem": True,
+            "capabilities": {"drop": ["ALL"]},
+        }
 
     def test_auth_sidecar_resources_with_dag_server_enabled(self, kube_version):
         """Test auth sidecar resource overrides"""
