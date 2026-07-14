@@ -512,26 +512,68 @@ Strips fsGroup and runAsUser on OpenShift to comply with restricted-v2 SCC.
 {{/*
 Private-CA trust for the git-sync container. When global.privateCaCerts is set
 (each entry is a Secret with a `cert.pem` key, synced into this deployment's
-namespace by commander), mount each bundle under /usr/local/share/ca-certificates
-so update-ca-certificates trusts it. Mirrors the astronomer chart's
+namespace by commander), the git-sync container trusts those CAs: each bundle is
+mounted under /usr/local/share/ca-certificates and update-ca-certificates runs
+over a writable emptyDir overlay of /etc/ssl/certs, so it works as the non-root
+relay user (readOnlyRootFilesystem is enforced). Mirrors the astronomer chart's
 custom_ca_volumes / custom_ca_volume_mounts so the same operator-provided CA
-Secrets work here. Paired with a writable emptyDir over /etc/ssl/certs (see the
-deployment template) so update-ca-certificates can run as the non-root relay user.
+Secrets work here.
+
+The four helpers below emit the volumes, the copier initContainer, the volume
+mounts, and the UPDATE_CA_CERTS env. Each is a no-op unless global.privateCaCerts
+is set, so callers include them unconditionally (no repeated guard at the call
+site).
 */}}
 {{- define "gitSyncRelay.customCaVolumes" }}
+{{- if .Values.global.privateCaCerts }}
+- name: etc-ssl-certs
+  emptyDir: {}
 {{- range .Values.global.privateCaCerts }}
 - name: {{ . }}
   secret:
     secretName: {{ . }}
 {{- end }}
 {{- end }}
+{{- end }}
+
+{{- define "gitSyncRelay.customCaInitContainer" }}
+{{- if .Values.global.privateCaCerts }}
+- name: etc-ssl-certs-copier
+  image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+  securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 4 }}
+  command:
+    - sh
+    - -c
+    - |
+      if [ -d /etc/ssl/certs ]; then
+        cp -r /etc/ssl/certs/* /etc/ssl/certs_copy/
+      else
+        echo "No /etc/ssl/certs directory found, skipping copy."
+      fi
+  volumeMounts:
+    - name: etc-ssl-certs
+      mountPath: /etc/ssl/certs_copy
+  resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 4 }}
+{{- end }}
+{{- end }}
 
 {{- define "gitSyncRelay.customCaVolumeMounts" }}
+{{- if .Values.global.privateCaCerts }}
+- name: etc-ssl-certs
+  mountPath: /etc/ssl/certs
 {{- range $secret_name := .Values.global.privateCaCerts }}
 - name: {{ $secret_name }}
   mountPath: /usr/local/share/ca-certificates/{{ $secret_name }}.pem
   subPath: cert.pem
   readOnly: true
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "gitSyncRelay.customCaEnv" }}
+{{- if .Values.global.privateCaCerts }}
+- name: UPDATE_CA_CERTS
+  value: "true"
 {{- end }}
 {{- end }}
 
