@@ -110,7 +110,9 @@ spec:
         {{- end }}
         - emptyDir: {}
           name: tmp
+        {{- include "gitSyncRelay.customCaVolumes" . | nindent 8 }}
       initContainers:
+        {{- include "gitSyncRelay.customCaInitContainer" . | nindent 8 }}
         - name: git-config-manager
           command: ["git", "config", "--global", "--add", "safe.directory", "/git"]
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
@@ -159,7 +161,9 @@ spec:
             {{- end }}
             - name: tmp
               mountPath: /tmp
+            {{- include "gitSyncRelay.customCaVolumeMounts" . | nindent 12 }}
           env:
+            {{- include "gitSyncRelay.customCaEnv" . | nindent 12 }}
             - name: GIT_SYNC_ROOT
               value: "/git"
             - name: GIT_SYNC_REPO
