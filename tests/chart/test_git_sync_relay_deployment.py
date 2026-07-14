@@ -82,7 +82,9 @@ class TestGitSyncRelayDeployment:
         # Volumes: writable trust-store overlay + the CA secret.
         vols = {v["name"]: v for v in spec["volumes"]}
         assert "etc-ssl-certs" in vols and "emptyDir" in vols["etc-ssl-certs"]
-        assert vols["my-private-ca"]["secret"]["secretName"] == "my-private-ca"
+        # Volume name is derived from the list index (DNS-1123-safe), not the raw
+        # Secret name; the Secret name stays on secretName.
+        assert vols["private-ca-0"]["secret"]["secretName"] == "my-private-ca"
 
         # initContainer seeds the emptyDir from the image trust store.
         inits = {c["name"]: c for c in spec["initContainers"]}
@@ -94,10 +96,36 @@ class TestGitSyncRelayDeployment:
         c_by_name = get_containers_by_name(docs[0])
         gs_mounts = {m["name"]: m for m in c_by_name["git-sync"]["volumeMounts"]}
         assert gs_mounts["etc-ssl-certs"]["mountPath"] == "/etc/ssl/certs"
-        assert gs_mounts["my-private-ca"]["mountPath"] == "/usr/local/share/ca-certificates/my-private-ca.pem"
-        assert gs_mounts["my-private-ca"]["subPath"] == "cert.pem"
+        # Mounted as .crt (content is PEM) so update-ca-certificates picks it up.
+        assert gs_mounts["private-ca-0"]["mountPath"] == "/usr/local/share/ca-certificates/private-ca-0.crt"
+        assert gs_mounts["private-ca-0"]["subPath"] == "cert.pem"
         git_sync_env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
         assert git_sync_env["UPDATE_CA_CERTS"] == "true"
+
+    def test_gsr_deployment_private_ca_names_are_index_based(self, kube_version):
+        """Volume names are index-derived (private-ca-N), so a Secret name that is
+        not a valid volume name (e.g. contains a dot) or would collide is handled.
+        Each CA maps to its own indexed volume + matching .crt mount."""
+        values = {
+            "gitSyncRelay": {"enabled": True},
+            # Dotted Secret names are valid Secret names but invalid volume names.
+            "global": {"privateCaCerts": ["corp.root.ca", "corp.intermediate.ca"]},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["templates/git-sync-relay/git-sync-relay-deployment.yaml"],
+            values=values,
+        )
+        spec = docs[0]["spec"]["template"]["spec"]
+
+        vols = {v["name"]: v for v in spec["volumes"]}
+        assert vols["private-ca-0"]["secret"]["secretName"] == "corp.root.ca"
+        assert vols["private-ca-1"]["secret"]["secretName"] == "corp.intermediate.ca"
+
+        gs_mounts = {m["name"]: m for m in get_containers_by_name(docs[0])["git-sync"]["volumeMounts"]}
+        assert gs_mounts["private-ca-0"]["mountPath"] == "/usr/local/share/ca-certificates/private-ca-0.crt"
+        assert gs_mounts["private-ca-1"]["mountPath"] == "/usr/local/share/ca-certificates/private-ca-1.crt"
 
     def test_gsr_deployment_gsr_repo_share_mode_volume(self, kube_version):
         """Test that a valid deployment is rendered when git-sync-relay is enabled with repoShareMode=shared_volume."""

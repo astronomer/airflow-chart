@@ -524,14 +524,21 @@ mounts, and the UPDATE_CA_CERTS env. Each is a no-op unless global.privateCaCert
 is set, so callers include them unconditionally (no repeated guard at the call
 site).
 */}}
+{{/*
+Volume names must be DNS-1123 labels (no dots, <=63 chars, unique), but Secret
+names are DNS-1123 subdomains (may contain dots, up to 253 chars). Derive the
+volume name from the list index (private-ca-N) so it is always valid and can
+never collide; the real Secret name stays on `secretName` / the mount filename.
+The same index is used in customCaVolumeMounts so each mount matches its volume.
+*/}}
 {{- define "gitSyncRelay.customCaVolumes" }}
 {{- if .Values.global.privateCaCerts }}
 - name: etc-ssl-certs
   emptyDir: {}
-{{- range .Values.global.privateCaCerts }}
-- name: {{ . }}
+{{- range $index, $secret_name := .Values.global.privateCaCerts }}
+- name: private-ca-{{ $index }}
   secret:
-    secretName: {{ . }}
+    secretName: {{ $secret_name }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -546,7 +553,7 @@ site).
     - -c
     - |
       if [ -d /etc/ssl/certs ]; then
-        cp -r /etc/ssl/certs/* /etc/ssl/certs_copy/
+        cp -r /etc/ssl/certs/. /etc/ssl/certs_copy/
       else
         echo "No /etc/ssl/certs directory found, skipping copy."
       fi
@@ -561,9 +568,9 @@ site).
 {{- if .Values.global.privateCaCerts }}
 - name: etc-ssl-certs
   mountPath: /etc/ssl/certs
-{{- range $secret_name := .Values.global.privateCaCerts }}
-- name: {{ $secret_name }}
-  mountPath: /usr/local/share/ca-certificates/{{ $secret_name }}.pem
+{{- range $index, $secret_name := .Values.global.privateCaCerts }}
+- name: private-ca-{{ $index }}
+  mountPath: /usr/local/share/ca-certificates/private-ca-{{ $index }}.crt
   subPath: cert.pem
   readOnly: true
 {{- end }}
