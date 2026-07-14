@@ -96,8 +96,8 @@ class TestGitSyncRelayDeployment:
         c_by_name = get_containers_by_name(docs[0])
         gs_mounts = {m["name"]: m for m in c_by_name["git-sync"]["volumeMounts"]}
         assert gs_mounts["etc-ssl-certs"]["mountPath"] == "/etc/ssl/certs"
-        # Mounted as .crt (content is PEM) so update-ca-certificates picks it up.
-        assert gs_mounts["private-ca-0"]["mountPath"] == "/usr/local/share/ca-certificates/private-ca-0.crt"
+        # PEM content mounted with a .pem name; ap-base's update-ca-certificates picks it up.
+        assert gs_mounts["private-ca-0"]["mountPath"] == "/usr/local/share/ca-certificates/private-ca-0.pem"
         assert gs_mounts["private-ca-0"]["subPath"] == "cert.pem"
         git_sync_env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
         assert git_sync_env["UPDATE_CA_CERTS"] == "true"
@@ -124,8 +124,8 @@ class TestGitSyncRelayDeployment:
         assert vols["private-ca-1"]["secret"]["secretName"] == "corp.intermediate.ca"
 
         gs_mounts = {m["name"]: m for m in get_containers_by_name(docs[0])["git-sync"]["volumeMounts"]}
-        assert gs_mounts["private-ca-0"]["mountPath"] == "/usr/local/share/ca-certificates/private-ca-0.crt"
-        assert gs_mounts["private-ca-1"]["mountPath"] == "/usr/local/share/ca-certificates/private-ca-1.crt"
+        assert gs_mounts["private-ca-0"]["mountPath"] == "/usr/local/share/ca-certificates/private-ca-0.pem"
+        assert gs_mounts["private-ca-1"]["mountPath"] == "/usr/local/share/ca-certificates/private-ca-1.pem"
 
     def test_gsr_deployment_gsr_repo_share_mode_volume(self, kube_version):
         """Test that a valid deployment is rendered when git-sync-relay is enabled with repoShareMode=shared_volume."""

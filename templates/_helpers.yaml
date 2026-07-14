@@ -570,7 +570,7 @@ The same index is used in customCaVolumeMounts so each mount matches its volume.
   mountPath: /etc/ssl/certs
 {{- range $index, $secret_name := .Values.global.privateCaCerts }}
 - name: private-ca-{{ $index }}
-  mountPath: /usr/local/share/ca-certificates/private-ca-{{ $index }}.crt
+  mountPath: /usr/local/share/ca-certificates/private-ca-{{ $index }}.pem
   subPath: cert.pem
   readOnly: true
 {{- end }}
