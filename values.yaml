@@ -89,6 +89,9 @@ airflow:
         container:
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
           capabilities:
             drop: [ALL]
 
