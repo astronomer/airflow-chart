@@ -702,7 +702,13 @@ authSidecar:
     allowPrivilegeEscalation: false
     capabilities:
       drop: [ALL]
-  resources: {}
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
   livenessProbe: {}
   readinessProbe: {}
   startupProbe: {}
@@ -737,7 +743,13 @@ loggingSidecar:
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
   image: quay.io/astronomer/ap-vector:0.45.0-1
-  resources: {}
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
   livenessProbe: {}
   readinessProbe: {}
   startupProbe: {}
@@ -855,13 +867,13 @@ dagDeploy:
     name: ~
     create: true
 
-  resources: {}
-  #  limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  #  requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
 
   # This setting tells kubernetes that its ok to evict
   # when it wants to scale a node down.
@@ -917,6 +929,13 @@ gitSyncRelay:
       allowPrivilegeEscalation: false
       capabilities:
         drop: [ALL]
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
     livenessProbe: {}
     readinessProbe: {}
     startupProbe: {}
@@ -927,6 +946,13 @@ gitSyncRelay:
       allowPrivilegeEscalation: false
       capabilities:
         drop: [ALL]
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
     livenessProbe: {}
     readinessProbe: {}
     startupProbe: {}

@@ -109,6 +109,22 @@ class TestDagServerStatefulSet:
         c_by_name = get_containers_by_name(doc)
         assert c_by_name["dag-server"]["resources"] == resources
 
+    def test_dag_server_statefulset_resources_have_default(self, kube_version):
+        """Test that Dag Server statefulset gets a real default resources block, not an empty one."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
+            values={"dagDeploy": {"enabled": True}},
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        c_by_name = get_containers_by_name(doc)
+        assert c_by_name["dag-server"]["resources"] == {
+            "limits": {"cpu": "250m", "memory": "512Mi"},
+            "requests": {"cpu": "100m", "memory": "256Mi"},
+        }
+
     def test_dag_server_statefulset_with_securitycontext_overrides(self, kube_version):
         """Test that dag-server statefulset are configurable with custom securitycontext."""
         dag_server_pod_securitycontext = {
@@ -402,6 +418,15 @@ class TestDagServerStatefulSet:
             {"mountPath": "/tmp", "name": "tmp"},  # noqa: S108
             {"mountPath": "/var/lib/nginx/tmp", "name": "nginx-tmp"},
         ]
+
+        assert c_by_name["auth-proxy"]["resources"] == {
+            "limits": {"cpu": "200m", "memory": "256Mi"},
+            "requests": {"cpu": "100m", "memory": "128Mi"},
+        }
+        assert c_by_name["sidecar-log-consumer"]["resources"] == {
+            "limits": {"cpu": "200m", "memory": "256Mi"},
+            "requests": {"cpu": "100m", "memory": "128Mi"},
+        }
 
     def test_dag_server_service_account_with_template(self, kube_version):
         """Test dag-server service account with template."""

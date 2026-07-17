@@ -48,6 +48,14 @@ class TestGitSyncRelayDeployment:
         assert "livenessProbe" not in c_by_name["git-sync"]
         assert "readinessProbe" not in c_by_name["git-sync"]
         assert "startupProbe" not in c_by_name["git-sync"]
+        assert c_by_name["git-sync"]["resources"] == {
+            "limits": {"cpu": "200m", "memory": "256Mi"},
+            "requests": {"cpu": "100m", "memory": "128Mi"},
+        }
+        assert c_by_name["git-daemon"]["resources"] == {
+            "limits": {"cpu": "100m", "memory": "128Mi"},
+            "requests": {"cpu": "50m", "memory": "64Mi"},
+        }
         assert "annotations" not in doc["metadata"]
         assert "annotations" not in doc["spec"]["template"]["metadata"]
 
