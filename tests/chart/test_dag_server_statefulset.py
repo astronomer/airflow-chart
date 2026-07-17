@@ -6,6 +6,7 @@ from tests.utils.chart import render_chart
 
 readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
 livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
+startupProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/shealthz", "port": 8080, "scheme": "HTTP"}}
 resources = {
     "requests": {"cpu": 99.9, "memory": "777Mi"},
     "limits": {"cpu": 66.6, "memory": "888Mi"},
@@ -29,6 +30,7 @@ def common_default_tests(doc):
     assert c_by_name["dag-server"]["image"].startswith("quay.io/astronomer/ap-dag-deploy:")
     assert c_by_name["dag-server"]["image"].startswith("quay.io/astronomer/ap-dag-deploy:")
     assert c_by_name["dag-server"]["livenessProbe"]
+    assert c_by_name["dag-server"]["startupProbe"]
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
@@ -320,8 +322,15 @@ class TestDagServerStatefulSet:
         assert "sidecar-log-consumer" in c_by_name
 
     def test_dag_server_statefulset_liveness_and_readiness_probes_with_dag_server_enabled(self, kube_version):
-        """Test that a valid statefulset is rendered when dag-server is enabled with readiness and liveness probes."""
-        values = {"dagDeploy": {"enabled": True, "readinessProbe": readinessProbe, "livenessProbe": livenessProbe}}
+        """Test that a valid statefulset is rendered when dag-server is enabled with readiness, liveness, and startup probes."""
+        values = {
+            "dagDeploy": {
+                "enabled": True,
+                "readinessProbe": readinessProbe,
+                "livenessProbe": livenessProbe,
+                "startupProbe": startupProbe,
+            }
+        }
 
         docs = render_chart(
             kube_version=kube_version,
@@ -336,13 +345,24 @@ class TestDagServerStatefulSet:
         c_by_name = get_containers_by_name(doc)
         assert readinessProbe == c_by_name["dag-server"]["readinessProbe"]
         assert livenessProbe == c_by_name["dag-server"]["livenessProbe"]
+        assert startupProbe == c_by_name["dag-server"]["startupProbe"]
 
     def test_dag_server_statefulset_with_probes_and_authproxy_enabled(self, kube_version):
-        """Test that a valid statefulset is rendered when dag-server and authsidecar is enabled with readiness and liveness probes."""
+        """Test that a valid statefulset is rendered when dag-server and authsidecar is enabled with readiness, liveness, and startup probes."""
         values = {
             "dagDeploy": {"enabled": True},
-            "authSidecar": {"enabled": True, "readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
-            "loggingSidecar": {"enabled": True, "readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
+            "authSidecar": {
+                "enabled": True,
+                "readinessProbe": readinessProbe,
+                "livenessProbe": livenessProbe,
+                "startupProbe": startupProbe,
+            },
+            "loggingSidecar": {
+                "enabled": True,
+                "readinessProbe": readinessProbe,
+                "livenessProbe": livenessProbe,
+                "startupProbe": startupProbe,
+            },
         }
 
         docs = render_chart(
@@ -370,8 +390,10 @@ class TestDagServerStatefulSet:
         assert "sidecar-log-consumer" in c_by_name
         assert readinessProbe == c_by_name["auth-proxy"]["readinessProbe"]
         assert livenessProbe == c_by_name["auth-proxy"]["livenessProbe"]
+        assert startupProbe == c_by_name["auth-proxy"]["startupProbe"]
         assert readinessProbe == c_by_name["sidecar-log-consumer"]["readinessProbe"]
         assert livenessProbe == c_by_name["sidecar-log-consumer"]["livenessProbe"]
+        assert startupProbe == c_by_name["sidecar-log-consumer"]["startupProbe"]
 
         assert c_by_name["auth-proxy"]["volumeMounts"] == [
             {"mountPath": "/var/lib/nginx/logs", "name": "nginx-access-logs"},

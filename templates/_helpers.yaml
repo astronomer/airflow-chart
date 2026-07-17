@@ -395,6 +395,19 @@ Create the name of the cleanup service account to use
 {{- if .Values.loggingSidecar.readinessProbe  }}
   readinessProbe: {{ tpl (toYaml .Values.loggingSidecar.readinessProbe) . | nindent 4 }}
 {{- end }}
+{{- if .Values.loggingSidecar.startupProbe  }}
+  startupProbe: {{ tpl (toYaml .Values.loggingSidecar.startupProbe) . | nindent 4 }}
+{{- else }}
+  startupProbe:
+    exec:
+      command:
+      - sh
+      - -c
+      - test -f /etc/sidecar-logging/vector-config.yaml
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    failureThreshold: 6
+{{- end }}
   volumeMounts:
   - mountPath: /etc/sidecar-logging
     name: config-volume
@@ -438,6 +451,18 @@ Create the name of the cleanup service account to use
       scheme: HTTP
     initialDelaySeconds: 10
     periodSeconds: 10
+{{- end }}
+{{- if .Values.authSidecar.startupProbe  }}
+  startupProbe: {{ tpl (toYaml .Values.authSidecar.startupProbe) . | nindent 4 }}
+{{- else }}
+  startupProbe:
+    httpGet:
+      path: /healthz
+      port: {{ .Values.authSidecar.port }}
+      scheme: HTTP
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    failureThreshold: 6
 {{- end }}
   volumeMounts:
   - mountPath: /var/lib/nginx/logs
