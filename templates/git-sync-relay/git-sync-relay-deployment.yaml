@@ -256,7 +256,8 @@ spec:
           startupProbe:
             exec:
               command:
-              - touch
+              - test
+              - -f
               - /git/.git/git-daemon-export-ok
             initialDelaySeconds: 0
             periodSeconds: 15

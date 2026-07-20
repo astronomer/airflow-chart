@@ -8,7 +8,11 @@ from tests.utils.chart import render_chart
 
 readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
 livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
-startupProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/shealthz", "port": 8080, "scheme": "HTTP"}}
+startupProbe = {
+    "httpGet": {"path": "/shealthz", "port": 8080, "scheme": "HTTP"},
+    "initialDelaySeconds": 20,
+    "periodSeconds": 20,
+}
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)

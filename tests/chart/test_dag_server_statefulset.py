@@ -6,7 +6,11 @@ from tests.utils.chart import render_chart
 
 readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
 livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
-startupProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/shealthz", "port": 8080, "scheme": "HTTP"}}
+startupProbe = {
+    "httpGet": {"path": "/shealthz", "port": 8080, "scheme": "HTTP"},
+    "initialDelaySeconds": 20,
+    "periodSeconds": 20,
+}
 resources = {
     "requests": {"cpu": 99.9, "memory": "777Mi"},
     "limits": {"cpu": 66.6, "memory": "888Mi"},
