@@ -249,7 +249,7 @@ jobs:
         default: "LocalExecutor"
       kube_version:
         type: string
-        default: "1.27.3"
+        default: "1.35.0"
     steps:
       - attach_workspace:
           at: /tmp/workspace
