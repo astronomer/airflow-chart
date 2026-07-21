@@ -8,6 +8,11 @@ from tests.utils.chart import render_chart
 
 readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
 livenessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/chealthz", "port": 8080, "scheme": "HTTP"}}
+startupProbe = {
+    "httpGet": {"path": "/shealthz", "port": 8080, "scheme": "HTTP"},
+    "initialDelaySeconds": 20,
+    "periodSeconds": 20,
+}
 
 
 @pytest.mark.parametrize("kube_version", supported_k8s_versions)
@@ -42,6 +47,19 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-sync"]["image"].startswith("quay.io/astronomer/ap-git-sync-relay:")
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
+        assert c_by_name["git-daemon"]["startupProbe"]
+        # git-sync has no hardcoded probe fallback (customer-configurable only), unlike git-daemon
+        assert "livenessProbe" not in c_by_name["git-sync"]
+        assert "readinessProbe" not in c_by_name["git-sync"]
+        assert "startupProbe" not in c_by_name["git-sync"]
+        assert c_by_name["git-sync"]["resources"] == {
+            "limits": {"cpu": "200m", "memory": "256Mi"},
+            "requests": {"cpu": "100m", "memory": "128Mi"},
+        }
+        assert c_by_name["git-daemon"]["resources"] == {
+            "limits": {"cpu": "100m", "memory": "128Mi"},
+            "requests": {"cpu": "50m", "memory": "64Mi"},
+        }
         assert "annotations" not in doc["metadata"]
         assert "annotations" not in doc["spec"]["template"]["metadata"]
 
@@ -221,6 +239,7 @@ class TestGitSyncRelayDeployment:
             "GIT_SYNC_REPO_FETCH_MODE": "poll",
         }
         assert c_by_name["git-daemon"]["livenessProbe"]
+        assert c_by_name["git-daemon"]["startupProbe"]
 
     def test_gsr_deployment_https_pat(self, kube_version):
         """HTTPS+PAT auth: GIT_SYNC_AUTH_TYPE is set, the credentials Secret mounts as a
@@ -516,6 +535,7 @@ class TestGitSyncRelayDeployment:
             "GIT_SYNC_REPO_FETCH_MODE": "poll",
         }
         assert c_by_name["git-daemon"]["livenessProbe"]
+        assert c_by_name["git-daemon"]["startupProbe"]
 
     def test_gsr_deployment_with_metrics_enabled(self, kube_version):
         """Test that metrics env vars are set when gitSyncRelay.metrics.enabled is true."""
@@ -706,12 +726,20 @@ class TestGitSyncRelayDeployment:
         assert [{"name": "gscsecret"}] == doc["spec"]["template"]["spec"]["imagePullSecrets"]
 
     def test_gsr_deployment_with_custom_probes(self, kube_version):
-        """Test git-sync-relay deployment with custom liveness and readiness probes."""
+        """Test git-sync-relay deployment with custom liveness, readiness, and startup probes."""
         values = {
             "gitSyncRelay": {
                 "enabled": True,
-                "gitSync": {"readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
-                "gitDaemon": {"readinessProbe": readinessProbe, "livenessProbe": livenessProbe},
+                "gitSync": {
+                    "readinessProbe": readinessProbe,
+                    "livenessProbe": livenessProbe,
+                    "startupProbe": startupProbe,
+                },
+                "gitDaemon": {
+                    "readinessProbe": readinessProbe,
+                    "livenessProbe": livenessProbe,
+                    "startupProbe": startupProbe,
+                },
             }
         }
 
@@ -728,8 +756,10 @@ class TestGitSyncRelayDeployment:
         c_by_name = get_containers_by_name(doc)
         assert readinessProbe == c_by_name["git-daemon"]["readinessProbe"]
         assert livenessProbe == c_by_name["git-daemon"]["livenessProbe"]
+        assert startupProbe == c_by_name["git-daemon"]["startupProbe"]
         assert readinessProbe == c_by_name["git-sync"]["readinessProbe"]
         assert livenessProbe == c_by_name["git-sync"]["livenessProbe"]
+        assert startupProbe == c_by_name["git-sync"]["startupProbe"]
 
     def test_gsr_deployment_with_repo_fetch_mode_webhook(self, kube_version):
         """Test git-sync-relay deployment with repoFetchMode=webhook."""
@@ -806,6 +836,10 @@ class TestGitSyncRelayDeployment:
             {"mountPath": "/tmp", "name": "tmp"},  # noqa: S108
             {"mountPath": "/var/lib/nginx/tmp", "name": "nginx-tmp"},
         ]
+        assert c_by_name["auth-proxy"]["livenessProbe"]
+        assert c_by_name["auth-proxy"]["readinessProbe"]
+        assert c_by_name["auth-proxy"]["startupProbe"]
+        assert c_by_name["sidecar-log-consumer"]["startupProbe"]
 
     def test_git_sync_service_account_with_template(self, kube_version):
         """Test git-sync-relay service account with template."""

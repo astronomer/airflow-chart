@@ -6,12 +6,24 @@ PATH="/tmp/bin:$PATH"
 
 function get_debugging_info {
   echo "Failed to deploy Airflow!"
-  echo "Printing description and logs where containers in pod are not ready..."
-  for pod in $(kubectl get pods -n airflow | grep -v NAME | grep -v 1/1 | grep -v 2/2 | grep -v 3/3 | grep -v Completed | awk '{ print $1 }'); do
+  echo "Printing description and logs where pods are not healthy..."
+  # A Job pod (e.g. airflow-create-user) can show READY=1/1 STATUS=Running between
+  # crash-loop restarts, which used to slip past a naive "READY == N/N" filter and
+  # never get its describe/logs captured. Treat a pod as healthy only if it's
+  # Completed, or Running/ready with zero restarts.
+  for pod in $(kubectl get pods -n airflow --no-headers | awk '
+      {
+        split($2, ready, "/")
+        restarts = $4
+        sub(/\(.*/, "", restarts)
+        healthy = ($3 == "Completed") || ($3 == "Running" && ready[1] == ready[2] && restarts == 0)
+        if (!healthy) print $1
+      }'); do
     echo "======================="
     set -x
     kubectl describe pod -n airflow "$pod"
-    kubectl logs -n airflow "$pod" | tail -n 30
+    kubectl logs -n airflow "$pod" --previous --tail=30 || true
+    kubectl logs -n airflow "$pod" --tail=30
     set +x
     echo "======================="
   done
@@ -62,6 +74,7 @@ set -x
 
 # shellcheck disable=SC2086
 helm install \
+  --debug \
   -n airflow \
   --set airflow.executor="$EXECUTOR" \
   --set airflow.pgbouncer.enabled=true \
