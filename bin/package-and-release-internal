@@ -44,7 +44,9 @@ gcloud storage cp gs://${helm_repo}/index.yaml "index-orig.yaml"
 sha256sum index-orig.yaml
 helm repo index . --url "https://${helm_repo}" --merge "index-orig.yaml"
 sha256sum index.yaml
-gcloud storage cp --cache-control "public" index.yaml "gs://${helm_repo}/"
+# index.yaml must never be served stale from cache: CI/stage-cluster
+# upgrades poll right after a release and need to see the new version.
+gcloud storage cp --cache-control "no-cache, no-store, max-age=0" index.yaml "gs://${helm_repo}/"
 set +e
 diff index-orig.yaml index.yaml
 echo "$(date -Iseconds) Finished."
