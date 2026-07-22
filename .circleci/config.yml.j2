@@ -32,12 +32,6 @@ workflows:
 {%- endfor %}
       - approve-release-prod:
           type: approval
-          requires:
-{%- for version in kube_versions %}
-{%- for executor in executors %}
-            - "test-{{ version | replace(".", "-") }}-{{ executor }}"
-{%- endfor %}
-{%- endfor %}
           filters:
             branches:
               only:
@@ -48,8 +42,12 @@ workflows:
             - github-repo
             - gcp-astronomer-prod
           requires:
-            - approve-test-all
             - approve-release-prod
+{%- for version in kube_versions %}
+{%- for executor in executors %}
+            - "test-{{ version | replace(".", "-") }}-{{ executor }}"
+{%- endfor %}
+{%- endfor %}
           filters:
             branches:
               only:
