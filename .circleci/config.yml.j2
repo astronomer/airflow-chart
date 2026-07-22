@@ -32,12 +32,6 @@ workflows:
 {%- endfor %}
       - approve-release-prod:
           type: approval
-          requires:
-{%- for version in kube_versions %}
-{%- for executor in executors %}
-            - "test-{{ version | replace(".", "-") }}-{{ executor }}"
-{%- endfor %}
-{%- endfor %}
           filters:
             branches:
               only:

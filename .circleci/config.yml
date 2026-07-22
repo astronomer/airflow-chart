@@ -135,22 +135,6 @@ workflows:
 
       - approve-release-prod:
           type: approval
-          requires:
-            - "test-1-31-14-CeleryExecutor"
-            - "test-1-31-14-LocalExecutor"
-            - "test-1-31-14-KubernetesExecutor"
-            - "test-1-32-11-CeleryExecutor"
-            - "test-1-32-11-LocalExecutor"
-            - "test-1-32-11-KubernetesExecutor"
-            - "test-1-33-7-CeleryExecutor"
-            - "test-1-33-7-LocalExecutor"
-            - "test-1-33-7-KubernetesExecutor"
-            - "test-1-34-3-CeleryExecutor"
-            - "test-1-34-3-LocalExecutor"
-            - "test-1-34-3-KubernetesExecutor"
-            - "test-1-35-0-CeleryExecutor"
-            - "test-1-35-0-LocalExecutor"
-            - "test-1-35-0-KubernetesExecutor"
           filters:
             branches:
               only:
