@@ -36,15 +36,46 @@ else
   (cd airflow && bin/repo-state-report.py)
 fi
 
+update_index() {
+  # Update index.yaml transactionally: only overwrite it if nobody else has
+  # updated it since we last read it. The astronomer (platform) chart
+  # publishes to this same bucket, so concurrent releases can otherwise
+  # clobber each other's merge.
+  gen=$(gcloud storage objects describe "gs://${helm_repo}/index.yaml" --format="value(generation)" 2>/dev/null || echo 0)
+  if [ "${gen}" -eq 0 ] ; then
+    echo "!!! P0: gs://${helm_repo}/index.yaml is missing or unreadable !!!"
+    echo "Every previously published airflow-chart version would become undiscoverable via"
+    echo "'helm repo update' if we silently generated a replacement index.yaml here. Refusing"
+    echo "to proceed -- investigate immediately whether the object was actually deleted, or"
+    echo "the describe call failed for another reason (auth/permissions/network), before"
+    echo "re-running."
+    exit 1
+  else
+    echo "-> merging into existing index.yaml (generation ${gen}) from gs://${helm_repo}"
+    rm -f index-orig.yaml
+    gcloud storage cp "gs://${helm_repo}/index.yaml#${gen}" "index-orig.yaml"
+    sha256sum index-orig.yaml
+    helm repo index . --url "https://${helm_repo}" --merge "index-orig.yaml"
+    diff index-orig.yaml index.yaml || true
+  fi
+  sha256sum index.yaml
+  # index.yaml must never be served stale from cache: CI/stage-cluster
+  # upgrades poll right after a release and need to see the new version.
+  gcloud storage cp --cache-control "no-cache, no-store, max-age=0" --if-generation-match "${gen}" index.yaml "gs://${helm_repo}/"
+}
+
 helm package airflow --dependency-update --app-version "${app_version}" "${extra_args[@]}"
 gcloud storage cp "${filename}" "gs://${helm_repo}/"
 
-rm -f index-orig.yaml
-gcloud storage cp gs://${helm_repo}/index.yaml "index-orig.yaml"
-sha256sum index-orig.yaml
-helm repo index . --url "https://${helm_repo}" --merge "index-orig.yaml"
-sha256sum index.yaml
-gcloud storage cp --cache-control "public" index.yaml "gs://${helm_repo}/"
-set +e
-diff index-orig.yaml index.yaml
+attempt=1
+until update_index ; do
+  echo "Index update failed (attempt ${attempt})"
+  if (( attempt++ == 3 )) ; then
+    echo "ERROR: failed to update index after 3 attempts!"
+    exit 1
+  fi
+  echo "Retrying in 5 seconds..."
+  sleep 5
+done
+
 echo "$(date -Iseconds) Finished."

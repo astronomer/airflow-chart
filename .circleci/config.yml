@@ -135,7 +135,17 @@ workflows:
 
       - approve-release-prod:
           type: approval
+          filters:
+            branches:
+              only:
+                - '/^release-\d+\.\d+$/'
+
+      - release-public:
+          context:
+            - github-repo
+            - gcp-astronomer-prod
           requires:
+            - approve-release-prod
             - "test-1-31-14-CeleryExecutor"
             - "test-1-31-14-LocalExecutor"
             - "test-1-31-14-KubernetesExecutor"
@@ -151,18 +161,6 @@ workflows:
             - "test-1-35-0-CeleryExecutor"
             - "test-1-35-0-LocalExecutor"
             - "test-1-35-0-KubernetesExecutor"
-          filters:
-            branches:
-              only:
-                - '/^release-\d+\.\d+$/'
-
-      - release-public:
-          context:
-            - github-repo
-            - gcp-astronomer-prod
-          requires:
-            - approve-test-all
-            - approve-release-prod
           filters:
             branches:
               only:
