@@ -2,6 +2,7 @@
 # git-sync-relay ingress #
 ##########################
 {{- if and
+  .Values.ingress.enabled
   .Values.gitSyncRelay.enabled
   (eq .Values.gitSyncRelay.repoFetchMode "webhook")
 }}
