@@ -138,8 +138,7 @@ class TestIngress:
         """CP HA: globalBaseDomain adds a parallel host rule + TLS SAN per component."""
         docs = render_chart(
             kube_version=kube_version,
-            show_only=["templates/ingress.yaml",
-                       "templates/dag-deploy/dag-server-ingress.yaml"],
+            show_only=["templates/ingress.yaml", "templates/dag-deploy/dag-server-ingress.yaml"],
             values={
                 "airflow": {"executor": "CeleryExecutor"},
                 "ingress": {
