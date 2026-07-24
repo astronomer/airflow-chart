@@ -25,9 +25,7 @@ metadata:
       "nginx.ingress.kubernetes.io/auth-cache-key": {{ .Values.ingress.authCache.key | quote }}
       "nginx.ingress.kubernetes.io/auth-cache-duration": {{ .Values.ingress.authCache.duration | quote }}
     {{- end }}
-    {{- range $k, $v := .Values.ingress.dagServerAnnotations }}
-      {{ $k | quote }}: {{ tpl $v $ctx | toYaml | indent 4 }}
-    {{- end }}
+    {{ toYaml .Values.ingress.dagServerAnnotations | nindent 4 }}
   {{- end }}
   {{- end }}
 spec:
