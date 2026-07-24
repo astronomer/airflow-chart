@@ -198,7 +198,7 @@ class TestIngress:
             show_only="templates/git-sync-relay/git-sync-relay-ingress.yaml",
             values={
                 "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
-                "ingress": {"baseDomain": "example.com","enabled": True},
+                "ingress": {"baseDomain": "example.com", "enabled": True},
             },
         )
         assert len(docs) == 1
@@ -214,7 +214,7 @@ class TestIngress:
             show_only="templates/git-sync-relay/git-sync-relay-ingress.yaml",
             values={
                 "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
-                "ingress": {"baseDomain": "example.com", "tlsSecretName": tls_secret_name,"enabled": True},
+                "ingress": {"baseDomain": "example.com", "tlsSecretName": tls_secret_name, "enabled": True},
             },
         )
         assert len(docs) == 1
