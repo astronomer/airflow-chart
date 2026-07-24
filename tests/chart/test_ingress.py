@@ -124,21 +124,22 @@ class TestIngress:
             },
         )
 
-        assert len(docs) == 2
+        assert len(docs) == 1
 
-        assert docs[1]["metadata"]["name"] == "release-name-dag-server-ingress"
-        rule_0 = docs[1]["spec"]["rules"][0]
+        assert docs[0]["metadata"]["name"] == "release-name-dag-server-ingress"
+        rule_0 = docs[0]["spec"]["rules"][0]
         assert rule_0["http"]["paths"][0]["path"] == "/release-name/dags/(upload|downloads|healthz)(/.*)?"
         assert rule_0["host"] == "deployments.example.com"
 
-        assert ingressAnnotations == docs[1]["metadata"]["annotations"]
-        assert docs[1]["spec"]["tls"][0]["secretName"] == tls_secret_name
+        assert ingressAnnotations == docs[0]["metadata"]["annotations"]
+        assert docs[0]["spec"]["tls"][0]["secretName"] == tls_secret_name
 
     def test_airflow_ingress_global_base_domain_dual_hosts(self, kube_version):
         """CP HA: globalBaseDomain adds a parallel host rule + TLS SAN per component."""
         docs = render_chart(
             kube_version=kube_version,
-            show_only="templates/ingress.yaml",
+            show_only=["templates/ingress.yaml",
+                       "templates/dag-deploy/dag-server-ingress.yaml"],
             values={
                 "airflow": {"executor": "CeleryExecutor"},
                 "ingress": {
@@ -150,7 +151,7 @@ class TestIngress:
                 "dagDeploy": {"enabled": True},
             },
         )
-        # webserver, flower, dag-server
+        # webserver, flower , dag-server
         assert len(docs) == 3
 
         webserver = docs[0]
