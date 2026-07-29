@@ -34,6 +34,16 @@ that subchart. Because the subchart is named `airflow`:
 - **Subchart templates:** `charts/airflow/templates/` (present after `make charts`) — the
   upstream chart. Do not edit these; they are a fetched dependency.
 
+## Sharp edge: `authSidecar` / `loggingSidecar` are easy to miss in any pod-spec feature
+
+Both are **top-level parent-chart keys** (see value scoping above) that add an extra container to a pod — but neither is defined inline in the pod template you'd naturally go looking at. They're rendered by shared helpers in `templates/_helpers.yaml`: `auth_sidecar_container_spec` (~line 406) and `logging_sidecar_container_spec` (~line 363), then `{{ include }}`'d into `templates/dag-deploy/dag-server-statefulset.yaml` and `templates/git-sync-relay/git-sync-relay-deployment.yaml`. Values defaults live at `values.yaml:692-746`.
+
+**Why this bites people:** if you're adding or auditing a pod-spec feature (security context, resources, probes, env vars, volume mounts, labels, image/registry override, network policy, etc.) by reading `dag-server-statefulset.yaml` or `git-sync-relay-deployment.yaml` top to bottom, you will see the `{{ include "auth_sidecar_container_spec" . }}` / `{{ include "logging_sidecar_container_spec" . }}` lines, but the actual container spec — and therefore whatever field you're checking or adding — lives in `_helpers.yaml`, not the file you're looking at. Grepping the calling template for the field name (e.g. `resources:`) will miss it entirely.
+
+**Concrete history:** this exact blind spot caused two rounds of missed coverage in the K8s Security Policy Compatibility project (`employment-astronomer` vault, `projects/2026-05-11-k8s-security-policy-compatibility/`) — first on startup probes (found 2026-07-08, fixed 2026-07-17 via PINF-951), then again on resource limits (`resources: {}` defaults for both helpers, found 2026-07-13, fixed 2026-07-17 via PINF-969 — both on this same branch).
+
+**Rule of thumb:** when adding or auditing ANY chart-wide pod-spec convention, explicitly `grep -rn "authSidecar\|loggingSidecar\|auth_sidecar\|logging_sidecar"` in this repo (and its siblings — the astronomer platform chart has an unrelated, independently-implemented `global.authSidecar` copy-pasted into several platform components, and houston-api has a third, separately-implemented `authSideCar`/`extraContainers` injection onto rendered Airflow pods; note the inconsistent casing across all three — `authSidecar` here, `authSideCar` in houston-api). Don't assume a per-file audit caught it.
+
 ## Testing & CI
 
 - Chart (render) tests: `make unittest-chart`, or `uv run pytest tests/chart/`. The tested

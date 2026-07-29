@@ -13,6 +13,7 @@ automatically rather than being silently skipped.
 """
 
 import pytest
+import yaml
 
 from tests import supported_k8s_versions
 from tests.utils import get_all_features, get_containers_by_name
@@ -135,6 +136,106 @@ def test_git_sync_relay_pod_security_context_openshift(kube_version):
         "runAsNonRoot": True,
         "seccompProfile": {"type": "RuntimeDefault"},
     }
+
+
+# --- dags.gitSync PSS-Restricted conformance (PINF-1024) ---------------------------
+#
+# dags.gitSync's git-sync/git-sync-init containers are rendered by the shared
+# git_sync_container helper (in the vendored airflow subchart), whose securityContext
+# resolves through localContainerSecurityContext. Unlike containerSecurityContext (used
+# by the main airflow container), that helper has no fallback to the global
+# Values.securityContexts.containers map that houston's securityHardeningConfig injects,
+# and houston doesn't harden dags.gitSync directly either (PINF-1024) — so the restricted
+# set must come entirely from this chart's values.yaml, same as git-sync-relay above.
+# Overrides for the vendored "airflow" subchart's own top-level values (executor, dags, ...)
+# must be nested under "airflow:" from this parent chart — see test_pod_template.py.
+GIT_SYNC_RESTRICTED_CONTAINER_SECURITY_CONTEXT = {
+    **RESTRICTED_CONTAINER_SECURITY_CONTEXT,
+    "runAsNonRoot": True,
+    "seccompProfile": {"type": "RuntimeDefault"},
+}
+
+# scheduler/triggerer/dag-processor always render (when enabled) regardless of executor choice.
+# dag-processor also needs an explicit enable: with the chart's default airflowVersion (< 3.0.0)
+# and dagProcessor.enabled unset, its deployment doesn't render at all (nil falls back to
+# `semverCompare ">=3.0.0"`), independent of executor.
+GIT_SYNC_ALWAYS_ON_DEPLOYMENTS = {
+    "scheduler": ("charts/airflow/templates/scheduler/scheduler-deployment.yaml", {}),
+    "triggerer": ("charts/airflow/templates/triggerer/triggerer-deployment.yaml", {}),
+    "dag-processor": (
+        "charts/airflow/templates/dag-processor/dag-processor-deployment.yaml",
+        {"dagProcessor": {"enabled": True}},
+    ),
+}
+
+
+@pytest.mark.parametrize("kube_version", supported_k8s_versions)
+@pytest.mark.parametrize("executor", ["CeleryExecutor", "KubernetesExecutor", "LocalExecutor"])
+@pytest.mark.parametrize(
+    "component,template_and_extra_values", GIT_SYNC_ALWAYS_ON_DEPLOYMENTS.items(), ids=GIT_SYNC_ALWAYS_ON_DEPLOYMENTS.keys()
+)
+def test_dags_git_sync_containers_are_pss_restricted(kube_version, executor, component, template_and_extra_values):
+    """The git-sync and git-sync-init containers carry the full PSS-Restricted container
+    securityContext on scheduler/triggerer/dag-processor, independent of executor choice."""
+    template, extra_values = template_and_extra_values
+    docs = render_chart(
+        kube_version=kube_version,
+        values={"airflow": {"executor": executor, "dags": {"gitSync": {"enabled": True}}, **extra_values}},
+        show_only=[template],
+    )
+    assert len(docs) == 1
+    containers = get_containers_by_name(docs[0], include_init_containers=True)
+    for name in ("git-sync", "git-sync-init"):
+        assert name in containers, f"expected '{name}' container in the {component} pod ({executor})"
+        assert containers[name]["securityContext"] == GIT_SYNC_RESTRICTED_CONTAINER_SECURITY_CONTEXT
+
+
+@pytest.mark.parametrize("kube_version", supported_k8s_versions)
+def test_dags_git_sync_celery_worker_containers_are_pss_restricted(kube_version):
+    """CeleryExecutor's persistent worker Deployment (the pod type from the PINF-1024 bug
+    report) renders its own git-sync containers via the same shared helper."""
+    docs = render_chart(
+        kube_version=kube_version,
+        values={"airflow": {"executor": "CeleryExecutor", "dags": {"gitSync": {"enabled": True}}}},
+        show_only=["charts/airflow/templates/workers/worker-deployment.yaml"],
+    )
+    assert len(docs) == 1
+    containers = get_containers_by_name(docs[0], include_init_containers=True)
+    for name in ("git-sync", "git-sync-init"):
+        assert name in containers, f"expected '{name}' container in the worker pod"
+        assert containers[name]["securityContext"] == GIT_SYNC_RESTRICTED_CONTAINER_SECURITY_CONTEXT
+
+
+@pytest.mark.parametrize("kube_version", supported_k8s_versions)
+def test_dags_git_sync_kubernetes_executor_pod_template_is_pss_restricted(kube_version):
+    """KubernetesExecutor has no persistent worker Deployment — each task pod is built from
+    pod_template_file.yaml (embedded in the airflow ConfigMap), which renders a git-sync-init
+    container via the same helper (only the init clone runs once per ephemeral task pod; the
+    continuous-sync sidecar doesn't apply here) and must be hardened the same way."""
+    docs = render_chart(
+        kube_version=kube_version,
+        values={"airflow": {"executor": "KubernetesExecutor", "dags": {"gitSync": {"enabled": True}}}},
+        show_only="charts/airflow/templates/configmaps/configmap.yaml",
+    )
+    assert len(docs) == 1
+    pod_template = yaml.safe_load(docs[0]["data"]["pod_template_file.yaml"])
+    containers = {c["name"]: c for c in pod_template["spec"].get("containers", [])}
+    containers.update({c["name"]: c for c in pod_template["spec"].get("initContainers", [])})
+    assert "git-sync-init" in containers, "expected 'git-sync-init' container in the KubernetesExecutor pod template"
+    assert containers["git-sync-init"]["securityContext"] == GIT_SYNC_RESTRICTED_CONTAINER_SECURITY_CONTEXT
+
+
+@pytest.mark.parametrize("kube_version", supported_k8s_versions)
+def test_dags_git_sync_local_executor_has_no_separate_worker_pod(kube_version):
+    """LocalExecutor runs tasks in-process in the scheduler, so there's no separate worker
+    Deployment — and thus no separate git-sync containers — beyond what the scheduler pod
+    already renders (covered by test_dags_git_sync_containers_are_pss_restricted above)."""
+    docs = render_chart(
+        kube_version=kube_version,
+        values={"airflow": {"executor": "LocalExecutor", "dags": {"gitSync": {"enabled": True}}}},
+        show_only="charts/airflow/templates/workers/worker-deployment.yaml",
+    )
+    assert docs == []
 
 
 # --- Sidecar securityContext: enforced readOnlyRootFilesystem floor + null-safety --------
