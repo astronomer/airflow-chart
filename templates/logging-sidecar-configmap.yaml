@@ -22,7 +22,9 @@ data:
         type: file
         include:
           - "${SIDECAR_LOGS}/*.log"
+          {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
           - "/usr/local/airflow/logs/**/*.log"
+          {{- end }}
         read_from: beginning
     transforms:
       # Parse Airflow 3 log file paths to extract metadata
@@ -34,7 +36,7 @@ data:
         {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
           # Airflow 3.x - Parse JSON structured logs
           parsed_log = parse_json(.message) ?? .
-          parsed, err = parse_regex(.file, r'/dag_id=(?P<dag_id>[0-9a-zA-Z-_]+)/run_id=(?P<run_id>[^/]+)/task_id=(?P<task_id>[0-9a-zA-Z-_]+)/(?:map_index=(?P<map_index>-?[0-9])/)?attempt=(?P<attempt>[0-9]+)\.log$')
+          parsed, err = parse_regex(.file, r'/dag_id=(?P<dag_id>[0-9a-zA-Z._-]+)/run_id=(?P<run_id>[^/]+)/task_id=(?P<task_id>[0-9a-zA-Z._-]+)/(?:map_index=(?P<map_index>-?[0-9]+)/)?attempt=(?P<attempt>[0-9]+)\.log$')
 
           if err == null {
             # Airflow 3 structured logs

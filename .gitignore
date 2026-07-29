@@ -3,6 +3,8 @@
 *.swp
 *.tgz
 .DS_Store
+.claude/settings.local.json
+.vscode
 /.idea/
 /.vscode/
 /config.yaml

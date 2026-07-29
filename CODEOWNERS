@@ -1,2 +1,2 @@
-*    @astronomer/astronomer-software
-*.md @astronomer/astronomer-software @astronomer/docs
+*    @astronomer/astro-private-cloud
+*.md @astronomer/astro-private-cloud @astronomer/docs

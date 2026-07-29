@@ -67,6 +67,21 @@ class TestAirflow:
         assert len(docs) == 1
         assert docs[0]["spec"]["template"]["spec"]["serviceAccountName"] == "release-name-airflow-api-server"
 
+    def test_airflow_flower_with_preAirflowExtraInitContainers(self, kube_version):
+        """Test flower deployment behaviors with preAirflowExtraInitContainers."""
+        values = get_all_features()
+        values.setdefault("airflow", {})["executor"] = "CeleryExecutor"
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["charts/airflow/templates/flower/flower-deployment.yaml"],
+            values=values,
+        )
+        assert len(docs) == 1
+        assert "initContainers" in docs[0]["spec"]["template"]["spec"]
+        c_by_name = get_containers_by_name(docs[0], include_init_containers=True)
+        assert "usr-local-airflow-copier" in c_by_name
+        assert c_by_name["usr-local-airflow-copier"]["securityContext"]["readOnlyRootFilesystem"] is True
+
     @pytest.mark.parametrize(
         "executor, expected_components",
         [

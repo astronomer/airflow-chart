@@ -2,6 +2,15 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+global:
+  # Names of Secrets (each with a `cert.pem` key) holding customer private CA
+  # bundles to trust. Houston/commander populate this per deployment with the
+  # names of the CA Secrets synced into the deployment namespace (via the
+  # astronomer.io/commander-sync annotation). When set, the git-sync container
+  # trusts them via update-ca-certificates (see the git-sync-relay deployment).
+  # Mirrors the astronomer chart's global.privateCaCerts.
+  privateCaCerts: []
+
 airflow:
   # group of airflow user
   gid: 50000
@@ -79,6 +88,12 @@ airflow:
       securityContexts:
         container:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+          capabilities:
+            drop: [ALL]
 
   # Airflow api server settings
   apiServer:
@@ -115,6 +130,9 @@ airflow:
     securityContexts:
       container:
         readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
     securityContext:
       # Set user to redis:999
       runAsUser: 999
@@ -149,9 +167,15 @@ airflow:
       securityContexts:
         container:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
     securityContexts:
       container:
         readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
 
   # Elasticsearch logging configuration
   elasticsearch:
@@ -432,6 +456,9 @@ airflow:
     securityContexts:
       container:
         readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
     overrideMappings:
       # Map dot separated stats to labels
       - match: airflow.operator_successes_(.*)
@@ -655,6 +682,9 @@ airflow:
 # Enable security context constraints required for OpenShift
 sccEnabled: false
 
+openshift:
+  enabled: false
+
 # Extra objects to deploy (these are passed through `tpl`)
 extraObjects: []
 
@@ -665,10 +695,23 @@ authSidecar:
   tag: 1.27.4-1
   pullPolicy: IfNotPresent
   port: 8084
-  securityContext: {}
-  resources: {}
+  # Hardened container securityContext. allowPrivilegeEscalation and capabilities are
+  # overridable here; readOnlyRootFilesystem is enforced by the chart (see _helpers.yaml).
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: [ALL]
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
   livenessProbe: {}
   readinessProbe: {}
+  startupProbe: {}
   ingressAllowedNamespaces: ~
   annotations: {}
 
@@ -700,9 +743,23 @@ loggingSidecar:
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
   image: quay.io/astronomer/ap-vector:0.45.0-1
-  resources: {}
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
   livenessProbe: {}
   readinessProbe: {}
+  startupProbe: {}
+  # Hardened container securityContext. allowPrivilegeEscalation and capabilities are
+  # overridable here; readOnlyRootFilesystem is enforced by the chart (see _helpers.yaml).
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: [ALL]
 
 # Ingress configuration
 ingress:
@@ -726,6 +783,12 @@ ingress:
 
   # Base domain for ingress vhosts
   baseDomain: ~
+
+  # Global customer-facing parent domain for CP HA deployment URL aliases. When
+  # set, the deployment Ingress emits a second host rule + TLS SAN under this
+  # parent alongside the per-CP baseDomain rules. Left unset (~) for non-HA
+  # installs, which keeps output unchanged.
+  globalBaseDomain: ~
 
   # Enable platform authentication
   auth:
@@ -767,7 +830,7 @@ astronomer:
   images:
     certgenerator:
       repository: quay.io/astronomer/ap-certgenerator
-      tag: 0.1.14
+      tag: 0.1.15
 
 dagDeploy:
   enabled: false
@@ -778,8 +841,10 @@ dagDeploy:
       imagePullPolicy: IfNotPresent
   livenessProbe: {}
   readinessProbe: {}
+  startupProbe: {}
   terminationGracePeriodSeconds: 30
   podAnnotations: {}
+  annotations: {}
   extraEnv: []
   extraContainers: []
   extraVolumeMounts: []
@@ -802,21 +867,26 @@ dagDeploy:
     name: ~
     create: true
 
-  resources: {}
-  #  limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  #  requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
 
   # This setting tells kubernetes that its ok to evict
   # when it wants to scale a node down.
   safeToEvict: true
 
   securityContexts:
-    pod: {}
-    container: {}
+    pod:
+      runAsUser: 50000
+    container:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
 
   flower:
     extraVolumeMounts:
@@ -843,14 +913,49 @@ gitSyncRelay:
   securityContext:
     fsGroup: 65533
     runAsUser: 50000
+    # PSS-Restricted requires run-as-non-root and a seccomp profile. Both are set at the
+    # pod level (seccomp pod-level matches the platform chart convention and covers every
+    # container in the pod). The gitSyncRelay.podSecurityContext helper preserves these on
+    # OpenShift while stripping runAsUser/fsGroup for the restricted-v2 SCC (PINF-559).
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
   terminationGracePeriodSeconds: 30
+  # git-sync-relay is not processed by houston's securityHardeningConfig, so these
+  # container securityContexts are the only place the restricted container set is applied.
   gitDaemon:
     securityContext:
       readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
   gitSync:
     webhookPort: 8000
     securityContext:
       readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    livenessProbe: {}
+    readinessProbe: {}
+    startupProbe: {}
   images:
     gitDaemon:
       repository: "quay.io/astronomer/ap-git-daemon"
@@ -865,6 +970,23 @@ gitSyncRelay:
     wait: 60 # seconds between synchronizations with upstream git repo
     subPath: ~ # if your dags dir is not the repo root, specify the path relative to the repo root
     sshPrivateKeySecretName: ~ # The name of a secret that holds the private key. This secret is not maintained by this chart.
+    # auth selects the git-sync authentication method. Leave unset for backward
+    # compatibility: a repo with sshPrivateKeySecretName and no auth.type is
+    # treated as SSH. SSH and HTTPS auth are mutually exclusive per deployment.
+    auth:
+      # type: one of ssh | https-pat | https-none. Unset implies ssh when
+      # sshPrivateKeySecretName is set (back-compat), otherwise no auth.
+      type: ~
+      https:
+        # Name of an existing Secret holding the HTTPS credentials. Not maintained
+        # by this chart — houston creates the per-deployment ${releaseName}-git-sync
+        # Secret via Commander (the same Secret used for SSH).
+        #
+        # The Secret must contain the keys `gitHttpsToken` and `gitHttpsUsername`.
+        # These names are a fixed contract, not configurable: git-sync-relay reads
+        # them as filenames from the mounted directory (PINF-426) and houston writes
+        # them (PINF-427), mirroring the fixed `gitSshKey` name used for SSH.
+        credentialsSecretName: ~
     gitSyncTimeout: 300 # How long to wait for the clone or fetch to take before aborting
     # knownHosts can be generated with: ssh-keyscan -t ed25519 github.com 2>/dev/null
     knownHosts: |
@@ -891,6 +1013,8 @@ gitSyncRelay:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  podAnnotations: {}
+  annotations: {}
 
   # Enable metrics for git-sync-relay
   metrics:

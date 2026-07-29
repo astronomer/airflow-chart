@@ -106,6 +106,24 @@
 {{ .Release.Name }}-flower.{{ .Values.ingress.baseDomain }}
 {{- end }}
 
+{{/*
+Global-parent (CP HA) variants of the deployment host helpers. Templated from
+ingress.globalBaseDomain, the shared customer-facing parent. Only rendered by the
+ingress template when ingress.globalBaseDomain is set, so non-HA installs are
+unchanged.
+*/}}
+{{ define "deployments_subdomain_global" -}}
+{{ printf "deployments.%s" .Values.ingress.globalBaseDomain }}
+{{- end }}
+
+{{ define "airflow_subdomain_global" -}}
+{{ .Release.Name }}-airflow.{{ .Values.ingress.globalBaseDomain }}
+{{- end }}
+
+{{ define "flower_subdomain_global" -}}
+{{ .Release.Name }}-flower.{{ .Values.ingress.globalBaseDomain }}
+{{- end }}
+
 {{ define "default_nginx_server_settings" }}
 # Disable Nginx Server version
 server_tokens off;
@@ -349,7 +367,8 @@ Create the name of the cleanup service account to use
   resources: {{- toYaml .Values.loggingSidecar.resources | nindent 4 }}
   {{- end }}
   securityContext:
-    readOnlyRootFilesystem: true
+    {{- $required := dict "readOnlyRootFilesystem" true }}
+    {{- toYaml (merge $required (.Values.loggingSidecar.securityContext | default dict)) | nindent 4 }}
   env:
   - name: VECTOR_CONFIG
     value: /etc/sidecar-logging/vector-config.yaml
@@ -376,6 +395,19 @@ Create the name of the cleanup service account to use
 {{- if .Values.loggingSidecar.readinessProbe  }}
   readinessProbe: {{ tpl (toYaml .Values.loggingSidecar.readinessProbe) . | nindent 4 }}
 {{- end }}
+{{- if .Values.loggingSidecar.startupProbe  }}
+  startupProbe: {{ tpl (toYaml .Values.loggingSidecar.startupProbe) . | nindent 4 }}
+{{- else }}
+  startupProbe:
+    exec:
+      command:
+      - sh
+      - -c
+      - test -f /etc/sidecar-logging/vector-config.yaml
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    failureThreshold: 6
+{{- end }}
   volumeMounts:
   - mountPath: /etc/sidecar-logging
     name: config-volume
@@ -392,11 +424,8 @@ Create the name of the cleanup service account to use
   resources: {{- toYaml .Values.authSidecar.resources | nindent 4 }}
   {{- end }}
   securityContext:
-  {{- if .Values.authSidecar.securityContext }}
     {{- $required := dict "readOnlyRootFilesystem" true }}
-    {{- toYaml (merge $required .Values.authSidecar.securityContext ) | nindent 4 }}
-  {{- end }}
-    readOnlyRootFilesystem: true
+    {{- toYaml (merge $required (.Values.authSidecar.securityContext | default dict)) | nindent 4 }}
   ports:
   - containerPort: {{ .Values.authSidecar.port }}
     name: auth-proxy
@@ -422,6 +451,18 @@ Create the name of the cleanup service account to use
       scheme: HTTP
     initialDelaySeconds: 10
     periodSeconds: 10
+{{- end }}
+{{- if .Values.authSidecar.startupProbe  }}
+  startupProbe: {{ tpl (toYaml .Values.authSidecar.startupProbe) . | nindent 4 }}
+{{- else }}
+  startupProbe:
+    httpGet:
+      path: /healthz
+      port: {{ .Values.authSidecar.port }}
+      scheme: HTTP
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    failureThreshold: 6
 {{- end }}
   volumeMounts:
   - mountPath: /var/lib/nginx/logs
@@ -479,3 +520,104 @@ proxy_buffering on;
 {{- end }}
 proxy_set_header            Cookie                  $http_cookie;
 {{- end -}}
+
+{{/*
+git-sync-relay pod-level securityContext
+Strips fsGroup and runAsUser on OpenShift to comply with restricted-v2 SCC.
+*/}}
+{{- define "gitSyncRelay.podSecurityContext" -}}
+{{- if .Values.openshift.enabled }}
+{{- $required := dict "runAsNonRoot" true }}
+{{- merge $required (omit (.Values.gitSyncRelay.securityContext | default dict) "runAsUser" "fsGroup") | toYaml }}
+{{- else }}
+{{- toYaml (.Values.gitSyncRelay.securityContext | default dict) }}
+{{- end -}}
+{{- end }}
+
+{{/*
+Private-CA trust for the git-sync container. When global.privateCaCerts is set
+(each entry is a Secret with a `cert.pem` key, synced into this deployment's
+namespace by commander), the git-sync container trusts those CAs: each bundle is
+mounted under /usr/local/share/ca-certificates and update-ca-certificates runs
+over a writable emptyDir overlay of /etc/ssl/certs, so it works as the non-root
+relay user (readOnlyRootFilesystem is enforced). Mirrors the astronomer chart's
+custom_ca_volumes / custom_ca_volume_mounts so the same operator-provided CA
+Secrets work here.
+
+The four helpers below emit the volumes, the copier initContainer, the volume
+mounts, and the UPDATE_CA_CERTS env. Each is a no-op unless global.privateCaCerts
+is set, so callers include them unconditionally (no repeated guard at the call
+site).
+*/}}
+{{/*
+Volume names must be DNS-1123 labels (no dots, <=63 chars, unique), but Secret
+names are DNS-1123 subdomains (may contain dots, up to 253 chars). Derive the
+volume name from the list index (private-ca-N) so it is always valid and can
+never collide; the real Secret name stays on `secretName` / the mount filename.
+The same index is used in customCaVolumeMounts so each mount matches its volume.
+*/}}
+{{- define "gitSyncRelay.customCaVolumes" }}
+{{- if .Values.global.privateCaCerts }}
+- name: etc-ssl-certs
+  emptyDir: {}
+{{- range $index, $secret_name := .Values.global.privateCaCerts }}
+- name: private-ca-{{ $index }}
+  secret:
+    secretName: {{ $secret_name }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "gitSyncRelay.customCaInitContainer" }}
+{{- if .Values.global.privateCaCerts }}
+- name: etc-ssl-certs-copier
+  image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+  securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 4 }}
+  command:
+    - sh
+    - -c
+    - |
+      if [ -d /etc/ssl/certs ]; then
+        cp -r /etc/ssl/certs/. /etc/ssl/certs_copy/
+      else
+        echo "No /etc/ssl/certs directory found, skipping copy."
+      fi
+  volumeMounts:
+    - name: etc-ssl-certs
+      mountPath: /etc/ssl/certs_copy
+  resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 4 }}
+{{- end }}
+{{- end }}
+
+{{- define "gitSyncRelay.customCaVolumeMounts" }}
+{{- if .Values.global.privateCaCerts }}
+- name: etc-ssl-certs
+  mountPath: /etc/ssl/certs
+{{- range $index, $secret_name := .Values.global.privateCaCerts }}
+- name: private-ca-{{ $index }}
+  mountPath: /usr/local/share/ca-certificates/private-ca-{{ $index }}.pem
+  subPath: cert.pem
+  readOnly: true
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "gitSyncRelay.customCaEnv" }}
+{{- if .Values.global.privateCaCerts }}
+- name: UPDATE_CA_CERTS
+  value: "true"
+{{- end }}
+{{- end }}
+
+{{/*
+dag-deploy pod-level securityContext
+Strips fsGroup and runAsUser on OpenShift to comply with restricted-v2 SCC.
+*/}}
+{{- define "dagDeploy.podSecurityContext" -}}
+{{- if .Values.openshift.enabled }}
+{{- $required := dict "runAsNonRoot" true }}
+{{- merge $required (omit (.Values.dagDeploy.securityContexts.pod | default dict) "runAsUser" "fsGroup") | toYaml }}
+{{- else }}
+{{- toYaml (.Values.dagDeploy.securityContexts.pod | default dict) }}
+{{- end -}}
+{{- end }}
