@@ -36,6 +36,27 @@ class TestPgbouncersslFeature:
         assert "RoleBinding" == jmespath.search("kind", docs[2])
         assert docs[3]["spec"]["template"]["spec"]["affinity"] == {}
         assert docs[3]["spec"]["template"]["spec"]["containers"][0]["securityContext"]["readOnlyRootFilesystem"] is True
+        assert docs[3]["spec"]["template"]["spec"]["containers"][0]["resources"] == {
+            "limits": {"cpu": "200m", "memory": "256Mi"},
+            "requests": {"cpu": "100m", "memory": "128Mi"},
+        }
+
+    def test_pgbouncer_certgenerator_resources_are_overridable(self, kube_version):
+        """Test that certgenerator.resources overrides the defaults."""
+        resources = {
+            "limits": {"cpu": "1", "memory": "1Gi"},
+            "requests": {"cpu": "500m", "memory": "512Mi"},
+        }
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "airflow": {"pgbouncer": {"enabled": True, "sslmode": "require"}},
+                "certgenerator": {"resources": resources},
+            },
+            show_only="templates/generate-ssl.yaml",
+        )
+        assert len(docs) == 4
+        assert docs[3]["spec"]["template"]["spec"]["containers"][0]["resources"] == resources
 
     def test_pgbouncer_certgenerator_with_custom_registry_secret(self, kube_version):
         """Test pgbouncer certgenerator sslmode opts result."""

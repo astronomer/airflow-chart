@@ -1025,6 +1025,13 @@ gitSyncRelay:
 certgenerator:
   extraAnnotations: {}
   affinity: {}
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 # Labels that are attached to all pods created by the airflow-chart, but not the sub-charts.
 labels: {}
