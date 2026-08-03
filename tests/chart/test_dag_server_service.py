@@ -27,3 +27,6 @@ class TestDagServerService:
         assert doc["kind"] == "Service"
         assert doc["apiVersion"] == "v1"
         assert doc["metadata"]["name"] == "release-name-dag-server"
+        # No serviceType override exists for this Service -- it must stay unset so Kubernetes'
+        # own default (ClusterIP) applies. (PINF-986: ServiceOnlyAllowClusterIP)
+        assert "type" not in doc["spec"]

@@ -65,6 +65,35 @@ def test_all_containers_have_hardened_security_context(kube_version):
     )
 
 
+# mountPropagation isn't a securityContext field, so it's not part of hardening_problems() above,
+# and Pod Security Admission doesn't validate it either -- this is a Kyverno/OPA-style customer
+# policy control instead, forbidding the two unsafe values (PINF-986: MountPropagation).
+UNSAFE_MOUNT_PROPAGATION = {"HostToContainer", "Bidirectional"}
+
+
+@pytest.mark.parametrize("kube_version", supported_k8s_versions)
+def test_no_containers_use_unsafe_mount_propagation(kube_version):
+    """Render the whole chart and assert no volumeMount sets an unsafe mountPropagation."""
+    docs = render_chart(kube_version=kube_version, values=get_all_features())
+
+    offenders = {}
+    checked = 0
+    for doc in docs:
+        if doc.get("metadata", {}).get("name") in EXCLUDED_DOCS:
+            continue
+        owner = f"{doc['kind']}/{doc['metadata']['name']}"
+        for name, container in get_containers_by_name(doc, include_init_containers=True).items():
+            checked += 1
+            for mount in container.get("volumeMounts") or []:
+                if mount.get("mountPropagation") in UNSAFE_MOUNT_PROPAGATION:
+                    offenders[f"{owner}:{name}:{mount['name']}"] = mount["mountPropagation"]
+
+    assert checked, "No containers were rendered; cannot validate mountPropagation"
+    assert not offenders, "volumeMounts with an unsafe mountPropagation (mount: value):\n" + "\n".join(
+        f"  {key}: {value}" for key, value in sorted(offenders.items())
+    )
+
+
 # --- git-sync-relay PSS-Restricted conformance (PINF-585 follow-up) -----------------
 #
 # git-sync-relay is not processed by houston's securityHardeningConfig, so unlike
