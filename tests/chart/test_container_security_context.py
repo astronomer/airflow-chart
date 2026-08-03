@@ -65,9 +65,9 @@ def test_all_containers_have_hardened_security_context(kube_version):
     )
 
 
-# mountPropagation isn't a securityContext field, so it's not part of hardening_problems() above --
-# a separate PSA/Kyverno-adjacent control (Restricted forbids the two unsafe values). Not
-# currently a PSA control itself, but a real customer ask (PINF-986: MountPropagation).
+# mountPropagation isn't a securityContext field, so it's not part of hardening_problems() above,
+# and Pod Security Admission doesn't validate it either -- this is a Kyverno/OPA-style customer
+# policy control instead, forbidding the two unsafe values (PINF-986: MountPropagation).
 UNSAFE_MOUNT_PROPAGATION = {"HostToContainer", "Bidirectional"}
 
 
