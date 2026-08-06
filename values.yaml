@@ -56,6 +56,16 @@ airflow:
   scheduler:
     livenessProbe:
       timeoutSeconds: 30
+    # PINF-1150: readinessProbe and livenessProbe run the identical exec command
+    # (fork a process, import Airflow, round-trip the DB). apc-airflow's own chart
+    # defaults give both the same initialDelaySeconds/periodSeconds (10s/60s), so
+    # without this offset they fire at the exact same instant every 60s, doubling
+    # the CPU/DB load from health-checking alone at that moment -- readiness (the
+    # smaller timeout of the two) is the one that trips first under contention.
+    # 40s puts readiness exactly opposite liveness within the 60s cycle (10s and
+    # 40s, 30s apart), so the two health checks never coincide.
+    readinessProbe:
+      initialDelaySeconds: 40
     strategy:
       type: Recreate
     affinity:
