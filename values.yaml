@@ -430,6 +430,7 @@ airflow:
       flower_url_prefix: ""
     core:
       execution_api_server_url: '{{ (printf "http://%s-api-server:%d/%s/airflow/execution/" (include "airflow.fullname" .) (int .Values.ports.apiServer) .Release.Name )  -}}'
+      auth_manager: "airflow.auth.managers.fab.fab_auth_manager.FabAuthManager"
 
     webserver:
       expose_config: non-sensitive-only
