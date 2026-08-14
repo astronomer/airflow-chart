@@ -87,6 +87,7 @@ spec:
           imagePullPolicy: IfNotPresent
           securityContext:
             readOnlyRootFilesystem: true
+          resources: {{- toYaml .Values.certgenerator.resources | nindent 12 }}
           volumeMounts:
             - name: tmp
               mountPath: /tmp
