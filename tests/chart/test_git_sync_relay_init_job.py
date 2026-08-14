@@ -293,14 +293,22 @@ class TestGitSyncRelayInitJob:
         assert job_doc["spec"]["template"]["spec"]["serviceAccountName"] == "release-name-git-sync-relay-init"
 
     def test_init_job_has_hook_pvc(self, kube_version):
-        """Test that a PVC is created as a pre-install hook before the Job."""
+        """Test that a PVC is created as a pre-install/pre-upgrade hook before the Job.
+
+        pre-upgrade matters so a release that newly enables shared_volume mode via
+        `helm upgrade` (rather than at initial install) still gets the PVC created --
+        without it, the Job would fail trying to mount a PVC that never got created.
+        Safe to also fire on upgrade because the PVC's own render is lookup-gated (see
+        test_init_job_pvc_lookup_gate_comment below): it only renders when the PVC
+        doesn't already exist, so this never re-creates/destroys an existing one.
+        """
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
         assert len(docs) == 3
 
         pvc_doc = _find_doc_by_kind(docs, "PersistentVolumeClaim")
         assert pvc_doc["metadata"]["name"] == "git-repo-contents"
-        assert pvc_doc["metadata"]["annotations"]["helm.sh/hook"] == "pre-install"
+        assert pvc_doc["metadata"]["annotations"]["helm.sh/hook"] == "pre-install,pre-upgrade"
         assert pvc_doc["metadata"]["annotations"]["helm.sh/hook-delete-policy"] == "before-hook-creation"
         assert pvc_doc["metadata"]["annotations"]["helm.sh/hook-weight"] == "1"
         assert pvc_doc["spec"]["accessModes"] == ["ReadWriteMany"]
@@ -462,3 +470,91 @@ class TestGitSyncRelayInitJob:
         assert gs_mounts["private-ca-0"]["subPath"] == "cert.pem"
         env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
         assert env["UPDATE_CA_CERTS"] == "true"
+
+    def test_init_job_uses_openshift_pod_security_context_helper(self, kube_version):
+        """fsGroup/runAsUser must be stripped on OpenShift, same as the Deployment --
+        the Job must use the gitSyncRelay.podSecurityContext helper, not a raw toYaml
+        of gitSyncRelay.securityContext which bypasses that stripping entirely."""
+        values = {
+            "openshift": {"enabled": True},
+            "gitSyncRelay": {
+                "enabled": True,
+                "repoShareMode": "shared_volume",
+                "securityContext": {"fsGroup": 65533, "runAsUser": 50000, "runAsNonRoot": True},
+            },
+        }
+        docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
+        doc = _find_doc_by_kind(docs, "Job")
+        pod_security_context = doc["spec"]["template"]["spec"]["securityContext"]
+
+        assert "fsGroup" not in pod_security_context
+        assert "runAsUser" not in pod_security_context
+        assert pod_security_context["runAsNonRoot"] is True
+
+    def test_init_job_non_openshift_preserves_security_context(self, kube_version):
+        """fsGroup/runAsUser must be preserved when OpenShift is disabled."""
+        values = {
+            "openshift": {"enabled": False},
+            "gitSyncRelay": {
+                "enabled": True,
+                "repoShareMode": "shared_volume",
+                "securityContext": {"fsGroup": 65533, "runAsUser": 50000, "runAsNonRoot": True},
+            },
+        }
+        docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
+        doc = _find_doc_by_kind(docs, "Job")
+        pod_security_context = doc["spec"]["template"]["spec"]["securityContext"]
+
+        assert pod_security_context["fsGroup"] == 65533
+        assert pod_security_context["runAsUser"] == 50000
+        assert pod_security_context["runAsNonRoot"] is True
+
+    def test_init_job_airflow_scheduling_fields(self, kube_version, airflow_node_pool_config):
+        """The Job must respect global airflow nodeSelector/affinity/tolerations, same as
+        the Deployment -- without this it could schedule onto nodes that violate cluster
+        scheduling constraints the rest of the release respects."""
+        values = {
+            "airflow": {
+                "nodeSelector": airflow_node_pool_config["nodeSelector"],
+                "affinity": airflow_node_pool_config["affinity"],
+                "tolerations": airflow_node_pool_config["tolerations"],
+            },
+            "gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"},
+        }
+        docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
+        spec = _find_doc_by_kind(docs, "Job")["spec"]["template"]["spec"]
+
+        assert spec["affinity"] == airflow_node_pool_config["affinity"]
+        assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
+        assert spec["tolerations"] == airflow_node_pool_config["tolerations"]
+
+    def test_init_job_gitsyncrelay_scheduling_fields_override_airflow(self, kube_version, airflow_node_pool_config):
+        """gitSyncRelay-specific scheduling values take precedence over the global airflow ones."""
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repoShareMode": "shared_volume",
+                "nodeSelector": airflow_node_pool_config["nodeSelector"],
+                "affinity": airflow_node_pool_config["affinity"],
+                "tolerations": airflow_node_pool_config["tolerations"],
+            },
+        }
+        docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
+        spec = _find_doc_by_kind(docs, "Job")["spec"]["template"]["spec"]
+
+        assert spec["affinity"] == airflow_node_pool_config["affinity"]
+        assert spec["nodeSelector"] == airflow_node_pool_config["nodeSelector"]
+        assert spec["tolerations"] == airflow_node_pool_config["tolerations"]
+
+    def test_init_job_termination_grace_period(self, kube_version):
+        values = {
+            "gitSyncRelay": {
+                "enabled": True,
+                "repoShareMode": "shared_volume",
+                "terminationGracePeriodSeconds": 45,
+            },
+        }
+        docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
+        spec = _find_doc_by_kind(docs, "Job")["spec"]["template"]["spec"]
+
+        assert spec["terminationGracePeriodSeconds"] == 45

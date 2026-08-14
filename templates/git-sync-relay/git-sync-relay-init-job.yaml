@@ -7,13 +7,28 @@
 {{- include "gitSyncRelay.validateAuth" . -}}
 {{- $authType := include "gitSyncRelay.authType" . }}
 {{- $httpsSecret := include "gitSyncRelay.httpsSecretName" . }}
+{{- $nodeSelector := or .Values.gitSyncRelay.nodeSelector .Values.airflow.nodeSelector }}
+{{- $affinity := or .Values.gitSyncRelay.affinity .Values.airflow.affinity }}
+{{- $tolerations := or .Values.gitSyncRelay.tolerations .Values.airflow.tolerations }}
+{{- /* Only render (and hook-create) the PVC if it doesn't already exist. Without this
+       gate, adding "pre-upgrade" here would make Helm's before-hook-creation policy
+       delete and recreate the PVC -- destroying the cloned repo, and briefly reopening
+       the exact ESTALE race this chart exists to close -- on every single upgrade, not
+       just the first install. `lookup` only queries the live cluster (never during
+       `helm template`/render tests, where it always returns an empty dict), so this is
+       a no-op for the existing render-test coverage and only matters for a real
+       install/upgrade: a fresh install renders and creates it as before; an upgrade
+       where it already exists skips this block entirely (no hook, no risk to existing
+       data); an upgrade that newly enables shared_volume mode (no PVC yet) now creates
+       it via the pre-upgrade hook instead of failing the Job that expects to mount it. */}}
+{{- if not (lookup "v1" "PersistentVolumeClaim" .Release.Namespace "git-repo-contents") }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: git-repo-contents
   annotations:
-    "helm.sh/hook": "pre-install"
+    "helm.sh/hook": "pre-install,pre-upgrade"
     "helm.sh/hook-delete-policy": "before-hook-creation"
     "helm.sh/hook-weight": "1"
   labels:
@@ -29,6 +44,7 @@ spec:
     requests:
       storage: {{ .Values.gitSyncRelay.volumeSync.volumeSize }}
   storageClassName: {{ .Values.gitSyncRelay.volumeSync.storageClassName }}
+{{- end }}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -82,7 +98,11 @@ spec:
       {{- end }}
       restartPolicy: Never
       serviceAccountName: {{ .Release.Name }}-git-sync-relay-init
-      securityContext: {{- toYaml .Values.gitSyncRelay.securityContext | nindent 8 }}
+      nodeSelector: {{- toYaml $nodeSelector | nindent 8 }}
+      affinity: {{- toYaml $affinity | nindent 8 }}
+      tolerations: {{- toYaml $tolerations | nindent 8 }}
+      terminationGracePeriodSeconds: {{ .Values.gitSyncRelay.terminationGracePeriodSeconds }}
+      securityContext: {{- include "gitSyncRelay.podSecurityContext" . | nindent 8 }}
       volumes:
         - name: git-sync-home
           emptyDir: {}
