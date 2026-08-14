@@ -62,8 +62,13 @@ metadata:
 spec:
   # Bound the one-time clone/fetch so a network issue stalls the Job instead of
   # hanging it forever -- there's no in-process retry loop here the way the
-  # long-running Deployment has (retry_attempts/retry_max_seconds).
+  # long-running Deployment has (retry_attempts/retry_max_seconds). backoffLimit: 0
+  # so a failure surfaces immediately instead of Kubernetes silently retrying up
+  # to its default of 6 attempts -- which would also make activeDeadlineSeconds
+  # (a Job-wide budget, not per-attempt) bound a fraction of gitSyncTimeout per
+  # attempt instead of the full value its own name promises.
   activeDeadlineSeconds: {{ .Values.gitSyncRelay.repo.gitSyncTimeout }}
+  backoffLimit: 0
   template:
     metadata:
       labels:
@@ -101,7 +106,9 @@ spec:
           secret:
             secretName: {{ $httpsSecret }}
         {{- end }}
+        {{- include "gitSyncRelay.customCaVolumes" . | nindent 8 }}
       initContainers:
+        {{- include "gitSyncRelay.customCaInitContainer" . | nindent 8 }}
         - name: git-config-manager
           command: ["git", "config", "--global", "--add", "safe.directory", "/git"]
           image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
@@ -150,7 +157,9 @@ spec:
             {{- end }}
             - name: git-repo-contents
               mountPath: /git
+            {{- include "gitSyncRelay.customCaVolumeMounts" . | nindent 12 }}
           env:
+            {{- include "gitSyncRelay.customCaEnv" . | nindent 12 }}
             - name: GIT_SYNC_ROOT
               value: "/git"
             - name: GIT_SYNC_REPO

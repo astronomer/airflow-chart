@@ -401,3 +401,64 @@ class TestGitSyncRelayInitJob:
         }
         with pytest.raises(CalledProcessError):
             render_chart(kube_version=kube_version, show_only=show_only, values=values)
+
+    def test_init_job_backoff_limit_zero(self, kube_version):
+        """A failed clone must surface immediately, not retry up to Kubernetes'
+        default of 6 -- which would also make activeDeadlineSeconds bound a
+        fraction of gitSyncTimeout per attempt instead of the full value."""
+        values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
+        docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
+        doc = _find_doc_by_kind(docs, "Job")
+
+        assert doc["spec"]["backoffLimit"] == 0
+
+    def test_init_job_no_private_ca_by_default(self, kube_version):
+        """Private-CA trust is off unless global.privateCaCerts is set."""
+        values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
+        docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
+        doc = _find_doc_by_kind(docs, "Job")
+        spec = doc["spec"]["template"]["spec"]
+
+        assert "etc-ssl-certs" not in {v["name"] for v in spec["volumes"]}
+        assert "etc-ssl-certs-copier" not in {c["name"] for c in spec.get("initContainers", [])}
+        c_by_name = get_containers_by_name(doc)
+        assert "UPDATE_CA_CERTS" not in get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert "etc-ssl-certs" not in {m["name"] for m in c_by_name["git-sync"].get("volumeMounts", [])}
+
+    def test_init_job_private_ca_enabled(self, kube_version):
+        """When global.privateCaCerts is set, the init Job's git-sync container trusts
+        the CA(s) the same way the long-running Deployment does: a writable
+        /etc/ssl/certs emptyDir (seeded by an initContainer), the CA secret mounted
+        under /usr/local/share/ca-certificates, and UPDATE_CA_CERTS=true.
+
+        Without this, a shared_volume deployment against a private-CA git host would
+        have its bootstrap clone fail TLS validation even though the long-running
+        Deployment (which does have this wiring) would work fine once it started."""
+        values = {
+            "gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"},
+            "global": {"privateCaCerts": ["my-private-ca"]},
+        }
+        docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
+        doc = _find_doc_by_kind(docs, "Job")
+        spec = doc["spec"]["template"]["spec"]
+
+        vols = {v["name"]: v for v in spec["volumes"]}
+        assert "etc-ssl-certs" in vols and "emptyDir" in vols["etc-ssl-certs"]
+        assert vols["private-ca-0"]["secret"]["secretName"] == "my-private-ca"
+
+        inits = {c["name"]: c for c in spec["initContainers"]}
+        assert "etc-ssl-certs-copier" in inits
+        copier_mounts = {m["name"]: m for m in inits["etc-ssl-certs-copier"]["volumeMounts"]}
+        assert copier_mounts["etc-ssl-certs"]["mountPath"] == "/etc/ssl/certs_copy"
+        # The copier must run before git-config-manager so the trust store is seeded
+        # before anything else in the pod might need it.
+        init_names = [c["name"] for c in spec["initContainers"]]
+        assert init_names.index("etc-ssl-certs-copier") < init_names.index("git-config-manager")
+
+        c_by_name = get_containers_by_name(doc)
+        gs_mounts = {m["name"]: m for m in c_by_name["git-sync"]["volumeMounts"]}
+        assert gs_mounts["etc-ssl-certs"]["mountPath"] == "/etc/ssl/certs"
+        assert gs_mounts["private-ca-0"]["mountPath"] == "/usr/local/share/ca-certificates/private-ca-0.pem"
+        assert gs_mounts["private-ca-0"]["subPath"] == "cert.pem"
+        env = get_env_vars_dict(c_by_name["git-sync"].get("env"))
+        assert env["UPDATE_CA_CERTS"] == "true"
