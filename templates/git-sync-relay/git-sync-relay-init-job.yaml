@@ -2,6 +2,11 @@
 ## git-sync-relay Pre install/upgrade Init Hook  ##
 ###################################################
 {{- if and .Values.gitSyncRelay.enabled (eq .Values.gitSyncRelay.repoShareMode "shared_volume") }}
+{{- /* Shared with git-sync-relay-deployment.yaml -- see the gitSyncRelay.* helper
+       definitions in _helpers.yaml for what this validates/resolves. */}}
+{{- include "gitSyncRelay.validateAuth" . -}}
+{{- $authType := include "gitSyncRelay.authType" . }}
+{{- $httpsSecret := include "gitSyncRelay.httpsSecretName" . }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -55,6 +60,10 @@ metadata:
     "helm.sh/hook-delete-policy": "before-hook-creation"
     "helm.sh/hook-weight": "5"
 spec:
+  # Bound the one-time clone/fetch so a network issue stalls the Job instead of
+  # hanging it forever -- there's no in-process retry loop here the way the
+  # long-running Deployment has (retry_attempts/retry_max_seconds).
+  activeDeadlineSeconds: {{ .Values.gitSyncRelay.repo.gitSyncTimeout }}
   template:
     metadata:
       labels:
@@ -87,24 +96,32 @@ spec:
           configMap:
             name: {{ .Release.Name }}-git-sync-config
         {{- end }}
+        {{- if and (eq $authType "https-pat") (ne $httpsSecret "") }}
+        - name: git-https-secret
+          secret:
+            secretName: {{ $httpsSecret }}
+        {{- end }}
       initContainers:
         - name: git-config-manager
           command: ["git", "config", "--global", "--add", "safe.directory", "/git"]
-          image: "{{ .Values.airflow.images.gitSync.repository }}:{{ .Values.airflow.images.gitSync.tag }}"
-          securityContext:
-            readOnlyRootFilesystem: true
-          env:
-            - name: HOME
-              value: /home/git-sync
+          image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+          securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 12 }}
           volumeMounts:
             - name: git-sync-home
               mountPath: /home/git-sync
           resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
       containers:
         - name: git-sync
-          image: "{{ .Values.airflow.images.gitSync.repository }}:{{ .Values.airflow.images.gitSync.tag }}"
-          securityContext:
-            readOnlyRootFilesystem: true
+          image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+          {{- /* No `command` override: let the image's own entrypoint.sh run first (so
+                 CA-trust/debug setup still applies), then exec this instead of the
+                 default long-running Sanic daemon. Reuses the ap-git-sync-relay image
+                 and its credential-helper wiring (SSH / HTTPS+PAT) instead of the
+                 upstream git-sync image, which has no equivalent for HTTPS+PAT --
+                 wiring PAT auth against its native mechanism would put the token in a
+                 plaintext env var. */}}
+          args: ["git-sync-once"]
+          securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 12 }}
           volumeMounts:
             - name: git-sync-home
               mountPath: /home/git-sync
@@ -122,11 +139,18 @@ spec:
               subPath: known_hosts
             {{- end }}
             {{- end }}
+            {{- if and (eq $authType "https-pat") (ne $httpsSecret "") }}
+            {{- /* Mount as a directory (no subPath), matching the Deployment, so a
+                   rotated credential doesn't need a pod restart to be picked up --
+                   not that it matters for a one-shot Job, but keeping the mount shape
+                   identical avoids a second convention to keep in sync. */}}
+            - name: git-https-secret
+              mountPath: /etc/git-secret/https
+              readOnly: true
+            {{- end }}
             - name: git-repo-contents
               mountPath: /git
           env:
-            - name: GIT_SYNC_ONE_TIME
-              value: "true"
             - name: GIT_SYNC_ROOT
               value: "/git"
             - name: GIT_SYNC_REPO
@@ -135,8 +159,6 @@ spec:
               value: "{{ .Values.gitSyncRelay.repo.branch }}"
             - name: GIT_SYNC_DEPTH
               value: "{{ .Values.gitSyncRelay.repo.depth }}"
-            - name: GIT_SYNC_SYNC_TIMEOUT
-              value: "{{ .Values.gitSyncRelay.repo.gitSyncTimeout }}"
             {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
             - name: GIT_SYNC_SSH
               value: "true"
@@ -151,6 +173,14 @@ spec:
             - name: GIT_KNOWN_HOSTS
               value: "false"
             {{- end }}
+            {{- end }}
+            {{- if or (eq $authType "https-pat") (eq $authType "https-none") }}
+            - name: GIT_SYNC_AUTH_TYPE
+              value: "{{ $authType }}"
+            {{- end }}
+            {{- if and (eq $authType "https-pat") (ne $httpsSecret "") }}
+            - name: GIT_SYNC_HTTPS_SECRET_DIR
+              value: "/etc/git-secret/https"
             {{- end }}
           resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
 {{- end }}
