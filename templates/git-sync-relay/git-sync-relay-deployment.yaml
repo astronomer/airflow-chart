@@ -220,6 +220,19 @@ spec:
           {{- end }}
           {{- if .Values.gitSyncRelay.gitSync.readinessProbe }}
           readinessProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitSync.readinessProbe) . | nindent 12 }}
+          {{- else }}
+          # Reflects the MOST RECENT sync attempt (initial, poll, or webhook), not just the
+          # pod's first one at startup -- so a Deployment's Gitsync URL edited to something
+          # invalid after the relay is already running marks this pod NotReady (PINF-816)
+          # instead of staying silently "ready" forever. Deliberately not a livenessProbe: a
+          # restart cannot fix a bad URL and would just crash-loop the pod pointlessly.
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: {{ .Values.gitSyncRelay.gitSync.webhookPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            failureThreshold: 3
           {{- end }}
           {{- if .Values.gitSyncRelay.gitSync.startupProbe }}
           startupProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitSync.startupProbe) . | nindent 12 }}
