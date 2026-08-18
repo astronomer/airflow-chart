@@ -57,7 +57,7 @@ class TestGitSyncRelayDeployment:
             "httpGet": {"path": "/readyz", "port": 8000},
             "initialDelaySeconds": 5,
             "periodSeconds": 15,
-            "failureThreshold": 3,
+            "failureThreshold": 1,
         }
         assert "startupProbe" not in c_by_name["git-sync"]
         assert c_by_name["git-sync"]["resources"] == {
