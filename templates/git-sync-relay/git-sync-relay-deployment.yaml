@@ -221,19 +221,11 @@ spec:
           {{- if .Values.gitSyncRelay.gitSync.readinessProbe }}
           readinessProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitSync.readinessProbe) . | nindent 12 }}
           {{- else }}
-          # Reflects the MOST RECENT sync attempt (initial, poll, or webhook), not just the
-          # pod's first one at startup -- so a Deployment's Gitsync URL edited to something
-          # invalid after the relay is already running marks this pod NotReady (PINF-816)
-          # instead of staying silently "ready" forever. Deliberately not a livenessProbe: a
-          # restart cannot fix a bad URL and would just crash-loop the pod pointlessly.
-          # failureThreshold: 1 is deliberate, not an oversight: /readyz already reflects a
-          # single failed sync cycle, and that sync-level signal is already debounced by
-          # sync_logic()'s own internal fetch retries/backoff before it ever flips -- stacking
-          # a second, multi-tick smoothing layer here (the k8s default is 3) would just delay
-          # surfacing an already-confirmed failure by up to 2 more periodSeconds for no real
-          # gain, since a bare probe-request failure (as opposed to a real 503) should be rare:
-          # /readyz is a lightweight in-memory read that doesn't block on the sync itself,
-          # which runs in a separate executor thread.
+          # /readyz reflects the most recent sync, so a bad Gitsync URL edit marks this pod
+          # NotReady instead of staying "ready" forever (PINF-816). Not a livenessProbe -- a
+          # restart can't fix a bad URL. failureThreshold: 1 (not the k8s default of 3): the
+          # sync itself already retries internally before /readyz ever flips, so no extra
+          # smoothing is needed here.
           readinessProbe:
             httpGet:
               path: /readyz

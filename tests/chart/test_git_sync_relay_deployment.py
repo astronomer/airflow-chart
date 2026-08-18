@@ -48,10 +48,8 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
         assert c_by_name["git-daemon"]["startupProbe"]
-        # git-sync has a hardcoded readinessProbe fallback (PINF-816: /readyz reflects the most
-        # recent sync attempt, so a bad repo URL marks this pod NotReady instead of staying
-        # silently "ready" forever) but no liveness/startup fallback -- a restart can't fix a
-        # bad URL, so liveness is deliberately left customer-configurable-only, like startup.
+        # git-sync has a hardcoded readinessProbe fallback (PINF-816) but no liveness fallback
+        # -- a restart can't fix a bad URL, so liveness stays customer-configurable-only.
         assert "livenessProbe" not in c_by_name["git-sync"]
         assert c_by_name["git-sync"]["readinessProbe"] == {
             "httpGet": {"path": "/readyz", "port": 8000},
