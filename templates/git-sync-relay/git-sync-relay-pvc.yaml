@@ -1,5 +1,42 @@
 ########################
 ## git-sync-relay pvc ##
 ########################
-{{/* PVC is created as a Helm hook in git-sync-relay-init-job.yaml (pre-install, weight 1)
-     to ensure it exists before the init job runs. It persists across upgrades. */}}
+{{- /* This is NOT redundant with the PVC hook block in git-sync-relay-init-job.yaml -- the
+       two solve different problems and both are needed.
+
+       The hook block guarantees the PVC exists before the pre-install/pre-upgrade init Job
+       tries to mount it (Helm applies pre-install hooks before any normal resource, so the PVC
+       can't live only as a normal resource without deadlocking a fresh install against the
+       Job). But a resource that only ever exists as a hook is never part of Helm's normal
+       release-manifest tracking, so an install that already has this PVC as a normal resource
+       (true of every shared_volume install made under a prior chart version, before this hook
+       existed) would see it vanish from the manifest on upgrade and get pruned by Helm -- data
+       loss. This plain declaration keeps the PVC permanently tracked as a normal resource
+       (as it always was), so it's never at risk of that prune, while the hook block still
+       handles the one real gap: creating it in time for a genuinely first-time creation
+       (a fresh install, or an upgrade that newly switches a release into shared_volume mode).
+       Both declarations render the identical spec, so Helm's normal-resource apply here is a
+       harmless no-op against whatever the hook already created (or an existing PVC's own
+       unchanged spec) -- see the hook block's own comment for the lookup-gate mechanics. */}}
+{{- if and
+  .Values.gitSyncRelay.enabled
+  (eq .Values.gitSyncRelay.repoShareMode "shared_volume")
+}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: git-repo-contents
+  labels:
+    component: git-sync-relay
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.gitSyncRelay.volumeSync.volumeSize }}
+  storageClassName: {{ .Values.gitSyncRelay.volumeSync.storageClassName }}
+{{- end }}

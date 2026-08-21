@@ -69,12 +69,21 @@ metadata:
     component: git-sync-relay
     tier: airflow
     release: {{ .Release.Name }}
-    chart: "{{ .Release.Name }}-{{ .Chart.Version }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
   annotations:
     "helm.sh/hook": "pre-install,pre-upgrade"
     "helm.sh/hook-delete-policy": "before-hook-creation"
     "helm.sh/hook-weight": "5"
+    # Known gaps, not yet fixed:
+    #  - On an upgrade, this Job's clone can run concurrently with the prior revision's
+    #    still-running relay Deployment fetching the same PVC (hooks run before normal
+    #    resources are reconciled). Unserialized -- tracked as PINF-1194.
+    #  - pre-upgrade means every upgrade is gated on this Job succeeding, so a git-host
+    #    outage or a clone exceeding activeDeadlineSeconds blocks that upgrade. Intended
+    #    fail-safe (better than deploying a broken sync), but Helm does not auto-rollback
+    #    an install/upgrade on hook failure by default -- callers wanting that need
+    #    `helm upgrade --atomic` themselves.
 spec:
   # Bound the one-time clone/fetch so a network issue stalls the Job instead of
   # hanging it forever -- there's no in-process retry loop here the way the

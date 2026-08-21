@@ -298,9 +298,9 @@ class TestGitSyncRelayInitJob:
         pre-upgrade matters so a release that newly enables shared_volume mode via
         `helm upgrade` (rather than at initial install) still gets the PVC created --
         without it, the Job would fail trying to mount a PVC that never got created.
-        Safe to also fire on upgrade because the PVC's own render is lookup-gated (see
-        test_init_job_pvc_lookup_gate_comment below): it only renders when the PVC
-        doesn't already exist, so this never re-creates/destroys an existing one.
+        Safe to also fire on upgrade because the PVC's own render here is lookup-gated
+        (see the template's own comment): it only renders when the PVC doesn't already
+        exist, so this never re-creates/destroys an existing one.
         """
         values = {"gitSyncRelay": {"enabled": True, "repoShareMode": "shared_volume"}}
         docs = render_chart(kube_version=kube_version, show_only=show_only, values=values)
