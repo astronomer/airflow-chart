@@ -171,3 +171,30 @@ class TestAirflow:
         assert len(docs) == 1
         c_by_name = get_containers_by_name(docs[0])
         assert c_by_name["api-server"]["startupProbe"]["initialDelaySeconds"] == 30
+
+    def test_scheduler_readinessprobe_and_livenessprobe_defaults_do_not_fire_in_lockstep(self, kube_version):
+        """PINF-1150: readinessProbe and livenessProbe run the identical exec
+        command (fork a process, import Airflow, round-trip the DB). If both fired
+        on the same initialDelaySeconds/periodSeconds, kubelet would trigger them
+        at the same instant every cycle, doubling the CPU/DB load from
+        health-checking alone at that moment -- readiness has no more timeout
+        headroom than liveness, so it would be the first to trip under contention.
+        This asserts values.yaml's override keeps the two offset, so a future edit
+        can't silently reintroduce the lockstep.
+        """
+        docs = render_chart(
+            kube_version=kube_version, show_only=["charts/airflow/templates/scheduler/scheduler-deployment.yaml"], values={}
+        )
+
+        assert len(docs) == 1
+        c_by_name = get_containers_by_name(docs[0])
+        liveness = c_by_name["scheduler"]["livenessProbe"]
+        readiness = c_by_name["scheduler"]["readinessProbe"]
+
+        assert liveness["timeoutSeconds"] == 30
+        assert liveness["initialDelaySeconds"] == 10
+        assert readiness["initialDelaySeconds"] == 40
+        assert liveness["periodSeconds"] == readiness["periodSeconds"] == 60
+        # Never coincide: the two schedules must not land on the same instant
+        # modulo their shared period.
+        assert (readiness["initialDelaySeconds"] - liveness["initialDelaySeconds"]) % liveness["periodSeconds"] != 0

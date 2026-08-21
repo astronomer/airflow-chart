@@ -28,6 +28,9 @@ class TestGitSyncRelayService:
         assert doc["kind"] == "Service"
         assert doc["apiVersion"] == "v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        # No serviceType override exists for this Service -- it must stay unset so Kubernetes'
+        # own default (ClusterIP) applies. (PINF-986: ServiceOnlyAllowClusterIP)
+        assert "type" not in doc["spec"]
 
     @pytest.mark.parametrize("repoShareMode,", ["git_daemon", "shared_volume"])
     @pytest.mark.parametrize("repoFetchMode", ["poll", "webhook"])
@@ -53,6 +56,7 @@ class TestGitSyncRelayService:
         assert doc["kind"] == "Service"
         assert doc["apiVersion"] == "v1"
         assert doc["metadata"]["name"] == "release-name-git-sync-relay"
+        assert "type" not in doc["spec"]
         ports = get_service_ports_by_name(doc)
         if repoFetchMode == "webhook":
             assert ports["webhook"]["port"] == 8000
