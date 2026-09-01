@@ -213,6 +213,19 @@ spec:
           {{- end }}
           {{- if .Values.gitSyncRelay.gitSync.readinessProbe }}
           readinessProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitSync.readinessProbe) . | nindent 12 }}
+          {{- else }}
+          # /readyz reflects the most recent sync, so a bad Gitsync URL edit marks this pod
+          # NotReady instead of staying "ready" forever (PINF-816). Not a livenessProbe -- a
+          # restart can't fix a bad URL. failureThreshold: 1 (not the k8s default of 3): the
+          # sync itself already retries internally before /readyz ever flips, so no extra
+          # smoothing is needed here.
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: {{ .Values.gitSyncRelay.gitSync.webhookPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            failureThreshold: 1
           {{- end }}
           {{- if .Values.gitSyncRelay.gitSync.startupProbe }}
           startupProbe: {{- tpl (toYaml .Values.gitSyncRelay.gitSync.startupProbe) . | nindent 12 }}
