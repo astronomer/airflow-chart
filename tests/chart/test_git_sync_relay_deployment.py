@@ -937,25 +937,25 @@ class TestGitSyncRelayDeployment:
         assert docs[0]["spec"]["template"]["metadata"]["annotations"] == {"sidecar.istio.io/inject": "false"}
 
     def test_git_sync_server_deployment_with_logging_sidecar_customconfig_enabled(self, kube_version):
-            """Test git sync server deployment with logging sidecar custom config enabled."""
-            values = {
-                "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
-                "loggingSidecar": {"enabled": True, "customConfig": True},
-            }
+        """Test git sync server deployment with logging sidecar custom config enabled."""
+        values = {
+            "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
+            "loggingSidecar": {"enabled": True, "customConfig": True},
+        }
 
-            docs = render_chart(
-                kube_version=kube_version,
-                show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
-                values=values,
-            )
-            assert len(docs) == 1
-            doc = docs[0]
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
 
-            assert doc["spec"]["template"]["spec"]["volumes"] == [
-                {"name": "git-sync-home", "emptyDir": {}},
-                {"name": "git-repo-contents", "emptyDir": {}},
-                {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
-                {"name": "config-volume", "configMap": {"name": "sidecar-config"}},
-                {"name": "sidecar-logging-consumer", "emptyDir": {}},
-                {"name": "tmp", "emptyDir": {}},
-            ]
+        assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-sync-home", "emptyDir": {}},
+            {"name": "git-repo-contents", "emptyDir": {}},
+            {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
+            {"name": "config-volume", "configMap": {"name": "sidecar-config"}},
+            {"name": "sidecar-logging-consumer", "emptyDir": {}},
+            {"name": "tmp", "emptyDir": {}},
+        ]

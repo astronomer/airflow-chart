@@ -551,22 +551,22 @@ class TestDagServerStatefulSet:
         assert docs[0]["spec"]["template"]["metadata"]["annotations"] == {"sidecar.istio.io/inject": "false"}
 
     def test_dag_server_statefulset_with_logging_sidecar_customconfig_enabled(self, kube_version):
-            """Test dag-server statefulset with logging sidecar enabled."""
-            values = {"dagDeploy": {"enabled": True}, "loggingSidecar": {"enabled": True, "customConfig": True}}
+        """Test dag-server statefulset with logging sidecar and custom config enabled."""
+        values = {"dagDeploy": {"enabled": True}, "loggingSidecar": {"enabled": True, "customConfig": True}}
 
-            docs = render_chart(
-                kube_version=kube_version,
-                show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
-                values=values,
-            )
-            assert len(docs) == 1
-            doc = docs[0]
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
 
-            c_by_name = get_containers_by_name(doc)
-            assert len(c_by_name) == 2
-            assert "sidecar-log-consumer" in c_by_name
-            assert doc["spec"]["template"]["spec"]["volumes"] == [
-                            {"name": "tmp", "emptyDir": {}},
-                            {"name": "config-volume", "configMap": {"name": "sidecar-config"}},
-                            {"name": "sidecar-logging-consumer", "emptyDir": {}},
-                        ]
+        c_by_name = get_containers_by_name(doc)
+        assert len(c_by_name) == 2
+        assert "sidecar-log-consumer" in c_by_name
+        assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "tmp", "emptyDir": {}},
+            {"name": "config-volume", "configMap": {"name": "sidecar-config"}},
+            {"name": "sidecar-logging-consumer", "emptyDir": {}},
+        ]
