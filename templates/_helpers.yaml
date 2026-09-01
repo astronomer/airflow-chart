@@ -621,3 +621,12 @@ Strips fsGroup and runAsUser on OpenShift to comply with restricted-v2 SCC.
 {{- toYaml (.Values.dagDeploy.securityContexts.pod | default dict) }}
 {{- end -}}
 {{- end }}
+
+
+{{- define "loggingSidecar.configName" -}}
+{{- if .Values.loggingSidecar.customConfig -}}
+sidecar-config
+{{- else -}}
+{{ .Release.Name }}-sidecar-config
+{{- end -}}
+{{- end }}
