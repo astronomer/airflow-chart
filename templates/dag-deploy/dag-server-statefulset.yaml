@@ -162,7 +162,7 @@ spec:
 {{- if .Values.loggingSidecar.enabled }}
       - name: config-volume
         configMap:
-          name: {{ .Release.Name }}-sidecar-config
+          name: {{ include "loggingSidecar.configName" . }}
       - emptyDir: {}
         name: sidecar-logging-consumer
 {{- end }}
