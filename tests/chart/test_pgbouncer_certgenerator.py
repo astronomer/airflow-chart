@@ -35,7 +35,11 @@ class TestPgbouncersslFeature:
         assert expected_rbac in docs[1]["rules"]
         assert "RoleBinding" == jmespath.search("kind", docs[2])
         assert docs[3]["spec"]["template"]["spec"]["affinity"] == {}
-        assert docs[3]["spec"]["template"]["spec"]["containers"][0]["securityContext"]["readOnlyRootFilesystem"] is True
+        assert docs[3]["spec"]["template"]["spec"]["containers"][0]["securityContext"] == {
+            "readOnlyRootFilesystem": True,
+            "allowPrivilegeEscalation": False,
+            "capabilities": {"drop": ["ALL"]},
+        }
         assert docs[3]["spec"]["template"]["spec"]["containers"][0]["resources"] == {
             "limits": {"cpu": "200m", "memory": "256Mi"},
             "requests": {"cpu": "100m", "memory": "128Mi"},
