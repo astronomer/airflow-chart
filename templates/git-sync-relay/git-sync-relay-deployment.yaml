@@ -10,19 +10,12 @@
        the same way the SSH path does: the HTTPS credentials Secret is mounted only
        when credentialsSecretName is present, and a missing/unused Secret renders
        nothing rather than failing (the relay starts and retries). The only hard
-       failures are an unknown auth.type and the SSH+HTTPS contradiction. */}}
-{{- $authType := "" }}
-{{- $httpsSecret := "" }}
-{{- with .Values.gitSyncRelay.repo.auth }}
-{{- $authType = .type | default "" }}
-{{- with .https }}{{- $httpsSecret = .credentialsSecretName | default "" }}{{- end }}
-{{- end }}
-{{- if not (has $authType (list "" "ssh" "https-pat" "https-none")) }}
-{{- fail (printf "gitSyncRelay.repo.auth.type: %q is invalid; must be one of ssh, https-pat, https-none." $authType) }}
-{{- end }}
-{{- if and .Values.gitSyncRelay.repo.sshPrivateKeySecretName (or (eq $authType "https-pat") (eq $authType "https-none") (ne $httpsSecret "")) }}
-{{- fail "gitSyncRelay.repo: SSH and HTTPS auth are mutually exclusive. repo.sshPrivateKeySecretName cannot be combined with HTTPS auth (repo.auth.type of https-pat/https-none, or repo.auth.https.credentialsSecretName)." }}
-{{- end }}
+       failures are an unknown auth.type and the SSH+HTTPS contradiction. Shared
+       with git-sync-relay-init-job.yaml via the gitSyncRelay.* helpers so the two
+       can't resolve or validate this differently. */}}
+{{- include "gitSyncRelay.validateAuth" . -}}
+{{- $authType := include "gitSyncRelay.authType" . }}
+{{- $httpsSecret := include "gitSyncRelay.httpsSecretName" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -610,6 +610,40 @@ The same index is used in customCaVolumeMounts so each mount matches its volume.
 {{- end }}
 
 {{/*
+Shared git-sync-relay auth resolution, used by both git-sync-relay-deployment.yaml
+and git-sync-relay-init-job.yaml so the two can't validate or resolve this
+differently. gitSyncRelay.validateAuth must be called once per template (its
+output is discarded; it exists only to `fail` on misconfiguration) before
+using gitSyncRelay.authType / gitSyncRelay.httpsSecretName:
+
+  {{- include "gitSyncRelay.validateAuth" . -}}
+  {{- $authType := include "gitSyncRelay.authType" . }}
+  {{- $httpsSecret := include "gitSyncRelay.httpsSecretName" . }}
+*/}}
+{{- define "gitSyncRelay.authType" -}}
+{{- $authType := "" }}
+{{- with .Values.gitSyncRelay.repo.auth }}{{- $authType = .type | default "" }}{{- end }}
+{{- $authType -}}
+{{- end -}}
+
+{{- define "gitSyncRelay.httpsSecretName" -}}
+{{- $httpsSecret := "" }}
+{{- with .Values.gitSyncRelay.repo.auth }}{{- with .https }}{{- $httpsSecret = .credentialsSecretName | default "" }}{{- end }}{{- end }}
+{{- $httpsSecret -}}
+{{- end -}}
+
+{{- define "gitSyncRelay.validateAuth" -}}
+{{- $authType := include "gitSyncRelay.authType" . }}
+{{- $httpsSecret := include "gitSyncRelay.httpsSecretName" . }}
+{{- if not (has $authType (list "" "ssh" "https-pat" "https-none")) }}
+{{- fail (printf "gitSyncRelay.repo.auth.type: %q is invalid; must be one of ssh, https-pat, https-none." $authType) }}
+{{- end }}
+{{- if and .Values.gitSyncRelay.repo.sshPrivateKeySecretName (or (eq $authType "https-pat") (eq $authType "https-none") (ne $httpsSecret "")) }}
+{{- fail "gitSyncRelay.repo: SSH and HTTPS auth are mutually exclusive. repo.sshPrivateKeySecretName cannot be combined with HTTPS auth (repo.auth.type of https-pat/https-none, or repo.auth.https.credentialsSecretName)." }}
+{{- end }}
+{{- end -}}
+
+{{/*
 dag-deploy pod-level securityContext
 Strips fsGroup and runAsUser on OpenShift to comply with restricted-v2 SCC.
 */}}
