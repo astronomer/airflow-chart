@@ -48,9 +48,15 @@ class TestGitSyncRelayDeployment:
         assert c_by_name["git-daemon"]["image"].startswith("quay.io/astronomer/ap-git-daemon:")
         assert c_by_name["git-daemon"]["livenessProbe"]
         assert c_by_name["git-daemon"]["startupProbe"]
-        # git-sync has no hardcoded probe fallback (customer-configurable only), unlike git-daemon
+        # git-sync has a hardcoded readinessProbe fallback (PINF-816) but no liveness fallback
+        # -- a restart can't fix a bad URL, so liveness stays customer-configurable-only.
         assert "livenessProbe" not in c_by_name["git-sync"]
-        assert "readinessProbe" not in c_by_name["git-sync"]
+        assert c_by_name["git-sync"]["readinessProbe"] == {
+            "httpGet": {"path": "/readyz", "port": 8000},
+            "initialDelaySeconds": 5,
+            "periodSeconds": 15,
+            "failureThreshold": 1,
+        }
         assert "startupProbe" not in c_by_name["git-sync"]
         assert c_by_name["git-sync"]["resources"] == {
             "limits": {"cpu": "200m", "memory": "256Mi"},
@@ -929,3 +935,27 @@ class TestGitSyncRelayDeployment:
         )
         assert len(docs) == 1
         assert docs[0]["spec"]["template"]["metadata"]["annotations"] == {"sidecar.istio.io/inject": "false"}
+
+    def test_git_sync_server_deployment_with_logging_sidecar_customconfig_enabled(self, kube_version):
+        """Test git sync server deployment with logging sidecar custom config enabled."""
+        values = {
+            "gitSyncRelay": {"enabled": True, "repoFetchMode": "webhook"},
+            "loggingSidecar": {"enabled": True, "customConfig": True},
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        assert doc["spec"]["template"]["spec"]["volumes"] == [
+            {"name": "git-sync-home", "emptyDir": {}},
+            {"name": "git-repo-contents", "emptyDir": {}},
+            {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
+            {"name": "config-volume", "configMap": {"name": "sidecar-config"}},
+            {"name": "sidecar-logging-consumer", "emptyDir": {}},
+            {"name": "tmp", "emptyDir": {}},
+        ]
