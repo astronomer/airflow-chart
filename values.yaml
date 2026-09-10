@@ -973,7 +973,7 @@ gitSyncRelay:
       tag: "3.21.3-6"
     gitSync:
       repository: "quay.io/astronomer/ap-git-sync-relay"
-      tag: "0.2.1"
+      tag: "0.5.0"
   repo:
     url: ~
     branch: main
