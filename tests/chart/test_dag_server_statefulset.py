@@ -567,6 +567,6 @@ class TestDagServerStatefulSet:
         assert "sidecar-log-consumer" in c_by_name
         assert doc["spec"]["template"]["spec"]["volumes"] == [
             {"name": "tmp", "emptyDir": {}},
-            {"name": "config-volume", "configMap": {"name": "sidecar-config"}},
+            {"name": "config-volume", "secret": {"secretName": "sidecar-config"}},
             {"name": "sidecar-logging-consumer", "emptyDir": {}},
         ]
