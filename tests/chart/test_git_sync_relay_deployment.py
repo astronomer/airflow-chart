@@ -955,7 +955,7 @@ class TestGitSyncRelayDeployment:
             {"name": "git-sync-home", "emptyDir": {}},
             {"name": "git-repo-contents", "emptyDir": {}},
             {"name": "release-name-git-sync-config", "configMap": {"name": "release-name-git-sync-config"}},
-            {"name": "config-volume", "configMap": {"name": "sidecar-config"}},
+            {"name": "config-volume", "secret": {"name": "sidecar-config"}},
             {"name": "sidecar-logging-consumer", "emptyDir": {}},
             {"name": "tmp", "emptyDir": {}},
         ]
