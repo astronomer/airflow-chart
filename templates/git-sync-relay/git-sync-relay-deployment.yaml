@@ -91,7 +91,7 @@ spec:
           configMap:
             name: {{ .Release.Name }}-git-sync-config
         {{- if .Values.loggingSidecar.enabled }}
-        {{- include "loggingSidecar.VolumeMounts" . | nindent 8 -}}
+        {{- include "loggingSidecar.VolumeMounts" . | nindent 8 }}
         - emptyDir: {}
           name: sidecar-logging-consumer
         {{- end }}

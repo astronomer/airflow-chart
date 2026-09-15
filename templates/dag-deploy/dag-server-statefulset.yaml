@@ -160,7 +160,7 @@ spec:
         emptyDir: {}
 {{- end }}
 {{- if .Values.loggingSidecar.enabled }}
-      {{- include "loggingSidecar.VolumeMounts" . | nindent 6 -}}
+      {{- include "loggingSidecar.VolumeMounts" . | nindent 6 }}
       - emptyDir: {}
         name: sidecar-logging-consumer
 {{- end }}
