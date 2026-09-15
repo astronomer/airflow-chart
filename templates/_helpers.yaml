@@ -630,3 +630,14 @@ sidecar-config
 {{ .Release.Name }}-sidecar-config
 {{- end -}}
 {{- end }}
+
+{{- define "loggingSidecar.VolumeMounts" -}}
+- name: config-volume
+{{- if .Values.loggingSidecar.customConfig }}
+  secret:
+    secretName: {{ include "loggingSidecar.configName" . }}
+{{- else }}
+  configMap:
+    name: {{ include "loggingSidecar.configName" . }}
+{{- end }}
+{{- end }}
