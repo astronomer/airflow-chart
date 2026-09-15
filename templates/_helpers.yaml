@@ -635,7 +635,7 @@ sidecar-config
 {{- if .Values.loggingSidecar.customConfig -}}
 - name: config-volume
   secret:
-    name: {{ include "loggingSidecar.configName" . }}
+    secretName: {{ include "loggingSidecar.configName" . }}
 {{ else }}
 - name: config-volume
   configMap:
