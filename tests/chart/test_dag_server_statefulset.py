@@ -1,7 +1,7 @@
 import pytest
 
 from tests import supported_k8s_versions
-from tests.utils import get_containers_by_name
+from tests.utils import get_containers_by_name, get_env_vars_dict
 from tests.utils.chart import render_chart
 
 readinessProbe = {"httpGet": {"initialDelaySeconds": 20, "periodSeconds": 20, "path": "/rhealthz", "port": 8080, "scheme": "HTTP"}}
@@ -570,3 +570,34 @@ class TestDagServerStatefulSet:
             {"name": "config-volume", "secret": {"secretName": "sidecar-config"}},
             {"name": "sidecar-logging-consumer", "emptyDir": {}},
         ]
+
+    def test_dag_server_statefulset_with_logging_sidecar_and_extraEnv(self, kube_version):
+        """Test dag-server statefulset with logging sidecar and extraEnv enabled."""
+        values = {
+            "dagDeploy": {"enabled": True},
+            "loggingSidecar": {
+                "enabled": True,
+                "extraEnv": [
+                    {"name": "ENV_NAME", "value": "apc"},
+                    {
+                        "name": "APC_AUTH_USER",
+                        "valueFrom": {"secretKeyRef": {"key": "USER", "name": "creds"}},
+                    },
+                ],
+            },
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["templates/dag-deploy/dag-server-statefulset.yaml"],
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        c_by_name = get_containers_by_name(doc)
+        assert len(c_by_name) == 2
+        assert "sidecar-log-consumer" in c_by_name
+        sidecar_env = get_env_vars_dict(c_by_name["sidecar-log-consumer"].get("env"))
+        assert sidecar_env.get("ENV_NAME") == "apc"
+        assert sidecar_env.get("APC_AUTH_USER") == {"secretKeyRef": {"key": "USER", "name": "creds"}}
