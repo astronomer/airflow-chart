@@ -963,7 +963,7 @@ class TestGitSyncRelayDeployment:
     def test_git_sync_server_deployment_with_logging_sidecar_and_extraEnv(self, kube_version):
         """Test dag-server statefulset with logging sidecar and extraEnv enabled."""
         values = {
-            "dagDeploy": {"enabled": True},
+            "gitSyncRelay": {"enabled": True},
             "loggingSidecar": {
                 "enabled": True,
                 "extraEnv": [
@@ -985,7 +985,7 @@ class TestGitSyncRelayDeployment:
         doc = docs[0]
 
         c_by_name = get_containers_by_name(doc)
-        assert len(c_by_name) == 2
+        assert len(c_by_name) == 3
         assert "sidecar-log-consumer" in c_by_name
         sidecar_env = get_env_vars_dict(c_by_name["sidecar-log-consumer"].get("env"))
         assert sidecar_env.get("ENV_NAME") == "apc"
