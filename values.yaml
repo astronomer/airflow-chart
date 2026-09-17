@@ -750,6 +750,7 @@ authSidecar:
 loggingSidecar:
   enabled: false
   name: sidecar-log-consumer
+  extraEnv: []
   customConfig: false
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector

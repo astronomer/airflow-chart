@@ -959,3 +959,28 @@ class TestGitSyncRelayDeployment:
             {"name": "sidecar-logging-consumer", "emptyDir": {}},
             {"name": "tmp", "emptyDir": {}},
         ]
+
+    def test_git_sync_server_deployment_with_logging_sidecar_and_extraEnv(self, kube_version, logging_sidecar_extra_env_config):
+        """Test dag-server statefulset with logging sidecar and extraEnv enabled."""
+        values = {
+            "gitSyncRelay": {"enabled": True},
+            "loggingSidecar": {
+                "enabled": True,
+                "extraEnv": logging_sidecar_extra_env_config,
+            },
+        }
+
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only="templates/git-sync-relay/git-sync-relay-deployment.yaml",
+            values=values,
+        )
+        assert len(docs) == 1
+        doc = docs[0]
+
+        c_by_name = get_containers_by_name(doc)
+        assert len(c_by_name) == 3
+        assert "sidecar-log-consumer" in c_by_name
+        sidecar_env = get_env_vars_dict(c_by_name["sidecar-log-consumer"].get("env"))
+        assert sidecar_env.get("ENV_NAME") == "apc"
+        assert sidecar_env.get("APC_AUTH_USER") == {"secretKeyRef": {"key": "USER", "name": "creds"}}
