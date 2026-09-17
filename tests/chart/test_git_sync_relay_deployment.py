@@ -960,19 +960,13 @@ class TestGitSyncRelayDeployment:
             {"name": "tmp", "emptyDir": {}},
         ]
 
-    def test_git_sync_server_deployment_with_logging_sidecar_and_extraEnv(self, kube_version):
+    def test_git_sync_server_deployment_with_logging_sidecar_and_extraEnv(self, kube_version, logging_sidecar_extra_env_config):
         """Test dag-server statefulset with logging sidecar and extraEnv enabled."""
         values = {
             "gitSyncRelay": {"enabled": True},
             "loggingSidecar": {
                 "enabled": True,
-                "extraEnv": [
-                    {"name": "ENV_NAME", "value": "apc"},
-                    {
-                        "name": "APC_AUTH_USER",
-                        "valueFrom": {"secretKeyRef": {"key": "USER", "name": "creds"}},
-                    },
-                ],
+                "extraEnv": logging_sidecar_extra_env_config,
             },
         }
 

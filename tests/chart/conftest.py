@@ -104,3 +104,14 @@ def airflow_node_pool_config():
             }
         ],
     }
+
+
+@pytest.fixture(scope="function")
+def logging_sidecar_extra_env_config():
+    yield [
+        {"name": "ENV_NAME", "value": "apc"},
+        {
+            "name": "APC_AUTH_USER",
+            "valueFrom": {"secretKeyRef": {"key": "USER", "name": "creds"}},
+        },
+    ]

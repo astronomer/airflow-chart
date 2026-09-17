@@ -571,19 +571,13 @@ class TestDagServerStatefulSet:
             {"name": "sidecar-logging-consumer", "emptyDir": {}},
         ]
 
-    def test_dag_server_statefulset_with_logging_sidecar_and_extraEnv(self, kube_version):
+    def test_dag_server_statefulset_with_logging_sidecar_and_extraEnv(self, kube_version, logging_sidecar_extra_env_config):
         """Test dag-server statefulset with logging sidecar and extraEnv enabled."""
         values = {
             "dagDeploy": {"enabled": True},
             "loggingSidecar": {
                 "enabled": True,
-                "extraEnv": [
-                    {"name": "ENV_NAME", "value": "apc"},
-                    {
-                        "name": "APC_AUTH_USER",
-                        "valueFrom": {"secretKeyRef": {"key": "USER", "name": "creds"}},
-                    },
-                ],
+                "extraEnv": logging_sidecar_extra_env_config,
             },
         }
 
