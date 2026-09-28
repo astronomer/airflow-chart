@@ -1,0 +1,224 @@
+###################################################
+## git-sync-relay Pre install/upgrade Init Hook  ##
+###################################################
+{{- if and .Values.gitSyncRelay.enabled (eq .Values.gitSyncRelay.repoShareMode "shared_volume") }}
+{{- /* Shared with git-sync-relay-deployment.yaml -- see the gitSyncRelay.* helper
+       definitions in _helpers.yaml for what this validates/resolves. */}}
+{{- include "gitSyncRelay.validateAuth" . -}}
+{{- $authType := include "gitSyncRelay.authType" . }}
+{{- $httpsSecret := include "gitSyncRelay.httpsSecretName" . }}
+{{- $nodeSelector := or .Values.gitSyncRelay.nodeSelector .Values.airflow.nodeSelector }}
+{{- $affinity := or .Values.gitSyncRelay.affinity .Values.airflow.affinity }}
+{{- $tolerations := or .Values.gitSyncRelay.tolerations .Values.airflow.tolerations }}
+{{- /* Only render (and hook-create) the PVC if it doesn't already exist. Without this
+       gate, adding "pre-upgrade" here would make Helm's before-hook-creation policy
+       delete and recreate the PVC -- destroying the cloned repo, and briefly reopening
+       the exact ESTALE race this chart exists to close -- on every single upgrade, not
+       just the first install. `lookup` only queries the live cluster (never during
+       `helm template`/render tests, where it always returns an empty dict), so this is
+       a no-op for the existing render-test coverage and only matters for a real
+       install/upgrade: a fresh install renders and creates it as before; an upgrade
+       where it already exists skips this block entirely (no hook, no risk to existing
+       data); an upgrade that newly enables shared_volume mode (no PVC yet) now creates
+       it via the pre-upgrade hook instead of failing the Job that expects to mount it. */}}
+{{- if not (lookup "v1" "PersistentVolumeClaim" .Release.Namespace "git-repo-contents") }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: git-repo-contents
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook-weight": "1"
+  labels:
+    component: git-sync-relay
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.gitSyncRelay.volumeSync.volumeSize }}
+  storageClassName: {{ .Values.gitSyncRelay.volumeSync.storageClassName }}
+{{- end }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-git-sync-relay-init
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook-weight": "3"
+  labels:
+    component: git-sync-relay
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-git-sync-relay-init
+  labels:
+    component: git-sync-relay
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook-weight": "5"
+    # Known gaps, not yet fixed:
+    #  - On an upgrade, this Job's clone can run concurrently with the prior revision's
+    #    still-running relay Deployment fetching the same PVC (hooks run before normal
+    #    resources are reconciled). Unserialized -- tracked as PINF-1194.
+    #  - pre-upgrade means every upgrade is gated on this Job succeeding, so a git-host
+    #    outage or a clone exceeding activeDeadlineSeconds blocks that upgrade. Intended
+    #    fail-safe (better than deploying a broken sync), but Helm does not auto-rollback
+    #    an install/upgrade on hook failure by default -- callers wanting that need
+    #    `helm upgrade --atomic` themselves.
+spec:
+  # Bound the one-time clone/fetch so a network issue stalls the Job instead of
+  # hanging it forever -- there's no in-process retry loop here the way the
+  # long-running Deployment has (retry_attempts/retry_max_seconds). backoffLimit: 0
+  # so a failure surfaces immediately instead of Kubernetes silently retrying up
+  # to its default of 6 attempts -- which would also make activeDeadlineSeconds
+  # (a Job-wide budget, not per-attempt) bound a fraction of gitSyncTimeout per
+  # attempt instead of the full value its own name promises.
+  activeDeadlineSeconds: {{ .Values.gitSyncRelay.repo.gitSyncTimeout }}
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        component: git-sync-relay
+        tier: airflow
+        release: {{ .Release.Name }}
+    spec:
+      {{- if or .Values.airflow.registry.secretName .Values.airflow.registry.connection }}
+      imagePullSecrets:
+        - name: {{ template "astro.registry_secret" . }}
+      {{- end }}
+      restartPolicy: Never
+      serviceAccountName: {{ .Release.Name }}-git-sync-relay-init
+      nodeSelector: {{- toYaml $nodeSelector | nindent 8 }}
+      affinity: {{- toYaml $affinity | nindent 8 }}
+      tolerations: {{- toYaml $tolerations | nindent 8 }}
+      terminationGracePeriodSeconds: {{ .Values.gitSyncRelay.terminationGracePeriodSeconds }}
+      securityContext: {{- include "gitSyncRelay.podSecurityContext" . | nindent 8 }}
+      volumes:
+        - name: git-sync-home
+          emptyDir: {}
+        - name: git-repo-contents
+          persistentVolumeClaim:
+            claimName: git-repo-contents
+        - name: tmp
+          emptyDir: {}
+        {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
+        - name: git-secret
+          secret:
+            secretName: {{ .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
+        {{- end }}
+        {{- if .Values.gitSyncRelay.repo.knownHosts }}
+        - name: {{ .Release.Name }}-git-sync-config
+          configMap:
+            name: {{ .Release.Name }}-git-sync-config
+        {{- end }}
+        {{- if and (eq $authType "https-pat") (ne $httpsSecret "") }}
+        - name: git-https-secret
+          secret:
+            secretName: {{ $httpsSecret }}
+        {{- end }}
+        {{- include "gitSyncRelay.customCaVolumes" . | nindent 8 }}
+      initContainers:
+        {{- include "gitSyncRelay.customCaInitContainer" . | nindent 8 }}
+        - name: git-config-manager
+          command: ["git", "config", "--global", "--add", "safe.directory", "/git"]
+          image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+          securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: git-sync-home
+              mountPath: /home/git-sync
+          resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
+      containers:
+        - name: git-sync
+          image: "{{ .Values.gitSyncRelay.images.gitSync.repository }}:{{ .Values.gitSyncRelay.images.gitSync.tag }}"
+          {{- /* No `command` override: let the image's own entrypoint.sh run first (so
+                 CA-trust/debug setup still applies), then exec this instead of the
+                 default long-running Sanic daemon. Reuses the ap-git-sync-relay image
+                 and its credential-helper wiring (SSH / HTTPS+PAT) instead of the
+                 upstream git-sync image, which has no equivalent for HTTPS+PAT --
+                 wiring PAT auth against its native mechanism would put the token in a
+                 plaintext env var. */}}
+          args: ["git-sync-once"]
+          securityContext: {{- toYaml .Values.gitSyncRelay.gitSync.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: git-sync-home
+              mountPath: /home/git-sync
+            - name: tmp
+              mountPath: /tmp
+            {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
+            - name: git-secret
+              mountPath: /etc/git-secret/ssh
+              readOnly: true
+              subPath: gitSshKey
+            {{- if .Values.gitSyncRelay.repo.knownHosts }}
+            - name: {{ .Release.Name }}-git-sync-config
+              mountPath: /etc/git-secret/known_hosts
+              readOnly: true
+              subPath: known_hosts
+            {{- end }}
+            {{- end }}
+            {{- if and (eq $authType "https-pat") (ne $httpsSecret "") }}
+            {{- /* Mount as a directory (no subPath), matching the Deployment, so a
+                   rotated credential doesn't need a pod restart to be picked up --
+                   not that it matters for a one-shot Job, but keeping the mount shape
+                   identical avoids a second convention to keep in sync. */}}
+            - name: git-https-secret
+              mountPath: /etc/git-secret/https
+              readOnly: true
+            {{- end }}
+            - name: git-repo-contents
+              mountPath: /git
+            {{- include "gitSyncRelay.customCaVolumeMounts" . | nindent 12 }}
+          env:
+            {{- include "gitSyncRelay.customCaEnv" . | nindent 12 }}
+            - name: GIT_SYNC_ROOT
+              value: "/git"
+            - name: GIT_SYNC_REPO
+              value: "{{ .Values.gitSyncRelay.repo.url }}"
+            - name: GIT_SYNC_BRANCH
+              value: "{{ .Values.gitSyncRelay.repo.branch }}"
+            - name: GIT_SYNC_DEPTH
+              value: "{{ .Values.gitSyncRelay.repo.depth }}"
+            {{- if .Values.gitSyncRelay.repo.sshPrivateKeySecretName }}
+            - name: GIT_SYNC_SSH
+              value: "true"
+            - name: GIT_SSH_KEY_FILE
+              value: "/etc/git-secret/ssh"
+            {{- if .Values.gitSyncRelay.repo.knownHosts }}
+            - name: GIT_KNOWN_HOSTS
+              value: "true"
+            - name: GIT_SSH_KNOWN_HOSTS_FILE
+              value: "/etc/git-secret/known_hosts"
+            {{- else }}
+            - name: GIT_KNOWN_HOSTS
+              value: "false"
+            {{- end }}
+            {{- end }}
+            {{- if or (eq $authType "https-pat") (eq $authType "https-none") }}
+            - name: GIT_SYNC_AUTH_TYPE
+              value: "{{ $authType }}"
+            {{- end }}
+            {{- if and (eq $authType "https-pat") (ne $httpsSecret "") }}
+            - name: GIT_SYNC_HTTPS_SECRET_DIR
+              value: "/etc/git-secret/https"
+            {{- end }}
+          resources: {{- toYaml .Values.gitSyncRelay.gitSync.resources | nindent 12 }}
+{{- end }}
