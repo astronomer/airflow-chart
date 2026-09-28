@@ -389,6 +389,9 @@ Create the name of the cleanup service account to use
       fieldRef:
         apiVersion: v1
         fieldPath: metadata.labels['workspace']
+{{- if .Values.loggingSidecar.extraEnv  }}
+{{- tpl (toYaml .Values.loggingSidecar.extraEnv) . | nindent 2 -}}
+{{- end }}
 {{- if .Values.loggingSidecar.livenessProbe  }}
   livenessProbe: {{ tpl (toYaml .Values.loggingSidecar.livenessProbe) . | nindent 4 }}
 {{- end }}
@@ -663,4 +666,15 @@ sidecar-config
 {{- else -}}
 {{ .Release.Name }}-sidecar-config
 {{- end -}}
+{{- end }}
+
+{{- define "loggingSidecar.VolumeMounts" -}}
+- name: config-volume
+{{- if .Values.loggingSidecar.customConfig }}
+  secret:
+    secretName: {{ include "loggingSidecar.configName" . }}
+{{- else }}
+  configMap:
+    name: {{ include "loggingSidecar.configName" . }}
+{{- end }}
 {{- end }}

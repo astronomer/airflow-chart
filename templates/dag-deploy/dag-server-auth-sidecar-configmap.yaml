@@ -44,8 +44,7 @@ data:
           add_header Set-Cookie $auth_cookie;
           return 302 https://app.{{ .Values.platform.controlPlaneBaseDomain }}/login?rd=https://$http_host$request_uri;
         }
-
-        location ~ ^/{{ .Release.Name }}/dags/(upload|download) {
+        location ~ ^/{{ .Release.Name }}/dags/(upload|downloads|healthz) {
 {{ include "default_nginx_settings_location" . | indent 8 }}
 
 
