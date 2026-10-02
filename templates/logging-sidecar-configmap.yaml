@@ -16,12 +16,12 @@ data:
   vector-config.yaml: |
     log_schema:
       timestamp_key: "@timestamp"
-    data_dir: "${SIDECAR_LOGS}"
+    data_dir: "/var/log/sidecar-logging-consumer"
     sources:
       airflow_log_files:
         type: file
         include:
-          - "${SIDECAR_LOGS}/*.log"
+          - "/var/log/sidecar-logging-consumer/*.log"
           {{- if semverCompare ">=3.0.0" .Values.airflow.airflowVersion }}
           - "/usr/local/airflow/logs/**/*.log"
           {{- end }}
