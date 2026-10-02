@@ -82,10 +82,10 @@ def test_builtin_vector_configs_validate_with_their_image(docker_client, tmp_pat
             command=["--require-healthy", "false", "validate"],
             environment={
                 **_ENVIRONMENT,
-                "VECTOR_CONFIG": f"/vector-config/vector-{index}.yaml",
+                "VECTOR_CONFIG": f"/config/vector-{index}.yaml",
             },
             volumes={
-                str(config_dir): {"bind": "/vector-config", "mode": "ro"},
+                str(config_dir): {"bind": "/config", "mode": "ro"},
                 str(log_dir): {"bind": "/vector-data", "mode": "rw"},
             },
             remove=True,
