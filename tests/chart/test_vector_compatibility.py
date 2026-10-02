@@ -1,4 +1,6 @@
+import io
 import re
+import tarfile
 
 import pytest
 import yaml
@@ -25,9 +27,40 @@ def _audit_environment_references(config):
     assert not unexpected_references, f"Unexpected Vector environment references: {unexpected_references}"
 
 
+def _write_container_files(container, files):
+    """Inject files/directories into a created (not-yet-started) container via the Docker API.
+
+    We can't use host bind mounts (`volumes=` on `containers.run`) here: the
+    `unittest-charts` CircleCI job runs on a `docker` executor with
+    `setup_remote_docker`, which executes containers against a *separate* remote
+    Docker Engine VM. Bind mounts are resolved against that remote host's
+    filesystem, not the primary container where `tmp_path` actually lives, so a
+    mounted directory silently shows up empty and Vector reports the config file
+    as not found no matter what path it's mounted at. Shipping the file contents
+    through the Docker API via `put_archive` works regardless of where the
+    daemon is actually running.
+
+    `files` maps a path (relative to `/`) to its contents as bytes, or to `None`
+    to create an empty directory at that path.
+    """
+    tar_stream = io.BytesIO()
+    with tarfile.open(fileobj=tar_stream, mode="w") as tar:
+        for path, content in files.items():
+            info = tarfile.TarInfo(name=path.lstrip("/"))
+            if content is None:
+                info.type = tarfile.DIRTYPE
+                info.mode = 0o755
+                tar.addfile(info)
+            else:
+                info.size = len(content)
+                tar.addfile(info, io.BytesIO(content))
+    tar_stream.seek(0)
+    container.put_archive("/", tar_stream)
+
+
 @pytest.mark.parametrize("airflow_version", ["2.10.5", "3.0.0"])
 @pytest.mark.skipif(not docker_daemon_present(), reason="Docker daemon not available")
-def test_builtin_vector_configs_validate_with_their_image(docker_client, tmp_path, airflow_version):
+def test_builtin_vector_configs_validate_with_their_image(docker_client, airflow_version):
     manifests = render_chart(
         values={
             "dagDeploy": {"enabled": True},
@@ -67,16 +100,12 @@ def test_builtin_vector_configs_validate_with_their_image(docker_client, tmp_pat
 
     for index, config in enumerate(configs):
         _audit_environment_references(config)
-        config_dir = tmp_path / "config"
-        config_dir.mkdir(exist_ok=True)
-        log_dir = tmp_path / "logs"
-        log_dir.mkdir(exist_ok=True)
-        config_path = config_dir / f"vector-{index}.yaml"
         validation_config = yaml.safe_load(config)
         validation_config["data_dir"] = "/vector-data"
         validation_config["sinks"]["out"]["healthcheck"] = {"enabled": False}
-        config_path.write_text(yaml.safe_dump(validation_config))
-        docker_client.containers.run(
+        config_bytes = yaml.safe_dump(validation_config).encode()
+
+        container = docker_client.containers.create(
             image,
             entrypoint="vector",
             command=["--require-healthy", "false", "validate"],
@@ -84,9 +113,21 @@ def test_builtin_vector_configs_validate_with_their_image(docker_client, tmp_pat
                 **_ENVIRONMENT,
                 "VECTOR_CONFIG": f"/config/vector-{index}.yaml",
             },
-            volumes={
-                str(config_dir): {"bind": "/config", "mode": "ro"},
-                str(log_dir): {"bind": "/vector-data", "mode": "rw"},
-            },
-            remove=True,
         )
+        try:
+            _write_container_files(
+                container,
+                {
+                    f"config/vector-{index}.yaml": config_bytes,
+                    "vector-data": None,
+                },
+            )
+            container.start()
+            result = container.wait()
+            logs = container.logs(stdout=True, stderr=True).decode(errors="replace")
+            assert result["StatusCode"] == 0, (
+                f"vector validate failed for config index {index} "
+                f"(exit {result['StatusCode']}):\n{logs}"
+            )
+        finally:
+            container.remove(force=True)
