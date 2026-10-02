@@ -126,8 +126,7 @@ def test_builtin_vector_configs_validate_with_their_image(docker_client, airflow
             result = container.wait()
             logs = container.logs(stdout=True, stderr=True).decode(errors="replace")
             assert result["StatusCode"] == 0, (
-                f"vector validate failed for config index {index} "
-                f"(exit {result['StatusCode']}):\n{logs}"
+                f"vector validate failed for config index {index} (exit {result['StatusCode']}):\n{logs}"
             )
         finally:
             container.remove(force=True)
