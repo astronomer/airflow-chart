@@ -49,7 +49,10 @@ def _write_container_files(container, files):
             info = tarfile.TarInfo(name=path.lstrip("/"))
             if content is None:
                 info.type = tarfile.DIRTYPE
-                info.mode = 0o755
+                # World-writable: the image may run `vector` as a non-root user
+                # whose uid we don't know ahead of time, and this directory only
+                # ever exists inside a throwaway validation container.
+                info.mode = 0o777
                 tar.addfile(info)
             else:
                 info.size = len(content)
