@@ -372,8 +372,6 @@ Create the name of the cleanup service account to use
   env:
   - name: VECTOR_CONFIG
     value: /etc/sidecar-logging/vector-config.yaml
-  - name: SIDECAR_LOGS
-    value: /var/log/sidecar-logging-consumer
   - name: COMPONENT
     valueFrom:
       fieldRef:
