@@ -1,0 +1,76 @@
+#################################
+# git-sync-relay VirtualService #
+#################################
+{{- $istio := .Values.global.istio | default dict }}
+{{- $gateway := $istio.gateway | default dict }}
+{{- if and
+  .Values.ingress.enabled
+  $gateway.enabled
+  .Values.gitSyncRelay.enabled
+  (eq .Values.gitSyncRelay.repoFetchMode "webhook")
+}}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-git-sync-relay-virtualservice
+  labels:
+    component: git-sync-relay
+    tier: airflow
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+    {{- with .Values.airflow.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  gateways:
+    - {{ required "global.istio.gateway.name is required when global.istio.gateway.enabled is true" $gateway.name }}
+  hosts:
+    {{- /* Only the deployments host, matching the Ingress — the webhook
+    receiver is not published under globalBaseDomain. */}}
+    - {{- include "deployments_subdomain" . | indent 1 }}
+  http:
+    {{- if .Values.authSidecar.enabled }}
+    # Routed to the auth sidecar, whose nginx both authenticates the request and
+    # strips the /<release>/git_sync prefix before proxying to the webhook
+    # listener, so no rewrite belongs here.
+    - match:
+        - authority:
+            exact: {{- include "deployments_subdomain" . | indent 1 }}
+          uri:
+            prefix: "/{{ .Release.Name }}/git_sync"
+      route:
+        - destination:
+            host: {{ .Release.Name }}-git-sync-relay.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+              number: {{ .Values.authSidecar.port }}
+    {{- else }}
+    # Routed straight to the webhook listener. The Ingress leans on the NGINX
+    # controller's rewrite-target to strip the prefix; an Istio Gateway will not,
+    # so the rewrite is expressed here. Mirrors the auth sidecar's
+    # `rewrite ^/<release>/git_sync(.*)$ $1`.
+    - match:
+        - authority:
+            exact: {{- include "deployments_subdomain" . | indent 1 }}
+          uri:
+            regex: "/{{ .Release.Name }}/git_sync(/.*)?"
+      rewrite:
+        uriRegexRewrite:
+          match: '^/{{ .Release.Name }}/git_sync/?(.*)$'
+          rewrite: '/\1'
+      route:
+        - destination:
+            host: {{ .Release.Name }}-git-sync-relay.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+              number: {{ .Values.gitSyncRelay.gitSync.webhookPort }}
+    {{- end }}
+      {{- with $istio.virtualService | default dict }}
+      {{- if hasKey . "timeout" }}
+      timeout: {{ .timeout }}
+      {{- end }}
+      {{- if hasKey . "retries" }}
+      retries:
+        {{- toYaml .retries | nindent 8 }}
+      {{- end }}
+      {{- end }}
+{{- end }}
