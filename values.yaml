@@ -751,6 +751,11 @@ loggingSidecar:
   enabled: false
   name: sidecar-log-consumer
   extraEnv: []
+  # customConfig: true skips the built-in Vector config and mounts your own `sidecar-config` secret.
+  # Vector 0.57+ no longer interpolates ${VAR} in config files, so a custom config that references
+  # env vars (including COMPONENT / WORKSPACE / RELEASE, which the sidecar still sets) must read
+  # them at runtime instead, e.g. in VRL: `.release = get_env_var("RELEASE") ?? "-"`, or use
+  # Vector's secrets backend (`SECRET[...]`) for credentials.
   customConfig: false
   indexPattern: "%Y.%m.%d"
   indexNamePrefix: vector
