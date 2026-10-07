@@ -72,9 +72,7 @@ data:
         inputs:
           - parse_airflow3_path
         source: |
-          .component = "${COMPONENT:--}"
-          .workspace = "${WORKSPACE:--}"
-          .release = "${RELEASE:--}"
+          {{- include "loggingSidecar.podMetadataVrl" . | nindent 10 }}
           .date_nano = parse_timestamp!(.@timestamp, format: "%Y-%m-%dT%H:%M:%S.%f%Z")
 
       filter_common_logs:
@@ -156,9 +154,7 @@ data:
         inputs:
           - transform_task_log
         source: |
-          .component = "${COMPONENT:--}"
-          .workspace = "${WORKSPACE:--}"
-          .release = "${RELEASE:--}"
+          {{- include "loggingSidecar.podMetadataVrl" . | nindent 10 }}
 
         {{- if not (semverCompare ">=3.0.0" .Values.airflow.airflowVersion) }}
           if exists(.@timestamp) {
@@ -233,6 +229,8 @@ data:
           password: {{ .Values.airflow.elasticsearch.connection.pass }}
       {{- end }}
         bulk:
-          index: "{{ .Values.loggingSidecar.indexNamePrefix }}.${RELEASE:--}.{{ .Values.loggingSidecar.indexPattern }}"
+          # Templated from the event's .release field (stamped from the pod's RELEASE env var
+          # by the transforms above) rather than interpolating the env var into the config.
+          index: "{{ .Values.loggingSidecar.indexNamePrefix }}.{{ "{{" }} release {{ "}}" }}.{{ .Values.loggingSidecar.indexPattern }}"
           action: create
 {{- end }}

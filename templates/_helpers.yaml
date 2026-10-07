@@ -632,6 +632,25 @@ sidecar-config
 {{- end -}}
 {{- end }}
 
+{{/*
+VRL that stamps the pod-label metadata onto each log event. The values come from the
+COMPONENT / WORKSPACE / RELEASE env vars on the sidecar container (fieldRefs on the pod
+labels, see logging_sidecar_container_spec; houston-api sets the same env vars on the
+sidecars it injects into Airflow pods).
+
+Vector 0.57+ no longer interpolates ${VAR} in config files, so they are read at runtime
+with VRL's get_env_var instead. Unset or empty (e.g. a pod without that label) falls back
+to "-", matching the old ${VAR:--} behaviour.
+*/}}
+{{- define "loggingSidecar.podMetadataVrl" -}}
+.component = get_env_var("COMPONENT") ?? ""
+if is_empty(.component) { .component = "-" }
+.workspace = get_env_var("WORKSPACE") ?? ""
+if is_empty(.workspace) { .workspace = "-" }
+.release = get_env_var("RELEASE") ?? ""
+if is_empty(.release) { .release = "-" }
+{{- end }}
+
 {{- define "loggingSidecar.VolumeMounts" -}}
 - name: config-volume
 {{- if .Values.loggingSidecar.customConfig }}
