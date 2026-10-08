@@ -11,6 +11,18 @@ global:
   # Mirrors the astronomer chart's global.privateCaCerts.
   privateCaCerts: []
 
+  # Route deployment traffic through a pre-existing Istio Gateway instead of an
+  # nginx Ingress. Commander injects this per deployment from its own metadata
+  # (global.istio.gateway), so these defaults only apply to renders that bypass
+  # commander, such as the chart tests. Mirrors the astronomer chart's
+  # global.istio.gateway.
+  istio:
+    gateway:
+      # -- Render VirtualServices for the deployment instead of Ingresses
+      enabled: false
+      # -- Gateway the VirtualServices attach to, in "namespace/name" form
+      name: ""
+
 airflow:
   # group of airflow user
   gid: 50000
