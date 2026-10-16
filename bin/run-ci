@@ -64,7 +64,7 @@ kind load docker-image "$REPOSITORY:$TEST_TAG"
 
 echo "Deploying Airflow..."
 
-kubectl get pods -w &
+kubectl get pods -n airflow -w &
 WATCH_PID=$!
 
 START=$(date +%s)
@@ -110,13 +110,13 @@ while [ $RC -eq 0 ]; do
     echo "Error (timeout): giving up after 800 seconds"
   else
     sleep 10
-    kubectl get pods > /tmp/pods
+    kubectl get pods -n airflow > /tmp/pods
     if [[ $? -ne 0 ]] ; then
       echo "kubectl get pods timed out. retrying."
       continue
     fi
     set +e
-    grep -q -vE '1/1|2/2|3/3|NAME' /tmp/pods
+    grep -q -vE '1/1|2/2|3/3|NAME|Completed' /tmp/pods
     RC=$?
     set -e
   fi
