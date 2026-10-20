@@ -180,9 +180,7 @@ class TestVirtualService:
             ("2.10.0-rc1", WEBSERVER_VS_NAME),
         ],
     )
-    def test_exactly_one_ui_virtualservice_renders_for_any_airflow_version(
-        self, kube_version, airflow_version, expected
-    ):
+    def test_exactly_one_ui_virtualservice_renders_for_any_airflow_version(self, kube_version, airflow_version, expected):
         """Exactly one of the two UI VirtualServices renders, chosen by
         airflowVersion - so no version is left with no route at all."""
         docs = render_chart(
