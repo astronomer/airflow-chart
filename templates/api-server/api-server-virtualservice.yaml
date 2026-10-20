@@ -3,7 +3,10 @@
 #################################
 {{- $istio := .Values.global.istio | default dict }}
 {{- $gateway := $istio.gateway | default dict }}
-{{- if and .Values.ingress.enabled $gateway.enabled (semverCompare ">=3.0.0" .Values.airflow.airflowVersion) }}
+{{- /* The -0 suffix makes the constraint prerelease-aware: without it a version
+like 3.0.0-rc1 matches neither this nor the <3.0.0 webserver counterpart, and the
+UI is left with no route at all (the Ingress is suppressed under a gateway). */}}
+{{- if and .Values.ingress.enabled $gateway.enabled (semverCompare ">=3.0.0-0" .Values.airflow.airflowVersion) }}
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:

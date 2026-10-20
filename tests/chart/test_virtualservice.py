@@ -19,6 +19,9 @@ ALL_VS = [API_SERVER_VS, WEBSERVER_VS, FLOWER_VS, DAG_SERVER_VS, GIT_SYNC_RELAY_
 # are selected by airflowVersion. The chart default (2.4.3) selects the webserver.
 AIRFLOW_3 = {"airflowVersion": "3.0.0", "defaultAirflowTag": "3.0.0"}
 
+API_SERVER_VS_NAME = "release-name-api-server-virtualservice"
+WEBSERVER_VS_NAME = "release-name-webserver-virtualservice"
+
 # Each VirtualService gates on the gateway plus its own component's prerequisites.
 VS_PREREQS = {
     API_SERVER_VS: {"airflow": AIRFLOW_3},
@@ -160,24 +163,39 @@ class TestVirtualService:
         )
         assert with_gateway == []
 
-    def test_webserver_and_api_server_virtualservices_are_mutually_exclusive(self, kube_version):
+    @pytest.mark.parametrize(
+        "airflow_version,expected",
+        [
+            ("2.4.3", WEBSERVER_VS_NAME),  # the chart default
+            ("2.10.0", WEBSERVER_VS_NAME),
+            ("3.0.0", API_SERVER_VS_NAME),
+            ("3.1.2", API_SERVER_VS_NAME),
+            # Prereleases: semver sorts these below the release they precede, and
+            # a constraint without a prerelease of its own matches no prerelease
+            # at all - so ">=3.0.0"/"<3.0.0" would leave 3.0.0-rc1 matching
+            # neither template. With the Ingress suppressed under a gateway, that
+            # is a deployment with no route to the UI.
+            ("3.0.0-rc1", API_SERVER_VS_NAME),
+            ("3.1.0-beta.2", API_SERVER_VS_NAME),
+            ("2.10.0-rc1", WEBSERVER_VS_NAME),
+        ],
+    )
+    def test_exactly_one_ui_virtualservice_renders_for_any_airflow_version(
+        self, kube_version, airflow_version, expected
+    ):
         """Exactly one of the two UI VirtualServices renders, chosen by
-        airflowVersion - so Airflow 2.x is not left with no route at all."""
-        airflow_2 = render_chart(
+        airflowVersion - so no version is left with no route at all."""
+        docs = render_chart(
             kube_version=kube_version,
             show_only=[API_SERVER_VS, WEBSERVER_VS],
-            values=vs_values(WEBSERVER_VS),
+            values=vs_values(
+                WEBSERVER_VS,
+                airflow={"airflowVersion": airflow_version, "defaultAirflowTag": airflow_version},
+            ),
             validate_objects=False,
         )
-        assert [doc["metadata"]["name"] for doc in airflow_2] == ["release-name-webserver-virtualservice"]
 
-        airflow_3 = render_chart(
-            kube_version=kube_version,
-            show_only=[API_SERVER_VS, WEBSERVER_VS],
-            values=vs_values(API_SERVER_VS),
-            validate_objects=False,
-        )
-        assert [doc["metadata"]["name"] for doc in airflow_3] == ["release-name-api-server-virtualservice"]
+        assert [doc["metadata"]["name"] for doc in docs] == [expected]
 
     @pytest.mark.parametrize("template", ALL_VS)
     def test_destination_is_the_backend_service_port(self, kube_version, template):

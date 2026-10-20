@@ -6,7 +6,10 @@ server. This is the <3.0.0 counterpart of api-server-virtualservice.yaml — the
 same split the Ingress expresses by branching on airflowVersion. */}}
 {{- $istio := .Values.global.istio | default dict }}
 {{- $gateway := $istio.gateway | default dict }}
-{{- if and .Values.ingress.enabled $gateway.enabled (semverCompare "<3.0.0" .Values.airflow.airflowVersion) }}
+{{- /* The -0 suffix keeps this exactly complementary to the api server's
+">=3.0.0-0": prereleases on either side of the boundary select one of the two
+VirtualServices rather than falling through both. */}}
+{{- if and .Values.ingress.enabled $gateway.enabled (semverCompare "<3.0.0-0" .Values.airflow.airflowVersion) }}
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
