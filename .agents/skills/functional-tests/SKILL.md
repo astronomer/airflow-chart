@@ -130,6 +130,7 @@ def test_entrypoint(webserver):
 ```python
 from packaging.version import parse as semantic_version
 
+
 def test_redis_version(webserver):
     redis_module = webserver.pip.get_packages()["redis"]
     version = redis_module["version"]
