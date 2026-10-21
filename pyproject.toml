@@ -26,6 +26,14 @@ dependencies = [
     "yamllint>=1.37.1",
 ]
 
+[tool.uv]
+# This should stay close to 7 days, but may be reduced to fix CVEs
+exclude-newer = "7 days"
+
+[tool.uv.exclude-newer-package]
+# Let certifi past the 7 day cooldown so the lock carries the 2026.10.19 CA bundle fix (PINF-1304). Drop this once 2026.10.19 is older than 7 days.
+certifi = "2026-10-21T00:00:00Z"
+
 # https://docs.astral.sh/ruff/settings/
 [tool.ruff]
 line-length = 132

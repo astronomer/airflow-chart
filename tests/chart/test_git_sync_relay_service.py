@@ -32,7 +32,7 @@ class TestGitSyncRelayService:
         # own default (ClusterIP) applies. (PINF-986: ServiceOnlyAllowClusterIP)
         assert "type" not in doc["spec"]
 
-    @pytest.mark.parametrize("repoShareMode,", ["git_daemon", "shared_volume"])
+    @pytest.mark.parametrize("repoShareMode", ["git_daemon", "shared_volume"])
     @pytest.mark.parametrize("repoFetchMode", ["poll", "webhook"])
     def test_gsr_service_gsr_enabled_configured_ports(self, kube_version, repoFetchMode, repoShareMode):
         """Test that a correct port list is rendered when git-sync-relay is configured with different modes."""
