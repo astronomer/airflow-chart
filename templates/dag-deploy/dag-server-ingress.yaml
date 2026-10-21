@@ -1,7 +1,10 @@
 ######################
 # dag server ingress #
 ######################
-{{- if and .Values.ingress.enabled  .Values.dagDeploy.enabled }}
+{{- /* Suppressed when an Istio Gateway fronts the deployment —
+dag-server-virtualservice.yaml routes this traffic instead. */}}
+{{- $gateway := (.Values.global.istio | default dict).gateway | default dict }}
+{{- if and .Values.ingress.enabled (not $gateway.enabled) .Values.dagDeploy.enabled }}
 ---
 kind: Ingress
 apiVersion: networking.k8s.io/v1
