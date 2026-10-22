@@ -60,11 +60,11 @@ helm delete my-release
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
-## Updating DAGs
+## Updating Dags
 
-### Bake DAGs in Docker image
+### Bake Dags in Docker image
 
-The recommended way to update your DAGs with this chart is to build a new docker image with the
+The recommended way to update your Dags with this chart is to build a new docker image with the
 latest code (`docker build -t my-company/airflow:8a0da78 .`), push it to an accessible
 registry (`docker push my-company/airflow:8a0da78`), then update the Airflow pods with that image:
 
@@ -157,9 +157,9 @@ Run `kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow`
 to port-forward the Airflow UI to http://localhost:8080/ to confirm Airflow is working.
 Login as _admin_ and password _admin_.
 
-### Build a Docker image from your DAGs
+### Build a Docker image from your Dags
 
-1.  Start a project using [astro-cli](https://github.com/astronomer/astro-cli), which will generate a Dockerfile, and load your DAGs in. You can test locally before pushing to kind with `astro airflow start`.
+1.  Start a project using [astro-cli](https://github.com/astronomer/astro-cli), which will generate a Dockerfile, and load your Dags in. You can test locally before pushing to kind with `astro airflow start`.
     ```sh
     mkdir my-airflow-project && cd my-airflow-project
     astro dev init

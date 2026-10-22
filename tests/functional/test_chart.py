@@ -114,7 +114,7 @@ def test_airflow_variables(scheduler):
 
 
 def test_airflow_trigger_dags(scheduler, triggerer):
-    """Test Triggering of DAGs & Pausing & Unpausing Dags"""
+    """Test Triggering of Dags & Pausing & Unpausing Dags"""
     pause_dag_command = "airflow dags pause example_dag"
     trigger_dag_command = "airflow dags trigger -r test_run -e 2020-05-01 example_dag"
     unpause_dag_command = "airflow dags unpause example_dag"
@@ -127,7 +127,7 @@ def test_airflow_trigger_dags(scheduler, triggerer):
 
     assert "Dag: example_dag, paused: False" in scheduler.check_output(unpause_dag_command)
 
-    # Verify the DAG succeeds in 100 seconds
+    # Verify the Dag succeeds in 100 seconds
     timeout = 100
     sleep_time_between_polls = 5
     try_count = 0
@@ -136,7 +136,7 @@ def test_airflow_trigger_dags(scheduler, triggerer):
         try_count += 1
         print("Try: ", try_count)
         if "failed" in scheduler.run(dag_state_command).stdout.rstrip("\r\n"):
-            print("Timed out waiting for DAG to succeed")
+            print("Timed out waiting for Dag to succeed")
             print()
             print("Logs: ")
             subprocess.run(
@@ -155,7 +155,7 @@ def test_airflow_trigger_dags(scheduler, triggerer):
             )
             raise Exception("DAGRun failed !")
         if (try_count * sleep_time_between_polls) >= timeout:
-            print("Timed out waiting for DAG to succeed")
+            print("Timed out waiting for Dag to succeed")
             print()
             print("Logs: ")
             subprocess.run(
