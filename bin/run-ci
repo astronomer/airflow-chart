@@ -51,7 +51,7 @@ docker exec kind-control-plane sh -c 'mkdir -p /etc/systemd/system/containerd.se
 echo "kind node containerd LimitNOFILE after: $(docker exec kind-control-plane systemctl show containerd -p LimitNOFILE)"
 kubectl wait --for=condition=Ready node --all --timeout=120s
 
-### (Start) Create example-project for running a simple DAG
+### (Start) Create example-project for running a simple Dag
 REPOSITORY=$(helm show values "$HELM_CHART_PATH" --jsonpath "{.airflow.defaultAirflowRepository}")
 TAG=$(helm show values . --jsonpath "{.airflow.defaultAirflowTag}")
 export REPOSITORY TAG
@@ -67,7 +67,7 @@ export TEST_TAG=$TAG-test
 
 docker build -t "$REPOSITORY:$TEST_TAG" "$TEST_EXAMPLE_PROJECT_DIR_PATH"
 kind load docker-image "$REPOSITORY:$TEST_TAG"
-### (End) Create example-project for running a simple DAG
+### (End) Create example-project for running a simple Dag
 
 echo "Deploying Airflow..."
 
