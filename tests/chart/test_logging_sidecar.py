@@ -214,3 +214,24 @@ class TestLoggingSidecar:
 
         transform_remove_fields = vc["transforms"]["transform_remove_fields"]
         assert "handle_error_details" in transform_remove_fields["inputs"]
+
+    @pytest.mark.parametrize(
+        ("airflow_version", "replaces_message"),
+        [("3.0.0", True), ("2.11.0", False)],
+    )
+    def test_logging_sidecar_message_replaced_with_parsed_event(self, kube_version, airflow_version, replaces_message):
+        """Airflow 3 .message holds the raw JSON line; it is replaced by the parsed event text"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={
+                "loggingSidecar": {"enabled": True},
+                "airflow": {"airflowVersion": airflow_version},
+            },
+            show_only="templates/logging-sidecar-configmap.yaml",
+        )
+        assert len(docs) == 1
+        vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
+
+        source = vc["transforms"]["parse_airflow3_path"]["source"]
+        assert ("if is_string(.event)" in source) is replaces_message
+        assert (".message = .event" in source) is replaces_message

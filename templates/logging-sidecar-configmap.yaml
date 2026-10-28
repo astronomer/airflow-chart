@@ -43,6 +43,10 @@ data:
             . = merge!(., parsed_log)
             . = merge(., parsed)
 
+            if is_string(.event) {
+              .message = .event
+            }
+
             # Create log_id for consistency
             map_index = get(., ["map_index"]) ?? "-1"
             if is_null(map_index) {
