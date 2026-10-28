@@ -30,14 +30,30 @@ class TestLoggingSidecar:
         assert "v1" == doc["apiVersion"]
         vc = yaml.safe_load(doc["data"]["vector-config.yaml"])
         assert vc["sources"]["airflow_log_files"]["include"] == [
-            "${SIDECAR_LOGS}/*.log",
+            "/var/log/sidecar-logging-consumer/*.log",
         ]
         assert vc["sinks"]["out"]["auth"] == {
             "strategy": "basic",
             "user": "testuser",
             "password": "testpass",
         }
-        assert vc["sinks"]["out"]["bulk"]["index"] == "vector.${RELEASE:--}.%Y.%m.%d"
+        assert vc["sinks"]["out"]["bulk"]["index"] == "vector.{{ release }}.%Y.%m.%d"
+
+    def test_logging_sidecar_config_has_no_env_var_interpolation(self, kube_version):
+        """Vector 0.57+ dropped ${VAR} interpolation, so pod metadata is read with get_env_var at runtime"""
+        docs = render_chart(
+            kube_version=kube_version,
+            values={"loggingSidecar": {"enabled": True}},
+            show_only="templates/logging-sidecar-configmap.yaml",
+        )
+        config = docs[0]["data"]["vector-config.yaml"]
+        assert "${" not in config
+        vc = yaml.safe_load(config)
+        for transform in ("transform_airflow_logs", "final_task_log"):
+            source = vc["transforms"][transform]["source"]
+            for field, env_var in (("component", "COMPONENT"), ("workspace", "WORKSPACE"), ("release", "RELEASE")):
+                assert f'.{field} = get_env_var("{env_var}") ?? ""' in source
+                assert f'if is_empty(.{field}) {{ .{field} = "-" }}' in source
 
     def test_logging_sidecar_config_disabled(self, kube_version):
         """Test logging sidecar config with flag disabled"""
@@ -85,7 +101,7 @@ class TestLoggingSidecar:
         assert len(docs) == 1
         vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
         assert vc["sinks"]["out"]["bulk"] == {
-            "index": "vector.${RELEASE:--}.%Y.%m",
+            "index": "vector.{{ release }}.%Y.%m",
             "action": "create",
         }
 
@@ -108,7 +124,7 @@ class TestLoggingSidecar:
         assert len(docs) == 1
         vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
         assert vc["sinks"]["out"]["bulk"] == {
-            "index": "fluentd.${RELEASE:--}.%Y.%m.%d",
+            "index": "fluentd.{{ release }}.%Y.%m.%d",
             "action": "create",
         }
 
@@ -155,7 +171,7 @@ class TestLoggingSidecar:
         vc = yaml.safe_load(docs[0]["data"]["vector-config.yaml"])
 
         assert vc["sources"]["airflow_log_files"]["include"] == [
-            "${SIDECAR_LOGS}/*.log",
+            "/var/log/sidecar-logging-consumer/*.log",
             "/usr/local/airflow/logs/**/*.log",
         ]
 
