@@ -1,0 +1,78 @@
+################################
+## Airflow Flower VirtualService
+#################################
+{{- $istio := .Values.global.istio | default dict }}
+{{- $gateway := $istio.gateway | default dict }}
+{{- if and .Values.ingress.enabled $gateway.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
+{{- /* The auth proxy serves the prefix without a trailing slash; flower itself
+needs one. Same split the Ingress expresses with two path entries. */}}
+{{- $prefix := printf "/%s/flower%s" .Release.Name (ternary "" "/" .Values.authSidecar.enabled) }}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-flower-virtualservice
+  labels:
+    tier: airflow
+    component: flower-virtualservice
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+    {{- with .Values.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.airflow.flower.labels }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if .Values.airflow.flower.annotations }}
+  annotations: {{- toYaml .Values.airflow.flower.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  gateways:
+    - {{ required "global.istio.gateway.name is required when global.istio.gateway.enabled is true" $gateway.name }}
+  hosts:
+    - {{- include "deployments_subdomain" . | indent 1 }}
+    - {{- include "flower_subdomain" . | indent 1 }}
+    {{- if .Values.ingress.globalBaseDomain }}
+    - {{- include "deployments_subdomain_global" . | indent 1 }}
+    - {{- include "flower_subdomain_global" . | indent 1 }}
+    {{- end }}
+  http:
+    # Flower routes. Match entries are OR'd: the deployments host serves flower
+    # only under the per-release prefix, while the per-release host serves it at
+    # the root — the same split the Ingress expresses as separate host rules.
+    - match:
+        - authority:
+            exact: {{- include "deployments_subdomain" . | indent 1 }}
+          uri:
+            prefix: {{ $prefix | quote }}
+        - authority:
+            exact: {{- include "flower_subdomain" . | indent 1 }}
+        {{- if .Values.ingress.globalBaseDomain }}
+        - authority:
+            exact: {{- include "deployments_subdomain_global" . | indent 1 }}
+          uri:
+            prefix: {{ $prefix | quote }}
+        - authority:
+            exact: {{- include "flower_subdomain_global" . | indent 1 }}
+        {{- end }}
+      route:
+        - destination:
+            host: {{ .Release.Name }}-flower.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+            # Istio requires a numeric port; the Ingress may use the service's
+            # port name, so the auth-proxy branch resolves to a number here.
+            {{- if .Values.authSidecar.enabled  }}
+              number: {{ .Values.authSidecar.port }}
+            {{- else }}
+              number: {{ .Values.airflow.ports.flowerUI }}
+            {{- end }}
+      {{- with $istio.virtualService | default dict }}
+      {{- if hasKey . "timeout" }}
+      timeout: {{ .timeout }}
+      {{- end }}
+      {{- if hasKey . "retries" }}
+      retries:
+        {{- toYaml .retries | nindent 8 }}
+      {{- end }}
+      {{- end }}
+{{- end }}

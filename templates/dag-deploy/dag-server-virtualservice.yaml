@@ -1,0 +1,83 @@
+#############################
+# dag server VirtualService #
+#############################
+{{- $istio := .Values.global.istio | default dict }}
+{{- $gateway := $istio.gateway | default dict }}
+{{- if and .Values.ingress.enabled $gateway.enabled .Values.dagDeploy.enabled }}
+{{- /* Hosts are collected up front so the authority matches below stay in step
+with the hosts list. The dag server is only reachable on the deployments host —
+it has no per-release subdomain of its own. */}}
+{{- $hosts := list (include "deployments_subdomain" . | trim) }}
+{{- if .Values.ingress.globalBaseDomain }}
+{{- $hosts = append $hosts (include "deployments_subdomain_global" . | trim) }}
+{{- end }}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-dag-server-virtualservice
+  labels:
+    tier: airflow
+    component: dag-server-virtualservice
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+    {{- with .Values.airflow.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  gateways:
+    - {{ required "global.istio.gateway.name is required when global.istio.gateway.enabled is true" $gateway.name }}
+  hosts:
+    {{- range $hosts }}
+    - {{ . }}
+    {{- end }}
+  http:
+    {{- if .Values.authSidecar.enabled }}
+    # Routed to the auth sidecar, whose nginx both authenticates the request and
+    # strips the /<release>/dags prefix before proxying to the dag server, so no
+    # rewrite belongs here. Mirrors the Ingress' auth-proxy path.
+    - match:
+        {{- range $hosts }}
+        - authority:
+            exact: {{ . }}
+          uri:
+            prefix: "/{{ $.Release.Name }}/dags"
+        {{- end }}
+      route:
+        - destination:
+            host: {{ .Release.Name }}-dag-server.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+              number: {{ .Values.authSidecar.port }}
+    {{- else }}
+    # Routed straight to the dag server. The Ingress relies on the NGINX
+    # controller for two things an Istio Gateway will not do for us, so both are
+    # expressed explicitly: the endpoint allowlist that its path regex encodes,
+    # and the prefix strip its rewrite-target performs. The rewrite mirrors the
+    # auth sidecar's `rewrite ^/<release>/dags(.*)$ $1`.
+    - match:
+        {{- range $hosts }}
+        - authority:
+            exact: {{ . }}
+          uri:
+            regex: "/{{ $.Release.Name }}/dags/(upload|downloads|healthz)(/.*)?"
+        {{- end }}
+      rewrite:
+        uriRegexRewrite:
+          match: '^/{{ .Release.Name }}/dags/?(.*)$'
+          rewrite: '/\1'
+      route:
+        - destination:
+            host: {{ .Release.Name }}-dag-server.{{ .Release.Namespace }}.svc.cluster.local
+            port:
+              number: {{ .Values.dagDeploy.ports.dagServerHttp }}
+    {{- end }}
+      {{- with $istio.virtualService | default dict }}
+      {{- if hasKey . "timeout" }}
+      timeout: {{ .timeout }}
+      {{- end }}
+      {{- if hasKey . "retries" }}
+      retries:
+        {{- toYaml .retries | nindent 8 }}
+      {{- end }}
+      {{- end }}
+{{- end }}

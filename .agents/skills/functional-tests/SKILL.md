@@ -7,7 +7,7 @@ description: Use when writing, editing, reviewing, or running functional (end-to
 
 ## Overview
 
-Functional tests run against a live Kubernetes cluster (kind) with the chart installed. Unlike chart tests (which only render templates), they verify real runtime behavior: that binaries are on `PATH`, that the right pip packages and versions are installed in the Airflow image, that the Airflow CLI can manage connections/variables, that a DAG can be triggered and runs to success, and that the statsd config is the Astronomer one.
+Functional tests run against a live Kubernetes cluster (kind) with the chart installed. Unlike chart tests (which only render templates), they verify real runtime behavior: that binaries are on `PATH`, that the right pip packages and versions are installed in the Airflow image, that the Airflow CLI can manage connections/variables, that a Dag can be triggered and runs to success, and that the statsd config is the Astronomer one.
 
 All functional tests live in a single file: `tests/functional/test_chart.py`. They use [testinfra](https://testinfra.readthedocs.io/) to `exec` into running containers via the `kubectl://` backend.
 
@@ -59,7 +59,7 @@ The fixtures and tests read these (set by `bin/run-ci`, or set them yourself whe
 | ----------------- | ---------------- | ------------------------------------------------------------- |
 | `NAMESPACE`       | `airflow`        | Namespace the pod fixtures search                             |
 | `EXECUTOR`        | `CeleryExecutor` | Which Airflow executor to deploy                              |
-| `SCHEDULER_POD`   | _(unset)_        | Pod name used when dumping scheduler logs on a failed DAG run |
+| `SCHEDULER_POD`   | _(unset)_        | Pod name used when dumping scheduler logs on a failed Dag run |
 | `WEBSERVER_POD`   | _(unset)_        | Exported by `bin/run-ci` for debugging                        |
 | `HELM_CHART_PATH` | repo root        | Chart path `bin/run-ci` installs                              |
 
@@ -130,6 +130,7 @@ def test_entrypoint(webserver):
 ```python
 from packaging.version import parse as semantic_version
 
+
 def test_redis_version(webserver):
     redis_module = webserver.pip.get_packages()["redis"]
     version = redis_module["version"]
@@ -166,7 +167,7 @@ def test_statsd(statsd):
 
 ## Eventually-Consistent State
 
-Some behavior (a DAG running to success, a pod becoming reachable) is not instantaneous. The existing DAG-trigger test polls `airflow dags state ...` in a loop with a timeout and dumps scheduler logs (via `kubectl logs $SCHEDULER_POD`) on failure. When you need to wait for convergence, prefer either:
+Some behavior (a Dag running to success, a pod becoming reachable) is not instantaneous. The existing Dag-trigger test polls `airflow dags state ...` in a loop with a timeout and dumps scheduler logs (via `kubectl logs $SCHEDULER_POD`) on failure. When you need to wait for convergence, prefer either:
 
 - a bounded poll loop with a clear timeout (as `test_airflow_trigger_dags` does), or
 - `@pytest.mark.flaky(reruns=N, reruns_delay=S)` for genuinely flaky reachability checks.

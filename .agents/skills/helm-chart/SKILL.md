@@ -12,7 +12,7 @@ This repository (`astronomer/airflow-chart`) is **Astronomer's Helm chart for Ap
 It is an **umbrella (parent) chart**: it declares the upstream Astronomer Airflow chart as a dependency (`dependencies:` in `Chart.yaml`, pinned to a `*-astro` version) and layers Astronomer-specific resources on top. A single `values.yaml` controls both the parent chart's own resources and the bundled `airflow` sub-chart.
 
 - The sub-chart is downloaded to `charts/airflow/` by `helm dep update` (run `make charts`). Sub-chart values are nested under the `airflow:` key in `values.yaml`.
-- The parent chart's own resources live at the top-level `templates/` directory and add things like the DAG-deploy server, git-sync relay, auth sidecars, OpenShift SCC, logging sidecar, and ingress.
+- The parent chart's own resources live at the top-level `templates/` directory and add things like the Dag-deploy server, git-sync relay, auth sidecars, OpenShift SCC, logging sidecar, and ingress.
 
 For testing, use the [chart-tests skill](../chart-tests/SKILL.md) — it covers `render_chart()`, sub-chart values nesting under `airflow`, parametrized tests, and `uv run pytest` usage.
 

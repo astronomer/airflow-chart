@@ -1,7 +1,12 @@
 ################################
 ## Airflow Ingress
 #################################
-{{- if .Values.ingress.enabled }}
+{{- /* When an Istio Gateway fronts the deployment, the VirtualServices in
+templates/api-server and templates/flower route this traffic instead, so these
+Ingresses are suppressed to avoid defining the same hosts twice. */}}
+{{- $istio := .Values.global.istio | default dict }}
+{{- $gateway := $istio.gateway | default dict }}
+{{- if and .Values.ingress.enabled (not $gateway.enabled) }}
   {{ $ctx := . }}
 kind: Ingress
 apiVersion: networking.k8s.io/v1
@@ -142,7 +147,7 @@ spec:
               {{- end }}
     {{- end }}
 {{- end }}
-{{- if and .Values.ingress.enabled (eq .Values.airflow.executor "CeleryExecutor") }}
+{{- if and .Values.ingress.enabled (not $gateway.enabled) (eq .Values.airflow.executor "CeleryExecutor") }}
 ---
 kind: Ingress
 apiVersion: networking.k8s.io/v1
