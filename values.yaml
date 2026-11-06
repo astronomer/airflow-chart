@@ -450,6 +450,7 @@ airflow:
       write_stdout: True
       elasticsearch_write_stdout: True
       elasticsearch_json_format: True
+      es_compat_with: "8"
       # "{dag_id}-{task_id}-{run_id}-{map_index}-{try_number}" for airflow >= 2.3.0 ref https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#log-id-template
       # "{dag_id}_{task_id}_{execution_date}_{try_number}" for airflow < 2.3.0
       log_id_template: '{{ include "airflow.logIdTemplate" . }}'

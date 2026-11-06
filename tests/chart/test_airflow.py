@@ -161,6 +161,20 @@ class TestAirflow:
         airflow_cfg = docs[0]["data"]["airflow.cfg"]
         assert "expose_config = non-sensitive-only" in airflow_cfg
 
+    def test_elasticsearch_es_compat_with_defaults_to_8(self, kube_version):
+        """The elasticsearch 9.x client in Runtime 3.3+ sends compatible-with=9,
+        which Elasticsearch 8.x rejects. es_compat_with = 8 must be set by default."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["charts/airflow/templates/configmaps/configmap.yaml"],
+            values={},
+        )
+
+        assert len(docs) == 1
+        airflow_cfg = docs[0]["data"]["airflow.cfg"]
+        es_section = airflow_cfg.split("[elasticsearch]")[1].split("\n[")[0]
+        assert "es_compat_with = 8" in es_section
+
     def test_apiServer_startup_initialDelaySeconds_defaults(self, kube_version):
         """Test initialDelaySeconds defaults."""
         values = {"airflow": {"airflowVersion": "3.0.0"}}
