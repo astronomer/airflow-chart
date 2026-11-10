@@ -34,30 +34,23 @@ spec:
     - {{ required "global.istio.gateway.name is required when global.istio.gateway.enabled is true" $gateway.name }}
   hosts:
     - {{- include "deployments_subdomain" . | indent 1 }}
-    - {{- include "airflow_subdomain" . | indent 1 }}
     {{- if .Values.ingress.globalBaseDomain }}
     - {{- include "deployments_subdomain_global" . | indent 1 }}
-    - {{- include "airflow_subdomain_global" . | indent 1 }}
     {{- end }}
   http:
-    # Webserver routes. Match entries are OR'd: the deployments host serves
-    # Airflow only under the per-release prefix, while the per-release host serves
-    # it at the root — the same split the Ingress expresses as separate host
-    # rules. No rewrite: Airflow's base_url already carries the prefix.
+    # Webserver routes. Airflow is published only on the deployments host,
+    # under the per-release prefix — matching the Ingress. No rewrite:
+    # Airflow's base_url already carries the prefix.
     - match:
         - authority:
             exact: {{- include "deployments_subdomain" . | indent 1 }}
           uri:
             prefix: "/{{ .Release.Name }}/airflow"
-        - authority:
-            exact: {{- include "airflow_subdomain" . | indent 1 }}
         {{- if .Values.ingress.globalBaseDomain }}
         - authority:
             exact: {{- include "deployments_subdomain_global" . | indent 1 }}
           uri:
             prefix: "/{{ .Release.Name }}/airflow"
-        - authority:
-            exact: {{- include "airflow_subdomain_global" . | indent 1 }}
         {{- end }}
       route:
         - destination:
