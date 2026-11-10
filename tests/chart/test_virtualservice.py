@@ -50,14 +50,6 @@ VS_SERVICE_HOST = {
     GIT_SYNC_RELAY_VS: "release-name-git-sync-relay.default.svc.cluster.local",
 }
 
-# The three UI VirtualServices also answer on a per-release subdomain; the dag
-# server and git-sync-relay are only published under the deployments host.
-VS_SUBDOMAIN = {
-    API_SERVER_VS: "release-name-airflow",
-    WEBSERVER_VS: "release-name-airflow",
-    FLOWER_VS: "release-name-flower",
-}
-
 # Ingresses that the istio gateway suppresses, with the doc count they render
 # when it is disabled.
 INGRESS_TEMPLATES = [
@@ -270,19 +262,17 @@ class TestVirtualService:
 
     @pytest.mark.parametrize("template", [API_SERVER_VS, WEBSERVER_VS, FLOWER_VS])
     def test_ui_virtualservice_hosts_and_authority_matches_stay_in_step(self, kube_version, template):
-        """The deployments host serves the component only under the per-release
-        prefix; the per-release host serves it at the root."""
+        """The component is published only on the deployments host, under the
+        per-release prefix. The retired per-release vanity host is not emitted."""
         docs = render_vs(template, kube_version)
         spec = docs[0]["spec"]
 
-        subdomain = f"{VS_SUBDOMAIN[template]}.example.com"
-        assert spec["hosts"] == ["deployments.example.com", subdomain]
+        assert spec["hosts"] == ["deployments.example.com"]
+        assert not [host for host in spec["hosts"] if host.startswith("release-name-")]
 
         matches = spec["http"][0]["match"]
         assert [match["authority"]["exact"] for match in matches] == spec["hosts"]
-        # Prefix-scoped on the deployments host, unscoped on the per-release host.
         assert "uri" in matches[0]
-        assert "uri" not in matches[1]
 
     @pytest.mark.parametrize("template", [API_SERVER_VS, WEBSERVER_VS, FLOWER_VS])
     def test_ui_virtualservice_global_base_domain_dual_hosts(self, kube_version, template):
@@ -294,12 +284,9 @@ class TestVirtualService:
         )
         spec = docs[0]["spec"]
 
-        subdomain = VS_SUBDOMAIN[template]
         assert spec["hosts"] == [
             "deployments.dp1.cp1.example.com",
-            f"{subdomain}.dp1.cp1.example.com",
             "deployments.dp1.cp.example.com",
-            f"{subdomain}.dp1.cp.example.com",
         ]
         assert [match["authority"]["exact"] for match in spec["http"][0]["match"]] == spec["hosts"]
 
