@@ -215,9 +215,15 @@ class TestVirtualService:
         assert destination["port"]["number"] == AUTH_SIDECAR_PORT
 
     @pytest.mark.parametrize("template", ALL_VS)
-    def test_every_destination_uses_the_platform_cluster_domain(self, kube_version, template):
+    @pytest.mark.parametrize("auth_sidecar", [True, False])
+    def test_every_destination_uses_the_platform_cluster_domain(self, kube_version, template, auth_sidecar):
         """On a cluster with a custom DNS domain, istio must route to hosts under that domain."""
-        docs = render_vs(template, kube_version, platform={"clusterDomain": "cluster.example.net"})
+        docs = render_vs(
+            template,
+            kube_version,
+            platform={"clusterDomain": "cluster.example.net"},
+            authSidecar={"enabled": auth_sidecar},
+        )
 
         expected = VS_SERVICE_HOST[template].replace("cluster.local", "cluster.example.net")
         hosts = [route["destination"]["host"] for http in docs[0]["spec"]["http"] for route in http["route"]]

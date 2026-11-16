@@ -52,7 +52,7 @@ airflow:
   dags:
     gitSync:
       enabled: True
-      repo: git://airflow-git-sync-relay.${NAMESPACE}.svc.cluster.local./git
+      repo: git://airflow-git-sync-relay.${NAMESPACE}.svc.${CLUSTER_DOMAIN}./git
       branch: main
 ```
 

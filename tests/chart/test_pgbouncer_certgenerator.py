@@ -45,17 +45,21 @@ class TestPgbouncersslFeature:
             "requests": {"cpu": "100m", "memory": "128Mi"},
         }
 
-    def test_pgbouncer_certgenerator_hostname_uses_the_platform_cluster_domain(self, kube_version):
+    @pytest.mark.parametrize(
+        "platform,domain",
+        [({}, "cluster.local"), ({"clusterDomain": "cluster.example.net"}, "cluster.example.net")],
+    )
+    def test_pgbouncer_certgenerator_hostname_uses_the_platform_cluster_domain(self, kube_version, platform, domain):
         docs = render_chart(
             kube_version=kube_version,
             values={
                 "airflow": {"pgbouncer": {"enabled": True, "sslmode": "require"}},
-                "platform": {"clusterDomain": "cluster.example.net"},
+                "platform": platform,
             },
             show_only="templates/generate-ssl.yaml",
         )
         args = docs[3]["spec"]["template"]["spec"]["containers"][0]["args"]
-        assert "--hostname=release-name-pgbouncer.release-name.svc.cluster.example.net" in args
+        assert f"--hostname=release-name-pgbouncer.release-name.svc.{domain}" in args
 
     def test_pgbouncer_certgenerator_resources_are_overridable(self, kube_version):
         """Test that certgenerator.resources overrides the defaults."""
