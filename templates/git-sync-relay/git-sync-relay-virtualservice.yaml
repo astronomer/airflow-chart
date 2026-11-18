@@ -41,7 +41,7 @@ spec:
             prefix: "/{{ .Release.Name }}/git_sync"
       route:
         - destination:
-            host: {{ .Release.Name }}-git-sync-relay.{{ .Release.Namespace }}.svc.cluster.local
+            host: {{ .Release.Name }}-git-sync-relay.{{ .Release.Namespace }}.svc.{{ .Values.platform.clusterDomain }}
             port:
               number: {{ .Values.authSidecar.port }}
     {{- else }}
@@ -60,7 +60,7 @@ spec:
           rewrite: '/\1'
       route:
         - destination:
-            host: {{ .Release.Name }}-git-sync-relay.{{ .Release.Namespace }}.svc.cluster.local
+            host: {{ .Release.Name }}-git-sync-relay.{{ .Release.Namespace }}.svc.{{ .Values.platform.clusterDomain }}
             port:
               number: {{ .Values.gitSyncRelay.gitSync.webhookPort }}
     {{- end }}
