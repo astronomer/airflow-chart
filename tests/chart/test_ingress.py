@@ -21,6 +21,9 @@ class TestIngress:
         assert "networking.k8s.io/v1" == doc["apiVersion"]
         assert "/release-name/airflow" == docs[0]["spec"]["rules"][0]["http"]["paths"][0]["path"]
         assert "tls" not in doc["spec"]
+        # Airflow is published only on the deployments host; the retired
+        # per-release vanity host is not emitted.
+        assert [rule["host"] for rule in doc["spec"]["rules"]] == ["deployments.example.com"]
 
     def test_airflow_ingress_tls_secret_overrides(self, kube_version):
         """Test airflow ingress and tls secret overrides with KubernetesExecutor."""
@@ -156,18 +159,22 @@ class TestIngress:
         webserver = docs[0]
         assert [r["host"] for r in webserver["spec"]["rules"]] == [
             "deployments.dp1.cp1.example.com",
-            "release-name-airflow.dp1.cp1.example.com",
             "deployments.dp1.cp.example.com",
-            "release-name-airflow.dp1.cp.example.com",
         ]
-        assert "deployments.dp1.cp.example.com" in webserver["spec"]["tls"][0]["hosts"]
-        assert "release-name-airflow.dp1.cp.example.com" in webserver["spec"]["tls"][0]["hosts"]
+        assert webserver["spec"]["tls"][0]["hosts"] == [
+            "deployments.dp1.cp1.example.com",
+            "deployments.dp1.cp.example.com",
+        ]
 
         flower = docs[1]
-        flower_hosts = [r["host"] for r in flower["spec"]["rules"]]
-        assert "deployments.dp1.cp.example.com" in flower_hosts
-        assert "release-name-flower.dp1.cp.example.com" in flower_hosts
-        assert "release-name-flower.dp1.cp.example.com" in flower["spec"]["tls"][0]["hosts"]
+        assert [r["host"] for r in flower["spec"]["rules"]] == [
+            "deployments.dp1.cp1.example.com",
+            "deployments.dp1.cp.example.com",
+        ]
+        assert flower["spec"]["tls"][0]["hosts"] == [
+            "deployments.dp1.cp1.example.com",
+            "deployments.dp1.cp.example.com",
+        ]
 
         dag_server = docs[2]
         assert [r["host"] for r in dag_server["spec"]["rules"]] == [
@@ -185,10 +192,7 @@ class TestIngress:
         )
         assert len(docs) == 1
         hosts = [r["host"] for r in docs[0]["spec"]["rules"]]
-        assert hosts == [
-            "deployments.dp1.cp1.example.com",
-            "release-name-airflow.dp1.cp1.example.com",
-        ]
+        assert hosts == ["deployments.dp1.cp1.example.com"]
         assert all("dp1.cp.example.com" not in h for h in hosts)
 
     def test_git_sync_relay_ingress_without_tls(self, kube_version):

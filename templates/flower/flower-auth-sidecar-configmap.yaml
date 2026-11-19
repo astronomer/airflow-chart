@@ -52,9 +52,6 @@ data:
 {{ include "default_nginx_settings_location" . | indent 8  }}
 {{ include "default_nginx_auth_headers" . | indent 8 }}
 
-          if ($host = '{{ .Values.platform.release }}-flower.{{ .Values.ingress.baseDomain }}' ) {
-            rewrite ^ https://deployments.{{ .Values.ingress.baseDomain }}/{{ .Release.Name }}/flower permanent;
-          }
           proxy_cookie_path                       / /{{ .Release.Name }}/;
           # Custom headers to proxied server
           proxy_set_header  Host  deployments.{{ .Values.ingress.baseDomain}};
