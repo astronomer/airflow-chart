@@ -447,8 +447,12 @@ airflow:
     webserver:
       expose_config: non-sensitive-only
     elasticsearch:
-      write_stdout: True
-      elasticsearch_write_stdout: True
+      # Airflow's Elasticsearch handler re-emits every task log line to stdout when write_stdout is on. On Airflow 3
+      # the task log is already shipped from its attempt.log file (Vector's file source / the logging sidecar), so the
+      # stdout copy is indexed a second time for every line (a Celery worker's stdout, for example). Airflow 2 has no
+      # file route, so stdout stays its only way into Elasticsearch.
+      write_stdout: '{{ semverCompare ">=3.0.0" .Values.airflowVersion | ternary "False" "True" }}'
+      elasticsearch_write_stdout: '{{ semverCompare ">=3.0.0" .Values.airflowVersion | ternary "False" "True" }}'
       elasticsearch_json_format: True
       es_compat_with: "8"
       # "{dag_id}-{task_id}-{run_id}-{map_index}-{try_number}" for airflow >= 2.3.0 ref https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#log-id-template
