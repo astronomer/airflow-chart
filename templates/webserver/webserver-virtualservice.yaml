@@ -61,7 +61,7 @@ spec:
         {{- end }}
       route:
         - destination:
-            host: {{ .Release.Name }}-webserver.{{ .Release.Namespace }}.svc.cluster.local
+            host: {{ .Release.Name }}-webserver.{{ .Release.Namespace }}.svc.{{ .Values.platform.clusterDomain }}
             port:
             # Istio requires a numeric port; the Ingress may use the service's
             # port name, so the auth-proxy branch resolves to a number here.

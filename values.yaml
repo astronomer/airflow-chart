@@ -854,6 +854,8 @@ platform:
   dataPlaneBaseDomain: ~
   controlPlaneBaseDomain: ~
   mode: ~
+  # Must match the kubelet --cluster-domain of the cluster this deployment runs in.
+  clusterDomain: cluster.local
 
 astronomer:
   images:
