@@ -175,6 +175,26 @@ class TestAirflow:
         es_section = airflow_cfg.split("[elasticsearch]")[1].split("\n[")[0]
         assert "es_compat_with = 8" in es_section
 
+    @pytest.mark.parametrize(
+        ("airflow_version", "expected"),
+        [("2.10.5", "True"), ("3.0.0", "False"), ("3.2.2", "False"), ("3.3.2", "False")],
+    )
+    def test_elasticsearch_write_stdout_only_on_airflow_2(self, kube_version, airflow_version, expected):
+        """Airflow 3 task logs are shipped from their attempt.log file, so write_stdout would index every line a
+        second time. Airflow 2 has no file route and keeps stdout as its only way into Elasticsearch."""
+        docs = render_chart(
+            kube_version=kube_version,
+            show_only=["charts/airflow/templates/configmaps/configmap.yaml"],
+            values={"airflow": {"airflowVersion": airflow_version}},
+        )
+
+        assert len(docs) == 1
+        airflow_cfg = docs[0]["data"]["airflow.cfg"]
+        es_section = airflow_cfg.split("[elasticsearch]")[1].split("\n[")[0]
+        assert f"write_stdout = {expected}" in es_section, (
+            f"airflow {airflow_version}: expected write_stdout = {expected}\n{es_section}"
+        )
+
     def test_apiServer_startup_initialDelaySeconds_defaults(self, kube_version):
         """Test initialDelaySeconds defaults."""
         values = {"airflow": {"airflowVersion": "3.0.0"}}
